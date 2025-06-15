@@ -1,0 +1,38 @@
+{
+  "departments": {
+    "dept_no": "char",
+    "dept_name": "char"
+  },
+  "dept_emp": {
+    "emp_no": "int",
+    "dept_no": "char",
+    "from_date": "char",
+    "to_date": "char"
+  },
+  "dept_manager": {
+    "dept_no": "char",
+    "emp_no": "int",
+    "from_date": "char",
+    "to_date": "char"
+  },
+  "employees": {
+    "emp_no": "int",
+    "birth_date": "char",
+    "first_name": "char",
+    "last_name": "char",
+    "gender": "char",
+    "hire_date": "char"
+  },
+  "salaries": {
+    "emp_no": "int",
+    "salary": "int",
+    "from_date": "char",
+    "to_date": "char"
+  },
+  "titles": {
+    "emp_no": "int",
+    "title": "char",
+    "from_date": "char",
+    "to_date": "char"
+  }
+}
