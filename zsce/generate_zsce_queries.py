@@ -46,14 +46,14 @@ def workload_gen(input):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--workload_dir', type=str, default=os.path.join(os.path.dirname(__file__), '../../pg_mem_data/workloads'), help='Directory to store generated workloads')
+    parser.add_argument('--workload_dir', type=str, default=os.path.join(os.path.dirname(__file__), '/home/wuy/query_costs/workloads'), help='Directory to store generated workloads')
     parser.add_argument('--dataset', nargs='+', default=None, type=str, help='Dataset to generate workloads for')
     parser.add_argument('--overwrite', action='store_true', help='Whether to overwrite existing workloads')
     args = parser.parse_args()
 
     import sys
     sys.path.append(os.path.join(os.path.dirname(__file__), '../'))
-    from database_list import full_database_list
+    # from database_list import full_database_list
 
     if args.dataset is not None:
         full_database_list = args.dataset

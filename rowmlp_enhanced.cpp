@@ -1,30 +1,11 @@
 /************************************************************************************
- * Updated C++ code compatible with C++11 that:
- *   - Reads from multiple "dataDir" directories
- *   - Combines them into a single ExecutionPlanDataset
- *   - Uses FANN for a 2-layer MLP (9->hidden->1)
- *   - Splits data into train/val (~80%/20%)
- *   - Implements early stopping with patience=20 based on val MSE
- *   - Saves best model => "best_mlp_no_tg.net"
- *   - Reports negative vs. positive precision & recall
- *   - Uses trapezoidal AUC => "roc_curve.csv"
- *   - Implements threshold search on the validation set to pick the best threshold by F1-score
- *   - Adds a "--skip_train" cmd argument so you can skip training and load the model.
+ * rowmlp_enhanced.cpp  –  richer feature set, per-feature scaling
+ *   • 24 engineered features
+ *   • Min/Max read from /home/wuy/query_costs/row_plan_statistics.json
+ *   • Scales every feature to [0-1] before training / inference
+ *   • Training / evaluation logic unchanged except “8→24” substitutions
  *
- * Compile:
- *   g++ -std=c++11 -I/path/to/json/single_include -lfann -o rowmlp_updated rowmlp_updated.cpp
- *
- * Run example:
- *   ./rowmlp_updated \
- *       --data_dirs=tpch_sf1_templates \
- *       --data_dirs=tpch_sf1_templates_index \
- *       --data_dirs=tpch_sf1_zsce_index_TP \
- *       --data_dirs=tpch_sf100_zsce \
- *       --epochs=1000 \
- *       --hidden_neurons=128 \
- *       --lr=0.001 \
- *       --best_model_path=checkpoints/best_mlp_no_tg.net \
- *       [--skip_train]
+ *   g++ -std=c++11 -I/path/to/json/single_include -lfann -o rowmlp_enhanced rowmlp_enhanced.cpp
  ************************************************************************************/
 
 #include <iostream>
@@ -32,297 +13,311 @@
 #include <sstream>
 #include <string>
 #include <vector>
-#include <map>
 #include <random>
 #include <algorithm>
 #include <numeric>
 #include <cctype>
-#include <chrono>
 #include <cmath>
-#include <cstring>
-#include <cstdlib>
-
-// POSIX Directory Traversal
 #include <dirent.h>
 #include <sys/stat.h>
 
-// FANN Library
 #include <fann.h>
-
-// JSON Library (nlohmann/json)
 #include "json.hpp"
-
 using json = nlohmann::json;
 
-// -----------------------------------------------------------------------------
-/*
- * Basic Logging
- */
-// -----------------------------------------------------------------------------
-static void logInfo(const std::string &msg)  { std::cout << "[INFO]  " << msg << std::endl; }
-static void logWarn(const std::string &msg)  { std::cerr << "[WARN]  " << msg << std::endl; }
-static void logError(const std::string &msg) { std::cerr << "[ERROR] " << msg << std::endl; }
+/* ───────────── small helpers ───────────── */
+static void logInfo (const std::string& s){ std::cout  << "[INFO]  "<<s<<'\n'; }
+static void logWarn (const std::string& s){ std::cerr  << "[WARN]  "<<s<<'\n'; }
+static void logError(const std::string& s){ std::cerr  << "[ERROR] "<<s<<'\n'; }
+static bool fileExists(const std::string& p){ std::ifstream f(p); return f.good(); }
+double safeLog1p(double v){ return std::log1p(std::max(0.0,v)); }
 
-// -----------------------------------------------------------------------------
-/*
- * Check if a path is a directory
- */
-// -----------------------------------------------------------------------------
-bool isDirectory(const std::string &path){
-    struct stat statbuf;
-    if(stat(path.c_str(), &statbuf) != 0){
-        return false;
-    }
-    return S_ISDIR(statbuf.st_mode);
+/* progress bar */
+void showProgressBar(size_t cur,size_t tot,size_t w=50){
+    double f = tot? double(cur)/tot : 1.0;  int filled=int(f*w);
+    std::cout<<"\r["<<std::string(filled,'=')<<std::string(w-filled,' ')
+             <<"] "<<int(f*100)<<"% ("<<cur<<'/'<<tot<<')';
+    if(cur>=tot) std::cout<<'\n';  std::fflush(stdout);
 }
 
-// -----------------------------------------------------------------------------
-/*
- * Check file existence
- */
-// -----------------------------------------------------------------------------
-bool fileExists(const std::string &path){
-    std::ifstream ifs(path.c_str());
-    return ifs.good();
-}
-
-// -----------------------------------------------------------------------------
-/*
- * Show progress bar
- */
-// -----------------------------------------------------------------------------
-void showProgressBar(size_t current, size_t total, size_t width=50){
-    double fraction= (total==0)? 1.0 : double(current)/ double(total);
-    int filled= int(fraction* width);
-    std::cout << "\r[";
-    for(int i=0; i<filled; i++) std::cout<<"=";
-    for(int i=filled; i<(int)width; i++) std::cout<<" ";
-    std::cout << "] " << int(fraction*100) <<"% ("<< current <<"/"<< total <<")";
-    if(current >= total) std::cout << std::endl;
-    std::fflush(stdout);
-}
-
-// -----------------------------------------------------------------------------
-/*
- * Minimal parsePossibleNumber
- */
-// -----------------------------------------------------------------------------
-double parsePossibleNumber(const json &j, const std::string &key){
-    if(!j.contains(key)) return 0.0;
-    try{
-        if(j[key].is_string()){
-            return std::stod(j[key].get<std::string>());
-        } else if(j[key].is_number_float() || j[key].is_number_integer()){
-            return j[key].get<double>();
-        }
-    } catch(...){
-        logWarn("Invalid number format for key: " + key);
-        return 0.0;
-    }
+/* parse helpers */
+double parseNum(const json& j,const std::string& k){
+    if(!j.contains(k)) return 0.0;
+    try{ if(j[k].is_string()) return std::stod(j[k].get<std::string>());
+         if(j[k].is_number()) return j[k].get<double>(); }
+    catch(...){}
     return 0.0;
 }
-
-// -----------------------------------------------------------------------------
-/*
- * Convert data size strings => e.g. "86G" => numeric
- */
-// -----------------------------------------------------------------------------
-double convert_data_size_to_numeric(const std::string &s){
-    if(s.empty()) return 0.0;
-    std::string str = s;
-    // Trim trailing whitespace
-    str.erase(std::find_if(str.rbegin(), str.rend(),
-        [](unsigned char ch) { return !std::isspace(ch); }).base(), str.end());
-
-    if(str.empty()) return 0.0;
-    char suffix = str.back();
-    double factor = 1.0;
-    std::string numPart = str;
-    if(suffix == 'G'){ factor = 1e9;  numPart.pop_back(); }
-    else if(suffix == 'M'){ factor = 1e6;  numPart.pop_back(); }
-    else if(suffix == 'K'){ factor = 1e3;  numPart.pop_back(); }
-    else{
-        // No suffix, assume raw number
-    }
-    try{
-        double val = std::stod(numPart);
-        return val * factor;
-    } catch(...){
-        logWarn("Invalid data size string: " + s);
-        return 0.0;
-    }
+double bytesFrom(const std::string& s){
+    if(s.empty()) return 0.0;  std::string t=s; while(t.size()&&isspace(t.back())) t.pop_back();
+    double f=1;  switch(t.back()){ case 'G':case 'g':f=1e9; t.pop_back(); break;
+                                    case 'M':case 'm':f=1e6; t.pop_back(); break;
+                                    case 'K':case 'k':f=1e3; t.pop_back(); break; }
+    try{ return std::stod(t)*f; }catch(...){ return 0.0; }
 }
 
-// -----------------------------------------------------------------------------
-/*
- * Statistics Information for Normalization
- */
-// -----------------------------------------------------------------------------
-struct StatsInfo{
-    double center;
-    double scale;
+/* ───────────── scaling config ───────────── */
+constexpr int NUM_FEATS = 32;
+static double fMin[NUM_FEATS]{}, fMax[NUM_FEATS]{};
+static bool   scaleReady=false;
+
+static const char* KEY[NUM_FEATS] = {
+/* 0-6  */ "rows_examined_per_scan","rows_produced_per_join","filtered",
+           "read_cost","eval_cost","prefix_cost","data_read_per_join",
+/* 7-11 */ nullptr,nullptr,nullptr,nullptr,nullptr,
+/* 12   */ nullptr,                 // using-idx
+/* 13-15*/ "filtered","filtered","filtered",
+/* 16-17*/ nullptr,nullptr,         // depth, fanout
+/* 18-20*/ nullptr,nullptr,nullptr, // flags grp/ord/tmp
+/* 21-22*/ "read_cost","read_cost",
+/* 23   */ "query_cost",
+/* 24   */ "rows_produced_per_join", // root cardinality
+/* 25-27*/ nullptr,nullptr,nullptr, // hasConst, hasLimit, hasDistinct
+/* 28-29*/ nullptr,nullptr,         // hasUnion, numUnion
+/* 30-31*/ nullptr,nullptr          // cross1, cross2
+};
+static const double DEF_MAX[NUM_FEATS] = {
+/* 0-6 */0,0,0,0,0,0,0,
+/*7-11*/1,1,1,1,1,  /* histogram */
+ 1,                /* using-idx */
+ 5,0,5,            /* sel stats */
+ 10,10,            /* depth/fanout */
+ 1,1,1,            /* grp/ord/tmp */
+ 10,10,            /* read/eval ratio */
+ 30,               /* qcost */
+ 20,               /* root rows log space max */
+ 1,1,1,            /* const, limit, distinct */
+ 1,10,             /* union flag, numUnion */
+ 10,10             /* cross features (rough caps) */
 };
 
-// -----------------------------------------------------------------------------
-/*
- * Safe log1p function
- */
-// -----------------------------------------------------------------------------
-double safeLog1p(double v){
-    if(v < 0) v = 0;
-    return std::log1p(v);
+template<typename T>
+inline const T& clamp11(const T& v, const T& lo, const T& hi)
+{
+    return (v < lo) ? lo : (hi < v) ? hi : v;
 }
 
-// -----------------------------------------------------------------------------
-/*
- * Feature Collector for Row Plans
- */
-// -----------------------------------------------------------------------------
-struct FeatureCollector{
-    double sumRe=0, sumRp=0, sumF=0, sumRc=0, sumEc=0, sumPc=0, sumDr=0;
-    int count=0;
-    void addOne(double re, double rp, double f, double rc, double ec, double pc, double dr){
-        sumRe += re; sumRp += rp; sumF += f; sumRc += rc;
-        sumEc += ec; sumPc += pc; sumDr += dr;
-        count++;
-    }
+static void loadScaling(){
+    if(scaleReady) return;
+    for(int i=0;i<NUM_FEATS;i++){ fMin[i]=0; fMax[i]=DEF_MAX[i]; }
+
+    std::ifstream ifs("/home/wuy/query_costs/hybench_sf1/row_plan_statistics.json");
+    if(ifs.good()){
+        json st; try{ ifs>>st;
+            for(int i=0;i<NUM_FEATS;i++)
+                if(KEY[i] && st.contains(KEY[i]))
+                    fMax[i]=std::max(st[KEY[i]].value("max",DEF_MAX[i]),1e-6);
+        }catch(...){ logWarn("stats JSON parse error – defaults for scaling"); }
+    }else logWarn("stats file missing – defaults for scaling");
+    scaleReady=true;
+}
+static float scl(int i,double v){
+    if(!scaleReady) loadScaling();
+    v=clamp11(v,fMin[i],fMax[i]);
+    return float((v-fMin[i])/(fMax[i]-fMin[i]+1e-12));
+}
+
+/* ───────────── feature aggregation ───────────── */
+struct Agg{
+    double re=0,rp=0,f=0,rc=0,ec=0,pc=0,dr=0;
+    double selSum=0,selMin=1e30,selMax=0,ratioSum=0,ratioMax=0;
+    int cnt=0,cRange=0,cRef=0,cEq=0,cIdx=0,cFull=0,idxUse=0,maxDepth=0;
+    double fanoutMax=0; bool grp=0,ord=0,tmp=0,hasLimit=0,hasDistinct=0,hasUnion=0,hasConst=0;
+    int numUnion=0;
 };
 
-// -----------------------------------------------------------------------------
-/*
- * Recursive function to parse Row Plan JSON
- */
-// -----------------------------------------------------------------------------
-void recurseRowPlan(const json &block, FeatureCollector &fc){
-    if(block.is_object()){
-        if(block.contains("table")){
-            const auto &tbl = block["table"];
-            double re = parsePossibleNumber(tbl, "rows_examined_per_scan");
-            double rp = parsePossibleNumber(tbl, "rows_produced_per_join");
-            double f  = parsePossibleNumber(tbl, "filtered");
-            double rc=0, ec=0, pc=0, dr=0;
-            if(tbl.contains("cost_info")){
-                const auto &ci = tbl["cost_info"];
-                rc = parsePossibleNumber(ci, "read_cost");
-                ec = parsePossibleNumber(ci, "eval_cost");
-                pc = parsePossibleNumber(ci, "prefix_cost");
-                std::string sdr = ci.value("data_read_per_join", "0");
-                dr = convert_data_size_to_numeric(sdr);
-            }
-            fc.addOne(re, rp, f, rc, ec, pc, dr);
-        }
-        // Recurse subkeys
-        for(auto it = block.begin(); it != block.end(); ++it){
-            if(it.key() == "table") continue;
-            recurseRowPlan(it.value(), fc);
-        }
+/* ------------------------------------------------------------------ *
+ *  getBool(obj,key) – safe bool accessor that also understands
+ *                     "YES"/"NO" or "true"/"false" strings.
+ * ------------------------------------------------------------------ */
+static bool getBool(const json &o, const char *k, bool d=false)
+{
+    if(!o.contains(k)) return d;
+    const json &v = o[k];
+    if(v.is_boolean())            return v.get<bool>();
+    if(v.is_string())
+    {
+        std::string s = v.get<std::string>();
+        std::transform(s.begin(), s.end(), s.begin(),
+                       static_cast<int(*)(int)>(std::tolower));
+        return (s=="yes"||s=="true"||s=="1");
     }
-    else if(block.is_array()){
-        for(auto &elem : block){
-            recurseRowPlan(elem, fc);
-        }
-    }
+    return d;
 }
 
+void walk(const json& n,Agg& a,int d){
+    if(n.is_object()){
+        if(n.contains("table")){
+            const auto& t=n["table"]; const auto ci=t.value("cost_info",json::object());
+            double re=parseNum(t,"rows_examined_per_scan");
+            double rp=parseNum(t,"rows_produced_per_join");
+            double fl=parseNum(t,"filtered");
+            double rc=parseNum(ci,"read_cost"), ec=parseNum(ci,"eval_cost"),
+                   pc=parseNum(ci,"prefix_cost");
+            double dr=ci.contains("data_read_per_join")?
+                      (ci["data_read_per_join"].is_string()? bytesFrom(ci["data_read_per_join"].get<std::string>())
+                                                           : parseNum(ci,"data_read_per_join"))
+                      :0.0;
+            a.re+=re; a.rp+=rp; a.f+=fl; a.rc+=rc; a.ec+=ec; a.pc+=pc; a.dr+=dr;
+            if(re>0){ double sel=rp/re; a.selSum+=sel; a.selMin=std::min(a.selMin,sel);
+                      a.selMax=std::max(a.selMax,sel); a.fanoutMax=std::max(a.fanoutMax,sel);}
+            double ratio=(ec>0? rc/ec: rc); a.ratioSum+=ratio; a.ratioMax=std::max(a.ratioMax,ratio);
+            a.cnt++;
 
-
-bool parseRowPlanJSON(const std::string &planPath,
-                      float outFeats[8],
-                      double &original_query_cost) {
-    for (int i = 0; i < 8; i++) outFeats[i] = 0.f;
-
-    std::ifstream ifs(planPath);
-    if (!ifs.is_open()) {
-        logWarn("Cannot open plan => " + planPath);
-        return false;
-    }
-
-    json j;
-    try {
-        ifs >> j;
-    } catch (...) {
-        logWarn("JSON parse error => " + planPath);
-        return false;
-    }
-
-    if (!j.contains("query_block")) {
-        logWarn("No query_block => " + planPath);
-        return false;
-    }
-
-    struct FeatureCollector {
-        double sumRe = 0, sumRp = 0, sumF = 0, sumRc = 0;
-        double sumEc = 0, sumPc = 0, sumDr = 0;
-        int count = 0;
-    } fc;
-
-    std::function<void(const json&)> recurse = [&](const json &blk){
-        if (blk.is_object()) {
-            if (blk.contains("table")) {
-                const auto &tbl = blk["table"];
-                double re = parsePossibleNumber(tbl, "rows_examined_per_scan");
-                double rp = parsePossibleNumber(tbl, "rows_produced_per_join");
-                double f  = parsePossibleNumber(tbl, "filtered");
-                double rc = parsePossibleNumber(tbl["cost_info"], "read_cost");
-                double ec = parsePossibleNumber(tbl["cost_info"], "eval_cost");
-                double pc = parsePossibleNumber(tbl["cost_info"], "prefix_cost");
-                double dr = convert_data_size_to_numeric(
-                              tbl["cost_info"].value("data_read_per_join", "0"));
-                if (re >= 0 && rp >= 0) {
-                    fc.sumRe += re;
-                    fc.sumRp += rp;
-                    fc.sumF  += f;
-                    fc.sumRc += rc;
-                    fc.sumEc += ec;
-                    fc.sumPc += pc;
-                    fc.sumDr += dr;
-                    fc.count++;
-                }
-            }
-            for (const auto& kv : blk.items()) recurse(kv.value());
-        } else if (blk.is_array()) {
-            for (const auto &el : blk) recurse(el);
+            std::string at=t.value("access_type","ALL");
+            if(at=="const"){ a.hasConst=true; }
+            if(at=="range")      a.cRange++;
+            else if(at=="ref")   a.cRef++;
+            else if(at=="eq_ref")a.cEq++;
+            else if(at=="index") a.cIdx++;
+            else                 a.cFull++;
+            // if(t.value("using_index",false)) a.idxUse++;
+            if(getBool(t,"using_index")) a.idxUse++;
         }
-    };
+        if(n.contains("limit"))     a.hasLimit=true;
+        if(n.contains("distinct"))  a.hasDistinct=true;
+        if(n.contains("union_result")){ a.hasUnion=true; a.numUnion++; }
 
-    recurse(j["query_block"]);
+        // if(n.contains("grouping_operation"))            a.grp=true;
+        // if(n.contains("ordering_operation")||n.value("using_filesort",false)) a.ord=true;
+        // if(n.value("using_temporary_table",false))      a.tmp=true;
+        if(n.contains("grouping_operation")) a.grp = true;
 
-    original_query_cost = 0.0;
-    if (j["query_block"].contains("cost_info")) {
-        original_query_cost = parsePossibleNumber(
-            j["query_block"]["cost_info"], "query_cost");
-    }
+        if(n.contains("ordering_operation") ||
+           getBool(n,"using_filesort"))                 a.ord = true;
 
-    if (fc.count == 0) return true;
+        if(getBool(n,"using_temporary_table"))          a.tmp = true;
 
-    auto safeLog1p = [](double v) { return std::log1p(std::max(0.0, v)); };
 
-    outFeats[0] = static_cast<float>(safeLog1p(fc.sumRe / fc.count));
-    outFeats[1] = static_cast<float>(safeLog1p(fc.sumRp / fc.count));
-    outFeats[2] = static_cast<float>(safeLog1p(fc.sumF  / fc.count));
-    outFeats[3] = static_cast<float>(safeLog1p(fc.sumRc / fc.count));
-    outFeats[4] = static_cast<float>(safeLog1p(fc.sumEc / fc.count));
-    outFeats[5] = static_cast<float>(safeLog1p(fc.sumPc / fc.count));
-    outFeats[6] = static_cast<float>(safeLog1p(fc.sumDr / fc.count));
-    outFeats[7] = static_cast<float>(safeLog1p(original_query_cost));
+        for(const auto& kv:n.items()) if(kv.key()!="table") walk(kv.value(),a,d+1);
+    } else if(n.is_array()) for(const auto& e:n) walk(e,a,d);
+    a.maxDepth=std::max(a.maxDepth,d);
+}
+
+/* ───────── plan → 32-feature vector ───────── */
+bool plan2feat(const json& j,float feat[NUM_FEATS]){
+    std::fill(feat,feat+NUM_FEATS,0.f);
+    if(!j.contains("query_block")){ logWarn("missing query_block"); return false; }
+
+    Agg a; walk(j["query_block"],a,1);
+
+    double rootRows=parseNum(j["query_block"],"rows_produced_per_join");
+    // double qCost=parseNum(j["query_block"]["cost_info"],"query_cost");
+
+    const json &ci = j["query_block"].value("cost_info", json::object());
+    double qCost   = parseNum(ci, "query_cost");
+
+
+
+    if(a.cnt==0) return true;
+    double inv=1.0/a.cnt; int k=0;
+
+    feat[k++]=safeLog1p(a.re*inv);   feat[k++]=safeLog1p(a.rp*inv);   feat[k++]=safeLog1p(a.f*inv);
+    feat[k++]=safeLog1p(a.rc*inv);   feat[k++]=safeLog1p(a.ec*inv);   feat[k++]=safeLog1p(a.pc*inv);
+    feat[k++]=safeLog1p(a.dr*inv);
+
+    feat[k++]=a.cRange*inv; feat[k++]=a.cRef*inv;  feat[k++]=a.cEq*inv;
+    feat[k++]=a.cIdx*inv;   feat[k++]=a.cFull*inv;
+
+    feat[k++]=a.idxUse*inv;
+
+    feat[k++]=a.selSum*inv; feat[k++]=a.selMin; feat[k++]=a.selMax;
+
+    feat[k++]=a.maxDepth;   feat[k++]=a.fanoutMax;
+
+    feat[k++]=a.grp;  feat[k++]=a.ord; feat[k++]=a.tmp;
+
+    feat[k++]=a.ratioSum*inv; feat[k++]=a.ratioMax;
+
+    feat[k++]=safeLog1p(qCost);
+
+    /* new ones */
+    feat[k++]=safeLog1p(rootRows);     // 24
+
+    feat[k++]=a.hasConst;              // 25
+    feat[k++]=a.hasLimit;              // 26
+    feat[k++]=a.hasDistinct;           // 27
+
+    feat[k++]=a.hasUnion;              // 28
+    feat[k++]=std::min(a.numUnion,10); // 29 (cap)
+
+    double selMean=a.selSum*inv;
+    feat[k++]=selMean * a.maxDepth;                       // 30   interaction
+    double fullFrac = a.cFull? a.cFull*inv : 1e-3;
+    feat[k++]=(a.idxUse*inv) / fullFrac;                  // 31   idxFrac / fullFrac
+
+    /* scale 0-1 */
+    for(int i=0;i<NUM_FEATS;i++) feat[i]=scl(i,feat[i]);
     return true;
 }
 
 
-// -----------------------------------------------------------------------------
-/*
- * Define a Row Sample
- */
-// -----------------------------------------------------------------------------
+
+/* -------------------------------------------------------------------------- */
+/* ---------------------- BELOW THIS LINE: UNCHANGED ------------------------ */
+/* (only occurrences of hard-coded \"8\" replaced with NUM_FEATS)            */
+/* -------------------------------------------------------------------------- */
+
 struct RowSampleStruct{
-    float feats[8]; // 8 features
-    int label;       // 0 or 1, -1 for ignore
-    double row_time;
-    double column_time;
-    double original_query_cost;
-    int hybrid_use_imci;
-    int fann_use_imci;
+    float feats[NUM_FEATS];
+    int   label;       /* 0/1 , -1=ignore */
+    double row_time,column_time,original_query_cost;
+    int hybrid_use_imci,fann_use_imci;
 };
+
+// inline bool parseRowPlanJSON(const std::string& p,
+//                              float f[NUM_FEATS], double& qc){
+//     std::ifstream in(p);
+//     if(!in) return false;
+//     json j;  in >> j;
+//     qc = j["query_block"].value("cost_info",json::object())
+//                           .value("query_cost",0.0);
+//     return plan2feat(j, f);
+// }
+
+
+/* ------------------------------------------------------------------ *
+ *  loadPlanFeatures()  –  just open+parse JSON, then call plan2feat
+ *  Returns false if the file can’t be opened, can’t be parsed, or
+ *  lacks a "query_block" section.
+ * ------------------------------------------------------------------ */
+static bool loadPlanFeatures(const std::string &path,
+                             float out[NUM_FEATS],
+                             double &qryCost /* ignored by caller */)
+{
+    std::ifstream in(path.c_str());
+    if(!in.good())
+    {
+        logWarn("cannot open plan JSON: " + path);
+        return false;
+    }
+
+    json j;
+    try { in >> j; }
+    catch(...)
+    {
+        logWarn("parse error in: " + path);
+        return false;
+    }
+
+    // the new extractor already checks for "query_block"
+    bool ok = plan2feat(j, out);
+    // qryCost = j.value("query_block", json::object())
+    //          .value("cost_info",    json::object())
+    //          .value("query_cost",   0.0);
+    /* cost_info can be an object, a string, or even missing – use
+    parseNum() to be tolerant and avoid type_error.302               */
+    qryCost = 0.0;
+    if(j.contains("query_block"))
+    {
+        const json &qb = j["query_block"];
+        if(qb.contains("cost_info"))
+            qryCost = parseNum(qb["cost_info"], "query_cost");
+    }
+
+    return ok;
+}
+
 
 // -----------------------------------------------------------------------------
 /*
@@ -434,13 +429,13 @@ public:
 
                 float feats[9];
                 double original_query_cost = 0.0;
-                if(!parseRowPlanJSON(planPath, feats, original_query_cost)){
+                if(!loadPlanFeatures(planPath, feats, original_query_cost)){
                     skipCount++;
                     continue;
                 }
 
                 RowSampleStruct rs;
-                for(int i=0; i<8; i++) rs.feats[i] = feats[i];
+                for(int i=0; i<NUM_FEATS; i++) rs.feats[i] = feats[i];
                 rs.label = lab;
                 rs.row_time = rowTime;
                 rs.column_time = columnTime;
@@ -523,7 +518,7 @@ std::vector<TrainSampleStruct> prepareTrainingSamples(const ExecutionPlanDataset
         const RowSampleStruct &rs = ds[idx];
         if(rs.label == -1) continue; // Ignore
         TrainSampleStruct ts;
-        ts.input.assign(rs.feats, rs.feats + 8);
+        ts.input.assign(rs.feats, rs.feats + NUM_FEATS);
         ts.desired = (rs.label == 1) ? 1.0f : 0.0f;
         samples.push_back(ts);
     }
@@ -706,7 +701,7 @@ int main(int argc, char *argv[]){
     int epochs = 10000;
     int hiddenNeurons = 128;
     float learning_rate = 0.001f;
-    std::string bestModelPath = "checkpoints/best_mlp_no_tg.net";
+    std::string bestModelPath = "checkpoints/best_mlp_enhanced.net";
     bool skipTrain = false;
 
     // Parse command-line arguments
@@ -776,7 +771,7 @@ int main(int argc, char *argv[]){
     FannModel *model = nullptr;
     if(!skipTrain){
         logInfo("Initializing and training the MLP model.");
-        model = new FannModel(8, hiddenNeurons, 1, learning_rate);
+        model = new FannModel(NUM_FEATS, hiddenNeurons, 1, learning_rate);
     }
     else{
         logInfo("Skipping training. Loading existing model from " + bestModelPath);
@@ -784,7 +779,7 @@ int main(int argc, char *argv[]){
             logError("Model file does not exist: " + bestModelPath);
             return 1;
         }
-        model = new FannModel(8, hiddenNeurons, 1, learning_rate); // Temporary initialization
+        model = new FannModel(NUM_FEATS, hiddenNeurons, 1, learning_rate); // Temporary initialization
         model->load(bestModelPath);
     }
 
@@ -812,7 +807,7 @@ int main(int argc, char *argv[]){
             for(auto idx : valIdx){
                 const RowSampleStruct &rs = dataset[idx];
                 if(rs.label == -1) continue; // Ignore
-                std::vector<float> input(rs.feats, rs.feats + 8);
+                std::vector<float> input(rs.feats, rs.feats + NUM_FEATS);
                 float output = model->run(input);
                 valScores.push_back(output);
                 valYtrue.push_back(rs.label);
@@ -853,7 +848,7 @@ int main(int argc, char *argv[]){
 
         // Reload the best model
         delete model;
-        model = new FannModel(8, hiddenNeurons, 1, learning_rate);
+        model = new FannModel(NUM_FEATS, hiddenNeurons, 1, learning_rate);
         model->load(bestModelPath);
         logInfo("Reloaded the best model from " + bestModelPath);
     }
@@ -867,7 +862,7 @@ int main(int argc, char *argv[]){
     for(auto idx : valIdx){
         const RowSampleStruct &rs = dataset[idx];
         if(rs.label == -1) continue; // Ignore
-        std::vector<float> input(rs.feats, rs.feats + 8);
+        std::vector<float> input(rs.feats, rs.feats + NUM_FEATS);
         float output = model->run(input);
         valScores.push_back(output);
         valYtrue.push_back(rs.label);
@@ -1008,7 +1003,7 @@ int main(int argc, char *argv[]){
 
         // AI Classifier Method
         // If using FANN with sigmoid activation, output > 0.5 indicates class 1
-        std::vector<float> input(rs.feats, rs.feats + 8);
+        std::vector<float> input(rs.feats, rs.feats + NUM_FEATS);
         float pred_prob = model->run(input);
         int pred_label = (pred_prob >= 0.5f) ? 1 : 0;
         double ai_delta = (pred_label == 1) ? rs.column_time : rs.row_time;
@@ -1034,3 +1029,4 @@ int main(int argc, char *argv[]){
 
     return 0;
 }
+

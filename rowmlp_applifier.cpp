@@ -509,6 +509,7 @@ public:
 struct TrainSampleStruct{
     std::vector<float> input; // 9 features
     float desired;            // 0.0 or 1.0
+    double gap;
 };
 
 // -----------------------------------------------------------------------------
@@ -692,57 +693,52 @@ std::pair<std::vector<size_t>, std::vector<size_t>> splitDataset(size_t total, d
     return {trainIdx, valIdx};
 }
 
-// -----------------------------------------------------------------------------
-/*
- * Main Function
- */
-// -----------------------------------------------------------------------------
 int main(int argc, char *argv[]){
     // Default parameters
-    // std::vector<std::string> dataDirs = {"tpch_sf1_templates", "tpch_sf1_templates_index", 
-                                        // "tpch_sf1_zsce_index_TP", "tpch_sf100_zsce"};
-    std::vector<std::string> dataDirs = {};
-    
+    std::vector<std::string> dataDirs;
     int epochs = 10000;
     int hiddenNeurons = 128;
     float learning_rate = 0.001f;
-    std::string bestModelPath = "checkpoints/best_mlp_no_tg.net";
+    std::string bestModelPath = "checkpoints/best_mlp_no_tg_amplifier.net";
     bool skipTrain = false;
 
     // Parse command-line arguments
     for(int i=1; i<argc; i++){
         if(std::strncmp(argv[i], "--data_dirs=", 12) == 0){
-            std::string val = std::string(argv[i] + 12);
-            dataDirs.push_back(val);
+            dataDirs.emplace_back(argv[i] + 12);
         }
         else if(std::strncmp(argv[i], "--epochs=", 9) == 0){
-            epochs = std::stoi(std::string(argv[i] + 8));
+            epochs = std::stoi(argv[i] + 9);
         }
         else if(std::strncmp(argv[i], "--hidden_neurons=", 17) == 0){
-            hiddenNeurons = std::stoi(std::string(argv[i] + 17));
+            hiddenNeurons = std::stoi(argv[i] + 17);
         }
         else if(std::strncmp(argv[i], "--lr=", 5) == 0){
-            learning_rate = std::stof(std::string(argv[i] + 5));
+            learning_rate = std::stof(argv[i] + 5);
         }
         else if(std::strncmp(argv[i], "--best_model_path=", 18) == 0){
-            bestModelPath = std::string(argv[i] + 18);
+            bestModelPath = argv[i] + 18;
         }
-        else if(std::strncmp(argv[i], "--skip_train", 12) == 0){
+        else if(std::strcmp(argv[i], "--skip_train") == 0){
             skipTrain = true;
             logInfo("** Received --skip_train => Skipping training and only evaluating. **");
         }
     }
 
-    logInfo("Best model path => " + bestModelPath);
-
     if(dataDirs.empty()){
         logWarn("No data_dirs provided. Using default directories.");
-        dataDirs = {"tpch_sf1_templates", "tpch_sf1_templates_index", 
-                   "tpch_sf1_zsce_index_TP", "tpch_sf100_zsce"};
+        dataDirs = {
+          "tpch_sf1_templates",
+          "tpch_sf1_templates_index",
+          "tpch_sf1_zsce_index_TP",
+          "tpch_sf100_zsce"
+        };
     }
 
-    double timeout = 60.0; // As defined in Python script
-    
+    logInfo("Best model path => " + bestModelPath);
+
+    double timeout = 60.0;
+
     // 1) Build dataset
     ExecutionPlanDatasetClass dataset(dataDirs, timeout);
     size_t dsSize = dataset.size();
@@ -753,109 +749,114 @@ int main(int argc, char *argv[]){
     }
 
     // 2) Split dataset into train and validation
-    auto splits = splitDataset(dsSize, 0.8);
-    std::vector<size_t> trainIdx = splits.first;
-    std::vector<size_t> valIdx   = splits.second;
-
-    logInfo("Train samples = " + std::to_string(trainIdx.size()) + 
-            ", Val samples = " + std::to_string(valIdx.size()));
+    auto splits   = splitDataset(dsSize, 0.8);
+    auto trainIdx = splits.first;
+    auto valIdx   = splits.second;
+    logInfo("Train samples = " + std::to_string(trainIdx.size()) +
+            ", Val samples = "  + std::to_string(valIdx.size()));
 
     // 3) Prepare Training Samples
     std::vector<int> trainLabels;
     for(auto idx : trainIdx){
-        int lab = dataset[idx].label;
-        if(lab != -1){
-            trainLabels.push_back(lab);
-        }
+        int L = dataset[idx].label;
+        if(L != -1) trainLabels.push_back(L);
     }
-
     WeightedRandomSamplerClass sampler(trainLabels);
-    std::vector<TrainSampleStruct> trainingSamples = prepareTrainingSamples(dataset, trainIdx);
+    auto trainingSamples = prepareTrainingSamples(dataset, trainIdx);
+
+    // 3a) compute per-sample gap & global maxGap
+    double maxGap = 0.0;
+    for(size_t i = 0; i < trainIdx.size(); ++i){
+        const auto &rs = dataset[trainIdx[i]];
+        double gap = std::fabs(rs.row_time - rs.column_time);
+        trainingSamples[i].gap = gap;
+        maxGap = std::max(maxGap, gap);
+    }
 
     // 4) Initialize or Load Model
     FannModel *model = nullptr;
     if(!skipTrain){
-        logInfo("Initializing and training the MLP model.");
         model = new FannModel(8, hiddenNeurons, 1, learning_rate);
-    }
-    else{
-        logInfo("Skipping training. Loading existing model from " + bestModelPath);
+        logInfo("Initialized new FANN model.");
+    } else {
         if(!fileExists(bestModelPath)){
             logError("Model file does not exist: " + bestModelPath);
             return 1;
         }
-        model = new FannModel(8, hiddenNeurons, 1, learning_rate); // Temporary initialization
+        model = new FannModel(8, hiddenNeurons, 1, learning_rate);
         model->load(bestModelPath);
+        logInfo("Loaded existing model from " + bestModelPath);
     }
 
-    // 5) Training Loop with Early Stopping
+    // 5) Training Loop with Early Stopping (weighted by gap)
+    const double GAMMA = 5.0;      // strength of emphasis on large gaps
     double bestValMSE = 1e9;
-    int patience = 20;
+    int patience      = 20;
     int patienceCount = 0;
 
     if(!skipTrain){
-        for(int epoch=1; epoch <= epochs; epoch++){
-            // Training
-            size_t trainSampleSize = trainingSamples.size();
+        for(int epoch = 1; epoch <= epochs; ++epoch){
             double epochMSE = 0.0;
+            size_t totalCalls = 0;
+
+            // TRAINING PASS
             for(auto &ts : trainingSamples){
-                model->train({ts});
-                epochMSE += model->getMSE();
+                // normalized gap weight in [0,1]
+                double w = (maxGap > 0.0 ? ts.gap / maxGap : 0.0);
+                // number of repeats for this sample
+                int repeats = 1 + int(GAMMA * w + 0.5);
+                for(int r = 0; r < repeats; ++r){
+                    model->train({ts});
+                    epochMSE += model->getMSE();
+                }
+                totalCalls += repeats;
             }
-            epochMSE /= trainSampleSize;
+            epochMSE = (totalCalls>0 ? epochMSE / double(totalCalls) : 0.0);
 
-            // Validation
+            // VALIDATION PASS
             double valMSE = 0.0;
-            size_t valSampleSize = 0;
-            std::vector<int> valYtrue;
-            std::vector<float> valScores;
+            size_t valCount = 0;
+            std::vector<int>  valY;
+            std::vector<float> valS;
             for(auto idx : valIdx){
-                const RowSampleStruct &rs = dataset[idx];
-                if(rs.label == -1) continue; // Ignore
-                std::vector<float> input(rs.feats, rs.feats + 8);
-                float output = model->run(input);
-                valScores.push_back(output);
-                valYtrue.push_back(rs.label);
-                double desired = (rs.label == 1) ? 1.0 : 0.0;
-                double err = output - desired;
-                valMSE += (err * err);
-                valSampleSize++;
+                const auto &rs = dataset[idx];
+                if(rs.label == -1) continue;
+                std::vector<float> inp(rs.feats, rs.feats + 8);
+                float yhat = model->run(inp);
+                valS.push_back(yhat);
+                valY.push_back(rs.label);
+                double err = yhat - double(rs.label);
+                valMSE += err*err;
+                ++valCount;
             }
-            if(valSampleSize > 0){
-                valMSE /= valSampleSize;
-            }
+            if(valCount) valMSE /= double(valCount);
 
-            logInfo("Epoch " + std::to_string(epoch) + "/" + std::to_string(epochs) + 
-                    " => Train MSE=" + std::to_string(epochMSE) + 
-                    ", Val MSE=" + std::to_string(valMSE));
+            logInfo("Epoch " + std::to_string(epoch) +
+                    "  TrainMSE=" + std::to_string(epochMSE) +
+                    "  ValMSE="   + std::to_string(valMSE));
 
-            // Check for improvement
+            // EARLY STOPPING
             if(valMSE < bestValMSE){
-                bestValMSE = valMSE;
+                bestValMSE   = valMSE;
                 patienceCount = 0;
-                // Create directory if it doesn't exist
-                std::string dirPath = bestModelPath.substr(0, bestModelPath.find_last_of("/\\"));
-                // Use POSIX mkdir with -p like behavior
-                std::string mkdirCmd = "mkdir -p " + dirPath;
-                system(mkdirCmd.c_str());
+                // save best model
+                std::string dir = bestModelPath.substr(0, bestModelPath.find_last_of("/\\"));
+                system(("mkdir -p " + dir).c_str());
                 model->save(bestModelPath);
-                logInfo("Saved best model with Val MSE = " + std::to_string(bestValMSE));
-            }
-            else{
-                patienceCount++;
-                logInfo("No improvement in Val MSE for " + std::to_string(patienceCount) + " epochs.");
-                if(patienceCount >= patience){
-                    logInfo("Early stopping triggered.");
+                logInfo("  → Saved new best model (ValMSE=" + std::to_string(valMSE) + ")");
+            } else {
+                if(++patienceCount >= patience){
+                    logInfo("Early stopping at epoch " + std::to_string(epoch));
                     break;
                 }
             }
         }
 
-        // Reload the best model
+        // reload best
         delete model;
         model = new FannModel(8, hiddenNeurons, 1, learning_rate);
         model->load(bestModelPath);
-        logInfo("Reloaded the best model from " + bestModelPath);
+        logInfo("Reloaded best model from " + bestModelPath);
     }
 
     // 6) Evaluation on Validation Set

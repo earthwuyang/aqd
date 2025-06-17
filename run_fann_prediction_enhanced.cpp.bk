@@ -1,0 +1,317 @@
+// run_fann_prediction_enhanced.cpp
+// Connects to MySQL, issues EXPLAIN FORMAT=JSON, extracts 24 enhanced features,
+// runs a 24→hidden→1 FANN MLP, and prints row-vs-column decision.
+
+#include <mysql/mysql.h>
+#include <fann.h>
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <cmath>
+#include <algorithm>
+#include <cctype>
+#include <functional>
+#include "json.hpp"
+
+using json = nlohmann::json;
+
+static const int NUM_FEATS = 24;
+
+//------------------------------------------------------------------------------
+// Convert strings like "58K", "3.2M", "1G" → numeric bytes
+//------------------------------------------------------------------------------
+double convert_data_size_to_numeric(std::string s) {
+    if (s.empty()) return 0.0;
+    // trim trailing whitespace
+    while (!s.empty() && std::isspace((unsigned char)s.back()))
+        s.pop_back();
+    if (s.empty()) return 0.0;
+
+    char suff = s.back();
+    double factor = 1.0;
+    if (suff == 'G') { factor = 1e9; s.pop_back(); }
+    else if (suff == 'M') { factor = 1e6; s.pop_back(); }
+    else if (suff == 'K') { factor = 1e3; s.pop_back(); }
+
+    try {
+        return std::stod(s) * factor;
+    } catch (...) {
+        return 0.0;
+    }
+}
+
+//------------------------------------------------------------------------------
+// Safe log1p: ensure non-negative
+//------------------------------------------------------------------------------
+inline double safeLog1p(double v) {
+    return std::log1p(std::max(0.0, v));
+}
+
+//------------------------------------------------------------------------------
+// Parse JSON number (string or numeric) or return 0
+//------------------------------------------------------------------------------
+double parseNumber(const json &j, const std::string &key) {
+    if (!j.contains(key)) return 0.0;
+    try {
+        if (j[key].is_string())
+            return std::stod(j[key].get<std::string>());
+        if (j[key].is_number())
+            return j[key].get<double>();
+    } catch (...) {}
+    return 0.0;
+}
+
+//------------------------------------------------------------------------------
+// Aggregator for walking the plan tree
+//------------------------------------------------------------------------------
+struct FeatureAgg {
+    // cost & row stats
+    double reSum=0, rpSum=0, fSum=0, rcSum=0, ecSum=0, pcSum=0, drSum=0;
+    // selectivity
+    double selMin=1e30, selMax=0, selSum=0;
+    // cost ratio
+    double ratioSum=0, ratioMax=0;
+    int cnt=0;
+
+    // access-type histogram
+    int cntRange=0, cntRef=0, cntEq=0, cntIdx=0, cntFull=0;
+    int usingIdx=0;
+
+    // plan-shape
+    int maxDepth=0;
+    double fanoutMax=0;
+    bool hasGroup=false, hasOrder=false, hasTemp=false;
+};
+
+//------------------------------------------------------------------------------
+// Recursively traverse JSON plan to populate FeatureAgg
+//------------------------------------------------------------------------------
+void recursePlan(const json &node,
+                 FeatureAgg &A,
+                 int depth,
+                 double parentRP)
+{
+    if (node.is_object()) {
+        // table node?
+        if (node.contains("table") && node["table"].is_object()) {
+            const auto &tbl = node["table"];
+            double re = parseNumber(tbl, "rows_examined_per_scan");
+            double rp = parseNumber(tbl, "rows_produced_per_join");
+            double f  = parseNumber(tbl, "filtered");
+
+            const json ci = tbl.contains("cost_info") ? tbl["cost_info"] : json::object();
+            double rc = parseNumber(ci, "read_cost");
+            double ec = parseNumber(ci, "eval_cost");
+            double pc = parseNumber(ci, "prefix_cost");
+            double dr = ci.contains("data_read_per_join")
+                      ? (ci["data_read_per_join"].is_string()
+                          ? convert_data_size_to_numeric(ci["data_read_per_join"].get<std::string>())
+                          : parseNumber(ci, "data_read_per_join"))
+                      : 0.0;
+
+            // accumulate
+            A.reSum  += re;   A.rpSum += rp;   A.fSum  += f;
+            A.rcSum  += rc;   A.ecSum += ec;   A.pcSum += pc;
+            A.drSum  += dr;   A.cnt   += 1;
+
+            // selectivity & fanout
+            if (re > 0) {
+                double sel = rp / re;
+                A.selSum += sel;
+                A.selMin = std::min(A.selMin, sel);
+                A.selMax = std::max(A.selMax, sel);
+                A.fanoutMax = std::max(A.fanoutMax, sel);
+            }
+
+            // cost ratio
+            double ratio = (ec > 0 ? rc / ec : rc);
+            A.ratioSum += ratio;
+            A.ratioMax = std::max(A.ratioMax, ratio);
+
+            // access-type histogram
+            std::string at = tbl.value("access_type", "all");
+            if      (at=="range")   A.cntRange++;
+            else if (at=="ref")     A.cntRef++;
+            else if (at=="eq_ref")  A.cntEq++;
+            else if (at=="index")   A.cntIdx++;
+            else                    A.cntFull++;
+            if (tbl.value("using_index", false)) A.usingIdx++;
+        }
+
+        // plan-shape flags
+        if (node.contains("grouping_operation"))      A.hasGroup = true;
+        if (node.contains("ordering_operation"))      A.hasOrder = true;
+        if (node.value("using_filesort", false))      A.hasOrder = true;
+        if (node.value("using_temporary_table", false)) A.hasTemp = true;
+
+        // recurse children
+        for (auto &kv : node.items()) {
+            if (kv.key() == "table") continue;
+            recursePlan(kv.value(), A, depth+1, parseNumber(node.value("table", json::object()), "rows_produced_per_join"));
+        }
+    }
+    else if (node.is_array()) {
+        for (auto &el : node) {
+            recursePlan(el, A, depth, parentRP);
+        }
+    }
+
+    A.maxDepth = std::max(A.maxDepth, depth);
+}
+
+//------------------------------------------------------------------------------
+// Extract 24 features into fann_type array
+//------------------------------------------------------------------------------
+bool extractFeaturesFromPlan(const json &plan, fann_type input[NUM_FEATS]) {
+    if (!plan.contains("query_block")) return false;
+    const auto &qb = plan["query_block"];
+
+    // recursion
+    FeatureAgg A;
+    recursePlan(qb, A, 1, 0.0);
+
+    // overall query cost
+    double qCost = parseNumber(qb.value("cost_info", json::object()), "query_cost");
+
+    if (A.cnt == 0) {
+        // no tables found
+        std::fill(input, input+NUM_FEATS, 0.f);
+        return true;
+    }
+
+    // assemble
+    double inv = 1.0 / A.cnt;
+    int k = 0;
+
+    // averaged log1p sums
+    input[k++] = (fann_type) safeLog1p(A.reSum  * inv);
+    input[k++] = (fann_type) safeLog1p(A.rpSum  * inv);
+    input[k++] = (fann_type) safeLog1p(A.fSum   * inv);
+    input[k++] = (fann_type) safeLog1p(A.rcSum  * inv);
+    input[k++] = (fann_type) safeLog1p(A.ecSum  * inv);
+    input[k++] = (fann_type) safeLog1p(A.pcSum  * inv);
+    input[k++] = (fann_type) safeLog1p(A.drSum  * inv);
+
+    // access-type fractions
+    input[k++] = (fann_type)(A.cntRange * inv);
+    input[k++] = (fann_type)(A.cntRef   * inv);
+    input[k++] = (fann_type)(A.cntEq    * inv);
+    input[k++] = (fann_type)(A.cntIdx   * inv);
+    input[k++] = (fann_type)(A.cntFull  * inv);
+
+    // using-index fraction
+    input[k++] = (fann_type)(A.usingIdx * inv);
+
+    // selectivity stats
+    input[k++] = (fann_type)(A.selSum * inv);
+    input[k++] = (fann_type) A.selMin;
+    input[k++] = (fann_type) A.selMax;
+
+    // plan shape
+    input[k++] = (fann_type) A.maxDepth;
+    input[k++] = (fann_type) A.fanoutMax;
+    input[k++] = (fann_type)(A.hasGroup ? 1.f : 0.f);
+    input[k++] = (fann_type)(A.hasOrder ? 1.f : 0.f);
+    input[k++] = (fann_type)(A.hasTemp  ? 1.f : 0.f);
+
+    // cost ratio mean & max
+    input[k++] = (fann_type)(A.ratioSum * inv);
+    input[k++] = (fann_type) A.ratioMax;
+
+    // query cost log1p
+    input[k++] = (fann_type) safeLog1p(qCost);
+
+    return true;
+}
+
+//------------------------------------------------------------------------------
+// Main: connect, EXPLAIN JSON, extract, run FANN, print decision
+//------------------------------------------------------------------------------
+int main() {
+    const char *host = "127.0.0.1";
+    const char *user = "root";
+    const char *pass = "";
+    const char *db   = "task_info";
+    unsigned int port = 44444;
+
+    // connect
+    MYSQL *conn = mysql_init(nullptr);
+    if (!mysql_real_connect(conn, host, user, pass, db, port, nullptr, 0)) {
+        std::cerr<<"MySQL connect error: "<< mysql_error(conn) <<std::endl;
+        return 1;
+    }
+
+    // disable IMCI engine (optional)
+    if (mysql_query(conn, "SET use_imci_engine=off")) {
+        std::cerr<<"SET failed: "<< mysql_error(conn) <<std::endl;
+        mysql_close(conn);
+        return 1;
+    }
+
+    // explain query
+    const char *query =
+        "EXPLAIN FORMAT=JSON "
+        "SELECT count(*) AS count, module_code FROM task_info WHERE (env = 'online' AND assignee_uid IN ('2206529173543', 'cn011000001612304') AND platform_code IN ('A@42gBZ', 'A@RhHWV'));";
+    if (mysql_query(conn, query)) {
+        std::cerr<<"EXPLAIN failed: "<< mysql_error(conn) <<std::endl;
+        mysql_close(conn);
+        return 1;
+    }
+
+    // fetch JSON
+    MYSQL_RES *res = mysql_store_result(conn);
+    MYSQL_ROW row  = mysql_fetch_row(res);
+    unsigned long *lens = mysql_fetch_lengths(res);
+    std::string json_text(row[0], lens[0]);
+
+    // parse JSON
+    json plan;
+    try { plan = json::parse(json_text); }
+    catch (...) {
+        std::cerr<<"JSON parse error"<<std::endl;
+        mysql_free_result(res);
+        mysql_close(conn);
+        return 1;
+    }
+
+    // extract features
+    fann_type input[NUM_FEATS];
+    if (!extractFeaturesFromPlan(plan, input)) {
+        std::cerr<<"Feature extraction failed"<<std::endl;
+        mysql_free_result(res);
+        mysql_close(conn);
+        return 1;
+    }
+
+    // debug print
+    std::cout<<"[DEBUG] Enhanced features:\n";
+    for (int i = 0; i < NUM_FEATS; i++) {
+        std::cout<<"  feat["<<i<<"] = "<< input[i] <<"\n";
+    }
+
+    // load model
+    const char *model_path = "checkpoints/best_mlp_enhanced.net";
+    struct fann *ann = fann_create_from_file(model_path);
+    if (!ann) {
+        std::cerr<<"Failed to load FANN model: "<< model_path <<std::endl;
+        mysql_free_result(res);
+        mysql_close(conn);
+        return 1;
+    }
+
+    // run prediction
+    fann_type *out = fann_run(ann, input);
+    if (out) {
+        std::cout<<"Prediction = "<< out[0]
+                 <<"  => Use "
+                 << (out[0] >= 0.5f ? "Column Store\n" : "Row Store\n");
+    } else {
+        std::cerr<<"FANN run failed\n";
+    }
+
+    // cleanup
+    fann_destroy(ann);
+    mysql_free_result(res);
+    mysql_close(conn);
+    return 0;
+}

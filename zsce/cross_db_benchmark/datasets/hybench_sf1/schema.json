@@ -1,0 +1,27 @@
+{
+    "name": "hybench",
+    "csv_kwargs": {"escapechar": "\\", "encoding": "utf-8", "quotechar": "\"", "on_bad_lines": "skip", "sep": ","}, "db_load_kwargs": {"mysql": "DELIMITER ',' QUOTE '\"' ESCAPE '\\' NULL '' CSV HEADER;"},
+    "tables": [
+      "customer",
+      "company",
+      "savingAccount",
+      "checkingAccount",
+      "transfer",
+      "checking",
+      "loanapps",
+      "loantrans"
+    ],
+    "relationships": [
+      ["customer", "companyID", "company", "companyID"],
+      ["savingAccount", "userID", "customer", "custID"],
+      ["checkingAccount", "userID", "customer", "custID"],
+      ["transfer", "sourceID", "customer", "custID"],
+      ["transfer", "targetID", "customer", "custID"],
+      ["checking", "sourceID", "customer", "custID"],
+      ["checking", "targetID", "customer", "custID"],
+      ["loanapps", "applicantID", "customer", "custID"],
+      ["loantrans", "applicantID", "customer", "custID"],
+      ["loantrans", "appID", "loanapps", "id"]
+    ]
+  }
+  
