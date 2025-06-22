@@ -183,45 +183,6 @@ static void walk(const json& n,Agg&a,int depth=1){
     a.maxDepth=max(a.maxDepth,depth);
 }
 
-// static bool plan2feat(const json&plan,float f[NUM_FEATS]){
-//     if(!plan.contains("query_block")) return false;
-//     const json*qb=&plan["query_block"];
-//     if(qb->contains("union_result")){
-//         const auto& specs=(*qb)["union_result"]["query_specifications"];
-//         if(specs.is_array()&&!specs.empty()) qb=&specs[0]["query_block"];
-//     }
-//     Agg a; walk(*qb,a);
-//     if(!a.cnt) return false;
-//     double inv=1.0/a.cnt; int k=0;
-//     double qCost=safe_f(qb->value("cost_info",json::object()),"query_cost");
-//     double rootRow=safe_f(*qb,"rows_produced_per_join");
-// #define PUSH(x) f[k++]=float(x)
-//     /* 0-6 basic */           PUSH(log1p_clip(a.re*inv));  PUSH(log1p_clip(a.rp*inv)); PUSH(log1p_clip(a.f*inv));
-//     PUSH(log1p_clip(a.rc*inv)); PUSH(log1p_clip(a.ec*inv)); PUSH(log1p_clip(a.pc*inv)); PUSH(log1p_clip(a.dr*inv));
-//     /* 7-12 access */         PUSH(a.cRange*inv); PUSH(a.cRef*inv); PUSH(a.cEq*inv); PUSH(a.cIdx*inv); PUSH(a.cFull*inv); PUSH(a.idxUse*inv);
-//     /* 13-17 sel/shape */     PUSH(a.selSum*inv); PUSH(a.selMin); PUSH(a.selMax); PUSH(a.maxDepth); PUSH(a.fanoutMax);
-//     /* 18-20 flags */         PUSH(a.grp); PUSH(a.ord); PUSH(a.tmp);
-//     /* 21-22 ratios */        PUSH(a.ratioSum*inv); PUSH(a.ratioMax);
-//     /* 23-24 cost/rows */     PUSH(log1p_clip(qCost)); PUSH(log1p_clip(rootRow));
-//     /* 25-27 cost ratios */   PUSH(log1p_clip((a.pc*inv)/max(1e-6,a.rc*inv)));
-//     PUSH(log1p_clip((a.rc*inv)/max(1e-6,a.re*inv)));
-//     PUSH(log1p_clip((a.ec*inv)/max(1e-6,a.re*inv)));
-//     /* 28-31 */               PUSH(a.cnt==1); PUSH(a.cnt>1);
-//     PUSH(log1p_clip(a.maxDepth*(a.idxUse*inv)));
-//     PUSH(log1p_clip((a.idxUse*inv)/max(a.cFull*inv,1e-3)));
-//     /* 32-39 misc */          PUSH(a.cnt); PUSH(a.cnt?double(a.sumPK)/a.cnt:0);
-//     PUSH(log1p_clip(a.maxPrefix)); PUSH(log1p_clip(a.minRead<1e30?a.minRead:0));
-//     PUSH(a.cnt>1?double(a.cnt-1)/a.cnt:0); PUSH(rootRow>0?double(a.re)/rootRow:0);
-//     PUSH(a.selMax-a.selMin); PUSH(a.idxUse/double(max(1,a.cRange+a.cRef+a.cEq+a.cIdx)));
-//     /* 40-43 */               PUSH(qCost); PUSH(qCost>5e4); PUSH(a.cnt?double(a.coverCount)/a.cnt:0); PUSH(a.coverCount==a.cnt);
-//     /* 44-46 */               PUSH(log1p_clip(a.re*inv)-log1p_clip(a.selSum*inv)); PUSH(a.cnt); PUSH(log1p_clip(a.cnt));
-//     /* 47-50 */               PUSH(a.sumPK); PUSH(a.cnt?double(a.sumPK)/a.cnt:0); PUSH(a.coverCount); PUSH(a.cnt?double(a.coverCount)/a.cnt:0);
-//     /* 51-56 */               PUSH(a.idxUse*inv); PUSH(a.cRange*inv); PUSH(a.cRef*inv); PUSH(a.cEq*inv); PUSH(a.cIdx*inv); PUSH(a.cFull*inv);
-//     /* 57-59 */               PUSH(log1p_clip(a.maxPrefix*inv)); PUSH(log1p_clip(a.minRead<1e30?a.minRead:0)); PUSH(a.selMax-a.selMin);
-//     /* 60-62 extremes */      PUSH(a.ratioMax); PUSH(a.fanoutMax); PUSH(a.selMin>0?double(a.selMax/a.selMin):0);
-//     return k==NUM_FEATS;
-// #undef PUSH
-// }
 
 /* ---------- 取消 clip 的对数函数 ---------- */
 static inline double lp(double v) { return std::log1p(std::max(0.0, v)); }
@@ -455,84 +416,6 @@ static void train_and_eval(const std::vector<Sample>& DS,
         double ct = std::max(s.col_t, EPS_RUNTIME);
         y[i] = float(std::log(rt) - std::log(ct));   // Δ = ln(rt/ct)
 
-        // /* base sample-weight (class-balance × gap × cost) ---------------- */
-        // double gap     = std::fabs(rt - ct);
-        // double w_gap   = 1.0 + std::log1p(gap);          // ≥ 1
-        // double w_cost  = std::log1p(s.qcost);            // ≥ 0
-        // double base_w  = (s.label ? w_pos : w_neg) * w_gap * w_cost;
-
-        // /* feature-boost  (fanoutMax & ratioMax) --------------------------- */
-        // double fanout  = s.feat[22];      // fanoutMax  (原 feat[22])
-        // double ratioMx = s.feat[60];      // ratioMax   (原 feat[60])
-        // /* tanh 抑制极端值；权重范围大致 1.0 – 3.0 */
-        // double boost   = 1.0 + 2.0 * std::tanh(0.5 * fanout)
-        //                       + 1.5 * std::tanh(0.5 * ratioMx);
-
-        // w[i] = float(base_w * boost);
-
-        // double base = (s.label ? w_pos : w_neg);
-
-        // double sel_boost = 1.0
-        //          + 1.0 * std::min<double>(3.0,  static_cast<double>(s.feat[22]))  // fanoutMax
-        //          + 0.8 * std::min<double>(3.0,  static_cast<double>(s.feat[60])); // ratioMax
-
-
-        // /* —— “巨大 qcost + fanout” 的 corner case再提权 —— */
-        // double corner = (s.label && s.qcost > 1e5 && s.feat[22] > 1.0) ? 2.0 : 1.0;
-
-        // w[i] = float(base * w_gap * sel_boost * corner);
-
-        // -------------  inside the training loop  -------------
-        // double base = (s.label ? w_pos : w_neg);          // class balance
-
-        // double gap_ln  = std::log(rt) - std::log(ct);
-        // double w_gap   = 1.0 + gap_ln * gap_ln;           // runtime gap (≥1)
-
-        // double fanout     = static_cast<double>(s.feat[22]);      // fanoutMax
-        // double ratio_max  = static_cast<double>(s.feat[60]);      // ratioMax
-        // double idx_share  = static_cast<double>(s.feat[37]);      // idxUse / (range+ref+eq_ref+idx)
-
-        // /* -------- positive-corner (column wins) --------------- */
-        // double pos_corner = (s.label == 1 &&
-        //                     s.qcost  > 1e5   &&   // very large estimate
-        //                     fanout   > 1.0)  ? 2.0 : 1.0;   // wide fan-out
-
-        // /* -------- negative-corner (row wins) ------------------ */
-        // double neg_corner = (s.label == 0 &&
-        //                     s.qcost  > 1e5 &&          // same huge estimate
-        //                     fanout   < 1.1 &&          // but very narrow joins
-        //                     idx_share > 0.7) ? 2.0 : 1.0;
-
-        // /* -------- cost mis-estimate penalty ------------------- */
-        // double underestimate_pen = (s.label == 1 && s.qcost < 1e4) ? 4.0 : 1.0;
-
-        // /* -------- smoothed qcost factor ----------------------- */
-        // double qcost_norm = std::log1p(s.qcost);          // grows slowly
-
-        // double w_total = base * w_gap
-        //             * (1.0 + std::min(3.0, fanout)   + 0.8*std::min(3.0,ratio_max))
-        //             * qcost_norm
-        //             * pos_corner * neg_corner * underestimate_pen;
-
-        // /* clamp outliers */
-        // w_total = std::min<double>(w_total, 1e6);
-        // w[i] = static_cast<float>(w_total);
-
-        // ---------- prepare shorthand ----------
-        // double base   = (s.label ? w_pos : w_neg);        // 类别平衡
-        // double q_ln   = std::log1p(s.qcost);              // 0–14
-
-        // double w_i = base * (1.0 + 0.2 * q_ln);           // ① 主体
-        // /* ② 温和列优势提权 (add-on) */
-        // double fan   = std::min<double>(3.0, s.feat[22]);
-        // double ratio = std::min<double>(3.0, s.feat[60]);
-        // if (fan   > 1.5) w_i += 0.8 * base * fan;
-        // if (ratio > 1.3) w_i += 0.5 * base * ratio;
-        // /* ③ credit corner case */
-        // if (fan > 2.5 && s.qcost < 8e3)
-        //     w_i += 2.0 * base;
-
-        // w[i] = static_cast<float>(w_i);
 
         double base   = (s.label ? w_pos : w_neg);          // 类别平衡
         double q_ln   = std::log1p(s.qcost);                // ~0–14

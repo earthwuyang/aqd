@@ -275,7 +275,7 @@ bool extractFeaturesFromPlan(const json &plan, double raw[NUM_FEATS])
 int main()
 {
     // 1) connect
-    const char *host="127.0.0.1", *user="root", *pass="", *db="member_log";
+    const char *host="127.0.0.1", *user="root", *pass="", *db="credit";
     unsigned int port=44444;
     MYSQL *conn = mysql_init(nullptr);
     if (!mysql_real_connect(conn,host,user,pass,db,port,nullptr,0)) {
@@ -284,7 +284,7 @@ int main()
 
     // 2) run EXPLAIN FORMAT=JSON your query
     const char *qry =
-        "EXPLAIN FORMAT=JSON SELECT COUNT(DISTINCT MemberAcctId) as Count from  member_log WHERE ShopId = 14823 AND IsGoShop = 1 AND CreateTime BETWEEN timestamp('2025-02-18 00:00:00.000000') AND timestamp('2025-02-18 23:59:59.999000');";
+        "EXPLAIN FORMAT=JSON SELECT member.lastname, region.region_name, corporation.mail_code, SUM(member.region_no + payment.member_no) as agg_0, MIN(corporation.region_no + statement.statement_no) as agg_1 FROM charge JOIN member ON charge.member_no = member.member_no JOIN category ON charge.category_no = category.category_no JOIN payment ON member.member_no = payment.member_no JOIN statement ON member.member_no = statement.member_no JOIN region ON member.region_no = region.region_no JOIN provider ON region.region_no = provider.region_no JOIN corporation ON region.region_no = corporation.region_no  WHERE corporation.corp_name NOT LIKE '%Expe%rt%' AND region.state_prov != 'ON' AND (charge.member_no >= 9836.630784128065 OR (charge.member_no >= 599.3242815336241 AND charge.member_no <= 8500.435258732907)) AND member.expr_dt LIKE '%2000-10-1%2%' AND statement.statement_no <= 9139.915110903554 AND category.category_no <= 7.5045396621025855 AND corporation.corp_no >= 433.46994220610617 AND payment.payment_dt LIKE '%1%999-09-02%' AND statement.statement_dt = '1999-08-13 00:00:00' AND charge.charge_amt <= 4250.852510174078 AND category.category_desc != 'Entertainment' AND (region.street != '444 Fourth St.' OR (region.city != 'Budapest' AND region.street = '999 Ninth St.')) AND corporation.city != ' ' AND region.region_name != 'Western Europea' AND statement.statement_dt LIKE '%00:00:00%' GROUP BY member.lastname, region.region_name, corporation.mail_code HAVING SUM(member.region_no + payment.member_no) <= 5896.041346161759 ORDER BY member.lastname, region.region_name, corporation.mail_code;";
     if (mysql_query(conn,qry)) {
         logError(mysql_error(conn)); mysql_close(conn); return 1;
     }
@@ -295,8 +295,18 @@ int main()
 
     // 3) parse JSON
     json plan;
-    try { plan = json::parse(jsonText); }
-    catch (...) { logError("JSON parse error"); return 1; }
+    // try { plan = json::parse(jsonText); }
+    // catch (...) { logError("JSON parse error"); return 1; }
+    
+    try {
+        plan = json::parse(jsonText);              // ← decodes the SQL string literal
+        if (plan.is_string()) {                    // ← still a JSON string?  decode again
+            plan = json::parse(plan.get<std::string>());
+        }
+    } catch (const std::exception& e) {
+        logError(std::string("JSON parse error: ") + e.what());
+        return 1;
+    }
 
     // 4) extract raw features
     double raw[NUM_FEATS];
