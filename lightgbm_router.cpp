@@ -483,6 +483,10 @@ static void train_and_eval(const std::vector<Sample>& DS,
     const double w_pos = P  ? N / (2 * P)  : 1.0;
     const double w_neg = N0 ? N / (2 * N0) : 1.0;
 
+    constexpr double Q_SMALL = 1e4;     // 小 qcost 阈值
+    constexpr double Q_LARGE = 5e4;     // 大 qcost 阈值
+    constexpr double BOOST   = 1;    // 全体放大基准 1.15×（比复制温和）
+
     for (int i = 0; i < N; ++i) {
         const Sample& s = *S[i];
 
@@ -516,6 +520,27 @@ static void train_and_eval(const std::vector<Sample>& DS,
         if (fan > 2.5 && s.qcost < 8e3)
             w_i += 2.0 * base;
                             // 1.5-2.0 works fine
+        
+        /* ===== emphasise tricky low-qcost/col-win  &  high-qcost/row-win ===== */
+        
+
+        auto rel_gap = [](double fast, double slow) {
+            double ratio = slow / std::max(1e-6, fast);   // ≥1
+            double g = std::log(ratio);                   // [0, +∞)
+            double norm = g / 3.0;                        // 3× 时间差 ⇒ 1.0
+            if (norm < 0.0) norm = 0.0;
+            else if (norm > 1.0) norm = 1.0;
+            return norm;                                  // ∈ [0,1]
+        };
+
+        if (s.label == 1 && s.qcost < Q_SMALL) {            // A  类
+            double g = rel_gap(s.col_t, s.row_t);
+            w_i *= (BOOST + 0 * g);                       // **连续** 放大
+        }
+        if (s.label == 0 && s.qcost > Q_LARGE) {            // B  类
+            double g = rel_gap(s.row_t, s.col_t);
+            w_i *= (BOOST + 0 * g);
+        }
 
         w[i] = static_cast<float>(w_i);
 
@@ -627,6 +652,11 @@ static void train_and_eval(const std::vector<Sample>& DS,
     double r_row=0,r_col=0,r_opt=0,
            r_cost=0,r_hopt=0,r_fann=0,r_lgb=0;
 
+
+
+    double loss_a = 0, cnt_a = 0;
+    double loss_b = 0, cnt_b = 0;
+
     for (int i = 0; i < N; ++i) {
         const Sample& s = *S[i];
 
@@ -642,7 +672,17 @@ static void train_and_eval(const std::vector<Sample>& DS,
         r_hopt += s.hybrid_pred ? s.col_t : s.row_t;
         r_fann += s.fann_pred   ? s.col_t : s.row_t;
         r_lgb  += col           ? s.col_t : s.row_t;
+
+        bool isA = (s.label==1 && s.qcost < Q_SMALL);
+        bool isB = (s.label==0 && s.qcost > Q_LARGE);
+
+        if (isA) { loss_a += (col ? s.col_t : s.row_t); cnt_a++; }
+        if (isB) { loss_b += (col ? s.col_t : s.row_t); cnt_b++; }
     }
+
+    std::cout << "── Group (A) avg runtime : " << (cnt_a ? loss_a / cnt_a : -1) << '\n'
+          << "── Group (B) avg runtime : " << (cnt_b ? loss_b / cnt_b : -1) << '\n';
+
 
     auto avg = [&](double s){ return s / N; };
 
@@ -673,7 +713,7 @@ static void train_and_eval(const std::vector<Sample>& DS,
 int main(int argc,char*argv[]){
     string base="/home/wuy/query_costs", model="lgb_model.txt";
     vector<string> dirs;
-    int trees=400, depth=10; double lr=0.06, subs=0.7, col=0.8;
+    int trees=50, depth=10; double lr=0.06, subs=0.7, col=0.8;
     string host="127.0.0.1", user="root", pass=""; int port=44444; bool skip=false;
 
     for(int i=1;i<argc;++i){
