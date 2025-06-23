@@ -35,7 +35,7 @@ using json = nlohmann::json;
 using namespace std;
 
 /* ───────────────── helpers ───────────────── */
-constexpr int    NUM_FEATS   = 63;
+constexpr int    NUM_FEATS   = 65;
 constexpr double EPS_RUNTIME = 1e-6;
 
 static void logI(const string&s){ cerr<<"[INFO]  "<<s<<'\n'; }
@@ -142,46 +142,121 @@ struct Agg{
     int    cnt=0,cRange=0,cRef=0,cEq=0,cIdx=0,cFull=0,idxUse=0,sumPK=0,
            coverCount=0,maxDepth=0;
     bool   grp=false,ord=false,tmp=false;
+    double outerRows      = 0;   // first non-ALL driver cardinality
+    int    eqChainDepth   = 0;   // longest consecutive eq_ref chain
+    int    _curEqChain    = 0;   // internal: running counter
 };
-static void walk(const json& n,Agg&a,int depth=1){
-    if(n.is_object()){
-        if(n.contains("table")&&n["table"].is_object()){
-            const auto&t=n["table"]; const auto&ci=t.value("cost_info",json::object());
-            double re=safe_f(t,"rows_examined_per_scan");
-            double rp=safe_f(t,"rows_produced_per_join");
-            double fl=safe_f(t,"filtered");
-            double rc=safe_f(ci,"read_cost");
-            double ec=safe_f(ci,"eval_cost");
-            double pc=safe_f(ci,"prefix_cost");
-            double dr=ci.contains("data_read_per_join")&&ci["data_read_per_join"].is_string()
-                      ? str_size_to_num(ci["data_read_per_join"].get<string>())
-                      : safe_f(ci,"data_read_per_join");
-            a.re+=re; a.rp+=rp; a.f+=fl; a.rc+=rc; a.ec+=ec; a.pc+=pc; a.dr+=dr; a.cnt++;
-            a.maxPrefix=max(a.maxPrefix,pc); a.minRead=min(a.minRead,rc);
-            if(re>0){ double sel=rp/re; a.selSum+=sel; a.selMin=min(a.selMin,sel); a.selMax=max(a.selMax,sel); a.fanoutMax=max(a.fanoutMax,sel); }
-            double ratio=ec>0?rc/ec:rc; a.ratioSum+=ratio; a.ratioMax=max(a.ratioMax,ratio);
-            string at=t.value("access_type","ALL");
-            if(at=="range")a.cRange++; else if(at=="ref")a.cRef++; else if(at=="eq_ref")a.cEq++; else if(at=="index")a.cIdx++; else a.cFull++;
-            if(getBool(t,"using_index")) a.idxUse++;
-            if(t.contains("possible_keys")&&t["possible_keys"].is_array()) a.sumPK+=int(t["possible_keys"].size());
-            /* covering index check */
-            if(t.contains("used_columns")&&t["used_columns"].is_array()&&t.contains("key")&&t["key"].is_string()){
-                string idx=t["key"]; auto it=indexCols.find(idx);
-                if(it!=indexCols.end()){
-                    bool cover=true;
-                    for(auto&u:t["used_columns"])
-                        if(!u.is_string()||!it->second.count(u.get<string>())){cover=false;break;}
-                    if(cover) a.coverCount++;
+
+
+/* -------------------------------------------------------------------------- */
+/* Recursive traversal over the JSON plan tree                                */
+/* Collects per-table statistics into an Agg struct                           */
+/* -------------------------------------------------------------------------- */
+static void walk(const json& n, Agg& a, int depth = 1)
+{
+    /* ---------- OBJECT node ------------------------------------------------ */
+    if (n.is_object()) {
+
+        /* ---- TABLE node ---- */
+        if (n.contains("table") && n["table"].is_object()) {
+
+            const auto& t  = n["table"];
+            const auto& ci = t.value("cost_info", json::object());
+
+            /* basic numerical fields */
+            double re = safe_f(t , "rows_examined_per_scan");
+            double rp = safe_f(t , "rows_produced_per_join");
+            double fl = safe_f(t , "filtered");
+            double rc = safe_f(ci, "read_cost");
+            double ec = safe_f(ci, "eval_cost");
+            double pc = safe_f(ci, "prefix_cost");
+            double dr = ci.contains("data_read_per_join") && ci["data_read_per_join"].is_string()
+                        ? str_size_to_num(ci["data_read_per_join"].get<string>())
+                        : safe_f(ci, "data_read_per_join");
+
+            /* aggregate into Agg */
+            a.re += re;  a.rp += rp;  a.f  += fl;
+            a.rc += rc;  a.ec += ec;  a.pc += pc;  a.dr += dr;  a.cnt++;
+
+            a.maxPrefix = std::max(a.maxPrefix, pc);
+            a.minRead   = std::min(a.minRead , rc);
+
+            if (re > 0) {
+                double sel = rp / re;
+                a.selSum   += sel;
+                a.selMin    = std::min(a.selMin, sel);
+                a.selMax    = std::max(a.selMax, sel);
+                a.fanoutMax = std::max(a.fanoutMax, sel);
+            }
+
+            double ratio = ec > 0 ? rc / ec : rc;
+            a.ratioSum  += ratio;
+            a.ratioMax   = std::max(a.ratioMax, ratio);
+
+            /* access-type counters ----------------------------------------- */
+            const std::string at = t.value("access_type", "ALL");
+            if      (at == "range")   a.cRange++;
+            else if (at == "ref")     a.cRef++;
+            else if (at == "eq_ref")  a.cEq++;
+            else if (at == "index")   a.cIdx++;
+            else                      a.cFull++;
+
+            if (getBool(t, "using_index")) a.idxUse++;
+
+            if (t.contains("possible_keys") && t["possible_keys"].is_array())
+                a.sumPK += int(t["possible_keys"].size());
+
+            /* covering-index check ----------------------------------------- */
+            if (t.contains("used_columns") && t["used_columns"].is_array() &&
+                t.contains("key") && t["key"].is_string())
+            {
+                const std::string idx = t["key"];
+                auto it = indexCols.find(idx);
+                if (it != indexCols.end()) {
+                    bool cover = true;
+                    for (const auto& u : t["used_columns"])
+                        if (!u.is_string() ||
+                            !it->second.count(u.get<string>()))
+                        { cover = false; break; }
+                    if (cover) a.coverCount++;
                 }
             }
-        }
-        if(n.contains("grouping_operation")) a.grp=1;
-        if(n.contains("ordering_operation")||getBool(n,"using_filesort")) a.ord=1;
-        if(getBool(n,"using_temporary_table")) a.tmp=1;
-        for(auto&kv:n.items()) if(kv.key()!="table") walk(kv.value(),a,depth+1);
-    }else if(n.is_array()) for(auto&v:n) walk(v,a,depth);
-    a.maxDepth=max(a.maxDepth,depth);
+
+            /* ---------- NEW “row-wins” signals ---------------------------- */
+
+            /* 1️⃣ first non-ALL access  -> outerRows */
+            if (a.outerRows == 0 && at != "ALL")
+                a.outerRows = re;
+
+            /* 2️⃣ consecutive eq_ref chain depth */
+            if (at == "eq_ref") {
+                a._curEqChain++;
+                a.eqChainDepth = std::max(a.eqChainDepth, a._curEqChain);
+            } else {
+                a._curEqChain = 0;          // break the chain
+            }
+        } /* end TABLE node */
+
+        /* plan-level flags --------------------------------------------------- */
+        if (n.contains("grouping_operation"))                                  a.grp = true;
+        if (n.contains("ordering_operation") || getBool(n, "using_filesort"))  a.ord = true;
+        if (getBool(n, "using_temporary_table"))                               a.tmp = true;
+
+        /* recurse into children (skip “table” key we already handled) */
+        for (const auto& kv : n.items())
+            if (kv.key() != "table")
+                walk(kv.value(), a, depth + 1);
+    }
+
+    /* ---------- ARRAY node ------------------------------------------------- */
+    else if (n.is_array()) {
+        for (const auto& v : n) walk(v, a, depth);
+    }
+
+    /* update maximum nesting depth */
+    a.maxDepth = std::max(a.maxDepth, depth);
 }
+
 
 
 /* ---------- 取消 clip 的对数函数 ---------- */
@@ -282,6 +357,9 @@ static bool plan2feat(const json& plan, float f[NUM_FEATS])
     PUSH(a.fanoutMax);
     PUSH(a.selMin > 0 ? double(a.selMax / a.selMin) : 0);
 
+    PUSH(lp(a.outerRows));     // 63 : log1p(outer driver rows)
+    PUSH(a.eqChainDepth);      // 64 : longest eq_ref chain length
+
     return k == NUM_FEATS;
 #undef PUSH
 }
@@ -367,6 +445,7 @@ static vector<Sample> load_dataset(const string&root,
 }
 
 
+
 /*********************************************************************
  * gap-regression LightGBM router  ·  train_and_eval (no feature_weights)
  *********************************************************************/
@@ -436,10 +515,9 @@ static void train_and_eval(const std::vector<Sample>& DS,
         // ---------- credit-type corner case仍保留 ----------
         if (fan > 2.5 && s.qcost < 8e3)
             w_i += 2.0 * base;
+                            // 1.5-2.0 works fine
 
         w[i] = static_cast<float>(w_i);
-
-
 
     }
 
@@ -462,8 +540,8 @@ static void train_and_eval(const std::vector<Sample>& DS,
         LGBM_DatasetSetField(dtrain, "weight", w.data(), N, C_API_DTYPE_FLOAT32);
 
         std::string param =
-            "objective=fair fair_c=0.5"
-            " max_bin=127 num_leaves=256"
+            "objective=fair fair_c=0.9"
+            " max_bin=127 num_leaves=512"
             " max_depth="        + std::to_string(max_depth)   +
             " num_iterations="   + std::to_string(num_trees)   +
             " learning_rate="    + std::to_string(lr)          +
@@ -472,8 +550,19 @@ static void train_and_eval(const std::vector<Sample>& DS,
             " bagging_freq=1"
             " lambda_l2=1.0"
             " num_threads="      + std::to_string(num_threads) +
-            " verbosity=-1";
+            " verbosity=-1";                                                           // 60,61…
 
+        {
+            std::string mono;            // "0,0,0,…"
+            mono.reserve(NUM_FEATS * 2); // cheap pre-alloc
+
+            for (int i = 0; i < NUM_FEATS; ++i) {
+                mono += (i == 22 || i == 60) ? '1' : '0';
+                if (i + 1 < NUM_FEATS) mono += ',';
+            }
+
+            param += " monotone_constraints=" + mono;
+        }
 
 
         // std::string param =
@@ -517,12 +606,21 @@ static void train_and_eval(const std::vector<Sample>& DS,
         LGBM_DatasetFree(dtrain);
     }
 
+
+
+    
+
+
     /* ---------- prediction ---------- */
     std::vector<double> pred(N); int64_t out_len = 0;
     if (LGBM_BoosterPredictForMat(booster, X.data(), C_API_DTYPE_FLOAT32,
                                   N, NUM_FEATS, 1, C_API_PREDICT_NORMAL,
                                   -1, 0, "", &out_len, pred.data()))
     { logE("PredictForMat failed"); LGBM_BoosterFree(booster); return; }
+
+
+
+    float TAU_STAR = 0.0f;
 
     /* ---------- metrics ---------- */
     int TP=0,FP=0,TN=0,FN=0;
@@ -532,7 +630,8 @@ static void train_and_eval(const std::vector<Sample>& DS,
     for (int i = 0; i < N; ++i) {
         const Sample& s = *S[i];
 
-        bool col = pred[i] > 0.0;                 // no fallback (GAP_THR=0)
+        bool col = pred[i] > TAU_STAR;                 // no fallback (GAP_THR=0)
+
 
         (col ? (s.label?++TP:++FP) : (s.label?++FN:++TN));
 
