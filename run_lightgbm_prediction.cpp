@@ -643,7 +643,7 @@ int main(int argc,char*argv[])
 {
 
     /* ----- CLI (same flags as before) ----- */
-    std::string csv="problem_sqls.csv", model="lgb_model.txt";
+    std::string csv="problem_sqls.csv", model="lgb_model_column_histogram.txt";
     std::string host="127.0.0.1",user="root",pass=""; int port=44444;
     for(int i=1;i<argc;++i){
         std::string a(argv[i]);
