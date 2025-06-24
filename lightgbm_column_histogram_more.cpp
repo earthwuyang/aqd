@@ -966,7 +966,7 @@ static void train_and_eval(const std::vector<Sample>& DS,
                            double  subsample      = 0.7,
                            double  colsample      = 0.8,
                            bool    skip_train     = false,
-                           int     num_threads    = 100 /* 0 ⇒ auto */ )
+                           int     num_threads    = 20 /* 0 ⇒ auto */ )
 {
     /* ---------- constants ---------- */
     constexpr double COST_THR = 5e4;          // old cost rule
