@@ -1425,6 +1425,113 @@ static vector<int> predict_binary(const string& model_path,
     return bin;
 }
 
+/* ---------- 评估 6 组策略 ---------- */
+struct Stat {
+    long TP=0,FP=0,TN=0,FN=0;
+    double runtime_sum=0;          // 秒
+    void add(bool pred_col, bool gt_col, double row_t, double col_t){
+        /* confusion count */
+        if      ( pred_col &&  gt_col) ++TP;
+        else if ( pred_col && !gt_col) ++FP;
+        else if (!pred_col &&  gt_col) ++FN;
+        else                           ++TN;
+        runtime_sum += pred_col ? col_t : row_t;
+    }
+    double acc (long tot) const { return double(TP+TN)/tot; }
+    double recall()       const { return (TP+FN)? double(TP)/(TP+FN):0; }
+    double f1()           const {
+        return (TP)? 2.0*TP/(2*TP+FP+FN) : 0;
+    }
+    double avg_rt(long tot) const { return runtime_sum/tot; }
+};
+
+/* ─────────────────────────────────────────────────────────────
+ *  report_and_evaluate
+ *  — 统计 7 种策略 (含 Oracle) 的混淆矩阵与平均运行时
+ *    并写入 CSV + 打印控制台表格
+ * ───────────────────────────────────────────────────────────── */
+void report_metrics(const std::vector<int>& pred_lgb,
+                         const std::vector<Sample>& DS_test)
+{
+    constexpr double COST_THR = 5e4;
+
+    struct Stat {
+        long TP=0,FP=0,TN=0,FN=0; double rt_sum=0;
+        void add(bool p,bool g,double rt,double ct){
+            (p? (g?++TP:++FP):(g?++FN:++TN));
+            rt_sum += (p?ct:rt);
+        }
+        double acc(long n) const { return double(TP+TN)/n; }
+        double rec()       const { return (TP+FN)? double(TP)/(TP+FN):0; }
+        double f1()        const { return TP? 2.0*TP/(2*TP+FP+FN):0; }
+        double avg(long n) const { return rt_sum/n; }
+    };
+
+    Stat S_row,S_col,S_cost,S_hopt,S_fann,S_lgb,S_opt;
+    for (size_t i=0;i<DS_test.size();++i){
+        const Sample &s = DS_test[i];
+        bool gt  = s.label;                  // 1 ⇒ column faster
+        bool lgb = pred_lgb[i];
+
+        S_row .add(false            ,gt,s.row_t,s.col_t);
+        S_col .add(true             ,gt,s.row_t,s.col_t);
+        S_cost.add(s.qcost>COST_THR ,gt,s.row_t,s.col_t);
+        S_hopt.add(s.hybrid_pred    ,gt,s.row_t,s.col_t);
+        S_fann.add(s.fann_pred      ,gt,s.row_t,s.col_t);
+        S_lgb .add(lgb              ,gt,s.row_t,s.col_t);
+
+        /* Oracle: always pick the faster of the two paths */
+        bool oracle_pred = s.label;          // same definition as gt
+        S_opt.add(oracle_pred   ,gt,s.row_t,s.col_t);
+    }
+    const long N = DS_test.size();
+
+    /* ------------ CSV -------------- */
+    std::ofstream fout("test_metrics.csv");
+    fout<<"method,TP,FP,TN,FN,accuracy,recall,f1,avg_runtime\n";
+    auto dump=[&](const std::string &n,Stat&s){
+        fout<<n<<','<<s.TP<<','<<s.FP<<','<<s.TN<<','<<s.FN<<','
+            <<s.acc(N)<<','<<s.rec()<<','<<s.f1()<<','<<s.avg(N)<<'\n';
+    };
+    dump("row_only"   ,S_row );
+    dump("column_only",S_col );
+    dump("cost_rule"  ,S_cost);
+    dump("hybrid_opt" ,S_hopt);
+    dump("FANN"       ,S_fann);
+    dump("LightGBM"   ,S_lgb );
+    dump("Oracle"     ,S_opt );
+    fout.close();
+
+    /* ------------ console ----------- */
+    std::cout<<"\n*** Evaluation on "<<N<<" samples ***\n"
+             <<"LightGBM ensemble  Acc="<<S_lgb.acc(N)
+             <<"  Rec="<<S_lgb.rec()<<"  F1="<<S_lgb.f1()<<"\n"
+             <<"TP="<<S_lgb.TP<<" FP="<<S_lgb.FP
+             <<" TN="<<S_lgb.TN<<" FN="<<S_lgb.FN<<"\n";
+
+    std::cout<<"\n| Method    | TP | FP | TN | FN |  Acc |  Rec |  F1 | Avg-RT |\n"
+             <<"|-----------|----|----|----|----|------|------|-----|--------|\n";
+    auto pr=[&](const std::string &n,Stat&s){
+        std::cout<<'|'<<std::setw(10)<<std::left<<n<<'|'
+                 <<std::setw(4)<<s.TP<<'|'<<std::setw(4)<<s.FP<<'|'
+                 <<std::setw(4)<<s.TN<<'|'<<std::setw(4)<<s.FN<<'|'
+                 <<std::setw(6)<<s.acc(N)<<'|'<<std::setw(6)<<s.rec()<<'|'
+                 <<std::setw(5)<<s.f1()<<'|'<<std::setw(8)<<std::setprecision(6)
+                 <<s.avg(N)<<"|\n";
+        std::cout.unsetf(std::ios::floatfield);
+    };
+    pr("Row"     ,S_row );
+    pr("Column"  ,S_col );
+    pr("Cost"    ,S_cost);
+    pr("Hybrid"  ,S_hopt);
+    pr("FANN"    ,S_fann);
+    pr("LGBM"    ,S_lgb );
+    pr("Oracle"  ,S_opt );
+
+    std::cout<<"\n[CSV] test_metrics.csv written (includes Oracle)\n";
+}
+
+
 
 /* ───────────────────────── UPDATED  main() ───────────────────────── */
 int main(int argc, char* argv[])
@@ -1434,6 +1541,7 @@ int main(int argc, char* argv[])
     double lr = 0.06, subs = 0.7, col = 0.8;
     string base = "/home/wuy/query_costs";
     uint32_t seed = 42;
+    bool skip_train = false;                 // ← 新增
 
     vector<string> all_dirs;
     for (int i = 1; i < argc; ++i) {
@@ -1448,13 +1556,47 @@ int main(int argc, char* argv[])
         else if (a.rfind("--lr=",0)==0)            lr    = stod(a.substr(5));
         else if (a.rfind("--subsample=",0)==0)     subs  = stod(a.substr(12));
         else if (a.rfind("--colsample=",0)==0)     col   = stod(a.substr(12));
+        else if (a=="--skip_train")                skip_train = true;
     }
-    if (all_dirs.size() < 8) {                    // 3 Test + ≥5 CV
-        logE("need ≥8 data dirs"); return 1;
+    if (!skip_train && all_dirs.size() < 8) {
+        logE("need ≥8 data dirs for training (omit --skip_train to run inference only)");
+        return 1;
+    }
+    if (skip_train && all_dirs.empty()) {
+        logE("need at least 1 data dir when --skip_train is present");
+        return 1;
     }
 
     /* ---------- 一次性扫描磁盘 ---------- */
     DirSamples ALL = load_all_datasets(base, all_dirs);
+
+    if (skip_train)
+    {
+        const vector<string> model_paths = {"lgb_fold1.txt",
+                                            "lgb_fold2.txt",
+                                            "lgb_fold3.txt"};
+        /* 构造测试集（用户给的所有目录即测试集） */
+        auto DS_test = build_subset(all_dirs, ALL);
+        if (DS_test.empty()) { logE("no samples found in given data_dirs"); return 1; }
+
+        /* 多数投票 */
+        vector<int> vote_sum(DS_test.size(), 0);
+        size_t usable_models = 0;
+        for (const auto& m : model_paths) {
+            if (!fs::exists(m)) { logW("model "+m+" missing, skip"); continue; }
+            auto pred = predict_binary(m, DS_test);
+            for (size_t i=0;i<pred.size();++i) vote_sum[i] += pred[i];
+            ++usable_models;
+        }
+        if (usable_models == 0) { logE("no usable model files"); return 1; }
+        int maj = usable_models/2 + 1;
+        vector<int> final(DS_test.size());
+        for (size_t i=0;i<final.size();++i) final[i] = vote_sum[i] >= maj;
+
+        report_metrics(final, DS_test);
+
+        return 0;
+    }
 
     /* ---------- 选 3 个库做 Test ---------- */
     vector<string> test_dirs = pick_test3(all_dirs, seed);
@@ -1466,95 +1608,51 @@ int main(int argc, char* argv[])
     cerr << "\n[Test ] "; for (auto& d:test_dirs) cerr<<d<<' ';
     cerr << "\n[Pool ] "; for (auto& d:cv_dirs)  cerr<<d<<' '; cerr<<"\n\n";
 
-    /* ---------- 5-fold 训练并记录验证分数 ---------- */
+    /* ---------- 5-fold & 分数 ---------- */
     auto folds = make_cv5(cv_dirs, seed);
     vector<pair<double,string>> scores;           // (BalAcc, path)
 
     int fid = 0;
     for (auto& f : folds) {
         ++fid;
-        cerr << "[Fold" << fid << "] train=";
-        for (auto& d:f.tr_dirs) cerr<<d<<' ';
-        cerr << "| val=";
-        for (auto& d:f.val_dirs) cerr<<d<<' '; cerr<<'\n';
-
-        auto DS_tr = build_subset(f.tr_dirs, ALL);
-        auto DS_va = build_subset(f.val_dirs, ALL);
-        if (DS_tr.empty() || DS_va.empty()) { logW("fold skip"); continue; }
-
         string mp = "lgb_fold"+to_string(fid)+".txt";
-        train_and_eval(DS_tr, mp, trees, depth, lr, subs, col, false);
-        double bal = compute_bal_acc(mp, DS_va);
-        cout << "  BalAcc=" << bal << '\n';
-        scores.push_back({bal, mp});
+
+        if (!skip_train) {                        // 需要训练
+            auto DS_tr = build_subset(f.tr_dirs, ALL);
+            auto DS_va = build_subset(f.val_dirs, ALL);
+            if (DS_tr.empty()||DS_va.empty()){ logW("fold skip"); continue; }
+            train_and_eval(DS_tr, mp, trees, depth, lr, subs, col, false);
+            double bal = compute_bal_acc(mp, DS_va);
+            cout << "[Fold"<<fid<<"] BalAcc="<<bal<<'\n';
+            scores.push_back({bal, mp});
+        } else {                                 // 直接加载现成模型
+            double bal = compute_bal_acc(mp, build_subset(f.val_dirs, ALL));
+            cout << "[Fold"<<fid<<"] (skip-train) BalAcc="<<bal<<'\n';
+            scores.push_back({bal, mp});
+        }
     }
-    if (scores.size() < 3) { logE("need ≥3 trained models"); return 1; }
+    if (scores.size() < 3) { logE("need ≥3 models"); return 1; }
 
-    /* ---------- 取“最佳一半”模型 ---------- */
-    sort(scores.rbegin(), scores.rend());               // 分数高→低
-    size_t keep = (scores.size() + 1) / 2;              // 上取整
+    /* ---------- 选最优一半 ---------- */
+    sort(scores.rbegin(), scores.rend());
+    size_t keep = (scores.size()+1)/2;
     vector<string> ens_models;
-    for (size_t i = 0; i < keep; ++i) ens_models.push_back(scores[i].second);
+    for (size_t i=0;i<keep;++i) ens_models.push_back(scores[i].second);
 
-    cout << "\n[INFO] ensemble with top " << keep << " model(s):\n";
-    for (auto& m: ens_models) cout << "  " << m << '\n';
+    cout << "\n[INFO] ensemble with top "<<keep<<" model(s):\n";
+    for (auto& m:ens_models) cout<<"  "<<m<<'\n';
 
-    /* ---------- 多数表决预测 ---------- */
+    /* ---------- 预测 ---------- */
     auto DS_test = build_subset(test_dirs, ALL);
     vector<int> vote_sum(DS_test.size(), 0);
-
-    for (auto& m : ens_models) {
-        auto p = predict_binary(m, DS_test);             // 0/1 向量
-        for (size_t i=0;i<p.size();++i) vote_sum[i] += p[i];
+    for (auto& m: ens_models){
+        auto p = predict_binary(m, DS_test);
+        for(size_t i=0;i<p.size();++i) vote_sum[i]+=p[i];
     }
-    const int maj = ens_models.size()/2 + 1;             // 多数阈值
+    const int maj = ens_models.size()/2 + 1;
     vector<int> final(DS_test.size());
-    for (size_t i=0;i<final.size();++i)
-        final[i] = vote_sum[i] >= maj;                   // 1=列存
+    for(size_t i=0;i<final.size();++i) final[i] = vote_sum[i] >= maj;
 
-    /* ---------- 计算混淆矩阵与平均耗时 ---------- */
-    constexpr double COST_THR = 5e4;
-
-    int TP=0,TN=0,FP=0,FN=0;
-    double r_row=0,r_col=0,r_opt=0,
-           r_cost=0,r_hopt=0,r_fann=0,r_lgb=0;
-
-    for (size_t i=0;i<DS_test.size();++i) {
-        const Sample& s = DS_test[i];
-        bool pred_col = final[i];          // 1 = 预测列存更快
-        bool gt_col   = s.label;           // 1 = 真正列存更快
-
-        if      ( pred_col &&  gt_col) ++TP;
-        else if ( pred_col && !gt_col) ++FP;
-        else if (!pred_col &&  gt_col) ++FN;
-        else                           ++TN;
-
-        r_row  += s.row_t;
-        r_col  += s.col_t;
-        r_opt  += std::min(s.row_t, s.col_t);
-        r_cost += (s.qcost > COST_THR ? s.col_t : s.row_t);
-        r_hopt += s.hybrid_pred ? s.col_t : s.row_t;
-        r_fann += s.fann_pred   ? s.col_t : s.row_t;
-        r_lgb  += pred_col      ? s.col_t : s.row_t;
-    }
-
-    auto avg = [&](double x){ return x / DS_test.size(); };
-    double TPR = (TP+FN) ? double(TP)/(TP+FN) : 0;
-    double TNR = (TN+FP) ? double(TN)/(TN+FP) : 0;
-    double BalAcc = 0.5 * (TPR + TNR);
-
-    cout << "\n=== Ensemble (best-half) on 3-set Test ===\n"
-         << "TP="<<TP<<" FP="<<FP<<" TN="<<TN<<" FN="<<FN<<"\n"
-         << "BalAcc=" << BalAcc << "\n\n";
-
-    cout << fixed << setprecision(6)
-         << "=== AVG RUNTIME (s) ===\n"
-         << "Row only            : " << avg(r_row)  << '\n'
-         << "Column only         : " << avg(r_col)  << '\n'
-         << "Cost threshold rule : " << avg(r_cost) << '\n'
-         << "Hybrid optimizer    : " << avg(r_hopt) << '\n'
-         << "FANN model          : " << avg(r_fann) << '\n'
-         << "LightGBM (ensemble) : " << avg(r_lgb)  << '\n'
-         << "Oracle (minimal)    : " << avg(r_opt)  << '\n';
+    report_metrics(final, DS_test);
     return 0;
 }
