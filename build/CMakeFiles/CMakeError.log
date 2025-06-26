@@ -1,0 +1,33 @@
+Determining if the pthread_create exist failed with the following output:
+Change Dir: /home/wuy/new_row_column_routing/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/gmake" "cmTC_a2c91/fast"
+/usr/bin/gmake -f CMakeFiles/cmTC_a2c91.dir/build.make CMakeFiles/cmTC_a2c91.dir/build
+gmake[1]: Entering directory `/home/t4/jitu.wy/new_row_column_routing/build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_a2c91.dir/CheckSymbolExists.cxx.o
+/usr/bin/c++    -fPIE   -std=gnu++11 -o CMakeFiles/cmTC_a2c91.dir/CheckSymbolExists.cxx.o -c /home/wuy/new_row_column_routing/build/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx
+Linking CXX executable cmTC_a2c91
+/usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTC_a2c91.dir/link.txt --verbose=1
+/usr/bin/c++       CMakeFiles/cmTC_a2c91.dir/CheckSymbolExists.cxx.o  -o cmTC_a2c91 
+CMakeFiles/cmTC_a2c91.dir/CheckSymbolExists.cxx.o: In function `main':
+CheckSymbolExists.cxx:(.text+0x1b): undefined reference to `pthread_create'
+collect2: error: ld returned 1 exit status
+gmake[1]: *** [cmTC_a2c91] Error 1
+gmake[1]: Leaving directory `/home/t4/jitu.wy/new_row_column_routing/build/CMakeFiles/CMakeTmp'
+gmake: *** [cmTC_a2c91/fast] Error 2
+
+File /home/wuy/new_row_column_routing/build/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx:
+/* */
+#include <pthread.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef pthread_create
+  return ((int*)(&pthread_create))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+

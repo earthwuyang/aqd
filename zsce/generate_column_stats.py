@@ -13,9 +13,9 @@ if __name__ == '__main__':
     # generate_stats(dir, dataset)
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('--dataset', type=str, default='tpcds_sf1100')
+    parser.add_argument('--dataset', type=str, default='tpch_sf100')
     args = parser.parse_args()
 
     dataset = args.dataset
-    dir = f'/home/wuy/DB/pg_mem_data/datasets/{dataset}'
+    dir = f'/home/wuy/datasets/{dataset}'
     generate_stats(dir, dataset)

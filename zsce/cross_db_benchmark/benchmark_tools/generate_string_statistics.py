@@ -53,12 +53,36 @@ def generate_string_stats(data_dir, dataset, force=True, max_sample_vals=100000,
         if verbose:
             print(f"Generating string statistics for {table}")
         all_files = os.listdir(data_dir)
-        table_files = [f for f in all_files if f.startswith(table) and f.endswith('.csv')]
+        table_files = [f for f in all_files if f.split('.')[0]==table and ('tbl' in f or 'csv' in f or 'dat' in f)]
         for f in table_files:
+            # if verbose:
+            #     print(f"file: {f}")
             table_dir = os.path.join(data_dir, f)
+
+            # -------- 🔍 ① 先抽样一行，判断真实列数 --------
+            expected_cols = len(tables[table])
+            sep = getattr(schema.csv_kwargs, "sep", "|")  
+
+            with open(table_dir, encoding=getattr(schema.csv_kwargs, "encoding", "utf-8")) as fh:
+                first_non_blank = next(line for line in fh if line.strip())      # 找到第一行非空行
+            # if verbose:
+            #     print(f"first_non_blank: {first_non_blank}")
+            actual_cols = first_non_blank.rstrip("\n").count(sep) + 1           # “|” 数 + 1 = 列数
+
+            if actual_cols not in (expected_cols, expected_cols + 1):
+                raise ValueError(f"{f}: unexpected column count {actual_cols} "
+                                f"(expected {expected_cols} or {expected_cols+1})")
+
+            # -------- 🏷️ ② 如果多 1 列，就临时加占位列名 --------
+            names_for_read = list(tables[table]) + ["__dummy__"] if actual_cols == expected_cols + 1 else tables[table]
+            
             print(f"Processing file {f}")
             try:
-                df_table = pd.read_csv(table_dir, nrows=max_sample_vals, **vars(schema.csv_kwargs), names=tables[table], dtype=dtype_mapping)
+                df_table = pd.read_csv(table_dir, nrows=max_sample_vals, **vars(schema.csv_kwargs), names=names_for_read, dtype=dtype_mapping)
+                
+                if actual_cols == expected_cols + 1:
+                    df_table.drop(columns="__dummy__", inplace=True)
+               
                 df_table_list.append(df_table)
             except Exception as e:
                 print(f"Error reading file {f}: {e}")

@@ -36,7 +36,7 @@ def load_samples(base, dirs):
             qid, lab, rt, ct, hyb, fann = parts[:6]
             if not lab: 
                 continue
-            label = int(lab)
+            label = int(ct <= rt)
             row_t = safe_float(rt)
             col_t = safe_float(ct)
             # skip exact ties or NaNs

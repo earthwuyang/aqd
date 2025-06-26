@@ -7,9 +7,11 @@ user = "root"
 password = ""
 
 # ✅ 你要操作的数据库列表
-database_list = ['airline', 'carcinogenesis', 'credit',
-                 'employee', 'financial', 'geneea',
-                 'hepatitis', 'walmart']
+# database_list = ['airline', 'carcinogenesis', 'credit',
+#                  'employee', 'financial', 'geneea',
+#                  'hepatitis', 'walmart']
+
+database_list = ['tpch_sf100']
 
 for db in database_list:
     print(f"\n==== Processing database: {db} ====")

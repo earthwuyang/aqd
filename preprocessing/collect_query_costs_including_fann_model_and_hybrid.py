@@ -188,19 +188,13 @@ def main():
             except Exception as e:
                 logging.error(f"Error executing row query: {row_query}")
                 logging.error(e)
-
-            # try again
-            try:
-                row_time = execute_row(row_query, conn, timeout) # in seconds
-            except Exception as e:
-                logging.error(f"Error executing row query: {row_query}")
-                logging.error(e)
-                
+         
             try:
                 column_time = execute_column(query, conn, timeout) # in seconds
             except Exception as e:
                 logging.error(f"Error executing column query: {query}")
                 logging.error(e)
+
 
             write_row_plan(conn, row_plan_dir, i, row_query)
             write_column_plan(conn, column_plan_dir, i, query)

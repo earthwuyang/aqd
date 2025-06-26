@@ -1,1 +1,0 @@
-g++ -std=c++11 -I/home/wuy/software/json-develop/single_include/nlohmann  -lfann -I/usr/include/eigen3  -I/usr/include/mysql -L/usr/lib64/mysql -lmysqlclient -pthread  -fopenmp -o ensemble_classifier ensemble_classifier.cpp
