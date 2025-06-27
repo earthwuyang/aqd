@@ -1,6 +1,11 @@
 /*  lightgbm_model.cpp  --------------------------------------- */
-#include "model_iface.hpp"
 #include <LightGBM/c_api.h>
+#include <cerrno>
+#include <iostream>
+#include <thread>
+
+#include "model_iface.hpp"
+
 #if __cplusplus < 201402L   // 只有 C++14 之前的标准才进这里
 #include <memory>
 #include <utility>
@@ -12,14 +17,12 @@ namespace std {
     }
 }
 #endif
-// struct TrainOpt
-// {
-//     double lr         = 0.1;
-//     double colsample  = 0.8;
-//     int    num_trees  = 300;
-//     int    num_threads= -1;  // <=0  → auto-detect
-//     bool   skip_train = false;
-// };
+
+template <typename T>
+inline T clamp_val(const T& v, const T& lo, const T& hi)
+{
+    return std::max(lo, std::min(v, hi));
+}
 
 class LGBModel : public IModel {
     std::string booster_; //"goss" or "rf"
@@ -65,49 +68,117 @@ public:
             num_threads = std::max(1u, std::thread::hardware_concurrency());
 
         /* ───── training matrices / label / weight ──────────────── */
+        /* ───── training matrices / label / weight ──────────────── */
         std::vector<float> X(size_t(N) * NUM_FEATS), y(N), w(N);
         {
+            /* 1. 计算基础正/负样本权；正样本略降，负样本略升  */
             double P = 0, N0 = 0;
             for (auto p : S) p->label ? ++P : ++N0;
-            const double w_pos = P  ? N / (2 * P)  : 1.0;
-            const double w_neg = N0 ? N / (2 * N0) : 1.0;
+            const double w_pos = P  ? 0.90 * N / (2 * P)  : 1.0;
+            const double w_neg = N0 ? 1.10 * N / (2 * N0) : 1.0;
 
             for (int i = 0; i < N; ++i) {
                 const Sample& s = *S[i];
 
+                /* ---------- 复制特征 & 标签 ---------- */
                 std::copy(s.feat.begin(), s.feat.end(),
                         X.begin() + i * NUM_FEATS);
 
                 const double rt = std::max(s.row_t, EPS_RUNTIME);
                 const double ct = std::max(s.col_t, EPS_RUNTIME);
-                y[i] = float(std::log(rt) - std::log(ct));
+                y[i] = static_cast<float>(std::log(rt) - std::log(ct));
 
-                /* Same elaborate weighting you already had */
-                double base = (s.label ? w_pos : w_neg);
-                double q_ln = std::log1p(s.qcost);
-                double w_i  = base * (1.0 + 0.20 * q_ln);
+                /* ---------- (A) 基础权重 ---------- */
+                const double base = (s.label ? w_pos : w_neg);
 
+                /* 0) Δ 放大（保留） */
+                double ln_gap = clamp_val(std::fabs(std::log(rt) - std::log(ct)), 0.0, 2.0);
+                double w_i = base * (1.0 + 0.4 * ln_gap);
+
+                /* 1) 提速/减速对称调节 (slow_amp≤2.0) */
+                double rel_gain = (s.row_t - s.col_t) / std::max(1e-6, s.row_t);
+                if (s.label) {
+                    double damp = clamp_val(rel_gain / 0.5, 0.0, 1.0);
+                    w_i *= 0.6 + 0.4 * damp;                 // 0.6-1.0×base
+                } else {
+                    double slow_amp = clamp_val(s.col_t / std::max(1e-6, s.row_t),
+                                                1.0, 2.0);
+                    w_i *= slow_amp;
+                }
+
+                /* 2) 巨型查询只对负样本放大（略降系数） */
+                if (!s.label) {
+                    if      (s.qcost > 3e7) w_i *= 1.8;
+                    else if (s.qcost > 1e7) w_i *= 1.4;
+                    else if (s.qcost > 2e6) w_i *= 1.2;
+                }
+
+                /* 3) fan / ratio / pc_rc 调整系数整体 ×0.5 */
                 double fan   = std::min<double>(3.0, s.feat[22]);
                 double ratio = std::min<double>(3.0, s.feat[60]);
-                if (fan   > 1.3) w_i += 0.6 * base * (fan   - 1.2);
-                if (ratio > 1.1) w_i += 0.4 * base * (ratio - 1.0);
+                if (fan   > 2.0) w_i += 0.05 * base * (fan   - 2.0);
+                if (ratio > 1.2) w_i += 0.04 * base * (ratio - 1.2);
 
                 double pc_rc = std::exp(std::min<double>(2.0, s.feat[25]));
-                if (pc_rc > 2.0 && s.qcost < 1e4) w_i += 0.8 * base * (pc_rc - 1.5);
-                if (fan > 2.5 && s.qcost < 8e3)   w_i += 2.0 * base;
+                if (pc_rc > 2.0 && s.qcost < 1e4) w_i += 0.20 * base * (pc_rc - 1.8);
 
-                auto rel_gap = [](double fast, double slow) {
-                    double g = std::log(slow / std::max(1e-6, fast));
-                    return clamp(g / 3.0, 0.0, 1.0);
-                };
-                if (s.label == 1 && s.qcost < Q_SMALL)
-                    w_i *= (1.0 + rel_gap(s.col_t, s.row_t));
-                if (s.label == 0 && s.qcost > Q_LARGE)
-                    w_i *= (1.0 + rel_gap(s.row_t, s.col_t));
+                /* 4) “窄列+点查” 轻量放大 */
+                double point_ratio  = s.feat[104];
+                double narrow_ratio = s.feat[105];
+                if (!s.label && point_ratio > 0.70 && narrow_ratio > 0.80)
+                    w_i *= 1.2;
+
+                /* 5) 正样本额外奖励 */
+                if (s.label && rel_gain > 0.1) {
+                    double bonus = clamp_val(rel_gain / 0.5, 0.0, 1.0);
+                    w_i *= 1.0 + 0.3 * bonus;
+                }
+
+                /* 6) 软剪裁 hi≤8× */
+                const double LO = 0.05 * base, HI = 8.0 * base;
+                w_i = clamp_val(w_i, LO, HI);
 
                 w[i] = static_cast<float>(w_i);
             }
+
+            // for (int i = 0; i < N; ++i) {
+            //     const Sample& s = *S[i];
+
+            //     /* feature */
+            //     std::copy(s.feat.begin(), s.feat.end(), X.begin() + i * NUM_FEATS);
+
+            //     /* regression target Δ = ln(rt/ct) */
+            //     double rt = std::max(s.row_t, EPS_RUNTIME);
+            //     double ct = std::max(s.col_t, EPS_RUNTIME);
+            //     y[i] = float(std::log(rt) - std::log(ct));
+
+            //     /* weight（同旧版） */
+            //     double base = (s.label ? w_pos : w_neg);
+            //     double q_ln = std::log1p(s.qcost);
+            //     double w_i  = base * (1.0 + 0.20 * q_ln);
+
+            //     double fan   = std::min<double>(3.0, s.feat[22]);
+            //     double ratio = std::min<double>(3.0, s.feat[60]);
+            //     if (fan   > 1.3) w_i += 0.6 * base * (fan   - 1.2);
+            //     if (ratio > 1.1) w_i += 0.4 * base * (ratio - 1.0);
+
+            //     double pc_rc = std::exp(std::min<double>(2.0, s.feat[25]));
+            //     if (pc_rc > 2.0 && s.qcost < 1e4) w_i += 0.8 * base * (pc_rc - 1.5);
+            //     if (fan > 2.5 && s.qcost < 8e3)   w_i += 2.0 * base;
+
+            //     auto rel_gap = [](double fast, double slow) {
+            //         double g = std::log(slow / std::max(1e-6, fast));
+            //         return clamp(g / 3.0, 0.0, 1.0);
+            //     };
+            //     if (s.label == 1 && s.qcost < Q_SMALL)
+            //         w_i *= (1.0 + rel_gap(s.col_t, s.row_t));
+            //     if (s.label == 0 && s.qcost > Q_LARGE)
+            //         w_i *= (1.0 + rel_gap(s.row_t, s.col_t));
+
+            //     w[i] = static_cast<float>(w_i);
+            // }
         }
+
 
         /* ───── validation matrices (simpler weighting = 1) ─────── */
         std::vector<float> X_val, y_val;
@@ -163,12 +234,20 @@ public:
                 param += " bagging_fraction=" + std::to_string(bag_frac)
                     + " bagging_freq=1";              // must be >0
             }
+            // param +=
+            //     " objective=fair fair_c=1.2 metric=l1 max_depth=18"
+            //     " max_bin=127 num_leaves=756 min_data_in_leaf=40"
+            //     " learning_rate="    + std::to_string(lr * 0.75) +
+            //     " feature_fraction=" + std::to_string(colsample) +
+            //     " lambda_l2=1.0 num_threads=" + std::to_string(num_threads) +
+            //     " verbosity=-1";
+
             param +=
-                " objective=fair fair_c=1.2 metric=l1"
-                " max_bin=127 num_leaves=512 min_data_in_leaf=20"
+                " objective=regression_l2 metrics=l2 max_depth=22"
+                " max_bin=127 num_leaves=1536 min_data_in_leaf=40"
                 " learning_rate="    + std::to_string(lr * 0.75) +
                 " feature_fraction=" + std::to_string(colsample) +
-                " lambda_l2=0.5 num_threads=" + std::to_string(num_threads) +
+                " lambda_l2=1.0 num_threads=" + std::to_string(num_threads) +
                 " verbosity=-1";
 
             /* monotone constraints (same as before) */
@@ -176,13 +255,17 @@ public:
                 std::string mono; mono.reserve(NUM_FEATS * 2);
                 for (int i = 0; i < NUM_FEATS; ++i) {
                     int m = 0;
-                    if (i == 22 || i == 60 || i == 101) m = +1;
-                    if (i == 65 || i == 97 || i == 98 || i == 99 || i == 100) m = -1;
-                    mono += std::to_string(m);
-                    if (i + 1 < NUM_FEATS) mono += ',';
+                    if (i == 22 || i == 23 || i == 40 || i == 60 || i == 101)  m = +1; // 正相关
+                    if (i == 65 || i == 97 || i == 98 || i == 99 || i == 100   // 旧负相关
+                        || i == 104 || i == 105)          // 新负相关
+                        m = -1;
+                    mono += std::to_string(m) + (i + 1 < NUM_FEATS ? "," : "");
                 }
                 param += " monotone_constraints=" + mono;
             }
+
+            
+
 
             /* create booster */
             if (LGBM_BoosterCreate(dtrain, param.c_str(), &booster))
@@ -273,9 +356,15 @@ public:
                 r_opt += std::min(s.row_t, s.col_t);
             }
 
+            auto safe_div = [](double a, double b){
+                return b ? a / b : 0.0;
+            };
+
             auto avg = [&](double v){ return v / N; };
             std::cout << "*** EVALUATED ON " << N << " SAMPLES ***\n"
                     << "Acc="      << double(TP+TN)/N
+                    << "  Precision=" << safe_div(TP,TP+FP)
+                    << "  Recall="    << safe_div(TP,TP+FN)
                     << "  BalAcc=" << 0.5*(double(TP)/(TP+FN)+double(TN)/(TN+FP))
                     << "  F1="     << (TP?2.0*TP/(2*TP+FP+FN):0.) << '\n'
                     << "Row-only:        " << avg(r_row)      << '\n'
@@ -301,15 +390,23 @@ public:
                              float tau) const override
     {
         const int N = DS.size();
+        // for (int i=0;i<N;i++) {
+        //     for (int j=0;j<NUM_FEATS;j++)   
+        //         printf("feat[%d]=%f\n",j,DS[i].feat[j]);
+        // }
         vector<float> X(size_t(N) * NUM_FEATS);
         for (int i = 0; i < N; ++i)
             std::copy(DS[i].feat.begin(), DS[i].feat.end(),
                     X.begin() + i * NUM_FEATS);
 
         BoosterHandle booster = nullptr; int iters = 0;
-        if (LGBM_BoosterCreateFromModelfile(path.c_str(),
-                                            &iters, &booster))
-        { logE("load "+path+" failed"); exit(1); }
+        int err = LGBM_BoosterCreateFromModelfile(path.c_str(),
+                                            &iters, &booster);
+
+        if (err != 0 || booster == nullptr) {
+            logE("LightGBM load failed: " + std::string(LGBM_GetLastError()));
+            throw std::runtime_error("cannot load model");
+        }
 
         vector<double> pred(N); int64_t out_len = 0;
         LGBM_BoosterPredictForMat(
@@ -320,6 +417,7 @@ public:
 
         vector<int> bin(N);
         for (int i = 0; i < N; ++i) bin[i] = pred[i] > tau;
+
         return bin;
     }
 

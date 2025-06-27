@@ -11,7 +11,7 @@ struct TrainOpt {
     int     max_depth       = 10;      // tree depth or hidden1 size
     double  lr          = 0.06;
     double  subsample   = 0.7;
-    double  colsample   = 0.8;
+    double  colsample   = 0.85;
     bool    skip_train  = false;
     int     threads     = 0;
     int epochs = 10000;

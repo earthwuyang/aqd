@@ -1,12 +1,17 @@
-#include "common.hpp"          // Sample, log helpers
+#include <iostream>
+#include <cerrno>
+#include <fstream>
+
 #include <Eigen/Dense>
 #include <unordered_map>
-#include "model_iface.hpp"
 #include <Eigen/Dense>
 #include <random>
 
+#include "common.hpp"          // Sample, log helpers
+#include "model_iface.hpp"
+#include "json.hpp"
 
-
+using json = nlohmann::json;
 
 /* ─────────  tiny, header-only 2-layer MLP using Eigen  ────────── */
 class EigenMLP

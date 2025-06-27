@@ -22,7 +22,8 @@ MYSQL_ROOT     ?= /usr
 
 # ── ③ 源文件 ────────────────────────────────────────────────
 SRCS  := main.cpp lightgbm_model.cpp fannmlp_model.cpp \
-         decision_tree_model.cpp random_forest_model.cpp gin_model.cpp
+         decision_tree_model.cpp gin_model.cpp \
+         global_stats.cpp common.cpp
 OBJS  := $(SRCS:.cpp=.o)
 TARGET := router
 

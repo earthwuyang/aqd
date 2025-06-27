@@ -1,7 +1,11 @@
 /*  fannmlp_model.cpp  ---------------------------------------- */
-#include "model_iface.hpp"
+
 #include <fann.h>
 #include <fann_cpp.h>
+#include <iostream>
+#include <cerrno>
+
+#include "model_iface.hpp"
 #if __cplusplus < 201402L   // 只有 C++14 之前的标准才进这里
 #include <memory>
 #include <utility>

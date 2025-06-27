@@ -2,7 +2,12 @@
  *  main.cpp – driver for row-vs-column routers
  * ----------------------------------------------------------- */
 #include "common.hpp"
+#include <iostream>
+#include <sys/stat.h>  // 声明 ::mkdir
+#include <cerrno>      // errno 与 EEXIST
+
 #include "model_iface.hpp"
+#include "global_stats.hpp"
 
 bool g_need_col_plans = true;
 
@@ -30,10 +35,19 @@ int main(int argc, char* argv[])
     std::string query_sql;
     std::string query_file;
     std::string database;
+
+    /* ───── MySQL connection params (optional CLI overrides) ───── */
+    std::string sql_host = "127.0.0.1";
+    int         sql_port = 44444;
+    std::string sql_user = "root";
+    std::string sql_pass = "";
+
     /* ───── CLI / hyper-params ─────────────────────────────── */
     std::string model_type  = "lightgbm";
     std::string base        = "/home/wuy/query_costs";
     std::vector<std::string> data_dirs{
+        // "tpch_sf100",
+        // "tpcds_sf10",
         "tpch_sf1",
         "tpcds_sf1",
         "hybench_sf1",
@@ -49,12 +63,13 @@ int main(int argc, char* argv[])
 
     TrainOpt hp;                 // generic hyper-param struct you defined
     uint32_t seed        = 42;
-    hp.trees             = 800;  // sensible defaults
-    hp.max_depth         = 20;
-    hp.lr                = 0.06;
+    hp.trees             = 1400;  // sensible defaults
+    hp.max_depth         = 24;
+    hp.lr                = 0.04;
     hp.subsample         = 0.7;
     hp.colsample         = 0.8;
     hp.skip_train        = false;
+    bool mix_folds = false;
 
     for (int i = 1; i < argc; ++i) {
         std::string a(argv[i]);
@@ -75,9 +90,43 @@ int main(int argc, char* argv[])
         else if (a.rfind("--colsample=",0)==0)     hp.colsample = std::stod(a.substr(12));
         else if (a == "--skip_train")              hp.skip_train = true;
         else if (a.rfind("--query=",0)==0)         query_sql = a.substr(8);
-        else if (a.rfind("--query_file",0)==0)     query_file = a.substr(12);
+        else if (a.rfind("--query_file=",0)==0)     query_file = a.substr(13);
         else if (a.rfind("--database=",0)==0)      database = a.substr(11);
+        else if (a == "--mix")                  mix_folds = true;
         else                                       logW("ignored arg: "+a);
+    }
+
+    
+    if (data_dirs.empty()) {
+        logE("No --data_dirs given");  return 1;
+    }
+
+    /* ───── instantiate learner ────────────────────────────── */
+    std::unique_ptr<IModel> learner;
+    if      (model_type == "lightgbm") learner = make_lightgbm("goss");
+    else if (model_type == "rowmlp")   learner = make_fann();
+    else if (model_type == "dtree")    learner = make_dtree();
+    else if (model_type == "forest")   learner = make_lightgbm("rf");
+    else if (model_type == "gin")      learner = make_gin();
+    else { logE("unknown --model="+model_type); return 1; }
+
+    g_need_col_plans = (model_type == "gin");   // 只有 GIN 需要列计划
+
+    /* ╔═══════════════╗
+       ║  ONE-TIME DB  ║  — column / table / index meta
+       ╚═══════════════╝ */
+    {
+        /* data_dirs 里的目录名就是 MySQL schema 名；若不是，请在这里替换 */
+        std::vector<std::string> dbs = data_dirs;
+
+        if (!populate_col_stats(sql_host, sql_port, sql_user, sql_pass, dbs))
+            logW("populate_col_stats() failed – column-level features will degrade");
+
+        if (!populate_tbl_stats(sql_host, sql_port, sql_user, sql_pass, dbs))
+            logW("populate_tbl_stats() failed – table-level features will degrade");
+
+        /* (可选) 预加载所有索引列全集 — 只影响 covering-index 相关特征 */
+        load_all_index_defs(sql_host, sql_port, sql_user, sql_pass, dbs);
     }
 
     if (!query_sql.empty() && database.empty()) {
@@ -87,7 +136,7 @@ int main(int argc, char* argv[])
     /* ---------- single-query fast path ---------- */
     if (!query_sql.empty() && !database.empty()) {
         /* 1) 解析 SQL → Sample（你已有的工具；这里只用示例函数名） */
-        Sample s = build_sample_from_sql(query_sql, g_need_col_plans);
+        Sample s = build_sample_from_sql(query_sql, database, g_need_col_plans);
 
         /* 2) 模型文件路径：默认 checkpoints/<model_type>_best.txt  */
         std::string model_path = "checkpoints/" + model_type + "_best.txt";
@@ -114,12 +163,10 @@ int main(int argc, char* argv[])
        ║  Fast-path ② : --query_file=...  (CSV 批量)                ║
        ╚════════════════════════════════════════════════════════════╝ */
     if (!query_file.empty()) {
-        std::vector<Sample> DS = build_samples_from_csv(query_csv, g_need_col_plans);
+        std::vector<Sample> DS = build_samples_from_csv(query_file, g_need_col_plans);
         if (DS.empty()) { logE("CSV has no valid rows");  return 1; }
 
-        std::string model_path = model_path_cli.empty()
-                               ? "checkpoints/" + model_type + "_best.txt"
-                               : model_path_cli;
+        std::string model_path = "checkpoints/" + model_type + "_best.txt";
         if (!file_exists(model_path)) {
             logE("model file not found: " + model_path);  return 1;
         }
@@ -129,26 +176,14 @@ int main(int argc, char* argv[])
         return 0;
     }
 
-    if (data_dirs.empty()) {
-        logE("No --data_dirs given");  return 1;
-    }
 
-    /* ───── instantiate learner ────────────────────────────── */
-    std::unique_ptr<IModel> learner;
-    if      (model_type == "lightgbm") learner = make_lightgbm("goss");
-    else if (model_type == "rowmlp")   learner = make_fann();
-    else if (model_type == "dtree")    learner = make_dtree();
-    else if (model_type == "forest")   learner = make_lightgbm("rf");
-    else if (model_type == "gin")      learner = make_gin();
-    else { logE("unknown --model="+model_type); return 1; }
-
-    g_need_col_plans = (model_type == "gin");   // 只有 GIN 需要列计划
 
     /* ---------- fast-path: only inference when --skip_train ---------- */
     if (hp.skip_train) {
         /* 1) 加载指定数据集 */
         DirSamples ALL = load_all_datasets(base, data_dirs);
         if (ALL.empty()) { logE("no samples found"); return 1; }
+        global_stats().freeze();
 
         auto DS_test = build_subset(data_dirs, ALL);
         if (DS_test.empty()) { logE("no test samples"); return 1; }
@@ -198,10 +233,53 @@ int main(int argc, char* argv[])
     std::cout << "[Split] CV pool   : " << join(cv_pool) << '\n';
 
     /* ───── 5-fold split on remaining pool ─────────────────── */
-    auto folds   = make_cv5(cv_pool, seed);
-    std::vector<std::pair<double,std::string>> fold_scores;   // (balAcc, modelPath)
+    struct SampFold {                  // 新结构：直接存样本指针
+        std::vector<const Sample*> tr;
+        std::vector<const Sample*> va;
+    };
 
-    int fid = 0;
+    std::vector<SampFold> folds;
+    std::vector<Fold>  dirFolds;
+
+    if (mix_folds) {
+        /* ----------  混合打乱 ---------- */
+        std::vector<const Sample*> all_ptrs;
+        for (auto& kv : ALL)                // ALL = DirSamples
+            for (auto& s : kv.second) all_ptrs.push_back(&s);
+
+        std::mt19937 g(seed);
+        std::shuffle(all_ptrs.begin(), all_ptrs.end(), g);
+
+        const int K = 5;
+        const size_t fold_sz = all_ptrs.size() / K;
+        folds.resize(K);
+
+        for (int k = 0; k < K; ++k) {
+            size_t beg = k * fold_sz;
+            size_t end = (k == K - 1) ? all_ptrs.size() : beg + fold_sz;
+            auto& f = folds[k];
+            for (size_t i = 0; i < all_ptrs.size(); ++i)
+                (i >= beg && i < end ? f.va : f.tr).push_back(all_ptrs[i]);
+        }
+    } else {
+        /* ----------  旧的 LODO  ---------- */
+        dirFolds = make_lodo(cv_pool);          // 还是按目录
+        for (auto& df : dirFolds) {
+            SampFold sf;
+            for (const auto& d : df.tr_dirs) {
+                auto it = ALL.find(d);
+                if (it != ALL.end())
+                    for (auto& s : it->second) sf.tr.push_back(&s);
+            }
+            for (const auto& d : df.val_dirs) {
+                auto it = ALL.find(d);
+                if (it != ALL.end())
+                    for (auto& s : it->second) sf.va.push_back(&s);
+            }
+            folds.push_back(std::move(sf));
+        }
+    }
+    std::vector<std::pair<double,std::string>> fold_scores;   // (balAcc, modelPath)
 
     const std::string ckpt_dir = "checkpoints";
 
@@ -218,28 +296,47 @@ int main(int argc, char* argv[])
         logI("created directory '" + ckpt_dir + "'");
     }
 
-    for (auto& f : folds) {
-        ++fid;
+    for (size_t idx=0; idx<folds.size(); ++idx) {
+        const auto&f = folds[idx];
+        const int fid = static_cast<int>(idx) + 1;
 
-        std::cout << "\n[Fold " << fid << "]"
-            << "  Train dirs = {" << join(f.tr_dirs)  << "}"
-            << "  Val dirs = {"   << join(f.val_dirs) << "}\n";
+        if (mix_folds) {
+            std::cout << "\n[Fold " << fid << "]"
+                        << "  Train samples = " << f.tr.size()
+                        << "  Val samples = "   << f.va.size() << '\n';
+        } else {
+            const auto& df = dirFolds[idx];        // 与 folds 下标一致
+            std::cout << "\n[Fold " << fid << "] --------------------------------------------------------\n"
+                    << "Train dirs = {" << join(df.tr_dirs) << "}"
+                    << "  Val dirs = {"   << join(df.val_dirs) << "}\n";
+        }
 
 
         std::string mp = ckpt_dir + '/' + model_type + "_fold" + std::to_string(fid) + ".txt";
 
-        auto DS_tr = build_subset(f.tr_dirs , ALL);
-        auto DS_va = build_subset(f.val_dirs, ALL);
+        std::vector<Sample> DS_tr, DS_va;
+        for (auto* p : f.tr) DS_tr.push_back(*p);
+        for (auto* p : f.va) DS_va.push_back(*p);
         if (DS_tr.empty() || DS_va.empty()) { logW("fold" + std::to_string(fid) + "skipped"); continue; }
 
         /* ---- train or just load ---- */
-        if (!hp.skip_train)
+        if (!hp.skip_train) {
             learner->train(DS_tr, DS_va, mp, hp);
+            logI("Validate on validation set:\n");
+            /* ─── 1. 在验证集上输出完整评估 ─── */
+            {
+                auto pred_va = learner->predict(mp, DS_va, /*τ=*/0.0f);
+                report_metrics(pred_va, DS_va);           // 打印全部指标
+            }
 
-        double bal = learner->bal_acc(mp, DS_va);   // your convenience helper
-        std::cout << "[Fold "<<fid<<"] BalAcc="<<bal<<'\n';
-        fold_scores.push_back({bal, mp});
+            /* ─── 2. 仍用 BalAcc 做折内排名 ─── */
+            double bal = learner->bal_acc(mp, DS_va);
+            std::cout << "[Fold " << fid << "] BalAcc(on validation set)="
+                    << bal << '\n';
+            fold_scores.push_back({bal, mp});
+        }
     }
+
     if (fold_scores.size() < 3) { logE("need ≥3 good folds"); return 1; }
 
     /* ───── keep top-50 % folds for ensemble ───────────────── */

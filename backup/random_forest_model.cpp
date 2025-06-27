@@ -10,13 +10,18 @@
  *          random_forest_model.cpp -o rf_model \
  *          -I.                     # common.hpp / json.hpp / …
  *********************************************************************/
-#include "common.hpp"          // NUM_FEATS, Sample, logI/logW/logE
-#include "model_iface.hpp"
-#include "json.hpp"
 #include <omp.h>
 #include <random>
 #include <numeric>
 #include <iomanip>
+#include <iostream>
+#include <cerrno>
+
+
+#include "common.hpp"          // NUM_FEATS, Sample, logI/logW/logE
+#include "model_iface.hpp"
+#include "json.hpp"
+
 
 using json = nlohmann::json;
 
@@ -244,8 +249,9 @@ public:
 class RFModel : public IModel
 {
 public:
-    int    nTrees      = 400;
-    int    maxDepth    = 10;
+
+    int nTrees = 400;
+    int maxDepth = 10;
     int    minSamples  = 40;
     double minGain     = 1e-4;
     double sampleRatio = 0.63;
@@ -256,6 +262,7 @@ public:
                const std::string&        path,
                const TrainOpt&           opt) override
     {
+        
         /* 1. skip_train ⇒ load  */
         if (opt.skip_train) { ensure_loaded(path); return; }
 
