@@ -18,16 +18,20 @@
 #include <Eigen/Dense>
 #include "json.hpp"
 
+using json = nlohmann::json;
 using namespace std;
 
 /* ---------- 全局常量 ---------- */
-constexpr int    NUM_FEATS   = 107;      // feature dim
+constexpr int    ORIG_FEATS   = 112;      // feature dim
 constexpr double EPS_RUNTIME = 1e-6;
 constexpr double COST_THR    = 5e4;
 
+constexpr int EMB_DIM = 0;
+constexpr int NUM_FEATS = ORIG_FEATS + EMB_DIM;
+
 /* ---------- 全局开关 ---------- */
 extern bool g_need_col_plans;            // 默认 = true
-
+extern bool g_use_col_feat;          // 默认为 false，由 CLI 设置
 
 /* ────────────────── Column / Table 元数据 ────────────────── */
 enum ColDType : uint8_t { COL_INT=0, COL_FLOAT, COL_STRING,
@@ -42,6 +46,8 @@ struct Graph {
     std::vector<std::vector<int>>      adj;    // adjacency list
     std::vector<int>                   op;     // global op-id / node
 };
+
+// std::vector<float> gnn_encoder(const Graph& g);    // 长度 = EMB_DIM
 
 struct Sample {
     std::array<float, NUM_FEATS> feat {};
@@ -142,53 +148,6 @@ private:
 };
 
 
-// /* ─────────── Random-Forest ─────────── */
-// class RandomForest {
-//   std::vector<DecisionTree> trees_;
-//   double sampleRatio_;
-// public:
-//   RandomForest(int n,int md,int ms,double mg,double sr);
-
-//   void fit(const std::vector<std::array<float,NUM_FEATS>>& X,
-//            const std::vector<int>&  y,
-//            const std::vector<float>& w,
-//            std::mt19937& rng);
-
-//   float predict(const float*f) const;
-
-//   nlohmann::json to_json() const;
-
-//   // ─────── NEW from_json ───────
-//   void from_json(const nlohmann::json& arr);
-// };
-
-
-
-
-// struct Logistic
-// {
-//     Logistic();                                  // ctor 把 w[] 置 0
-
-//     /* 训练：3 个输入特征 + 偏置，使用外部 Random-Forest 作为 x₃ */
-//     void fit(const std::vector<std::array<float,NUM_FEATS>>& X,
-//              const std::vector<int>&                        y,
-//              const RandomForest&                            rf,
-//              int   epochs = 400,
-//              double lr     = 0.1);
-
-//     /* 预测（已知行特征向量 & RF 概率）                      */
-//     double predict(const float* f, double rfProb) const;
-
-//     /* 序列化 / 反序列化 */
-//     nlohmann::json to_json() const;
-//     void           from_json(const nlohmann::json& j);
-
-// private:
-//     static inline double sig(double z) { return 1.0 / (1.0 + std::exp(-z)); }
-
-//     double w[4];        // w0 = bias, w1 = costFlag, w2 = coverFlag, w3 = RF-prob
-// };
-
 /* ────────────────── log / 进度 & 文件工具 ────────────────── */
 void logI(const std::string& msg);
 void logW(const std::string& msg);
@@ -229,6 +188,18 @@ bool populate_tbl_stats(const std::string& host, int port,
 
 ColStats             lookup_col_stats(const std::string& id);
 const TblStats&      lookup_tbl      (const std::string& id);
+
+
+/* ---------- 计表数：旧版 JSON 同样含 "table" ----------*/
+// static int count_tables(const json& node);
+
+// /* ---------- 全树找 MIN / MAX 函数 ----------*/
+// static bool tree_has_minmax(const json& node);
+
+// static bool has_grouping(const json& qb);
+
+// static bool min_or_max_no_group(const json& qb);
+
 
 /* ────────────────── 计划解析 / 样本构建 ────────────────── */
 bool plan2feat(const nlohmann::json& plan, float f[NUM_FEATS]);

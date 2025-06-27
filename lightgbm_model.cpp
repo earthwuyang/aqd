@@ -43,7 +43,7 @@ public:
         constexpr float  DECISION     = 0.0f;         // τ*
         constexpr double Q_SMALL      = 1e4;
         constexpr double Q_LARGE      = 5e4;
-        constexpr int    EARLY_STOP   = 20;          // rounds w/out improvement
+        constexpr int    EARLY_STOP   = 100;          // rounds w/out improvement
         constexpr int    PRINT_EVERY  = 10;
         int num_threads = 20;
         bool skip_train = opt.skip_train;
@@ -108,9 +108,7 @@ public:
                 if (std::fabs(diff) < EPS) diff *= 0.3;   // 压缩梯度
                 y[i] = static_cast<float>(diff);
 
-                /* ---------- (A) 基础正负样本权重 -------------------------------- */
-                
-                /* ------------ 基础正负样本权重 -------------------------------- */
+                /* ---------- (A) 基础正负样本权重 -------------------------------- */                
                 const double base = s.label ? w_pos : w_neg;
 
                 /* ---------- (B) Δ(gap) 放大 ---------------------------------- */
@@ -157,6 +155,43 @@ public:
                         double bonus = clamp_val((-gap_lt0) / 1.5, 0.0, 2.0); // 上限 ×3
                         w_i *= 100.0 + bonus;
                     }
+                }
+
+                /* ---------- (L) 早期行数很小 + fan-out 介于 5-20 → 行存往往获胜 ---- */
+                double outer_rows_norm = s.feat[63];   // 已做 log 缩放
+                double fanout          = s.feat[22];   // 原始 fan-out_max
+                bool   late_fan        = (s.feat[97] > 0.4);   // 累计 fan-out 信号
+                bool   small_core      = (outer_rows_norm < 0.05);   // ≈ outerRows ≤ 3
+                bool   mid_fan_range   = (fanout > 5.0 && fanout < 20.0);
+
+                if (!s.label && small_core && mid_fan_range && late_fan) {
+                    w_i *= 10.0;            // 适度放大到够用即可
+                }
+
+
+                /* ---------- (G2) 稀有场景加权：多表但行更快 ------------------ */
+                int tbl_cnt = int(s.feat[107]);          // 你在 plan2feat 里写入的位置
+                if (!s.label && tbl_cnt > 20)            // 行存赢且表数>20
+                    w_i *= 1.30;
+
+                /* ---------- (H2) MIN/MAX 无 GROUP 且行存快 ------------------- */
+                bool has_agg_no_grp = (s.feat[108] > 0.5);   // 0/1 布尔
+                if (!s.label && has_agg_no_grp)
+                    w_i *= 1.40;
+
+                /* ---------- (I2) rows_probe / rows_outer 失衡 ---------------- */
+                double probe_ratio = s.feat[109];            // 已是 log_tanh 或原值
+                if (!s.label && probe_ratio < 0.5)           // 行快却探测行很少
+                    w_i *= 1.20;
+                if ( s.label && probe_ratio > 10.0)          // 列快却探测行很多
+                    w_i *= 1.20;
+
+
+                /* --- (J) fan-out 很大且列更快 → 放大列样本 -------------------- */
+                double fan_big = s.feat[22];      // fanout_max
+                if (s.label && fan_big > 30.0) {
+                    double bump = clamp_val((fan_big - 30.0) / 170.0, 0.0, 1.0); // 30→200 线性
+                    w_i *= 1.0 + bump;            // 最高 ×2
                 }
 
                 /* ========== ❸ 新 I：统一软剪裁 (0.03–20 × base) =============== */
@@ -275,8 +310,8 @@ public:
                 std::string mono; mono.reserve(NUM_FEATS * 2);
                 for (int i = 0; i < NUM_FEATS; ++i) {
                     int m = 0;
-                    if (i == 22 || i == 23 || i == 40 || i == 60 || i == 101)  m = +1; // 正相关
-                    if (i == 65 || i == 97 || i == 98 || i == 99 || i == 100   // 旧负相关
+                    if (i == 22 || i == 23 || i == 40 || i == 101)  m = +1; // 正相关
+                    if (i == 65 || i == 99 || i == 100   // 旧负相关
                         || i == 104 || i == 105 || i==106)          // 新负相关
                         m = -1;
                     mono += std::to_string(m) + (i + 1 < NUM_FEATS ? "," : "");

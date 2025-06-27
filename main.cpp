@@ -10,6 +10,7 @@
 #include "global_stats.hpp"
 
 bool g_need_col_plans = true;
+bool g_use_col_feat = false;
 
 
 /* factory fns declared somewhere in your project ---------------- */
@@ -63,9 +64,9 @@ int main(int argc, char* argv[])
 
     TrainOpt hp;                 // generic hyper-param struct you defined
     uint32_t seed        = 42;
-    hp.trees             = 3000;  // sensible defaults
-    hp.max_depth         = 18;
-    hp.lr                = 0.03;
+    hp.trees             = 800;  // sensible defaults
+    hp.max_depth         = 12;
+    hp.lr                = 0.06;
     hp.subsample         = 0.7;
     hp.colsample         = 0.8;
     hp.skip_train        = false;
@@ -93,9 +94,12 @@ int main(int argc, char* argv[])
         else if (a.rfind("--query_file=",0)==0)     query_file = a.substr(13);
         else if (a.rfind("--database=",0)==0)      database = a.substr(11);
         else if (a == "--mix")                  mix_folds = true;
+        else if (a == "--use_col")               g_use_col_feat - true;
         else                                       logW("ignored arg: "+a);
     }
 
+    if (g_use_col_feat)
+        g_need_col_plans - true;
     
     if (data_dirs.empty()) {
         logE("No --data_dirs given");  return 1;

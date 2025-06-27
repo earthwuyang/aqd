@@ -888,6 +888,50 @@ inline double log_scale(double v, double k = 1e6){
     return std::log1p(v) / std::log1p(k);   // v=k 时输出 1
 }
 
+/* ---------- 计表数：旧版 JSON 同样含 "table" ----------*/
+static int count_tables(const json& node){
+    int cnt = 0;
+    std::function<void(const json&)> rec = [&](const json& n){
+        if(n.is_object()){
+            if(n.contains("table")) ++cnt;
+            for(const auto& kv : n.items()) rec(kv.value());
+        }else if(n.is_array()){
+            for(const auto& v : n) rec(v);
+        }
+    };
+    rec(node);
+    return cnt;
+}
+
+/* ---------- 全树找 MIN / MAX 函数 ----------*/
+static bool tree_has_minmax(const json& node){
+    if(node.is_object()){
+        if(node.contains("function") && node["function"].is_string()){
+            std::string fn = node["function"];
+            std::transform(fn.begin(),fn.end(),fn.begin(),::tolower);
+            if(fn=="min" || fn=="max") return true;
+        }
+        for(const auto& kv:node.items())
+            if(tree_has_minmax(kv.value())) return true;
+    }else if(node.is_array()){
+        for(const auto& v:node)
+            if(tree_has_minmax(v)) return true;
+    }
+    return false;
+}
+
+static bool has_grouping(const json& qb){
+    /* 各版本 key 略不同，这里罗列常见几种 */
+    return qb.contains("grouping_operation") ||
+           qb.contains("grouping")           ||
+           qb.contains("grouping_sets");
+}
+
+static bool min_or_max_no_group(const json& qb){
+    return tree_has_minmax(qb) && !has_grouping(qb);
+}
+
+
 bool plan2feat(const json &plan, float f[NUM_FEATS])
 {
     
@@ -1175,11 +1219,30 @@ bool plan2feat(const json &plan, float f[NUM_FEATS])
     PUSH(hash_prefetch);          // 106 – 索引已命中仍建哈希 → 行存
 
 
+    /* === 新增 3 个维度 (放在 107-109，可自行调整顺序) =========== */
+    int    tbl_cnt  = count_tables(*qb);            // ①
+    bool   agg_flag = min_or_max_no_group(*qb);     // ②
+    double probe_vs_outer = 0.0;                    // ③
+    if(a.outerRows > 0.0)
+        probe_vs_outer = rootRow / a.outerRows;     // >1 → 后续 fan-out
+
+    PUSH( std::min(1.0, tbl_cnt / 64.0) );          // feat[107]  num_tables (0-1)
+    PUSH( agg_flag ? 1.0f : 0.0f );                 // feat[108]  has_minmax_no_group
+    PUSH( log_tanh( probe_vs_outer ) );             // feat[109]  rows_probe / rows_outer
+
+
+    double biggest_ratio = (a.selMax > 0 && a.outerRows > 0)
+                            ? a.selMax / a.outerRows : 1.0;
+    PUSH( log_tanh(biggest_ratio) );   // feat[110]
+
+    double late_rows_norm = log_scale(rootRow, 1e8);   // 产出行数归一到 0–1
+    PUSH( late_rows_norm );     
+
 #undef PUSH
-    if (k != NUM_FEATS) {
+    if (k != ORIG_FEATS) {
         throw std::runtime_error("paln2feat feature count mismatch");
     }
-    return k == NUM_FEATS;        // k should be 95 now
+    return k == ORIG_FEATS;        // k should be 95 now
 }
 
 // parseColPlan now uses per-dir stats for numeric norms and a global op2id map
@@ -1485,6 +1548,15 @@ load_all_datasets(const std::string& base,
             if (!load_plan_file(fp_row, qid, rowPlanDir, colPlanDir,
                                 s.feat.data(), s.qcost, s.colGraph))
                 continue;
+
+            // if (g_use_col_feat) {
+            //     /* 1. 用你的 GNN 读 column plan 得到嵌入向量 */
+            //     auto emb = gnn_encoder(s.colGraph);          // 长度 = EMB_DIM
+
+            //     /* 2. 追加到 Sample 的特征尾部 */
+            //     std::copy(emb.begin(), emb.end(),
+            //             s.feat.begin() + ORIG_FEATS);      // 从第 ORIG_FEATS 位开始写
+            // }
 
             /* fill meta columns */
             // s.label        = itm->second.lab;
