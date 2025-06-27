@@ -102,50 +102,69 @@ public:
 
                 const double rt = std::max(s.row_t, EPS_RUNTIME);
                 const double ct = std::max(s.col_t, EPS_RUNTIME);
-                y[i] = static_cast<float>(std::log(rt) - std::log(ct));
+                // y[i] = static_cast<float>(std::log(rt) - std::log(ct));
+                double diff = std::log(rt) - std::log(ct);
+                const double EPS = 0.05;           // 约 5 % 差距阈值
+                if (std::fabs(diff) < EPS) diff *= 0.3;   // 压缩梯度
+                y[i] = static_cast<float>(diff);
 
                 /* ---------- (A) 基础正负样本权重 -------------------------------- */
                 
+                /* ------------ 基础正负样本权重 -------------------------------- */
                 const double base = s.label ? w_pos : w_neg;
 
-                /* ---------- (B) Δ(gap) 放大：保留 -------------------------------- */
+                /* ---------- (B) Δ(gap) 放大 ---------------------------------- */
                 double ln_gap = clamp_val(std::fabs(std::log(rt) - std::log(ct)), 0.0, 2.0);
                 double w_i    = base * (1.0 + 0.4 * ln_gap);
 
-                /* ---------- (C) 数据集级 √N 反比权重：保留 ----------------------- */
+                /* ---------- (C) 数据集级 √N 反比权重 -------------------------- */
                 w_i *= DIR_W.at(s.dir_tag);
 
-                /* ---------- (D) 提速/减速 非对称调节（改倍率） ----------------- */
+                /* ---------- (D) 提速 / 减速 非对称调节 ----------------------- */
                 double rel_gap = (s.row_t - s.col_t) / std::max(1e-6, std::min(rt, ct));
-                if (s.label) {                           // 列更快
-                    w_i *= 1.0 + 0.4 * clamp_val(rel_gap / 0.5, 0.0, 1.0);  // 奖励↑
-                } else {                                 // 行更快
+                if (s.label) {                                    // 列更快
+                    w_i *= 1.0 + 0.4 * clamp_val(rel_gap / 0.5, 0.0, 1.0);
+                } else {                                          // 行更快
                     double slow_ratio = clamp_val(ct / std::max(1e-6, rt), 1.0, 3.0);
-                    w_i *= 1.0 + 0.5 * (slow_ratio - 1.0);                  // 惩罚略降
+                    w_i *= 1.0 + 0.5 * (slow_ratio - 1.0);
                 }
 
-                /* ---------- (E) qcost 调节（缩 3 档→2 档，且只奖励正样本） -------- */
+                /* ---------- (E) qcost 调节（2 档，只奖励正样本） -------------- */
                 if (s.label) {
                     if      (s.qcost > 3e7) w_i *= 1.25;
                     else if (s.qcost > 1e7) w_i *= 1.10;
                 }
 
-                /* ---------- (F) fan / ratio / pc_rc 微调：保留 ------------------- */
+                /* ---------- (F) fan / ratio / pc_rc 微调 ---------------------- */
                 double fan   = std::min<double>(3.0, s.feat[22]);
                 double ratio = std::min<double>(3.0, s.feat[60]);
                 if (fan   > 2.0) w_i *= 1.00 + 0.02 * (fan   - 2.0);
                 if (ratio > 1.2) w_i *= 1.00 + 0.02 * (ratio - 1.2);
 
-                /* ---------- (G) 行窄 + 点查：行优样本一刀翻 ×1.6 ----------------- */
-                double point_ratio  = s.feat[104];   // ref+eq_ref 占比
-                double narrow_ratio = s.feat[105];   // ≤16B 窄列占比
-                if (!s.label && point_ratio > 0.70 && narrow_ratio > 0.80)
-                    w_i *= 1.60;                     // 原 1.15 → 1.60
+                /* ========== ❶ 新 G：行窄 + 点查（Row-win 信号） =============== */
+                double point_ratio  = s.feat[104];   // ref + eq_ref 占比
+                double narrow_ratio = s.feat[105];   // ≤16 B 列占比
+                bool   point_and_narrow = (point_ratio > 0.70 && narrow_ratio > 0.80);
+                if (!s.label && point_and_narrow)
+                    w_i *= 1.8;                      // 原 1.6 → 1.8，放大一点
 
-                /* ---------- (H) 软剪裁：放宽到 0.03–20 倍 base ------------------- */
+                /* ========== ❷ 新 H：中等规模但 Row 更快 → 软放大 =============== *
+                * 逻辑：行存实际更快，且 qcost 不到 3 M（典型 OLTP / 点查）。     */
+                if (!s.label) {
+                    /* gap_lt0 为负值，-gap_lt0 越大说明 Row 优势越明显 */
+                    double gap_lt0 = std::log(rt) - std::log(ct);   // <0 ⇒ Row faster
+                    if (gap_lt0 < -0.2) {
+                        double bonus = clamp_val((-gap_lt0) / 1.5, 0.0, 2.0); // 上限 ×3
+                        w_i *= 100.0 + bonus;
+                    }
+                }
+
+                /* ========== ❸ 新 I：统一软剪裁 (0.03–20 × base) =============== */
                 const double LO = 0.03 * base;
-                const double HI = 20.0 * base;
+                const double HI = 100.0 * base;
                 w_i = clamp_val(w_i, LO, HI);
+
+
                 w[i] = static_cast<float>(w_i);
 
                 
@@ -258,7 +277,7 @@ public:
                     int m = 0;
                     if (i == 22 || i == 23 || i == 40 || i == 60 || i == 101)  m = +1; // 正相关
                     if (i == 65 || i == 97 || i == 98 || i == 99 || i == 100   // 旧负相关
-                        || i == 104 || i == 105)          // 新负相关
+                        || i == 104 || i == 105 || i==106)          // 新负相关
                         m = -1;
                     mono += std::to_string(m) + (i + 1 < NUM_FEATS ? "," : "");
                 }
@@ -309,28 +328,6 @@ public:
             /* save model */
             LGBM_BoosterSaveModel(booster, 0, -1, 0, model_path.c_str());
             logI("Model saved → " + model_path);
-
-            /* === (A) 统计 Gain 并生成黑名单 ================================== */
-            int num_feat = 0;
-            LGBM_BoosterGetNumFeature(booster, &num_feat);
-
-            std::vector<double> gain(num_feat, 0.0);
-            /* importance_type = 0 → Gain； 1 → Split 次数               */
-            LGBM_BoosterFeatureImportance(
-                    booster, /*num_iteration=*/-1, 0, gain.data());
-
-            double tot = std::accumulate(gain.begin(), gain.end(), 0.0);
-            std::vector<int> blacklist;
-            for (int i = 0; i < num_feat; ++i)
-                if (tot > 0 && gain[i] / tot < 0.01)        // <-- 1 %
-                    blacklist.push_back(i);
-
-            /* === (B) 写到 model 同名 .blk 文件，一行一个索引 ================ */
-            std::ofstream outf(model_path + ".blk");
-            for (int id : blacklist)  outf << id << '\n';
-
-            logI("Feature blacklist (" + std::to_string(blacklist.size()) +
-                " cols, gain < 1 %) → " + model_path + ".blk");
 
         }
         else {
@@ -426,21 +423,7 @@ public:
             std::copy(DS[i].feat.begin(), DS[i].feat.end(),
                     X.begin() + i * NUM_FEATS);
 
-        // const int N = DS.size();
 
-        // /* --- (new) 读黑名单，如果文件不存在 blk 为空 ---------------- */
-        // std::unordered_set<int> blk = load_feat_blk(path);   // 可能为空
-
-        // /* --- 预填 0；被黑掉的列保持 0 -------------------------------- */
-        // vector<float> X(size_t(N) * NUM_FEATS, 0.f);
-
-        // for (int i = 0; i < N; ++i) {
-        //     const auto& src = DS[i].feat;
-        //     float* dst = X.data() + i * NUM_FEATS;
-        //     for (int j = 0; j < NUM_FEATS; ++j)
-        //         if (!blk.count(j))          // 不在黑名单才拷贝
-        //             dst[j] = src[j];        // 否则保持 0
-        // }
 
         BoosterHandle booster = nullptr; int iters = 0;
         int err = LGBM_BoosterCreateFromModelfile(path.c_str(),

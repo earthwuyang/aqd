@@ -11,7 +11,7 @@ password = ""
 #                  'employee', 'financial', 'geneea',
 #                  'hepatitis', 'walmart']
 
-database_list = ['tpch_sf100']
+database_list = ['tpch_sf10']
 
 for db in database_list:
     print(f"\n==== Processing database: {db} ====")
