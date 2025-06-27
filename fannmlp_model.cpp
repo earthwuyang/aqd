@@ -77,7 +77,8 @@ class FANNModel : public IModel {
    void train(const std::vector<Sample>& DS,
             const std::vector<Sample>& va,
             const std::string&        model_path,
-            const TrainOpt&           opt) override
+            const TrainOpt&           opt,
+            const std::unordered_map<std::string,double>& DIR_W) override
    {
       /* ---------- hyper-parameters from CLI / TrainOpt ------------ */
       const bool   skip_train = opt.skip_train;
@@ -195,8 +196,29 @@ class FANNModel : public IModel {
          int   best_ep  = -1;
          int   stall    = 0;
 
+         /* ① 预先算好类别权重（正 = col 更快的样本数） ------------- */
+         unsigned pos_cnt = 0;
+         for (unsigned i = 0; i < N; ++i) if (Y[i] > 0.f) ++pos_cnt;
+         float w_pos = float(N) / (2.f * std::max(1u, pos_cnt));   // 1 / freq
+         float w_neg = float(N) / (2.f * std::max(1u, N-pos_cnt));
+
          for (int ep = 0; ep < max_epoch; ++ep) {
-               fann_train_epoch(net.get(), &tr);
+               // fann_train_epoch(net.get(), &tr);
+                float total_err = 0.f;
+
+               for (unsigned i = 0; i < N; ++i) {
+                  /* 前向 */
+                  float* out = fann_run(net.get(), train_in[i]);
+                  float  diff = out[0] - Y[i];
+
+                  /* 加权误差用于 early-stop 统计 */
+                  float w = (Y[i] > 0.f) ? w_pos : w_neg;
+                  total_err += w * diff * diff;
+
+                  /* 单样本训练 —— 官方接口 */
+                  fann_train(net.get(), train_in[i], &Y[i]);
+               }
+
 
                float cur_mse = Nv ? mse_on(val) : fann_get_MSE(net.get());
 

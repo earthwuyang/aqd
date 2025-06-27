@@ -7,11 +7,11 @@
 struct TrainOpt {
     /* generic hyper-params – you may ignore the ones your model
        doesn’t need */
-    int     trees       = 400;     // GBM / RF
-    int     max_depth       = 10;      // tree depth or hidden1 size
-    double  lr          = 0.06;
-    double  subsample   = 0.7;
-    double  colsample   = 0.85;
+    int     trees       = 3000;     // GBM / RF
+    int     max_depth       = 18;      // tree depth or hidden1 size
+    double  lr          = 0.03;
+    double  subsample   = 1.0;
+    double  colsample   = 1.0;
     bool    skip_train  = false;
     int     threads     = 0;
     int epochs = 10000;
@@ -28,7 +28,8 @@ struct IModel {
     virtual void train(const std::vector<Sample>&    DS_tr,
                        const std::vector<Sample>&    DS_val,
                        const std::string&            model_path,
-                       const TrainOpt&               opt) = 0;
+                       const TrainOpt&               opt,
+                       const std::unordered_map<std::string,double>& DIR_W) = 0;
 
     /*  hard 0/1 prediction on an arbitrary set                     */
     virtual std::vector<int>

@@ -1380,7 +1380,22 @@ std::vector<Fold> make_lodo(const std::vector<std::string>& dirs){
     return out;                 // K = |dirs|
 }
 
+std::vector<Fold> make_cv3(const std::vector<std::string>& dirs)
+{
+    constexpr std::size_t K = 3;        // number of folds
+    std::vector<Fold> folds(K);         // folds[0], folds[1], folds[2]
 
+    /* ---------- assign validation dirs ---------- */
+    for (std::size_t i = 0; i < dirs.size(); ++i)
+        folds[i % K].val_dirs.push_back(dirs[i]);      // round-robin
+
+    /* ---------- assign training dirs ---------- */
+    for (std::size_t k = 0; k < K; ++k)
+        for (std::size_t i = 0; i < dirs.size(); ++i)
+            if (i % K != k) folds[k].tr_dirs.push_back(dirs[i]);
+
+    return folds;                       // always returns 3 folds
+}
 
 
 

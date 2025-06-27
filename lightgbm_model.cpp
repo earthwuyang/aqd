@@ -36,14 +36,14 @@ public:
     void train(const std::vector<Sample>& DS,
             const std::vector<Sample>& va,
             const std::string& model_path,
-            const TrainOpt&       opt) override
+            const TrainOpt&       opt, const std::unordered_map<std::string,double>& DIR_W) override
     {
         /* ───── constants ───────────────────────────────────────── */
         constexpr double GAP_THR      = 0.0;
         constexpr float  DECISION     = 0.0f;         // τ*
         constexpr double Q_SMALL      = 1e4;
         constexpr double Q_LARGE      = 5e4;
-        constexpr int    EARLY_STOP   = 120;          // rounds w/out improvement
+        constexpr int    EARLY_STOP   = 20;          // rounds w/out improvement
         constexpr int    PRINT_EVERY  = 10;
         int num_threads = 20;
         bool skip_train = opt.skip_train;
@@ -55,11 +55,27 @@ public:
 
         /* ───── build training subset (identical logic) ─────────── */
         std::vector<const Sample*> S;
-        for (const auto& s : DS)
+        std::vector<const Sample*> S_focus; // 二次训练用焦点样本
+        
+        for (const auto& s : DS) {
+            bool in_main = false;
             if (s.hybrid_pred != -1 && s.fann_pred != -1 &&
                 s.row_t > 0 && s.col_t > 0 &&
-                std::fabs(s.row_t - s.col_t) >= GAP_THR)
-                S.push_back(&s);
+                std::fabs(s.row_t - s.col_t) >= GAP_THR) {
+                    S.push_back(&s);
+                    in_main = true;
+                }
+                
+            if (in_main) {
+                /* ------------ 把“难点子集”另外收集 ------------ */
+                bool col_faster =  s.col_t < s.row_t;   // 正样本
+                if ( (s.qcost < Q_SMALL &&  col_faster) ||
+                    (s.qcost > Q_LARGE && !col_faster) )
+                    S_focus.push_back(&s);
+            }
+            
+        }
+            
 
         const int N = static_cast<int>(S.size());
         if (!N) { logE("no sample has full information"); return; }
@@ -74,8 +90,8 @@ public:
             /* 1. 计算基础正/负样本权；正样本略降，负样本略升  */
             double P = 0, N0 = 0;
             for (auto p : S) p->label ? ++P : ++N0;
-            const double w_pos = P  ? 0.90 * N / (2 * P)  : 1.0;
-            const double w_neg = N0 ? 1.10 * N / (2 * N0) : 1.0;
+            double w_pos = 1.30 * N / (2 * P);   // ↑ 1.3
+            double w_neg = 0.90 * N / (2 * N0);  // ↓ 0.9
 
             for (int i = 0; i < N; ++i) {
                 const Sample& s = *S[i];
@@ -88,95 +104,79 @@ public:
                 const double ct = std::max(s.col_t, EPS_RUNTIME);
                 y[i] = static_cast<float>(std::log(rt) - std::log(ct));
 
-                /* ---------- (A) 基础权重 ---------- */
-                const double base = (s.label ? w_pos : w_neg);
+                /* ---------- (A) 基础正负样本权重 -------------------------------- */
+                
+                const double base = s.label ? w_pos : w_neg;
 
-                /* 0) Δ 放大（保留） */
+                /* ---------- (B) Δ(gap) 放大：保留 -------------------------------- */
                 double ln_gap = clamp_val(std::fabs(std::log(rt) - std::log(ct)), 0.0, 2.0);
-                double w_i = base * (1.0 + 0.4 * ln_gap);
+                double w_i    = base * (1.0 + 0.4 * ln_gap);
 
-                /* 1) 提速/减速对称调节 (slow_amp≤2.0) */
-                double rel_gain = (s.row_t - s.col_t) / std::max(1e-6, s.row_t);
+                /* ---------- (C) 数据集级 √N 反比权重：保留 ----------------------- */
+                w_i *= DIR_W.at(s.dir_tag);
+
+                /* ---------- (D) 提速/减速 非对称调节（改倍率） ----------------- */
+                double rel_gap = (s.row_t - s.col_t) / std::max(1e-6, std::min(rt, ct));
+                if (s.label) {                           // 列更快
+                    w_i *= 1.0 + 0.4 * clamp_val(rel_gap / 0.5, 0.0, 1.0);  // 奖励↑
+                } else {                                 // 行更快
+                    double slow_ratio = clamp_val(ct / std::max(1e-6, rt), 1.0, 3.0);
+                    w_i *= 1.0 + 0.5 * (slow_ratio - 1.0);                  // 惩罚略降
+                }
+
+                /* ---------- (E) qcost 调节（缩 3 档→2 档，且只奖励正样本） -------- */
                 if (s.label) {
-                    double damp = clamp_val(rel_gain / 0.5, 0.0, 1.0);
-                    w_i *= 0.6 + 0.4 * damp;                 // 0.6-1.0×base
-                } else {
-                    double slow_amp = clamp_val(s.col_t / std::max(1e-6, s.row_t),
-                                                1.0, 2.0);
-                    w_i *= slow_amp;
+                    if      (s.qcost > 3e7) w_i *= 1.25;
+                    else if (s.qcost > 1e7) w_i *= 1.10;
                 }
 
-                /* 2) 巨型查询只对负样本放大（略降系数） */
-                if (!s.label) {
-                    if      (s.qcost > 3e7) w_i *= 1.8;
-                    else if (s.qcost > 1e7) w_i *= 1.4;
-                    else if (s.qcost > 2e6) w_i *= 1.2;
-                }
-
-                /* 3) fan / ratio / pc_rc 调整系数整体 ×0.5 */
+                /* ---------- (F) fan / ratio / pc_rc 微调：保留 ------------------- */
                 double fan   = std::min<double>(3.0, s.feat[22]);
                 double ratio = std::min<double>(3.0, s.feat[60]);
-                if (fan   > 2.0) w_i += 0.05 * base * (fan   - 2.0);
-                if (ratio > 1.2) w_i += 0.04 * base * (ratio - 1.2);
+                if (fan   > 2.0) w_i *= 1.00 + 0.02 * (fan   - 2.0);
+                if (ratio > 1.2) w_i *= 1.00 + 0.02 * (ratio - 1.2);
 
-                double pc_rc = std::exp(std::min<double>(2.0, s.feat[25]));
-                if (pc_rc > 2.0 && s.qcost < 1e4) w_i += 0.20 * base * (pc_rc - 1.8);
-
-                /* 4) “窄列+点查” 轻量放大 */
-                double point_ratio  = s.feat[104];
-                double narrow_ratio = s.feat[105];
+                /* ---------- (G) 行窄 + 点查：行优样本一刀翻 ×1.6 ----------------- */
+                double point_ratio  = s.feat[104];   // ref+eq_ref 占比
+                double narrow_ratio = s.feat[105];   // ≤16B 窄列占比
                 if (!s.label && point_ratio > 0.70 && narrow_ratio > 0.80)
-                    w_i *= 1.2;
+                    w_i *= 1.60;                     // 原 1.15 → 1.60
 
-                /* 5) 正样本额外奖励 */
-                if (s.label && rel_gain > 0.1) {
-                    double bonus = clamp_val(rel_gain / 0.5, 0.0, 1.0);
-                    w_i *= 1.0 + 0.3 * bonus;
-                }
-
-                /* 6) 软剪裁 hi≤8× */
-                const double LO = 0.05 * base, HI = 8.0 * base;
+                /* ---------- (H) 软剪裁：放宽到 0.03–20 倍 base ------------------- */
+                const double LO = 0.03 * base;
+                const double HI = 20.0 * base;
                 w_i = clamp_val(w_i, LO, HI);
-
                 w[i] = static_cast<float>(w_i);
+
+                
             }
+            for (size_t j = 0; j < w.size(); ++j)
+                if (!std::isfinite(w[j]) || w[j] <= 0)
+                    throw std::runtime_error("bad weight at "+std::to_string(j));
+           
+        }
 
-            // for (int i = 0; i < N; ++i) {
-            //     const Sample& s = *S[i];
+        std::vector<float> Xf, yf, wf;
+        const int NF = static_cast<int>(S_focus.size());
+        if (NF > 0) {
+            Xf.resize(size_t(NF) * NUM_FEATS);
+            yf.resize(NF);
+            wf.resize(NF);
 
-            //     /* feature */
-            //     std::copy(s.feat.begin(), s.feat.end(), X.begin() + i * NUM_FEATS);
+            for (int i = 0; i < NF; ++i) {
+                const Sample& s = *S_focus[i];
+                std::copy(s.feat.begin(), s.feat.end(),
+                        Xf.begin() + i * NUM_FEATS);
 
-            //     /* regression target Δ = ln(rt/ct) */
-            //     double rt = std::max(s.row_t, EPS_RUNTIME);
-            //     double ct = std::max(s.col_t, EPS_RUNTIME);
-            //     y[i] = float(std::log(rt) - std::log(ct));
+                double rt = std::max(s.row_t, EPS_RUNTIME);
+                double ct = std::max(s.col_t, EPS_RUNTIME);
+                yf[i] = float(std::log(rt) - std::log(ct));
 
-            //     /* weight（同旧版） */
-            //     double base = (s.label ? w_pos : w_neg);
-            //     double q_ln = std::log1p(s.qcost);
-            //     double w_i  = base * (1.0 + 0.20 * q_ln);
-
-            //     double fan   = std::min<double>(3.0, s.feat[22]);
-            //     double ratio = std::min<double>(3.0, s.feat[60]);
-            //     if (fan   > 1.3) w_i += 0.6 * base * (fan   - 1.2);
-            //     if (ratio > 1.1) w_i += 0.4 * base * (ratio - 1.0);
-
-            //     double pc_rc = std::exp(std::min<double>(2.0, s.feat[25]));
-            //     if (pc_rc > 2.0 && s.qcost < 1e4) w_i += 0.8 * base * (pc_rc - 1.5);
-            //     if (fan > 2.5 && s.qcost < 8e3)   w_i += 2.0 * base;
-
-            //     auto rel_gap = [](double fast, double slow) {
-            //         double g = std::log(slow / std::max(1e-6, fast));
-            //         return clamp(g / 3.0, 0.0, 1.0);
-            //     };
-            //     if (s.label == 1 && s.qcost < Q_SMALL)
-            //         w_i *= (1.0 + rel_gap(s.col_t, s.row_t));
-            //     if (s.label == 0 && s.qcost > Q_LARGE)
-            //         w_i *= (1.0 + rel_gap(s.row_t, s.col_t));
-
-            //     w[i] = static_cast<float>(w_i);
-            // }
+                auto it = std::find(S.begin(), S.end(), S_focus[i]);
+                if (it == S.end())
+                    throw std::logic_error("focus sample not in main sample set");
+                wf[i] = 2.0f * w[std::distance(S.begin(), it)];
+            }
         }
 
 
@@ -201,6 +201,7 @@ public:
         /* ───── LightGBM handles ─────────────────────────────────── */
         DatasetHandle dtrain = nullptr, dvalid = nullptr;
         BoosterHandle booster = nullptr;
+        DatasetHandle dfocus = nullptr;
 
         /* ---------------------------------------------------------- */
         if (!skip_train) {
@@ -230,9 +231,9 @@ public:
             }
             else if (booster_ == "rf") {
                 double bag_frac = (opt.subsample > 0.0 && opt.subsample < 1.0)
-                                    ? opt.subsample : 0.63;
+                                    ? opt.subsample : 0.8;
                 param += " bagging_fraction=" + std::to_string(bag_frac)
-                    + " bagging_freq=1";              // must be >0
+                    + " bagging_freq=5";              // must be >0
             }
             // param +=
             //     " objective=fair fair_c=1.2 metric=l1 max_depth=18"
@@ -243,12 +244,12 @@ public:
             //     " verbosity=-1";
 
             param +=
-                " objective=regression_l2 metrics=l2 max_depth=22"
-                " max_bin=127 num_leaves=1536 min_data_in_leaf=40"
+                " objective=regression_l2 metrics=l2 max_depth=18"
+                " max_bin=127 num_leaves=1024 min_data_in_leaf=1"
                 " learning_rate="    + std::to_string(lr * 0.75) +
                 " feature_fraction=" + std::to_string(colsample) +
-                " lambda_l2=1.0 num_threads=" + std::to_string(num_threads) +
-                " verbosity=-1";
+                " lambda_l1=0.2 lambda_l2=3.0 num_threads=" + std::to_string(num_threads) +
+                " verbosity=-1 min_sum_hessian_in_leaf=1e-6";
 
             /* monotone constraints (same as before) */
             {
@@ -308,6 +309,29 @@ public:
             /* save model */
             LGBM_BoosterSaveModel(booster, 0, -1, 0, model_path.c_str());
             logI("Model saved → " + model_path);
+
+            /* === (A) 统计 Gain 并生成黑名单 ================================== */
+            int num_feat = 0;
+            LGBM_BoosterGetNumFeature(booster, &num_feat);
+
+            std::vector<double> gain(num_feat, 0.0);
+            /* importance_type = 0 → Gain； 1 → Split 次数               */
+            LGBM_BoosterFeatureImportance(
+                    booster, /*num_iteration=*/-1, 0, gain.data());
+
+            double tot = std::accumulate(gain.begin(), gain.end(), 0.0);
+            std::vector<int> blacklist;
+            for (int i = 0; i < num_feat; ++i)
+                if (tot > 0 && gain[i] / tot < 0.01)        // <-- 1 %
+                    blacklist.push_back(i);
+
+            /* === (B) 写到 model 同名 .blk 文件，一行一个索引 ================ */
+            std::ofstream outf(model_path + ".blk");
+            for (int id : blacklist)  outf << id << '\n';
+
+            logI("Feature blacklist (" + std::to_string(blacklist.size()) +
+                " cols, gain < 1 %) → " + model_path + ".blk");
+
         }
         else {
             /* inference-only path */
@@ -378,10 +402,16 @@ public:
 
         /* ───── cleanup ───────────────────────────────────────────── */
         if (!skip_train) {
+            LGBM_BoosterFree(booster);
             LGBM_DatasetFree(dtrain);
+            if (dfocus) LGBM_DatasetFree(dfocus);
             if (dvalid) LGBM_DatasetFree(dvalid);
+            
         }
-        LGBM_BoosterFree(booster);
+        else {
+            LGBM_BoosterFree(booster);
+        }
+        
     }
 
 
@@ -390,14 +420,27 @@ public:
                              float tau) const override
     {
         const int N = DS.size();
-        // for (int i=0;i<N;i++) {
-        //     for (int j=0;j<NUM_FEATS;j++)   
-        //         printf("feat[%d]=%f\n",j,DS[i].feat[j]);
-        // }
+        
         vector<float> X(size_t(N) * NUM_FEATS);
         for (int i = 0; i < N; ++i)
             std::copy(DS[i].feat.begin(), DS[i].feat.end(),
                     X.begin() + i * NUM_FEATS);
+
+        // const int N = DS.size();
+
+        // /* --- (new) 读黑名单，如果文件不存在 blk 为空 ---------------- */
+        // std::unordered_set<int> blk = load_feat_blk(path);   // 可能为空
+
+        // /* --- 预填 0；被黑掉的列保持 0 -------------------------------- */
+        // vector<float> X(size_t(N) * NUM_FEATS, 0.f);
+
+        // for (int i = 0; i < N; ++i) {
+        //     const auto& src = DS[i].feat;
+        //     float* dst = X.data() + i * NUM_FEATS;
+        //     for (int j = 0; j < NUM_FEATS; ++j)
+        //         if (!blk.count(j))          // 不在黑名单才拷贝
+        //             dst[j] = src[j];        // 否则保持 0
+        // }
 
         BoosterHandle booster = nullptr; int iters = 0;
         int err = LGBM_BoosterCreateFromModelfile(path.c_str(),

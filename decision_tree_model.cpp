@@ -54,7 +54,8 @@ public:
     void train(const std::vector<Sample>& DS_tr,
                const std::vector<Sample>& /*DS_val – optional, unused*/,
                const std::string&         model_path,
-               const TrainOpt&            opt) override
+               const TrainOpt&            opt,
+               const std::unordered_map<std::string,double>& DIR_W) override
     {
         /* honour TrainOpt on each invocation */
         max_depth   = opt.max_depth  > 0   ? opt.max_depth   : max_depth;

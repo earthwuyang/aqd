@@ -46,8 +46,8 @@ int main(int argc, char* argv[])
     std::string model_type  = "lightgbm";
     std::string base        = "/home/wuy/query_costs";
     std::vector<std::string> data_dirs{
-        // "tpch_sf100",
-        // "tpcds_sf10",
+        "tpch_sf100",
+        "tpcds_sf10",
         "tpch_sf1",
         "tpcds_sf1",
         "hybench_sf1",
@@ -63,9 +63,9 @@ int main(int argc, char* argv[])
 
     TrainOpt hp;                 // generic hyper-param struct you defined
     uint32_t seed        = 42;
-    hp.trees             = 1400;  // sensible defaults
-    hp.max_depth         = 24;
-    hp.lr                = 0.04;
+    hp.trees             = 3000;  // sensible defaults
+    hp.max_depth         = 18;
+    hp.lr                = 0.03;
     hp.subsample         = 0.7;
     hp.colsample         = 0.8;
     hp.skip_train        = false;
@@ -152,6 +152,8 @@ int main(int argc, char* argv[])
 
         /* 3) 预测并输出结果 */
         std::vector<Sample> one{ s };
+        for (int j=0;j<NUM_FEATS;j++)   
+            printf("feat[%d]=%f\n",j,s.feat[j]);
         int pr = learner->predict(model_path, one, /*τ=*/0.0f).front();
         std::cout << "\n[Result] " << (pr ? "Use COLUMN store" : "Use ROW store")
                 << "  (model=" << model_type << ")\n";
@@ -177,13 +179,13 @@ int main(int argc, char* argv[])
     }
 
 
-
+    std::unordered_map<std::string,double> DIR_W;
     /* ---------- fast-path: only inference when --skip_train ---------- */
     if (hp.skip_train) {
         /* 1) 加载指定数据集 */
         DirSamples ALL = load_all_datasets(base, data_dirs);
         if (ALL.empty()) { logE("no samples found"); return 1; }
-        global_stats().freeze();
+        
 
         auto DS_test = build_subset(data_dirs, ALL);
         if (DS_test.empty()) { logE("no test samples"); return 1; }
@@ -219,6 +221,16 @@ int main(int argc, char* argv[])
     /* ───── one-shot disk scan (reuse across folds) ────────── */
     DirSamples ALL = load_all_datasets(base, data_dirs);
     if (ALL.empty()) { logE("no samples found"); return 1; }
+
+    /* ---------- after ALL is built ---------- */
+        
+    double total_samples = 0.0;
+    for (auto& kv : ALL) total_samples += kv.second.size();
+    for (auto& kv : ALL) {
+        double n = kv.second.size();
+        DIR_W[kv.first] = std::sqrt(total_samples / n);   // √反比
+    }
+    global_stats().freeze();
 
     /* choose 3 random dirs as hold-out test (oracle  ≈ 20 %)  */
     std::vector<std::string> test_dirs = pick_test3(data_dirs, seed);
@@ -264,6 +276,7 @@ int main(int argc, char* argv[])
     } else {
         /* ----------  旧的 LODO  ---------- */
         dirFolds = make_lodo(cv_pool);          // 还是按目录
+        // dirFolds = make_cv3(cv_pool);          // 还是按目录
         for (auto& df : dirFolds) {
             SampFold sf;
             for (const auto& d : df.tr_dirs) {
@@ -321,7 +334,7 @@ int main(int argc, char* argv[])
 
         /* ---- train or just load ---- */
         if (!hp.skip_train) {
-            learner->train(DS_tr, DS_va, mp, hp);
+            learner->train(DS_tr, DS_va, mp, hp, DIR_W);
             logI("Validate on validation set:\n");
             /* ─── 1. 在验证集上输出完整评估 ─── */
             {

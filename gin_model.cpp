@@ -307,7 +307,7 @@ public:                       /* ---- IModel API ---- */
     void train (const std::vector<Sample>& DS_tr,
                 const std::vector<Sample>& DS_val,
                 const std::string&        model_path,
-                const TrainOpt&           opt) override;
+                const TrainOpt&           opt, const std::unordered_map<std::string,double>& DIR_W) override;
 
     std::vector<int> predict(const std::string&        model_path,
                              const std::vector<Sample>& DS,
@@ -413,7 +413,8 @@ void GINModel::load(const std::string& p) const
 void GINModel::train(const std::vector<Sample>& DS_tr,
                      const std::vector<Sample>& DS_val,
                      const std::string&        path,
-                     const TrainOpt&           opt)
+                     const TrainOpt&           opt,
+                     const std::unordered_map<std::string,double>& DIR_W)
 {
     /* 1) ── 仅加载 ───────────────────────────────────────────────*/
     if (opt.skip_train) {                // --skip_train ⇒ 直接 restore

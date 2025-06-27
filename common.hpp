@@ -11,6 +11,8 @@
 #include <utility>      // pair
 #include <cstdint>      // uint8_t
 #include <random>     // ← 新增
+#include <unordered_set>
+#include <fstream>
 
 /* ---------- 依赖库 ---------- */
 #include <Eigen/Dense>
@@ -269,6 +271,9 @@ struct Split;
 
 std::vector<Fold> make_lodo(const std::vector<std::string>& dirs);
 
+std::vector<Fold> make_cv3(const std::vector<std::string>& dirs);
+
+
 /* 批量加载整个目录的数据集 */
 using DirSamples = std::unordered_map<std::string,
                                       std::vector<Sample>>;
@@ -299,3 +304,11 @@ std::vector<Sample> build_samples_from_csv(const std::string& csv_path,
         const std::string& host = "127.0.0.1", int port = 44444,
         const std::string& user = "root", const std::string& pass = "");
 
+inline std::unordered_set<int>
+load_feat_blk(const std::string& model_path) {
+    std::unordered_set<int> blk;
+    std::ifstream in(model_path + ".blk");
+    int id;
+    while (in >> id) blk.insert(id);
+    return blk;
+}
