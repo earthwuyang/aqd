@@ -1593,105 +1593,128 @@ vector<string> pick_test3(vector<string> dirs, uint32_t seed)
 
 /* ─────────────────────────────────────────────────────────────
  *  report_and_evaluate
- *  — 统计 7 种策略 (含 Oracle) 的混淆矩阵与平均运行时
- *    并写入 CSV + 打印控制台表格
  * ───────────────────────────────────────────────────────────── */
 void report_metrics(const std::vector<int>& pred_lgb,
-                         const std::vector<Sample>& DS_test)
+                    const std::vector<Sample>& DS_test)
 {
-    
     struct Stat {
         long TP=0,FP=0,TN=0,FN=0; double rt_sum=0;
         void add(bool p,bool g,double rt,double ct){
             (p? (g?++TP:++FP):(g?++FN:++TN));
             rt_sum += (p?ct:rt);
         }
-        double acc(long n) const { return double(TP+TN)/n; }
+        double acc(long n) const { return n? double(TP+TN)/n : 0; }
+        double prec()      const { return (TP+FP)? double(TP)/(TP+FP):0; }          // -- NEW --
         double rec()       const { return (TP+FN)? double(TP)/(TP+FN):0; }
         double f1()        const { return TP? 2.0*TP/(2*TP+FP+FN):0; }
-        double avg(long n) const { return rt_sum/n; }
+        double avg(long n) const { return n? rt_sum/n : 0; }
     };
+
     std::unordered_map<std::string, Stat> perDir;
     Stat S_row,S_col,S_cost,S_hopt,S_fann,S_lgb,S_opt;
+
+    /* ----- NEW : 统计 AI on cost-correct / cost-wrong ----- */
+    Stat S_ai_cost_ok, S_ai_cost_bad;
+    long N_cost_ok  = 0;
+    long N_cost_bad = 0;
+    /* ------------------------------------------------------ */
+
     double oracle_rt_sum = 0.0;
 
     for (size_t i=0;i<DS_test.size();++i){
         const Sample &s = DS_test[i];
-        // bool gt  = s.label;                  // 1 ⇒ column faster
-        bool gt = (s.col_t < s.row_t);
-        bool lgb = pred_lgb[i];
+        bool gt   = (s.col_t < s.row_t);              // ground-truth
+        bool lgb  = pred_lgb[i];
+        bool cost_pred = (s.qcost > COST_THR);
 
-        S_row .add(false            ,gt,s.row_t,s.col_t);
-        S_col .add(true             ,gt,s.row_t,s.col_t);
-        S_cost.add(s.qcost>COST_THR ,gt,s.row_t,s.col_t);
-        S_hopt.add(s.hybrid_pred    ,gt,s.row_t,s.col_t);
-        S_fann.add(s.fann_pred      ,gt,s.row_t,s.col_t);
-        S_lgb .add(lgb              ,gt,s.row_t,s.col_t);
+        S_row .add(false      ,gt,s.row_t,s.col_t);
+        S_col .add(true       ,gt,s.row_t,s.col_t);
+        S_cost.add(cost_pred  ,gt,s.row_t,s.col_t);
+        S_hopt.add(s.hybrid_pred ,gt,s.row_t,s.col_t);
+        S_fann.add(s.fann_pred   ,gt,s.row_t,s.col_t);
+        S_lgb .add(lgb           ,gt,s.row_t,s.col_t);
 
-        /* Oracle: always pick the faster of the two paths */
-        // bool oracle_pred = s.label;          // same definition as gt
-        bool oracle_pred = (s.col_t < s.row_t);   // true ⇒ choose column
-        S_opt.add(oracle_pred   ,gt ,s.row_t, s.col_t);
-
-        oracle_rt_sum += std::min(s.row_t, s.col_t);
+        /* Oracle: always faster path */
+        bool oracle_pred = (s.col_t < s.row_t);
+        S_opt.add(oracle_pred, gt, s.row_t, s.col_t);
 
         perDir[s.dir_tag].add(lgb, gt, s.row_t, s.col_t);
+        oracle_rt_sum += std::min(s.row_t, s.col_t);
 
+        /* ----- NEW : 根据 cost_rule 正误，再累计 AI 模型表现 -------- */
+        if (cost_pred == gt){                 // cost_rule 命中
+            S_ai_cost_ok.add(lgb, gt, s.row_t, s.col_t);
+            ++N_cost_ok;
+        } else {                              // cost_rule 失准
+            S_ai_cost_bad.add(lgb, gt, s.row_t, s.col_t);
+            ++N_cost_bad;
+        }
+        /* ----------------------------------------------------------- */
     }
+
     const long N = DS_test.size();
-    printf("oracle avg time: %f", oracle_rt_sum/N);
+    printf("oracle avg time: %f\n", oracle_rt_sum/N);
 
-    /* ------------ CSV -------------- */
+    /* ------------ CSV -------------- (保持原实现) -------------- */
     std::ofstream fout("test_metrics.csv");
-    fout<<"method,TP,FP,TN,FN,accuracy,recall,f1,avg_runtime\n";
-    auto dump=[&](const std::string &n,Stat&s){
+    fout<<"method,TP,FP,TN,FN,accuracy,precision,recall,f1,avg_runtime\n";
+    auto dump=[&](const std::string &n,Stat&s,long n_samples){
         fout<<n<<','<<s.TP<<','<<s.FP<<','<<s.TN<<','<<s.FN<<','
-            <<s.acc(N)<<','<<s.rec()<<','<<s.f1()<<','<<s.avg(N)<<'\n';
+            <<s.acc(n_samples)<<','<<s.prec()<<','<<s.rec()<<','<<s.f1()<<','<<s.avg(n_samples)<<'\n';
     };
-    dump("row_only"   ,S_row );
-    dump("column_only",S_col );
-    dump("cost_rule"  ,S_cost);
-    dump("hybrid_opt" ,S_hopt);
-    dump("Kernel Model"       ,S_fann);
-    dump("AI Model"   ,S_lgb );
-    dump("Oracle"     ,S_opt );
-    fout.close();
+    dump("row_only"      ,S_row ,N);
+    dump("column_only"   ,S_col ,N);
+    dump("cost_rule"     ,S_cost,N);
+    dump("hybrid_opt"    ,S_hopt,N);
+    dump("Kernel Model"  ,S_fann,N);
+    dump("AI Model"      ,S_lgb ,N);
+    dump("Oracle"        ,S_opt ,N);
 
-    std::cout<<"\n### Per-dataset BalAcc\n";
-    for (auto& kv : perDir){
-        long n = kv.second.TP+kv.second.TN+kv.second.FP+kv.second.FN;
-        double bal = 0.5*(kv.second.rec() + 
-                        (kv.second.TN+kv.second.FP? double(kv.second.TN)/(kv.second.TN+kv.second.FP):0));
-        std::cout<<kv.first<<"  "<<bal<<"  ("<<n<<" samples)\n";
-    }
+    /* ----- NEW : 追加子集统计到 CSV（可选） -------------------- */
+    dump("AI_on_cost_OK" ,S_ai_cost_ok ,N_cost_ok );
+    dump("AI_on_cost_BAD",S_ai_cost_bad,N_cost_bad);
+    /* ----------------------------------------------------------- */
+    fout.close();
 
     /* ------------ console ----------- */
     std::cout<<"\n*** Evaluation on "<<N<<" samples ***\n"
              <<"LightGBM ensemble  Acc="<<S_lgb.acc(N)
-             <<"  Rec="<<S_lgb.rec()<<"  F1="<<S_lgb.f1()<<"\n"
+             <<"  Prec="<<S_lgb.prec()
+             <<"  Rec="<<S_lgb.rec()
+             <<"  F1="<<S_lgb.f1()<<"\n"
              <<"TP="<<S_lgb.TP<<" FP="<<S_lgb.FP
              <<" TN="<<S_lgb.TN<<" FN="<<S_lgb.FN<<"\n";
 
-    std::cout<<"\n| Method    | TP | FP | TN | FN |  Acc |  Rec |  F1 | Avg-RT |\n"
-             <<"|-----------|----|----|----|----|------|------|-----|--------|\n";
-    auto pr=[&](const std::string &n,Stat&s){
+    std::cout<<"\n| Method    | TP | FP | TN | FN |  Acc | Prec | Rec |  F1 | Avg-RT |\n"
+             <<"|-----------|----|----|----|----|------|------|-----|-----|--------|\n";
+    auto pr=[&](const std::string &n,Stat&s,long n_samples){
         std::cout<<'|'<<std::setw(10)<<std::left<<n<<'|'
                  <<std::setw(4)<<s.TP<<'|'<<std::setw(4)<<s.FP<<'|'
                  <<std::setw(4)<<s.TN<<'|'<<std::setw(4)<<s.FN<<'|'
-                 <<std::setw(6)<<s.acc(N)<<'|'<<std::setw(6)<<s.rec()<<'|'
-                 <<std::setw(5)<<s.f1()<<'|'<<std::setw(8)<<std::setprecision(6)
-                 <<s.avg(N)<<"|\n";
+                 <<std::setw(6)<<s.acc(n_samples)<<'|'
+                 <<std::setw(6)<<s.prec()<<'|'
+                 <<std::setw(5)<<s.rec()<<'|'
+                 <<std::setw(5)<<s.f1()<<'|'
+                 <<std::setw(8)<<std::setprecision(6)<<s.avg(n_samples)<<"|\n";
         std::cout.unsetf(std::ios::floatfield);
     };
-    pr("Row"     ,S_row );
-    pr("Column"  ,S_col );
-    pr("Cost"    ,S_cost);
-    pr("Hybrid"  ,S_hopt);
-    pr("Kernel Model"    ,S_fann);
-    pr("AI Model"    ,S_lgb );
-    pr("Oracle"  ,S_opt );
+    pr("Row"        ,S_row ,N);
+    pr("Column"     ,S_col ,N);
+    pr("Cost"       ,S_cost,N);
+    pr("Hybrid"     ,S_hopt,N);
+    pr("Kernel"     ,S_fann,N);
+    pr("AI Model"   ,S_lgb ,N);
+    pr("Oracle"     ,S_opt ,N);
 
-    std::cout<<"\n[CSV] test_metrics.csv written (includes Oracle)\n";
+    /* ----- NEW : AI 模型在 cost-rule 子集上的表现 -------------- */
+    std::cout<<"\n=== AI Model where Cost-Rule is CORRECT ("<<N_cost_ok<<" samples) ===\n";
+    pr("AI_cost_OK", S_ai_cost_ok , N_cost_ok );
+
+    std::cout<<"\n=== AI Model where Cost-Rule is WRONG ("<<N_cost_bad<<" samples) ===\n";
+    pr("AI_cost_BAD",S_ai_cost_bad, N_cost_bad);
+    /* ----------------------------------------------------------- */
+
+    std::cout<<"\n[CSV] test_metrics.csv written (includes Oracle & subset stats)\n";
 }
 
 /*───────────────────────────────────────────────────────────────
