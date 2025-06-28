@@ -118,86 +118,89 @@ public:
                 /* ---------- (C) 数据集级 √N 反比权重 -------------------------- */
                 w_i *= DIR_W.at(s.dir_tag);
 
-                /* ---------- (D) 提速 / 减速 非对称调节 ----------------------- */
-                double rel_gap = (s.row_t - s.col_t) / std::max(1e-6, std::min(rt, ct));
-                if (s.label) {                                    // 列更快
-                    w_i *= 1.0 + 0.4 * clamp_val(rel_gap / 0.5, 0.0, 1.0);
-                } else {                                          // 行更快
-                    double slow_ratio = clamp_val(ct / std::max(1e-6, rt), 1.0, 3.0);
-                    w_i *= 1.0 + 0.5 * (slow_ratio - 1.0);
-                }
+                // /* ---------- (D) 提速 / 减速 非对称调节 ----------------------- */
+                // double rel_gap = (s.row_t - s.col_t) / std::max(1e-6, std::min(rt, ct));
+                // if (s.label) {                                    // 列更快
+                //     w_i *= 1.0 + 0.4 * clamp_val(rel_gap / 0.5, 0.0, 1.0);
+                // } else {                                          // 行更快
+                //     double slow_ratio = clamp_val(ct / std::max(1e-6, rt), 1.0, 3.0);
+                //     w_i *= 1.0 + 0.5 * (slow_ratio - 1.0);
+                // }
 
-                /* ---------- (E) qcost 调节（2 档，只奖励正样本） -------------- */
-                if (s.label) {
-                    if      (s.qcost > 3e7) w_i *= 1.25;
-                    else if (s.qcost > 1e7) w_i *= 1.10;
-                }
+                // /* ---------- (E) qcost 调节（2 档，只奖励正样本） -------------- */
+                // if (s.label) {
+                //     if      (s.qcost > 3e7) w_i *= 1.25;
+                //     else if (s.qcost > 1e7) w_i *= 1.10;
+                // }
 
-                /* ---------- (F) fan / ratio / pc_rc 微调 ---------------------- */
-                double fan   = std::min<double>(3.0, s.feat[22]);
-                double ratio = std::min<double>(3.0, s.feat[60]);
-                if (fan   > 2.0) w_i *= 1.00 + 0.02 * (fan   - 2.0);
-                if (ratio > 1.2) w_i *= 1.00 + 0.02 * (ratio - 1.2);
+                // /* ---------- (F) fan / ratio / pc_rc 微调 ---------------------- */
+                // double fan   = std::min<double>(3.0, s.feat[22]);
+                // double ratio = std::min<double>(3.0, s.feat[60]);
+                // if (fan   > 2.0) w_i *= 1.00 + 0.02 * (fan   - 2.0);
+                // if (ratio > 1.2) w_i *= 1.00 + 0.02 * (ratio - 1.2);
 
-                /* ========== ❶ 新 G：行窄 + 点查（Row-win 信号） =============== */
-                double point_ratio  = s.feat[104];   // ref + eq_ref 占比
-                double narrow_ratio = s.feat[105];   // ≤16 B 列占比
-                bool   point_and_narrow = (point_ratio > 0.70 && narrow_ratio > 0.80);
-                if (!s.label && point_and_narrow)
-                    w_i *= 1.8;                      // 原 1.6 → 1.8，放大一点
+                // /* ========== ❶ 新 G：行窄 + 点查（Row-win 信号） =============== */
+                // double point_ratio  = s.feat[104];   // ref + eq_ref 占比
+                // double narrow_ratio = s.feat[105];   // ≤16 B 列占比
+                // bool   point_and_narrow = (point_ratio > 0.70 && narrow_ratio > 0.80);
+                // if (!s.label && point_and_narrow)
+                //     w_i *= 1.8;                      // 原 1.6 → 1.8，放大一点
 
-                /* ========== ❷ 新 H：中等规模但 Row 更快 → 软放大 =============== *
-                * 逻辑：行存实际更快，且 qcost 不到 3 M（典型 OLTP / 点查）。     */
-                if (!s.label) {
-                    /* gap_lt0 为负值，-gap_lt0 越大说明 Row 优势越明显 */
-                    double gap_lt0 = std::log(rt) - std::log(ct);   // <0 ⇒ Row faster
-                    if (gap_lt0 < -0.2) {
-                        double bonus = clamp_val((-gap_lt0) / 1.5, 0.0, 2.0); // 上限 ×3
-                        w_i *= 100.0 + bonus;
-                    }
-                }
+                // /* ========== ❷ 新 H：中等规模但 Row 更快 → 软放大 =============== *
+                // * 逻辑：行存实际更快，且 qcost 不到 3 M（典型 OLTP / 点查）。     */
+                // if (!s.label) {
+                //     /* gap_lt0 为负值，-gap_lt0 越大说明 Row 优势越明显 */
+                //     double gap_lt0 = std::log(rt) - std::log(ct);   // <0 ⇒ Row faster
+                //     if (gap_lt0 < -0.2) {
+                //         double bonus = clamp_val((-gap_lt0) / 1.5, 0.0, 2.0); // 上限 ×3
+                //         w_i *= 100.0 + bonus;
+                //     }
+                // }
 
-                /* ---------- (L) 早期行数很小 + fan-out 介于 5-20 → 行存往往获胜 ---- */
-                double outer_rows_norm = s.feat[63];   // 已做 log 缩放
-                double fanout          = s.feat[22];   // 原始 fan-out_max
-                bool   late_fan        = (s.feat[97] > 0.4);   // 累计 fan-out 信号
-                bool   small_core      = (outer_rows_norm < 0.05);   // ≈ outerRows ≤ 3
-                bool   mid_fan_range   = (fanout > 5.0 && fanout < 20.0);
+                // /* ---------- (L) 早期行数很小 + fan-out 介于 5-20 → 行存往往获胜 ---- */
+                // double outer_rows_norm = s.feat[63];   // 已做 log 缩放
+                // double fanout          = s.feat[22];   // 原始 fan-out_max
+                // bool   late_fan        = (s.feat[97] > 0.4);   // 累计 fan-out 信号
+                // bool   small_core      = (outer_rows_norm < 0.05);   // ≈ outerRows ≤ 3
+                // bool   mid_fan_range   = (fanout > 5.0 && fanout < 20.0);
 
-                if (!s.label && small_core && mid_fan_range && late_fan) {
-                    w_i *= 10.0;            // 适度放大到够用即可
-                }
-
-
-                /* ---------- (G2) 稀有场景加权：多表但行更快 ------------------ */
-                int tbl_cnt = int(s.feat[107]);          // 你在 plan2feat 里写入的位置
-                if (!s.label && tbl_cnt > 20)            // 行存赢且表数>20
-                    w_i *= 1.30;
-
-                /* ---------- (H2) MIN/MAX 无 GROUP 且行存快 ------------------- */
-                bool has_agg_no_grp = (s.feat[108] > 0.5);   // 0/1 布尔
-                if (!s.label && has_agg_no_grp)
-                    w_i *= 1.40;
-
-                /* ---------- (I2) rows_probe / rows_outer 失衡 ---------------- */
-                double probe_ratio = s.feat[109];            // 已是 log_tanh 或原值
-                if (!s.label && probe_ratio < 0.5)           // 行快却探测行很少
-                    w_i *= 1.20;
-                if ( s.label && probe_ratio > 10.0)          // 列快却探测行很多
-                    w_i *= 1.20;
+                // if (!s.label && small_core && mid_fan_range && late_fan) {
+                //     w_i *= 10.0;            // 适度放大到够用即可
+                // }
 
 
-                /* --- (J) fan-out 很大且列更快 → 放大列样本 -------------------- */
-                double fan_big = s.feat[22];      // fanout_max
-                if (s.label && fan_big > 30.0) {
-                    double bump = clamp_val((fan_big - 30.0) / 170.0, 0.0, 1.0); // 30→200 线性
-                    w_i *= 1.0 + bump;            // 最高 ×2
-                }
+                // /* ---------- (G2) 稀有场景加权：多表但行更快 ------------------ */
+                // int tbl_cnt = int(s.feat[107]);          // 你在 plan2feat 里写入的位置
+                // if (!s.label && tbl_cnt > 20)            // 行存赢且表数>20
+                //     w_i *= 1.30;
+
+                // /* ---------- (H2) MIN/MAX 无 GROUP 且行存快 ------------------- */
+                // bool has_agg_no_grp = (s.feat[108] > 0.5);   // 0/1 布尔
+                // if (!s.label && has_agg_no_grp)
+                //     w_i *= 1.40;
+
+                // /* ---------- (I2) rows_probe / rows_outer 失衡 ---------------- */
+                // double probe_ratio = s.feat[109];            // 已是 log_tanh 或原值
+                // if (!s.label && probe_ratio < 0.5)           // 行快却探测行很少
+                //     w_i *= 1.20;
+                // if ( s.label && probe_ratio > 10.0)          // 列快却探测行很多
+                //     w_i *= 1.20;
+
+
+                // /* --- (J) fan-out 很大且列更快 → 放大列样本 -------------------- */
+                // double fan_big = s.feat[22];      // fanout_max
+                // if (s.label && fan_big > 30.0) {
+                //     double bump = clamp_val((fan_big - 30.0) / 170.0, 0.0, 1.0); // 30→200 线性
+                //     w_i *= 1.0 + bump;            // 最高 ×2
+                // }
 
                 /* ========== ❸ 新 I：统一软剪裁 (0.03–20 × base) =============== */
-                const double LO = 0.03 * base;
-                const double HI = 100.0 * base;
-                w_i = clamp_val(w_i, LO, HI);
+                // const double LO = 0.03 * base;
+                // const double HI = 100.0 * base;
+                // w_i = clamp_val(w_i, LO, HI);
+                double log_lo = std::log(0.05 * (s.label ? w_pos : w_neg));
+                double log_hi = std::log(20.0 * (s.label ? w_pos : w_neg));
+                w_i = std::exp(clamp_val(std::log(w_i), log_lo, log_hi));
 
 
                 w[i] = static_cast<float>(w_i);

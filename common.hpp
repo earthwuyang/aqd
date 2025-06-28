@@ -22,8 +22,8 @@ using json = nlohmann::json;
 using namespace std;
 
 /* ---------- 全局常量 ---------- */
-constexpr int    ORIG_FEATS   = 112;      // feature dim
-constexpr double EPS_RUNTIME = 1e-6;
+constexpr int    ORIG_FEATS   = 115;      // feature dim
+constexpr double EPS_RUNTIME = 1e-2;
 constexpr double COST_THR    = 5e4;
 
 constexpr int EMB_DIM = 0;
@@ -190,15 +190,6 @@ ColStats             lookup_col_stats(const std::string& id);
 const TblStats&      lookup_tbl      (const std::string& id);
 
 
-/* ---------- 计表数：旧版 JSON 同样含 "table" ----------*/
-// static int count_tables(const json& node);
-
-// /* ---------- 全树找 MIN / MAX 函数 ----------*/
-// static bool tree_has_minmax(const json& node);
-
-// static bool has_grouping(const json& qb);
-
-// static bool min_or_max_no_group(const json& qb);
 
 
 /* ────────────────── 计划解析 / 样本构建 ────────────────── */

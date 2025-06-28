@@ -651,18 +651,6 @@ bool populate_col_stats(const std::string& host, int port,
         if (i + 1 < dbs.size()) in += ",";
     }
 
-    // std::string q =
-    //     "SELECT C.TABLE_SCHEMA, C.TABLE_NAME, C.COLUMN_NAME, "
-    //     "       C.DATA_TYPE, "
-    //     "       COALESCE(C.CHARACTER_OCTET_LENGTH, "
-    //     "                CEILING(C.NUMERIC_PRECISION/8), 8) AS AVG_LEN, "
-    //     "       CS.HISTOGRAM_JSON "
-    //     "FROM information_schema.COLUMNS AS C "
-    //     "LEFT JOIN information_schema.COLUMN_STATISTICS AS CS "
-    //     "  ON CS.SCHEMA_NAME = C.TABLE_SCHEMA "
-    //     " AND CS.TABLE_NAME  = C.TABLE_NAME "
-    //     " AND CS.COLUMN_NAME = C.COLUMN_NAME "
-    //     "WHERE C.TABLE_SCHEMA IN (" + in + ")";
     std::string q =
         "SELECT C.TABLE_SCHEMA, C.TABLE_NAME, C.COLUMN_NAME, "
         "       C.DATA_TYPE, "
@@ -1236,7 +1224,28 @@ bool plan2feat(const json &plan, float f[NUM_FEATS])
     PUSH( log_tanh(biggest_ratio) );   // feat[110]
 
     double late_rows_norm = log_scale(rootRow, 1e8);   // 产出行数归一到 0–1
-    PUSH( late_rows_norm );     
+    PUSH( late_rows_norm );     // 111
+
+    /* === NEW: shrink manual heuristics into explicit features === */
+    /* ❺ 额外辅助量：outer_rows_norm & fanout --------------------------- */
+    double outer_rows_norm = 0.0;                    // ≤0.05 说明 outerRows 很小
+    if (a.outerRows > 0.0)
+        outer_rows_norm = log_scale(a.outerRows, 1e6);   // 0-1 归一：1e6 行≈1.0
+
+    double fanout = a.fanoutMax;                     // 已在 walk() 中统计
+    /* ------------------------------------------------------------------ */
+    // F112  point_and_narrow  (Row-win 信号)
+    bool point_and_narrow = (point_ratio > 0.70 && narrow_ratio > 0.80);
+    PUSH( point_and_narrow ? 1.0f : 0.0f );
+
+    // F113  mid_fan_signal   (small core + mid fan-out + late fan)
+    bool mid_fan_signal =
+        (outer_rows_norm < 0.05) && (fanout > 5.0 && fanout < 20.0) &&
+        (cum_fan > 0.4);
+    PUSH( mid_fan_signal ? 1.0f : 0.0f );
+
+    // F114  minmax_without_group
+    PUSH( agg_flag ? 1.0f : 0.0f );   // 已经算过 agg_flag
 
 #undef PUSH
     if (k != ORIG_FEATS) {

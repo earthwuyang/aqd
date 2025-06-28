@@ -5,6 +5,7 @@
 #include <iostream>
 #include <sys/stat.h>  // 声明 ::mkdir
 #include <cerrno>      // errno 与 EEXIST
+#include <cmath>
 
 #include "model_iface.hpp"
 #include "global_stats.hpp"
@@ -94,12 +95,12 @@ int main(int argc, char* argv[])
         else if (a.rfind("--query_file=",0)==0)     query_file = a.substr(13);
         else if (a.rfind("--database=",0)==0)      database = a.substr(11);
         else if (a == "--mix")                  mix_folds = true;
-        else if (a == "--use_col")               g_use_col_feat - true;
+        else if (a == "--use_col")               g_use_col_feat = true;
         else                                       logW("ignored arg: "+a);
     }
 
     if (g_use_col_feat)
-        g_need_col_plans - true;
+        g_need_col_plans = true;
     
     if (data_dirs.empty()) {
         logE("No --data_dirs given");  return 1;
@@ -232,7 +233,7 @@ int main(int argc, char* argv[])
     for (auto& kv : ALL) total_samples += kv.second.size();
     for (auto& kv : ALL) {
         double n = kv.second.size();
-        DIR_W[kv.first] = std::sqrt(total_samples / n);   // √反比
+        DIR_W[kv.first] = std::pow(total_samples / n, 0.35);   // √反比
     }
     global_stats().freeze();
 
