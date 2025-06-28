@@ -3,6 +3,8 @@
 #include <cerrno>
 #include <iostream>
 #include <thread>
+#include <cmath>
+#include <unordered_map>
 
 #include "model_iface.hpp"
 
@@ -18,10 +20,81 @@ namespace std {
 }
 #endif
 
+extern std::unordered_map<std::string,double> g_db_size_gb;
+
+
 template <typename T>
 inline T clamp_val(const T& v, const T& lo, const T& hi)
 {
     return std::max(lo, std::min(v, hi));
+}
+
+/* ★ util – sigmoid(raw_score) → [0,1] 概率 */
+inline double sigmoid(double z){ return 1.0 / (1.0 + std::exp(-z)); }
+
+/* ★ util – 断言简化 */
+inline void chk(bool ok,const char*msg){
+    if(!ok){ std::cerr<<"[FATAL] "<<msg<<'\n'; std::abort(); }
+}
+
+/* ---------- 自定义损失: 期望运行时间平方误差 ---------- *
+ * L = ( p·ct + (1-p)·rt – g )²
+ *   其中 p = σ(score),  g = min(rt,ct)
+ * ---------------------------------------------------- */
+struct TimeObjData {
+    const double* rt;   // 行存真实时间 (len = num_data)
+    const double* ct;   // 列存真实时间
+};
+
+int time_obj_grad_hess(const double* score,        /* raw scores      */
+                       const double* /*label*/,    /* unused          */
+                       int64_t        num_data,
+                       double*        grad,        /* ← write here    */
+                       double*        hess,        /* ← write here    */
+                       void*          user_data)   /* ← TimeObjData*  */
+{
+    const auto* d = static_cast<const TimeObjData*>(user_data);
+
+    /* ---- numeric safety constants --------------------------------- */
+    constexpr double SCALE  = 20.0;   // magnify g & h (empirically 10-40)
+    constexpr double G_CLIP = 50.0;   // final gradient clipping range
+    constexpr double H_MIN  = 1e-1;   // Hessian floor  (post-scale)
+    constexpr double H_MAX  = 1e3;    // Hessian ceiling
+
+    for (int64_t i = 0; i < num_data; ++i) {
+
+        /* --------- local shorthand ---------------------------------- */
+        const double rt    = d->rt[i];
+        const double ct    = d->ct[i];
+        const double delta = ct - rt;                     // ct – rt
+
+        const double s  = score[i];
+        const double p  = 1.0 / (1.0 + std::exp(-s));     // σ(s)
+        const double sp = p * (1.0 - p);                  // σ'(s)
+
+        const double f_hat = rt + p * delta;              // model output
+        const double target = std::min(rt, ct);           // g
+        const double diff   = f_hat - target;             // (f – g)
+
+        /* ------------- gradient ------------------------------------- */
+        double g = 2.0 * diff * delta * sp;
+
+        /* ------------- Hessian  (complete) -------------------------- */
+        double h = 2.0 * delta * delta * sp * sp               // always ≥ 0
+                 + 2.0 * diff  * delta * sp * (1.0 - 2.0 * p); // mixed term
+
+        /* --------- numeric scaling & guards ------------------------- */
+        g *= SCALE;
+        h  = std::fabs(h) * SCALE;            // keep non-negative
+
+        /* floors / caps */
+        h  = std::max(H_MIN, std::min(H_MAX, h));
+        g  = std::max(-G_CLIP, std::min(G_CLIP, g));
+
+        grad[i] = g;
+        hess[i] = h;
+    }
+    return 0;   // success
 }
 
 class LGBModel : public IModel {
@@ -43,9 +116,11 @@ public:
         constexpr float  DECISION     = 0.0f;         // τ*
         constexpr double Q_SMALL      = 1e4;
         constexpr double Q_LARGE      = 5e4;
-        constexpr int    EARLY_STOP   = 100;          // rounds w/out improvement
+        constexpr int    EARLY_STOP   = 30;          // rounds w/out improvement
         constexpr int    PRINT_EVERY  = 10;
         int num_threads = 20;
+        const int MAX_EPOCH = 1;
+
         bool skip_train = opt.skip_train;
         // double sumsample = opt.subsample;
         double colsample = opt.colsample;
@@ -86,8 +161,14 @@ public:
         /* ───── training matrices / label / weight ──────────────── */
         /* ───── training matrices / label / weight ──────────────── */
         std::vector<float> X(size_t(N) * NUM_FEATS), y(N), w(N);
+        
+            
+        for(auto p:S) const_cast<Sample*>(p)->prev_prob = 0.5;
+
+
+        for (int cur_epoch = 0; cur_epoch < MAX_EPOCH; ++cur_epoch)
         {
-            /* 1. 计算基础正/负样本权；正样本略降，负样本略升  */
+             /* 1. 计算基础正/负样本权；正样本略降，负样本略升  */
             double P = 0, N0 = 0;
             for (auto p : S) p->label ? ++P : ++N0;
             double w_pos = 1.30 * N / (2 * P);   // ↑ 1.3
@@ -96,6 +177,15 @@ public:
             for (int i = 0; i < N; ++i) {
                 const Sample& s = *S[i];
 
+                // ✔ 直接写成普通判断
+                if (s.feat.size() != NUM_FEATS) {
+                    std::cerr << "[BUG] dir=" << s.dir_tag
+                            << "  sample#" << i
+                            << "  feat.size=" << s.feat.size()
+                            << "  NUM_FEATS=" << NUM_FEATS << '\n';
+                    std::abort();
+                }
+
                 /* ---------- 复制特征 & 标签 ---------- */
                 std::copy(s.feat.begin(), s.feat.end(),
                         X.begin() + i * NUM_FEATS);
@@ -103,7 +193,11 @@ public:
                 const double rt = std::max(s.row_t, EPS_RUNTIME);
                 const double ct = std::max(s.col_t, EPS_RUNTIME);
                 // y[i] = static_cast<float>(std::log(rt) - std::log(ct));
-                double diff = std::log(rt) - std::log(ct);
+                double diff = std::log(rt) - std::log(ct) ;
+                // auto it = g_db_size_gb.find(s.dir_tag);             // ② 按 dir_tag 查
+                // double gb = (it != g_db_size_gb.end()) ? it->second : 1.0;
+                // diff /= std::max(1e-6, gb); 
+
                 const double EPS = 0.05;           // 约 5 % 差距阈值
                 if (std::fabs(diff) < EPS) diff *= 0.3;   // 压缩梯度
                 y[i] = static_cast<float>(diff);
@@ -118,263 +212,180 @@ public:
                 /* ---------- (C) 数据集级 √N 反比权重 -------------------------- */
                 w_i *= DIR_W.at(s.dir_tag);
 
-                // /* ---------- (D) 提速 / 减速 非对称调节 ----------------------- */
-                // double rel_gap = (s.row_t - s.col_t) / std::max(1e-6, std::min(rt, ct));
-                // if (s.label) {                                    // 列更快
-                //     w_i *= 1.0 + 0.4 * clamp_val(rel_gap / 0.5, 0.0, 1.0);
-                // } else {                                          // 行更快
-                //     double slow_ratio = clamp_val(ct / std::max(1e-6, rt), 1.0, 3.0);
-                //     w_i *= 1.0 + 0.5 * (slow_ratio - 1.0);
-                // }
+                /* ---------- (D) 代价敏感放大  ←📍就在这里加 ---------- */
+                w_i *= std::pow(std::fabs(rt - ct), 1.3); 
 
-                // /* ---------- (E) qcost 调节（2 档，只奖励正样本） -------------- */
-                // if (s.label) {
-                //     if      (s.qcost > 3e7) w_i *= 1.25;
-                //     else if (s.qcost > 1e7) w_i *= 1.10;
-                // }
+                /* (E)  focal-loss 难例权重 */
+                w_i *= std::pow(1.0-std::fabs(s.prev_prob-0.5)*2,2.0);
 
-                // /* ---------- (F) fan / ratio / pc_rc 微调 ---------------------- */
-                // double fan   = std::min<double>(3.0, s.feat[22]);
-                // double ratio = std::min<double>(3.0, s.feat[60]);
-                // if (fan   > 2.0) w_i *= 1.00 + 0.02 * (fan   - 2.0);
-                // if (ratio > 1.2) w_i *= 1.00 + 0.02 * (ratio - 1.2);
+                /* (F)  统一软剪裁：随 epoch 略放宽 */
+                double epoch_scale = 1.0 + cur_epoch/200.0;
+                double log_lo = std::log(0.05*base);
+                double log_hi = std::log(20.0*base*epoch_scale);
+                w_i = std::exp(clamp_val(std::log(w_i),log_lo,log_hi));
 
-                // /* ========== ❶ 新 G：行窄 + 点查（Row-win 信号） =============== */
-                // double point_ratio  = s.feat[104];   // ref + eq_ref 占比
-                // double narrow_ratio = s.feat[105];   // ≤16 B 列占比
-                // bool   point_and_narrow = (point_ratio > 0.70 && narrow_ratio > 0.80);
-                // if (!s.label && point_and_narrow)
-                //     w_i *= 1.8;                      // 原 1.6 → 1.8，放大一点
-
-                // /* ========== ❷ 新 H：中等规模但 Row 更快 → 软放大 =============== *
-                // * 逻辑：行存实际更快，且 qcost 不到 3 M（典型 OLTP / 点查）。     */
-                // if (!s.label) {
-                //     /* gap_lt0 为负值，-gap_lt0 越大说明 Row 优势越明显 */
-                //     double gap_lt0 = std::log(rt) - std::log(ct);   // <0 ⇒ Row faster
-                //     if (gap_lt0 < -0.2) {
-                //         double bonus = clamp_val((-gap_lt0) / 1.5, 0.0, 2.0); // 上限 ×3
-                //         w_i *= 100.0 + bonus;
-                //     }
-                // }
-
-                // /* ---------- (L) 早期行数很小 + fan-out 介于 5-20 → 行存往往获胜 ---- */
-                // double outer_rows_norm = s.feat[63];   // 已做 log 缩放
-                // double fanout          = s.feat[22];   // 原始 fan-out_max
-                // bool   late_fan        = (s.feat[97] > 0.4);   // 累计 fan-out 信号
-                // bool   small_core      = (outer_rows_norm < 0.05);   // ≈ outerRows ≤ 3
-                // bool   mid_fan_range   = (fanout > 5.0 && fanout < 20.0);
-
-                // if (!s.label && small_core && mid_fan_range && late_fan) {
-                //     w_i *= 10.0;            // 适度放大到够用即可
-                // }
-
-
-                // /* ---------- (G2) 稀有场景加权：多表但行更快 ------------------ */
-                // int tbl_cnt = int(s.feat[107]);          // 你在 plan2feat 里写入的位置
-                // if (!s.label && tbl_cnt > 20)            // 行存赢且表数>20
-                //     w_i *= 1.30;
-
-                // /* ---------- (H2) MIN/MAX 无 GROUP 且行存快 ------------------- */
-                // bool has_agg_no_grp = (s.feat[108] > 0.5);   // 0/1 布尔
-                // if (!s.label && has_agg_no_grp)
-                //     w_i *= 1.40;
-
-                // /* ---------- (I2) rows_probe / rows_outer 失衡 ---------------- */
-                // double probe_ratio = s.feat[109];            // 已是 log_tanh 或原值
-                // if (!s.label && probe_ratio < 0.5)           // 行快却探测行很少
-                //     w_i *= 1.20;
-                // if ( s.label && probe_ratio > 10.0)          // 列快却探测行很多
-                //     w_i *= 1.20;
-
-
-                // /* --- (J) fan-out 很大且列更快 → 放大列样本 -------------------- */
-                // double fan_big = s.feat[22];      // fanout_max
-                // if (s.label && fan_big > 30.0) {
-                //     double bump = clamp_val((fan_big - 30.0) / 170.0, 0.0, 1.0); // 30→200 线性
-                //     w_i *= 1.0 + bump;            // 最高 ×2
-                // }
-
-                /* ========== ❸ 新 I：统一软剪裁 (0.03–20 × base) =============== */
-                // const double LO = 0.03 * base;
-                // const double HI = 100.0 * base;
-                // w_i = clamp_val(w_i, LO, HI);
-                double log_lo = std::log(0.05 * (s.label ? w_pos : w_neg));
-                double log_hi = std::log(20.0 * (s.label ? w_pos : w_neg));
-                w_i = std::exp(clamp_val(std::log(w_i), log_lo, log_hi));
+                double slow = std::pow(std::min(rt,ct) /*秒*/ , 0.8);  // or log1p(rt+ct)
+                w_i *= 1.0 + 0.5 * slow;      // 系数 0.5~1.0 可 grid-search
 
 
                 w[i] = static_cast<float>(w_i);
 
-                
             }
-            for (size_t j = 0; j < w.size(); ++j)
-                if (!std::isfinite(w[j]) || w[j] <= 0)
-                    throw std::runtime_error("bad weight at "+std::to_string(j));
-           
-        }
+            /* ========== 1. 重新计算 focal-weight (上面已算好 w[]) ========== */
+            for (size_t j = 0; j < w.size(); ++j)           // 放进临时数组 w_tmp
+                w[j] *= std::pow(1.0 - std::fabs(S[j]->prev_prob - 0.5) * 2, 2.0);
 
-        std::vector<float> Xf, yf, wf;
-        const int NF = static_cast<int>(S_focus.size());
-        if (NF > 0) {
-            Xf.resize(size_t(NF) * NUM_FEATS);
-            yf.resize(NF);
-            wf.resize(NF);
-
-            for (int i = 0; i < NF; ++i) {
-                const Sample& s = *S_focus[i];
-                std::copy(s.feat.begin(), s.feat.end(),
-                        Xf.begin() + i * NUM_FEATS);
-
-                double rt = std::max(s.row_t, EPS_RUNTIME);
-                double ct = std::max(s.col_t, EPS_RUNTIME);
-                yf[i] = float(std::log(rt) - std::log(ct));
-
-                auto it = std::find(S.begin(), S.end(), S_focus[i]);
-                if (it == S.end())
-                    throw std::logic_error("focus sample not in main sample set");
-                wf[i] = 2.0f * w[std::distance(S.begin(), it)];
-            }
-        }
-
-
-        /* ───── validation matrices (simpler weighting = 1) ─────── */
-        std::vector<float> X_val, y_val;
-        if (!va.empty()) {
-            const int Nv = static_cast<int>(va.size());
-            X_val.resize(size_t(Nv) * NUM_FEATS);
-            y_val.resize(Nv);
-
-            for (int i = 0; i < Nv; ++i) {
-                const Sample& s = va[i];
-                std::copy(s.feat.begin(), s.feat.end(),
-                        X_val.begin() + i * NUM_FEATS);
-
-                double rt = std::max(s.row_t, EPS_RUNTIME);
-                double ct = std::max(s.col_t, EPS_RUNTIME);
-                y_val[i]  = float(std::log(rt) - std::log(ct));
-            }
-        }
-
-        /* ───── LightGBM handles ─────────────────────────────────── */
-        DatasetHandle dtrain = nullptr, dvalid = nullptr;
-        BoosterHandle booster = nullptr;
-        DatasetHandle dfocus = nullptr;
-
-        /* ---------------------------------------------------------- */
-        if (!skip_train) {
-            /* create train set */
-            if (LGBM_DatasetCreateFromMat(X.data(), C_API_DTYPE_FLOAT32,
-                                        N, NUM_FEATS, 1,
-                                        "", nullptr, &dtrain))
-            { logE("DatasetCreate failed"); return; }
-
+            /* ========== 2. 创建 dtrain / dvalid / booster ========== */
+            DatasetHandle dtrain = nullptr, dvalid = nullptr;
+            chk(!LGBM_DatasetCreateFromMat(X.data(), C_API_DTYPE_FLOAT32,
+                                        N, NUM_FEATS, 1, "",
+                                        nullptr, &dtrain),
+                "DatasetCreate failed");
             LGBM_DatasetSetField(dtrain, "label",  y.data(), N, C_API_DTYPE_FLOAT32);
             LGBM_DatasetSetField(dtrain, "weight", w.data(), N, C_API_DTYPE_FLOAT32);
 
-            /* optional valid set */
-            if (!X_val.empty()) {
+            if (!va.empty()) {                          // 你的原来的验证集构造逻辑
                 const int Nv = static_cast<int>(va.size());
-                if (LGBM_DatasetCreateFromMat(X_val.data(), C_API_DTYPE_FLOAT32,
-                                            Nv, NUM_FEATS, 1,
-                                            "", dtrain, &dvalid))
-                { logE("DatasetCreate(valid) failed"); return; }
-                LGBM_DatasetSetField(dvalid, "label", y_val.data(),
-                                    Nv, C_API_DTYPE_FLOAT32);
-            }
-
-            std::string param = "boosting=" + booster_; 
-            if (booster_ == "goss") {
-                param += " top_rate=0.2 other_rate=0.05";
-            }
-            else if (booster_ == "rf") {
-                double bag_frac = (opt.subsample > 0.0 && opt.subsample < 1.0)
-                                    ? opt.subsample : 0.8;
-                param += " bagging_fraction=" + std::to_string(bag_frac)
-                    + " bagging_freq=5";              // must be >0
-            }
-            // param +=
-            //     " objective=fair fair_c=1.2 metric=l1 max_depth=18"
-            //     " max_bin=127 num_leaves=756 min_data_in_leaf=40"
-            //     " learning_rate="    + std::to_string(lr * 0.75) +
-            //     " feature_fraction=" + std::to_string(colsample) +
-            //     " lambda_l2=1.0 num_threads=" + std::to_string(num_threads) +
-            //     " verbosity=-1";
-
-            param +=
-                " objective=regression_l2 metrics=l2 max_depth=18"
-                " max_bin=127 num_leaves=1024 min_data_in_leaf=1"
-                " learning_rate="    + std::to_string(lr * 0.75) +
-                " feature_fraction=" + std::to_string(colsample) +
-                " lambda_l1=0.2 lambda_l2=3.0 num_threads=" + std::to_string(num_threads) +
-                " verbosity=-1 min_sum_hessian_in_leaf=1e-6";
-
-            /* monotone constraints (same as before) */
-            {
-                std::string mono; mono.reserve(NUM_FEATS * 2);
-                for (int i = 0; i < NUM_FEATS; ++i) {
-                    int m = 0;
-                    if (i == 22 || i == 23 || i == 40 || i == 101)  m = +1; // 正相关
-                    if (i == 65 || i == 99 || i == 100   // 旧负相关
-                        || i == 104 || i == 105 || i==106)          // 新负相关
-                        m = -1;
-                    mono += std::to_string(m) + (i + 1 < NUM_FEATS ? "," : "");
+                std::vector<float> Xv(size_t(Nv)*NUM_FEATS), yv(Nv);
+                for (int i = 0; i < Nv; ++i) {
+                    std::copy(va[i].feat.begin(), va[i].feat.end(),
+                            Xv.begin() + i*NUM_FEATS);
+                    double rt = std::max(va[i].row_t, EPS_RUNTIME);
+                    double ct = std::max(va[i].col_t, EPS_RUNTIME);
+                    yv[i] = float(std::log(rt) - std::log(ct));
+                    // auto it = g_db_size_gb.find(va[i].dir_tag);             // ② 按 dir_tag 查
+                    // double gb = (it != g_db_size_gb.end()) ? it->second : 1.0;
+                    // yv[i] /= std::max(1e-6, gb); 
                 }
-                param += " monotone_constraints=" + mono;
+                chk(!LGBM_DatasetCreateFromMat(Xv.data(), C_API_DTYPE_FLOAT32,
+                                            Nv, NUM_FEATS, 1, "",
+                                            dtrain, &dvalid),
+                    "DatasetCreate(valid) failed");
+                LGBM_DatasetSetField(dvalid, "label", yv.data(), Nv, C_API_DTYPE_FLOAT32);
             }
 
+            /* ------ 训练前准备 rt / ct 数组 ------ */
+            std::vector<double> rt_d(N), ct_d(N);
+            for (int i = 0; i < N; ++i) {
+                rt_d[i] = S[i]->row_t;
+                ct_d[i] = S[i]->col_t;
+            }
+            TimeObjData obj_data{ rt_d.data(), ct_d.data() };
+
+
+            /* --- 参数字符串 param 与你旧代码完全一样 --- */
+            std::string param = "boosting=" + booster_
+                  + " objective=none metrics=l2"
+                  + " learning_rate=" + std::to_string(lr*0.75)
+                  + " num_leaves=1024 max_depth=18 max_bin=127"
+                  + " feature_fraction=" + std::to_string(colsample)
+                  + " lambda_l1=0 lambda_l2=0.1"
+                  + " min_data_in_leaf=5"      // ★ 新增：允许小叶子
+                  + " min_split_gain=0"        // ★ 新增：取消最小增益门槛
+                  + " num_threads=" + std::to_string(num_threads)
+                  + " verbosity=-1";
             
+            if (booster_ == "rf") {
+                // ① 先取 CLI 里传进来的 --subsample；否则默认 0.8
+                double frac = (opt.subsample > 0.0 && opt.subsample < 1.0)
+                                ? opt.subsample : 0.8;
 
+                // ② rf 还要求 bagging_freq>0；设为 1 就行
+                param += " bagging_fraction=" + std::to_string(frac)
+                    +  " bagging_freq=1";
+            }
 
-            /* create booster */
-            if (LGBM_BoosterCreate(dtrain, param.c_str(), &booster))
-            { logE("BoosterCreate failed"); return; }
+            BoosterHandle booster = nullptr;
+            chk(!LGBM_BoosterCreate(dtrain, param.c_str(), &booster),
+                "BoosterCreate failed");
+            // LGBM_BoosterSetObjective(booster, my_grad_hess_cb, nullptr);
+            if (dvalid) LGBM_BoosterAddValidData(booster, dvalid);
 
-            if (dvalid)
-                LGBM_BoosterAddValidData(booster, dvalid);   // returns 0 on success
+            /* ========== 3. 训练循环（带进度条 + 早停） ========== */
+            double best_metric = std::numeric_limits<double>::max();
+            int    best_iter   = -1;
 
-            /* ------------ training loop with early-stop ------------ */
-            const int MAX_ITERS = num_trees;
-            double best_metric  = std::numeric_limits<double>::max();
-            int    best_iter    = -1;
+            double last_l2 = std::numeric_limits<double>::quiet_NaN();
+            // LGBM_BoosterUpdateOneIter(booster, &fin);
+            for (int it = 0, fin; it < num_trees; ++it) {
+                /* 1. 先拿当前 raw score */
+                std::vector<double> raw(N);
+                int64_t out_len = 0;
+                LGBM_BoosterPredictForMat(
+                    booster, X.data(), C_API_DTYPE_FLOAT32,
+                    N, NUM_FEATS, 1, C_API_PREDICT_RAW_SCORE,
+                    -1, 0, "", &out_len, raw.data());
 
-            for (int it = 0, fin; it < MAX_ITERS; ++it) {
-                LGBM_BoosterUpdateOneIter(booster, &fin);
+                /* 2. 算 grad / hess */
+                std::vector<double> gD(N), hD(N);
+                time_obj_grad_hess(raw.data(), nullptr, N,
+                                gD.data(), hD.data(), &obj_data);
 
+                std::vector<float> grad(N), hess(N);
+                for (int i = 0; i < N; ++i) {        // 转 float
+                    grad[i] = static_cast<float>(gD[i]);
+                    hess[i] = static_cast<float>(hD[i]);
+                }
+
+                /* 3. 更新一棵树 */
+                LGBM_BoosterUpdateOneIterCustom(
+                    booster, grad.data(), hess.data(), &fin);            
+
+                // if (it == 0 && cur_epoch == 0) {
+                //     int sz = 0;
+                //     LGBM_BoosterNumberOfTotalModel(booster, &sz);     // sz=1 就是首棵树
+                    // double gain = 0;
+                    // LGBM_BoosterFeatureImportance(booster, 0, 0, &gain);
+                    // std::cerr<<"[DBG] first-tree gain = "<<gain<<"\n";
+                // }
+
+                 /* === 每 PRINT_EVERY 轮在验证集上评估一次 === */
                 if (dvalid && (it + 1) % PRINT_EVERY == 0) {
-                    /* metric on the first valid dataset */
-                    int      n_eval = 0;
-                    LGBM_BoosterGetEvalCounts(booster, &n_eval);
+                    int n = 0;  LGBM_BoosterGetEvalCounts(booster, &n);
+                    std::vector<double> eval(n); int out_len=0;
+                    LGBM_BoosterGetEval(booster, 0, &out_len, eval.data());
 
-                    std::vector<double> res(n_eval);
-                    int out_len = 0;
-                    LGBM_BoosterGetEval(booster, 0, &out_len, res.data());
+                    double l2 = eval.empty() ? 0.0 : eval[0];
+                    last_l2   = l2;                         // ① 先更新 last_l2
 
-                    double l1 = res.empty() ? 0.0 : res[0];
-                    progress("l1=" + std::to_string(l1), it + 1, MAX_ITERS);
-
-                    if (l1 < best_metric - 1e-7) {      // tiny epsilon
-                        best_metric = l1; best_iter = it;
+                    // ② 早停判定
+                    if (l2 < best_metric - 1e-7) { 
+                        best_metric = l2;  best_iter = it; 
                     } else if (it - best_iter >= EARLY_STOP) {
-                        logI("Early stop at iter " + std::to_string(it + 1) +
-                            "  best=" + std::to_string(best_iter + 1));
-                        break;
+                        break;                              // 提前结束本 epoch
                     }
                 }
+
+                /* === 打印进度条（用刚刚更新的 last_l2） === */
+                std::ostringstream tag;
+                tag << "ep" << cur_epoch
+                    << " l2=" << std::fixed << std::setprecision(4)
+                    << (std::isnan(last_l2) ? 0.0 : last_l2);
+
+                progress(tag.str(), it + 1, num_trees);
             }
             std::cerr << '\n';
 
-            /* save model */
-            LGBM_BoosterSaveModel(booster, 0, -1, 0, model_path.c_str());
-            logI("Model saved → " + model_path);
+            /* ========== 4. 预测训练集，写回 prev_prob ========== */
+            std::vector<double> raw(N); int64_t out_len = 0;
+            chk(!LGBM_BoosterPredictForMat(
+                    booster, X.data(), C_API_DTYPE_FLOAT32,
+                    N, NUM_FEATS, 1, C_API_PREDICT_NORMAL,
+                    -1, 0, "", &out_len, raw.data()),
+                "PredictForMat failed");
+            for (size_t i = 0; i < S.size(); ++i)
+                const_cast<Sample*>(S[i])->prev_prob = sigmoid(raw[i]);
 
-        }
-        else {
-            /* inference-only path */
-            int iters = 0;
-            if (LGBM_BoosterCreateFromModelfile(model_path.c_str(),
-                                                &iters, &booster))
-            { logE("model load failed"); return; }
-        }
+            /* ========== 5. 仅最后一轮落盘 ========== */
+            if (cur_epoch == MAX_EPOCH - 1)
+                LGBM_BoosterSaveModel(booster, 0, -1, 0, model_path.c_str());
+
+            /* ========== 6. 清理，下一轮重建 ========== */
+            LGBM_BoosterFree(booster);
+            LGBM_DatasetFree(dtrain);
+            if (dvalid) LGBM_DatasetFree(dvalid);
+        }   /* <<< end for cur_epoch */
+        
 
         /* ───── quick evaluation on training subset ─────────────── */
         {
@@ -434,19 +445,6 @@ public:
                     << "LightGBM:        " << avg(r_lgb)      << '\n'
                     << "Oracle (min):    " << avg(r_opt)      << '\n';
         }
-
-        /* ───── cleanup ───────────────────────────────────────────── */
-        if (!skip_train) {
-            LGBM_BoosterFree(booster);
-            LGBM_DatasetFree(dtrain);
-            if (dfocus) LGBM_DatasetFree(dfocus);
-            if (dvalid) LGBM_DatasetFree(dvalid);
-            
-        }
-        else {
-            LGBM_BoosterFree(booster);
-        }
-        
     }
 
 

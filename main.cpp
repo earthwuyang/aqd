@@ -6,13 +6,13 @@
 #include <sys/stat.h>  // 声明 ::mkdir
 #include <cerrno>      // errno 与 EEXIST
 #include <cmath>
+#include <unordered_map>
 
 #include "model_iface.hpp"
 #include "global_stats.hpp"
 
 bool g_need_col_plans = true;
 bool g_use_col_feat = false;
-
 
 /* factory fns declared somewhere in your project ---------------- */
 std::unique_ptr<IModel> make_lightgbm(const std::string& booster);
@@ -108,7 +108,7 @@ int main(int argc, char* argv[])
 
     /* ───── instantiate learner ────────────────────────────── */
     std::unique_ptr<IModel> learner;
-    if      (model_type == "lightgbm") learner = make_lightgbm("goss");
+    if      (model_type == "lightgbm") learner = make_lightgbm("gbdt");
     else if (model_type == "rowmlp")   learner = make_fann();
     else if (model_type == "dtree")    learner = make_dtree();
     else if (model_type == "forest")   learner = make_lightgbm("rf");
@@ -132,6 +132,7 @@ int main(int argc, char* argv[])
 
         /* (可选) 预加载所有索引列全集 — 只影响 covering-index 相关特征 */
         load_all_index_defs(sql_host, sql_port, sql_user, sql_pass, dbs);
+        collect_db_sizes(sql_host, sql_port, sql_user, sql_pass, data_dirs);
     }
 
     if (!query_sql.empty() && database.empty()) {

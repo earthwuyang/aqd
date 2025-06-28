@@ -13,6 +13,7 @@
 #include <random>     // ← 新增
 #include <unordered_set>
 #include <fstream>
+#include <unordered_map>
 
 /* ---------- 依赖库 ---------- */
 #include <Eigen/Dense>
@@ -32,6 +33,18 @@ constexpr int NUM_FEATS = ORIG_FEATS + EMB_DIM;
 /* ---------- 全局开关 ---------- */
 extern bool g_need_col_plans;            // 默认 = true
 extern bool g_use_col_feat;          // 默认为 false，由 CLI 设置
+
+
+
+/* 全局：键 = schema / data_dir，值 = 该库总大小（GB） */
+extern std::unordered_map<std::string,double> g_db_size_gb;
+
+/* 在 common.cpp 中实现，main.cpp 里直接调用 */
+void collect_db_sizes(const std::string& host,
+                      int               port,
+                      const std::string& user,
+                      const std::string& pass,
+                      const std::vector<std::string>& schemas);
 
 /* ────────────────── Column / Table 元数据 ────────────────── */
 enum ColDType : uint8_t { COL_INT=0, COL_FLOAT, COL_STRING,
@@ -57,6 +70,7 @@ struct Sample {
     int      fann_pred   = -1;
     int      hybrid_pred = -1;
     std::string dir_tag;                       // 来源数据集目录
+    double prev_prob = 0.5;
 };
 
 struct TblStats {

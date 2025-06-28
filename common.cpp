@@ -33,77 +33,13 @@ using namespace std;
 
 using json = nlohmann::json;
 
+std::unordered_map<std::string,double> g_db_size_gb;
 
 
 extern bool g_need_col_plans;   // 缺省为 true，兼容旧逻辑
 
 
 std::unordered_map<std::string,int> GLOBAL_OP2ID{ {"UNK",0} };
-
-
-// /* ---------- train -------------------------------------------------- */
-// void Logistic::fit(const std::vector<std::array<float,NUM_FEATS>>& X,
-//                    const std::vector<int>&                        y,
-//                    const RandomForest&                            rf,
-//                    int   epochs,
-//                    double lr)
-// {
-//     using clock = std::chrono::steady_clock;
-//     auto t0 = clock::now();
-
-//     for (int e = 0; e < epochs; ++e)
-//     {
-//         double g[4] = {0, 0, 0, 0};
-
-//         for (std::size_t i = 0; i < X.size(); ++i)
-//         {
-//             double x1 = X[i][41];                 // high-cost flag
-//             double x2 = X[i][43];                 // all-covered flag
-//             double x3 = rf.predict(X[i].data());  // forest prob
-
-//             double z = w[0] + w[1]*x1 + w[2]*x2 + w[3]*x3;
-//             double p = sig(z);
-//             double d = p - y[i];
-
-//             g[0] += d;
-//             g[1] += d * x1;
-//             g[2] += d * x2;
-//             g[3] += d * x3;
-//         }
-
-//         for (double &gi : g) gi /= X.size();
-//         for (int j = 0; j < 4; ++j) w[j] -= lr * g[j];
-
-//         if ((e + 1) % 10 == 0 || e + 1 == epochs)
-//             progress("LR-train", e + 1, epochs);
-//     }
-
-//     auto t1 = clock::now();
-//     logI("Logistic fine-tune took " +
-//          std::to_string(std::chrono::duration_cast<std::chrono::seconds>(t1 - t0).count()) +
-//          " s");
-// }
-
-// /* ---------- predict ------------------------------------------------ */
-// double Logistic::predict(const float* f, double rfProb) const
-// {
-//     double z = w[0] + w[1]*f[41] + w[2]*f[43] + w[3]*rfProb;
-//     return sig(z);
-// }
-
-// /* ---------- JSON helpers ------------------------------------------ */
-// nlohmann::json Logistic::to_json() const
-// {
-//     return nlohmann::json::array({w[0], w[1], w[2], w[3]});
-// }
-
-// void Logistic::from_json(const nlohmann::json& j)
-// {
-//     if (!j.is_array() || j.size() != 4)
-//         throw std::runtime_error("Logistic::from_json – malformed JSON");
-
-//     for (int i = 0; i < 4; ++i) w[i] = j[i].get<double>();
-// }
 
 
 void logI(const string&s){ cerr<<"[INFO]  "<<s<<'\n'; }
@@ -185,6 +121,52 @@ bool getBool(const json&o,const char*k){
     return false;
 }
 
+/* ▶ 单库查询：返回 GB；失败时给 1.0 作稳妥默认 */
+static double fetch_db_size_gb(const std::string& host,int port,
+                               const std::string& user,const std::string& pass,
+                               const std::string& schema)
+{
+    MYSQL* c = mysql_init(nullptr);
+    mysql_options(c, MYSQL_OPT_RECONNECT, "1");
+    if (!mysql_real_connect(c, host.c_str(), user.c_str(), pass.c_str(),
+                            "information_schema", port, nullptr, 0))
+    {
+        logW("MySQL connect fail for "+schema+", use 1.0 GB default");
+        return 1.0;
+    }
+    std::string sql =
+        "SELECT COALESCE(SUM(DATA_LENGTH+INDEX_LENGTH),0) "
+        "FROM TABLES WHERE TABLE_SCHEMA='" + schema + '\'';
+    unsigned long long bytes = 0;
+    if (mysql_query(c, sql.c_str()) == 0)
+    {
+        if (MYSQL_RES* r = mysql_store_result(c))
+        {
+            if (MYSQL_ROW row = mysql_fetch_row(r))
+                bytes = row && row[0] ? strtoull(row[0],nullptr,10) : 0ULL;
+            mysql_free_result(r);
+        }
+    }
+    mysql_close(c);
+    return bytes / (1024.0*1024*1024);          // → GB
+}
+
+/* ▶ 对外唯一接口：一次把所有 schema 的大小放进 g_db_size_gb */
+void collect_db_sizes(const std::string& host,
+                      int               port,
+                      const std::string& user,
+                      const std::string& pass,
+                      const std::vector<std::string>& schemas)
+{
+    g_db_size_gb.clear();
+    for (const auto& s : schemas)
+    {
+        double gb = fetch_db_size_gb(host,port,user,pass,s);
+        // if (gb < 1e-6) gb = 1.0;                // 最低 1 MB ⇒ 1 GB 说明值异常
+        g_db_size_gb[s] = gb;
+        std::cerr << "[DB_SIZE] " << s << " = " << gb << " GB\n";
+    }
+}
 
 double DecisionTree::gini(double pos,double tot){
     if(tot<=0) return 1.0;
