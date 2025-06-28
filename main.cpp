@@ -45,7 +45,7 @@ int main(int argc, char* argv[])
     std::string sql_pass = "";
 
     /* ───── CLI / hyper-params ─────────────────────────────── */
-    std::string model_type  = "forest";
+    std::string model_type  = "lightgbm";
     std::string base        = "/home/wuy/query_costs";
     std::vector<std::string> data_dirs{
         "tpch_sf100",

@@ -23,7 +23,7 @@ using json = nlohmann::json;
 using namespace std;
 
 /* ---------- 全局常量 ---------- */
-constexpr int    ORIG_FEATS   = 115;      // feature dim
+constexpr int    ORIG_FEATS   = 124;      // feature dim
 constexpr double EPS_RUNTIME = 1e-2;
 constexpr double COST_THR    = 5e4;
 
@@ -100,6 +100,11 @@ struct Agg{
     double lateFanMax  = 0;   // ❶ NEW  – max fan-out seen at depth ≥ 4
     double pcDepth3 = 0;        // Σ prefix_cost of tables at depth == 3
     bool  hashJoin = false;          // NEW – any table used hash join‐buffer
+    int preds_total  = 0;   // # predicates seen
+    int preds_pushed = 0;   // # that were pushed below table layer
+
+    /* — (ii) long- vs short-branch row ratio for joins — */
+    double join_ratio_max = 1.0;   // ≥1, larger ⇒ bigger fan-out
 };
 
 struct ColStats {

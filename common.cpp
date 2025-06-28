@@ -486,6 +486,17 @@ void walk(const json& n, Agg& a, int depth = 1)
             a.ratioSum  += ratio;
             a.ratioMax   = std::max(a.ratioMax, ratio);
 
+
+            if (t.contains("attached_condition") ||
+                    t.contains("pushed_index_condition") ||
+                    t.contains("pushed_join_condition"))
+                {
+                    ++a.preds_total;
+                    if (t.contains("pushed_index_condition") ||
+                        t.contains("pushed_join_condition"))
+                        ++a.preds_pushed;
+                }
+
             /* access-type counters ----------------------------------------- */
             const std::string at = t.value("access_type", "ALL");
             if      (at == "range")   a.cRange++;
@@ -534,6 +545,23 @@ void walk(const json& n, Agg& a, int depth = 1)
         if (n.contains("grouping_operation"))                                  a.grp = true;
         if (n.contains("ordering_operation") || getBool(n, "using_filesort"))  a.ord = true;
         if (getBool(n, "using_temporary_table"))                               a.tmp = true;
+
+        if (n.contains("nested_loop") && n["nested_loop"].is_array()) {
+            const auto& nl = n["nested_loop"];
+            if (nl.size() >= 2) {
+                auto rows_of = [](const json& x)->double {
+                    if (x.contains("table"))
+                        return safe_f(x["table"], "rows_produced_per_join");
+                    return safe_f(x, "rows_produced_per_join");
+                };
+                double l = rows_of(nl[0]), r = rows_of(nl[1]);
+                if (l > 0 && r > 0) {
+                    double ratio = std::max(l, r) / std::max(1.0, std::min(l, r));
+                    a.join_ratio_max = std::max(a.join_ratio_max, ratio);
+                }
+            }
+        }
+
 
         /* recurse into children (skip “table” key we already handled) */
         for (const auto& kv : n.items())
@@ -1228,6 +1256,29 @@ bool plan2feat(const json &plan, float f[NUM_FEATS])
 
     // F114  minmax_without_group
     PUSH( agg_flag ? 1.0f : 0.0f );   // 已经算过 agg_flag
+
+    /* === (i) predicate selectivity & push-down one-hots — 8 dims === */
+    double sel_avg = a.selSum * inv;               // 0-1
+    auto oh_sel = [&](double v){
+        PUSH(v<=0.01);          // ultra-selective
+        PUSH(v>0.01 && v<=0.10);
+        PUSH(v>0.10 && v<=0.50);
+        PUSH(v>0.50);
+    };
+    oh_sel(sel_avg);
+
+    double pdr = (a.preds_total>0) ?
+                double(a.preds_pushed)/a.preds_total : 0.0;
+    auto oh_pdr = [&](double v){
+        PUSH(v==0);
+        PUSH(v>0   && v<=0.30);
+        PUSH(v>0.30&& v<=0.70);
+        PUSH(v>0.70);
+    };
+    oh_pdr(pdr);
+
+    /* === (ii) max join long/short branch ratio — 1 dim === */
+    PUSH( std::log1p(a.join_ratio_max) );          // soft-log, 1 →0
 
 #undef PUSH
     if (k != ORIG_FEATS) {
