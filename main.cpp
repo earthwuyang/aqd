@@ -108,7 +108,7 @@ int main(int argc, char* argv[])
 
     /* ───── instantiate learner ────────────────────────────── */
     std::unique_ptr<IModel> learner;
-    if      (model_type == "lightgbm") learner = make_lightgbm("gbdt");
+    if      (model_type == "lightgbm") learner = make_lightgbm("goss");
     else if (model_type == "rowmlp")   learner = make_fann();
     else if (model_type == "dtree")    learner = make_dtree();
     else if (model_type == "forest")   learner = make_lightgbm("rf");
@@ -234,7 +234,7 @@ int main(int argc, char* argv[])
     for (auto& kv : ALL) total_samples += kv.second.size();
     for (auto& kv : ALL) {
         double n = kv.second.size();
-        DIR_W[kv.first] = std::pow(total_samples / n, 0.35);   // √反比
+        DIR_W[kv.first] = std::pow(total_samples / n, 0.2);   // √反比
     }
     global_stats().freeze();
 

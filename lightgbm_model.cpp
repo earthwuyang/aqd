@@ -37,6 +37,42 @@ inline void chk(bool ok,const char*msg){
     if(!ok){ std::cerr<<"[FATAL] "<<msg<<'\n'; std::abort(); }
 }
 
+/* ---------- Regret-Aware BCE 目标 ------------------------------
+ *  grad = (p-y) * regret
+ *  hess = p(1-p) * regret
+ *  其中 regret = |rt-ct|  (秒)
+ * ------------------------------------------------------------- */
+struct RegretObjData {
+    const double* rt;   // 行存真实耗时
+    const double* ct;   // 列存真实耗时
+};
+
+int regret_obj_grad_hess(const double* score, const double* /*label*/,
+                         int64_t num_data,
+                         double* grad, double* hess,
+                         void* user_data)
+{
+    const auto* d = static_cast<const RegretObjData*>(user_data);
+    constexpr double G_CLIP = 50.0;       // 和你原来的保持一致
+
+    for (int64_t i = 0; i < num_data; ++i) {
+        double rt = d->rt[i], ct = d->ct[i];
+        double y  = (ct < rt) ? 1.0 : 0.0;           // 1 ⇒ 列更快
+        double r  = std::fabs(rt - ct);              // regret (秒)
+
+        double p = 1.0 / (1.0 + std::exp(-score[i]));
+        double g = (p - y) * r;                      // 见上式
+        double h = std::max(1e-6, p * (1.0 - p)) * r;
+
+        /* 与旧实现一致的裁剪 / 地板 */
+        g = std::max(-G_CLIP, std::min(G_CLIP, g));
+        h = std::max(1e-4, h);
+        grad[i] = g;
+        hess[i] = h;
+    }
+    return 0;
+}
+
 /* ---------- 自定义损失: 期望运行时间平方误差 ---------- *
  * L = ( p·ct + (1-p)·rt – g )²
  *   其中 p = σ(score),  g = min(rt,ct)
@@ -99,9 +135,11 @@ int time_obj_grad_hess(const double* score,        /* raw scores      */
 
 class LGBModel : public IModel {
     std::string booster_; //"goss" or "rf"
+    bool        use_custom_loss_; 
 public:
     explicit LGBModel(std::string booster = "goss")
-        : booster_(std::move(booster)) {}
+        : booster_(std::move(booster)),
+        use_custom_loss_(booster_ != "rf") {}  //rf doesn't use custom objective
 
     /*  ------------------------------------------------------------
     LGBModel::train  –  re-worked to honour the `va` set
@@ -119,7 +157,7 @@ public:
         constexpr int    EARLY_STOP   = 30;          // rounds w/out improvement
         constexpr int    PRINT_EVERY  = 10;
         int num_threads = 20;
-        const int MAX_EPOCH = 1;
+        const int MAX_EPOCH = 3;
 
         bool skip_train = opt.skip_train;
         // double sumsample = opt.subsample;
@@ -168,11 +206,17 @@ public:
 
         for (int cur_epoch = 0; cur_epoch < MAX_EPOCH; ++cur_epoch)
         {
+            std::vector<float> Xv;          // 验证特征
+            std::vector<float> yv;          // （若你还需要）
+            std::vector<double> va_rt, va_ct;
+
+            int Nv = 0;                     // 验证集条数
+
              /* 1. 计算基础正/负样本权；正样本略降，负样本略升  */
             double P = 0, N0 = 0;
             for (auto p : S) p->label ? ++P : ++N0;
-            double w_pos = 1.30 * N / (2 * P);   // ↑ 1.3
-            double w_neg = 0.90 * N / (2 * N0);  // ↓ 0.9
+            double w_pos = 1 * N / (2 * P);   // ↑ 1.3
+            double w_neg = 3 * N / (2 * N0);  // ↓ 0.9
 
             for (int i = 0; i < N; ++i) {
                 const Sample& s = *S[i];
@@ -213,7 +257,9 @@ public:
                 w_i *= DIR_W.at(s.dir_tag);
 
                 /* ---------- (D) 代价敏感放大  ←📍就在这里加 ---------- */
-                w_i *= std::pow(std::fabs(rt - ct), 1.3); 
+                // w_i *= std::pow(std::fabs(rt - ct), 20); 
+                double regret = std::fabs(rt - ct);
+                w_i *= (1.0 + 0.5 * regret);
 
                 /* (E)  focal-loss 难例权重 */
                 w_i *= std::pow(1.0-std::fabs(s.prev_prob-0.5)*2,2.0);
@@ -221,7 +267,7 @@ public:
                 /* (F)  统一软剪裁：随 epoch 略放宽 */
                 double epoch_scale = 1.0 + cur_epoch/200.0;
                 double log_lo = std::log(0.05*base);
-                double log_hi = std::log(20.0*base*epoch_scale);
+                double log_hi = std::log(100.0*base*epoch_scale);
                 w_i = std::exp(clamp_val(std::log(w_i),log_lo,log_hi));
 
                 double slow = std::pow(std::min(rt,ct) /*秒*/ , 0.8);  // or log1p(rt+ct)
@@ -245,8 +291,11 @@ public:
             LGBM_DatasetSetField(dtrain, "weight", w.data(), N, C_API_DTYPE_FLOAT32);
 
             if (!va.empty()) {                          // 你的原来的验证集构造逻辑
-                const int Nv = static_cast<int>(va.size());
-                std::vector<float> Xv(size_t(Nv)*NUM_FEATS), yv(Nv);
+                Nv = static_cast<int>(va.size());
+                Xv.resize(size_t(Nv) * NUM_FEATS);
+                yv.resize(Nv);
+                va_rt.resize(Nv);
+                va_ct.resize(Nv);
                 for (int i = 0; i < Nv; ++i) {
                     std::copy(va[i].feat.begin(), va[i].feat.end(),
                             Xv.begin() + i*NUM_FEATS);
@@ -270,18 +319,29 @@ public:
                 rt_d[i] = S[i]->row_t;
                 ct_d[i] = S[i]->col_t;
             }
-            TimeObjData obj_data{ rt_d.data(), ct_d.data() };
+            // TimeObjData obj_data{ rt_d.data(), ct_d.data() };
+            RegretObjData obj_data {rt_d.data(), ct_d.data()};
+
+            if (dvalid) {
+                va_rt.resize(Nv);
+                va_ct.resize(Nv);
+                for (int i = 0; i < Nv; ++i) {
+                    va_rt[i] = std::max(va[i].row_t, EPS_RUNTIME);
+                    va_ct[i] = std::max(va[i].col_t, EPS_RUNTIME);
+                }
+            }
 
 
             /* --- 参数字符串 param 与你旧代码完全一样 --- */
             std::string param = "boosting=" + booster_
-                  + " objective=none metrics=l2"
+                  + " objective=" + (use_custom_loss_? "none" : "regression_l2")
+                  + " metrics=l2"
                   + " learning_rate=" + std::to_string(lr*0.75)
-                  + " num_leaves=1024 max_depth=18 max_bin=127"
+                  + " num_leaves=256 max_depth=18 max_bin=127"
                   + " feature_fraction=" + std::to_string(colsample)
-                  + " lambda_l1=0 lambda_l2=0.1"
-                  + " min_data_in_leaf=5"      // ★ 新增：允许小叶子
-                  + " min_split_gain=0"        // ★ 新增：取消最小增益门槛
+                  + " lambda_l1=0 lambda_l2=1"
+                  + " min_data_in_leaf=20"     
+                  + " min_split_gain=0"       
                   + " num_threads=" + std::to_string(num_threads)
                   + " verbosity=-1";
             
@@ -307,37 +367,48 @@ public:
 
             double last_l2 = std::numeric_limits<double>::quiet_NaN();
             // LGBM_BoosterUpdateOneIter(booster, &fin);
+            std::vector<double> raw(N, 0.0);
             for (int it = 0, fin; it < num_trees; ++it) {
-                /* 1. 先拿当前 raw score */
-                std::vector<double> raw(N);
+                if (use_custom_loss_) {
+                    /* 1. 先拿当前 raw score */
+                
+                    // int64_t out_len = 0;
+                    // LGBM_BoosterPredictForMat(
+                    //     booster, X.data(), C_API_DTYPE_FLOAT32,
+                    //     N, NUM_FEATS, 1, C_API_PREDICT_RAW_SCORE,
+                    //     -1, 0, "", &out_len, raw.data());
+
+                    /* 2. 算 grad / hess */
+                    std::vector<double> gD(N), hD(N);
+                    // time_obj_grad_hess(raw.data(), nullptr, N,
+                    //                 gD.data(), hD.data(), &obj_data);
+                    regret_obj_grad_hess(raw.data(), nullptr, N,
+                                    gD.data(), hD.data(), &obj_data);
+
+                    std::vector<float> grad(N), hess(N);
+                    for (int i = 0; i < N; ++i) {        // 转 float
+                        grad[i] = static_cast<float>(gD[i]);
+                        hess[i] = static_cast<float>(hD[i]);
+                    }
+
+                    /* 3. 更新一棵树 */
+                    LGBM_BoosterUpdateOneIterCustom(
+                        booster, grad.data(), hess.data(), &fin);    
+                }
+                else {
+                    LGBM_BoosterUpdateOneIter(booster, &fin);
+                }
+                        
+
+                std::vector<double> delta(N);
                 int64_t out_len = 0;
                 LGBM_BoosterPredictForMat(
                     booster, X.data(), C_API_DTYPE_FLOAT32,
                     N, NUM_FEATS, 1, C_API_PREDICT_RAW_SCORE,
-                    -1, 0, "", &out_len, raw.data());
+                    /*start_iteration=*/it,        /*num_iteration=*/1,
+                    "", &out_len, delta.data());
 
-                /* 2. 算 grad / hess */
-                std::vector<double> gD(N), hD(N);
-                time_obj_grad_hess(raw.data(), nullptr, N,
-                                gD.data(), hD.data(), &obj_data);
-
-                std::vector<float> grad(N), hess(N);
-                for (int i = 0; i < N; ++i) {        // 转 float
-                    grad[i] = static_cast<float>(gD[i]);
-                    hess[i] = static_cast<float>(hD[i]);
-                }
-
-                /* 3. 更新一棵树 */
-                LGBM_BoosterUpdateOneIterCustom(
-                    booster, grad.data(), hess.data(), &fin);            
-
-                // if (it == 0 && cur_epoch == 0) {
-                //     int sz = 0;
-                //     LGBM_BoosterNumberOfTotalModel(booster, &sz);     // sz=1 就是首棵树
-                    // double gain = 0;
-                    // LGBM_BoosterFeatureImportance(booster, 0, 0, &gain);
-                    // std::cerr<<"[DBG] first-tree gain = "<<gain<<"\n";
-                // }
+                for (int i = 0; i < N; ++i) raw[i] += delta[i];   // ← 关键累加
 
                  /* === 每 PRINT_EVERY 轮在验证集上评估一次 === */
                 if (dvalid && (it + 1) % PRINT_EVERY == 0) {
@@ -355,6 +426,38 @@ public:
                         break;                              // 提前结束本 epoch
                     }
                 }
+                // if (dvalid && (it + 1) % PRINT_EVERY == 0) {
+
+                //     /* ---------- 2.1 先拿 raw 预测 ------------------ */
+                //     std::vector<double> raw_va(Nv); int64_t _ = 0;
+                //     LGBM_BoosterPredictForMat(
+                //         booster, Xv.data(), C_API_DTYPE_FLOAT32,
+                //         Nv, NUM_FEATS, 1, C_API_PREDICT_NORMAL,
+                //         -1, 0, "", &_, raw_va.data());
+
+                //     /* ---------- 2.2 把 raw → decision -------------- */
+                //     constexpr double TAU = 0.0;                 // 你也可以扫 τ
+                //     double sum_pred = 0, sum_best = 0;
+                //     for (int j = 0; j < Nv; ++j) {
+                //         bool use_col = raw_va[j] > TAU;
+                //         double t_pred = use_col ? va_ct[j] : va_rt[j];
+                //         double t_best = std::min(va_rt[j], va_ct[j]);
+                //         sum_pred += t_pred;
+                //         sum_best += t_best;
+                //     }
+
+                //     /* ---------- 2.3 runtime-loss (>=1, 越小越好) ---- */
+                //     double rl = sum_pred / sum_best;
+                //     last_l2   = rl;                 // 复用变量名，省事
+
+                //     /* ---------- 2.4 手动早停 ----------------------- */
+                //     if (rl < best_metric - 1e-6) {          // “更好” 判定
+                //         best_metric = rl;
+                //         best_iter   = it;
+                //     } else if (it - best_iter >= EARLY_STOP) {
+                //         break;                              // 触发早停
+                //     }
+                // }
 
                 /* === 打印进度条（用刚刚更新的 last_l2） === */
                 std::ostringstream tag;
@@ -367,7 +470,7 @@ public:
             std::cerr << '\n';
 
             /* ========== 4. 预测训练集，写回 prev_prob ========== */
-            std::vector<double> raw(N); int64_t out_len = 0;
+            int64_t out_len = 0;
             chk(!LGBM_BoosterPredictForMat(
                     booster, X.data(), C_API_DTYPE_FLOAT32,
                     N, NUM_FEATS, 1, C_API_PREDICT_NORMAL,

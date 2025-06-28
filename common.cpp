@@ -1278,13 +1278,13 @@ bool plan2feat(const json &plan, float f[NUM_FEATS])
     oh_pdr(pdr);
 
     /* === (ii) max join long/short branch ratio — 1 dim === */
-    PUSH( std::log1p(a.join_ratio_max) );          // soft-log, 1 →0
+    PUSH( std::log1p(a.join_ratio_max) );          // soft-log, 1 →0  // F123
 
 #undef PUSH
     if (k != ORIG_FEATS) {
         throw std::runtime_error("paln2feat feature count mismatch");
     }
-    return k == ORIG_FEATS;        // k should be 95 now
+    return k == ORIG_FEATS;       
 }
 
 // parseColPlan now uses per-dir stats for numeric norms and a global op2id map
@@ -1584,6 +1584,8 @@ load_all_datasets(const std::string& base,
             auto itm = meta.find(qid);
             if (itm == meta.end()) continue;                // no meta row
 
+            
+
             Sample s;
             /* NB: fp_row is full path now */
             std::string fp_row = rowPlanDir + "/" + baseName;
@@ -1764,6 +1766,9 @@ void report_metrics(const std::vector<int>& pred_lgb,
     std::cout<<"\n=== AI Model where Cost-Rule is WRONG ("<<N_cost_bad<<" samples) ===\n";
     pr("AI_cost_BAD",S_ai_cost_bad, N_cost_bad);
     /* ----------------------------------------------------------- */
+
+    double loss_runtime = (S_lgb.avg(N) - S_opt.avg(N)) / S_opt.avg(N);
+    printf("Runtime-loss (ratio): %.4f\n", loss_runtime + 1.0);
 
     std::cout<<"\n[CSV] test_metrics.csv written (includes Oracle & subset stats)\n";
 }
