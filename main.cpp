@@ -51,6 +51,7 @@ int main(int argc, char* argv[])
         "tpch_sf100",
         "tpcds_sf10",
         "tpch_sf1",
+        "tpch_sf10",
         "tpcds_sf1",
         "hybench_sf1",
         "hybench_sf10",
@@ -64,7 +65,7 @@ int main(int argc, char* argv[])
     };
 
     TrainOpt hp;                 // generic hyper-param struct you defined
-    uint32_t seed        = 42;
+    uint32_t seed        = 7;
     hp.trees             = 800;  // sensible defaults
     hp.max_depth         = 12;
     hp.lr                = 0.06;

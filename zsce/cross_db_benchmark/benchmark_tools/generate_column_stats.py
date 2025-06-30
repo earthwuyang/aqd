@@ -110,6 +110,7 @@ def generate_stats(data_dir, dataset, force=True):
     all_files = [f for f in all_files if 'tbl' in f or 'dat' in f or 'csv' in f]
     for t in schema.tables:
         print(f"Generating statistics for {t}")
+
         column_stats_table = dict()
         # Get the dtype mapping for the current table
         dtype_mapping = get_dtypes_for_table(t, column_type)
@@ -117,7 +118,12 @@ def generate_stats(data_dir, dataset, force=True):
         for f in all_files:
             
             # if f.startswith(t):
-            if f.split('.')[0] == t:
+            # if f.split('.')[0] == t:
+                
+            import re
+            pattern = re.compile(rf"^{re.escape(t)}(_\d+(_\d+)*)?\.(dat|tbl|csv)$", re.I)
+
+            if pattern.match(f):
                 print(f"Processing file {f}")
                 try:
                     table_dir = os.path.join(data_dir, f)
@@ -137,9 +143,9 @@ def generate_stats(data_dir, dataset, force=True):
                     # -------- 🏷️ ② 如果多 1 列，就临时加占位列名 --------
                     names_for_read = list(tables[t]) + ["__dummy__"] if actual_cols == expected_cols + 1 else tables[t]
                     
-
+                    # print(f"reading table: {table_dir}")
                     df_table = pd.read_csv(table_dir, **vars(schema.csv_kwargs), names=names_for_read, dtype=dtype_mapping, header=None)
-                    
+                    # print(f"df_table: {df_table}")
                     if actual_cols == expected_cols + 1:
                         df_table.drop(columns="__dummy__", inplace=True)
 
