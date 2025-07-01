@@ -40,3 +40,16 @@ make
 ./router --model lightgbm (--skip_train --data_dirs=tpch_sf100,tpch_sf1,tpdcs_sf1)
 ```
 Currently supports lightgbm, rowmlp (implemented with FANN), dtree (decision tree), forest (random forest), all implemented in c++.
+
+
+
+## python_impl
+### first extract features
+```
+python feature_analysis.py extract tpch_sf1
+```
+
+### train 
+```
+python feature_analysis.py train airline --use_idx shap_idx.npy
+```
