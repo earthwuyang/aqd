@@ -154,7 +154,7 @@ public:
         constexpr float  DECISION     = 0.0f;         // τ*
         constexpr double Q_SMALL      = 1e4;
         constexpr double Q_LARGE      = 5e4;
-        constexpr int    EARLY_STOP   = 30;          // rounds w/out improvement
+        constexpr int    EARLY_STOP   = 100;          // rounds w/out improvement
         constexpr int    PRINT_EVERY  = 10;
         int num_threads = 20;
         const int MAX_EPOCH = 3;

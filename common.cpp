@@ -1553,8 +1553,8 @@ load_all_datasets(const std::string& base,
 
                 meta[qid] = {
                     lab  == "1",
-                    rt.empty()   ? 0 : std::stod(rt),
-                    ct.empty()   ? 0 : std::stod(ct),
+                    rt.empty()   ? 60 : std::stod(rt),
+                    ct.empty()   ? 60 : std::stod(ct),
                     fann.empty() ? -1 : std::stoi(fann),
                     hyb .empty() ? -1 : std::stoi(hyb)
                 };

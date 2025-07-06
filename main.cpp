@@ -48,11 +48,12 @@ int main(int argc, char* argv[])
     std::string model_type  = "lightgbm";
     std::string base        = "/home/wuy/query_costs";
     std::vector<std::string> data_dirs{
-        "tpch_sf100",
-        "tpcds_sf10",
         "tpch_sf1",
         "tpch_sf10",
+        "tpch_sf100",
         "tpcds_sf1",
+        "tpcds_sf10",
+        "tpcds_sf100",
         "hybench_sf1",
         "hybench_sf10",
         "airline",
@@ -65,7 +66,7 @@ int main(int argc, char* argv[])
     };
 
     TrainOpt hp;                 // generic hyper-param struct you defined
-    uint32_t seed        = 7;
+    uint32_t seed        = 42;
     hp.trees             = 800;  // sensible defaults
     hp.max_depth         = 12;
     hp.lr                = 0.06;
