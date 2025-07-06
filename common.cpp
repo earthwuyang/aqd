@@ -1645,133 +1645,151 @@ vector<string> pick_test3(vector<string> dirs, uint32_t seed)
 
 
 /* ─────────────────────────────────────────────────────────────
- *  report_and_evaluate
+ *  report_and_evaluate   — Macro-P / R / F1 版本
+ *  仍输出 AI_cost_OK / AI_cost_BAD
  * ───────────────────────────────────────────────────────────── */
 void report_metrics(const std::vector<int>& pred_lgb,
                     const std::vector<Sample>& DS_test)
 {
     struct Stat {
-        long TP=0,FP=0,TN=0,FN=0; double rt_sum=0;
-        void add(bool p,bool g,double rt,double ct){
-            (p? (g?++TP:++FP):(g?++FN:++TN));
-            rt_sum += (p?ct:rt);
+        long TP = 0, FP = 0, TN = 0, FN = 0;
+        double rt_sum = 0;
+
+        void add(bool pred, bool gt, double rt, double ct) {
+            (pred ? (gt ? ++TP : ++FP) : (gt ? ++FN : ++TN));
+            rt_sum += (pred ? ct : rt);
         }
-        double acc(long n) const { return n? double(TP+TN)/n : 0; }
-        double prec()      const { return (TP+FP)? double(TP)/(TP+FP):0; }          // -- NEW --
-        double rec()       const { return (TP+FN)? double(TP)/(TP+FN):0; }
-        double f1()        const { return TP? 2.0*TP/(2*TP+FP+FN):0; }
-        double avg(long n) const { return n? rt_sum/n : 0; }
+
+        /* —— 每类指标 —— */
+        double prec_pos() const { return (TP + FP) ? double(TP) / (TP + FP) : 0; }
+        double rec_pos()  const { return (TP + FN) ? double(TP) / (TP + FN) : 0; }
+        double f1_pos()   const { return TP ? 2.0 * TP / (2 * TP + FP + FN) : 0; }
+
+        double prec_neg() const { return (TN + FN) ? double(TN) / (TN + FN) : 0; }
+        double rec_neg()  const { return (TN + FP) ? double(TN) / (TN + FP) : 0; }
+        double f1_neg()   const { long TPn = TN, FPn = FN, FNn = FP;
+                                   return TPn ? 2.0 * TPn / (2 * TPn + FPn + FNn) : 0; }
+
+        /* —— Macro 指标 —— */
+        double precM() const { return 0.5 * (prec_pos() + prec_neg()); }
+        double recM () const { return 0.5 * (rec_pos () + rec_neg ()); }
+        double f1M  () const { return 0.5 * (f1_pos  () + f1_neg  ()); }
+
+        double acc(long n) const { return n ? double(TP + TN) / n : 0; }
+        double avg(long n) const { return n ? rt_sum / n : 0; }
     };
 
-    std::unordered_map<std::string, Stat> perDir;
-    Stat S_row,S_col,S_cost,S_hopt,S_fann,S_lgb,S_opt;
-
-    /* ----- NEW : 统计 AI on cost-correct / cost-wrong ----- */
+    /* 统计结构体 */
+    Stat S_row, S_col, S_cost, S_hopt, S_fann, S_lgb, S_opt;
     Stat S_ai_cost_ok, S_ai_cost_bad;
-    long N_cost_ok  = 0;
-    long N_cost_bad = 0;
-    /* ------------------------------------------------------ */
+    long N_cost_ok = 0, N_cost_bad = 0;
 
-    double oracle_rt_sum = 0.0;
+    double oracle_rt_sum = 0;
 
-    for (size_t i=0;i<DS_test.size();++i){
-        const Sample &s = DS_test[i];
-        bool gt   = (s.col_t < s.row_t);              // ground-truth
-        bool lgb  = pred_lgb[i];
+    for (size_t i = 0; i < DS_test.size(); ++i) {
+        const Sample& s = DS_test[i];
+        bool gt        = (s.col_t < s.row_t);   // ground-truth
+        bool lgb       = pred_lgb[i];
         bool cost_pred = (s.qcost > COST_THR);
 
-        S_row .add(false      ,gt,s.row_t,s.col_t);
-        S_col .add(true       ,gt,s.row_t,s.col_t);
-        S_cost.add(cost_pred  ,gt,s.row_t,s.col_t);
-        S_hopt.add(s.hybrid_pred ,gt,s.row_t,s.col_t);
-        S_fann.add(s.fann_pred   ,gt,s.row_t,s.col_t);
-        S_lgb .add(lgb           ,gt,s.row_t,s.col_t);
+        S_row .add(false , gt, s.row_t, s.col_t);
+        S_col .add(true  , gt, s.row_t, s.col_t);
+        S_cost.add(cost_pred        , gt, s.row_t, s.col_t);
+        S_hopt.add(s.hybrid_pred==1 , gt, s.row_t, s.col_t);
+        S_fann.add(s.fann_pred  ==1 , gt, s.row_t, s.col_t);
+        S_lgb .add(lgb            , gt, s.row_t, s.col_t);
 
-        /* Oracle: always faster path */
-        bool oracle_pred = (s.col_t < s.row_t);
-        S_opt.add(oracle_pred, gt, s.row_t, s.col_t);
+        /* Oracle 总是选择更快的 */
+        S_opt.add(gt, gt, s.row_t, s.col_t);
 
-        perDir[s.dir_tag].add(lgb, gt, s.row_t, s.col_t);
         oracle_rt_sum += std::min(s.row_t, s.col_t);
 
-        /* ----- NEW : 根据 cost_rule 正误，再累计 AI 模型表现 -------- */
-        if (cost_pred == gt){                 // cost_rule 命中
-            S_ai_cost_ok.add(lgb, gt, s.row_t, s.col_t);
+        /* cost-rule 正 / 误 子集 */
+        if (cost_pred == gt) {           // 命中
+            S_ai_cost_ok .add(lgb, gt, s.row_t, s.col_t);
             ++N_cost_ok;
-        } else {                              // cost_rule 失准
+        } else {
             S_ai_cost_bad.add(lgb, gt, s.row_t, s.col_t);
             ++N_cost_bad;
         }
-        /* ----------------------------------------------------------- */
     }
 
     const long N = DS_test.size();
-    printf("oracle avg time: %f\n", oracle_rt_sum/N);
+    printf("oracle avg time: %.6f\n", oracle_rt_sum / N);
 
-    /* ------------ CSV -------------- (保持原实现) -------------- */
+    /* ============  CSV ============ */
     std::ofstream fout("test_metrics.csv");
-    fout<<"method,TP,FP,TN,FN,accuracy,precision,recall,f1,avg_runtime\n";
-    auto dump=[&](const std::string &n,Stat&s,long n_samples){
-        fout<<n<<','<<s.TP<<','<<s.FP<<','<<s.TN<<','<<s.FN<<','
-            <<s.acc(n_samples)<<','<<s.prec()<<','<<s.rec()<<','<<s.f1()<<','<<s.avg(n_samples)<<'\n';
-    };
-    dump("row_only"      ,S_row ,N);
-    dump("column_only"   ,S_col ,N);
-    dump("cost_rule"     ,S_cost,N);
-    dump("hybrid_opt"    ,S_hopt,N);
-    dump("Kernel Model"  ,S_fann,N);
-    dump("AI Model"      ,S_lgb ,N);
-    dump("Oracle"        ,S_opt ,N);
+    fout << "method,TP,FP,TN,FN,accuracy,macro_precision,macro_recall,macro_f1,avg_runtime\n";
 
-    /* ----- NEW : 追加子集统计到 CSV（可选） -------------------- */
-    dump("AI_on_cost_OK" ,S_ai_cost_ok ,N_cost_ok );
-    dump("AI_on_cost_BAD",S_ai_cost_bad,N_cost_bad);
-    /* ----------------------------------------------------------- */
+    auto dump = [&](const std::string& name, Stat& s, long n_samples) {
+        fout << name << ','
+             << s.TP << ',' << s.FP << ',' << s.TN << ',' << s.FN << ','
+             << s.acc(n_samples) << ','
+             << s.precM()        << ','
+             << s.recM()         << ','
+             << s.f1M()          << ','
+             << s.avg(n_samples) << '\n';
+    };
+
+    dump("row_only"      , S_row , N);
+    dump("column_only"   , S_col , N);
+    dump("cost_rule"     , S_cost, N);
+    dump("hybrid_opt"    , S_hopt, N);
+    dump("Kernel Model"  , S_fann, N);
+    dump("AI Model"      , S_lgb , N);
+    dump("Oracle"        , S_opt , N);
+    dump("AI_on_cost_OK" , S_ai_cost_ok , N_cost_ok );
+    dump("AI_on_cost_BAD", S_ai_cost_bad, N_cost_bad);
     fout.close();
 
-    /* ------------ console ----------- */
-    std::cout<<"\n*** Evaluation on "<<N<<" samples ***\n"
-             <<"LightGBM ensemble  Acc="<<S_lgb.acc(N)
-             <<"  Prec="<<S_lgb.prec()
-             <<"  Rec="<<S_lgb.rec()
-             <<"  F1="<<S_lgb.f1()<<"\n"
-             <<"TP="<<S_lgb.TP<<" FP="<<S_lgb.FP
-             <<" TN="<<S_lgb.TN<<" FN="<<S_lgb.FN<<"\n";
+    /* ============  终端输出 ============ */
+    std::cout << "\n*** Evaluation on " << N << " samples ***\n"
+              << "LightGBM ensemble  Acc="   << S_lgb.acc(N)
+              << "  Macro-Prec=" << S_lgb.precM()
+              << "  Macro-Rec="  << S_lgb.recM()
+              << "  Macro-F1="   << S_lgb.f1M() << "\n"
+              << "TP=" << S_lgb.TP << " FP=" << S_lgb.FP
+              << " TN=" << S_lgb.TN << " FN=" << S_lgb.FN << "\n";
 
-    std::cout<<"\n| Method    | TP | FP | TN | FN |  Acc | Prec | Rec |  F1 | Avg-RT |\n"
-             <<"|-----------|----|----|----|----|------|------|-----|-----|--------|\n";
-    auto pr=[&](const std::string &n,Stat&s,long n_samples){
-        std::cout<<'|'<<std::setw(10)<<std::left<<n<<'|'
-                 <<std::setw(4)<<s.TP<<'|'<<std::setw(4)<<s.FP<<'|'
-                 <<std::setw(4)<<s.TN<<'|'<<std::setw(4)<<s.FN<<'|'
-                 <<std::setw(6)<<s.acc(n_samples)<<'|'
-                 <<std::setw(6)<<s.prec()<<'|'
-                 <<std::setw(5)<<s.rec()<<'|'
-                 <<std::setw(5)<<s.f1()<<'|'
-                 <<std::setw(8)<<std::setprecision(6)<<s.avg(n_samples)<<"|\n";
+    std::cout << "\n| Method    | TP | FP | TN | FN |  Acc | "
+              << "PrecM | RecM | F1M | Avg-RT |\n"
+              << "|-----------|----|----|----|----|------|"
+              << "-------|-------|------|--------|\n";
+
+    auto pr = [&](const std::string& name, Stat& s, long n_samples) {
+        std::cout << '|' << std::setw(10) << std::left << name << '|'
+                  << std::setw(4) << s.TP << '|'
+                  << std::setw(4) << s.FP << '|'
+                  << std::setw(4) << s.TN << '|'
+                  << std::setw(4) << s.FN << '|'
+                  << std::setw(6) << s.acc(n_samples) << '|'
+                  << std::setw(7) << s.precM()        << '|'
+                  << std::setw(7) << s.recM()         << '|'
+                  << std::setw(6) << s.f1M()          << '|'
+                  << std::setw(8) << std::setprecision(6) << s.avg(n_samples) << "|\n";
         std::cout.unsetf(std::ios::floatfield);
     };
-    pr("Row"        ,S_row ,N);
-    pr("Column"     ,S_col ,N);
-    pr("Cost"       ,S_cost,N);
-    pr("Hybrid"     ,S_hopt,N);
-    pr("Kernel"     ,S_fann,N);
-    pr("AI Model"   ,S_lgb ,N);
-    pr("Oracle"     ,S_opt ,N);
 
-    /* ----- NEW : AI 模型在 cost-rule 子集上的表现 -------------- */
-    std::cout<<"\n=== AI Model where Cost-Rule is CORRECT ("<<N_cost_ok<<" samples) ===\n";
-    pr("AI_cost_OK", S_ai_cost_ok , N_cost_ok );
+    pr("Row"      , S_row , N);
+    pr("Column"   , S_col , N);
+    pr("Cost"     , S_cost, N);
+    pr("Hybrid"   , S_hopt, N);
+    pr("Kernel"   , S_fann, N);
+    pr("AI Model" , S_lgb , N);
+    pr("Oracle"   , S_opt , N);
 
-    std::cout<<"\n=== AI Model where Cost-Rule is WRONG ("<<N_cost_bad<<" samples) ===\n";
-    pr("AI_cost_BAD",S_ai_cost_bad, N_cost_bad);
-    /* ----------------------------------------------------------- */
+    std::cout << "\n=== AI Model where Cost-Rule is CORRECT (" << N_cost_ok << " samples) ===\n";
+    pr("AI_cost_OK",  S_ai_cost_ok , N_cost_ok );
+
+    std::cout << "\n=== AI Model where Cost-Rule is WRONG (" << N_cost_bad << " samples) ===\n";
+    pr("AI_cost_BAD", S_ai_cost_bad, N_cost_bad);
 
     double loss_runtime = (S_lgb.avg(N) - S_opt.avg(N)) / S_opt.avg(N);
-    printf("Runtime-loss (ratio): %.4f\n", loss_runtime + 1.0);
-
-    std::cout<<"\n[CSV] test_metrics.csv written (includes Oracle & subset stats)\n";
+    std::cout << "\nRuntime-loss (ratio): " << loss_runtime + 1.0 << "\n";
+    std::cout << "\n[CSV] test_metrics.csv written (macro P/R/F1 only, "
+              << "includes AI_cost_OK / AI_cost_BAD)\n";
 }
+
 
 /*───────────────────────────────────────────────────────────────
  *  build_sample_from_sql()    – 即时 EXPLAIN 生成单条 Sample
