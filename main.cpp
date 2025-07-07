@@ -187,14 +187,14 @@ int main(int argc, char* argv[])
     }
 
 
+    /* 1) 加载指定数据集 */
+    DirSamples ALL = load_all_datasets(base, data_dirs);
+    if (ALL.empty()) { logE("no samples found"); return 1; }
+    
     std::unordered_map<std::string,double> DIR_W;
     /* ---------- fast-path: only inference when --skip_train ---------- */
     if (hp.skip_train) {
-        /* 1) 加载指定数据集 */
-        DirSamples ALL = load_all_datasets(base, data_dirs);
-        if (ALL.empty()) { logE("no samples found"); return 1; }
         
-
         auto DS_test = build_subset(data_dirs, ALL);
         if (DS_test.empty()) { logE("no test samples"); return 1; }
 
