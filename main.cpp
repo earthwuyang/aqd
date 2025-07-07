@@ -195,8 +195,17 @@ int main(int argc, char* argv[])
     /* ---------- fast-path: only inference when --skip_train ---------- */
     if (hp.skip_train) {
         
-        auto DS_test = build_subset(data_dirs, ALL);
+        if (data_dirs.size() == 1 && !mix_folds) {
+            /* —— 单目录时，用跟训练阶段一模一样的切分 —— */
+            auto all_samp = build_subset(data_dirs, ALL);        // same dir
+            std::vector<Sample> dummy_tr;   // 不需要，用占位
+            split_train_test(all_samp, 0.10, seed, dummy_tr, DS_test);
+        } else {
+            /* —— 多目录时，沿用原逻辑 —— */
+            DS_test = build_subset(data_dirs, ALL);
+        }
         if (DS_test.empty()) { logE("no test samples"); return 1; }
+
 
         /* 2) 决定要加载的模型文件 */
         std::string model_path;                       // ← 新局部变量
@@ -226,9 +235,51 @@ int main(int argc, char* argv[])
     }
 
 
-    /* ───── one-shot disk scan (reuse across folds) ────────── */
-    DirSamples ALL = load_all_datasets(base, data_dirs);
-    if (ALL.empty()) { logE("no samples found"); return 1; }
+    /* ------------------------------------------------------------ *
+    *  Special-case: single --data_dirs=dir   ⇒  in-dataset split  *
+    * ------------------------------------------------------------ */
+    if (data_dirs.size() == 1 && !mix_folds)
+    {
+        const std::string the_dir = data_dirs.front();
+
+        /* ① 用 build_subset() 统一入口 */
+        auto all_samp = build_subset({the_dir}, ALL);
+        if (all_samp.empty()) { logE("dataset '"+the_dir+"' is empty"); return 1; }
+
+        /* ② 同一函数切分，seed 与全局一致 */
+        std::vector<Sample> DS_tr, DS_te;
+        split_train_test(all_samp, /*test_ratio=*/0.10, seed, DS_tr, DS_te);
+
+        std::cout << "\n[Split-in-dir] '" << the_dir << "'  "
+                << "train=" << DS_tr.size()
+                << "  test="  << DS_te.size() << '\n';
+
+        /* ---- 2. 训练 / 加载并预测 ------------------------------------ */
+        const std::string ckpt_dir = "checkpoints";
+        if (!is_directory(ckpt_dir)) {
+            ::mkdir(ckpt_dir.c_str(), 0755);   // 若不存在则新建
+        }
+        const std::string model_path = ckpt_dir + '/' + model_type + "_" + data_dirs[0] + ".txt";
+
+        if (!hp.skip_train) {
+            /* dataset-level √N 反比权重：这里只有一个目录 */
+            DIR_W.clear();
+            DIR_W[the_dir] = 1.0;
+
+            learner->train(DS_tr, DS_te, model_path, hp, DIR_W);
+            logI("finished training on single dataset, model → " + model_path);
+        }
+        else {
+            if (!file_exists(model_path)) {
+                logE("skip_train set but model '" + model_path + "' not found");   return 1;
+            }
+        }
+
+        /* ---- 3. 测试集评估 ------------------------------------------- */
+        auto pred = learner->predict(model_path, DS_te, /*τ=*/0.0f);
+        report_metrics(pred, DS_te);          // 你已有的打印函数
+        return 0;                             // 整个程序在此结束
+    }
 
     /* ---------- after ALL is built ---------- */
         
