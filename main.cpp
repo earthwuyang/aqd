@@ -13,6 +13,7 @@
 
 bool g_need_col_plans = true;
 bool g_use_col_feat = false;
+bool g_use_vib = false;
 
 /* factory fns declared somewhere in your project ---------------- */
 std::unique_ptr<IModel> make_lightgbm(const std::string& booster);
@@ -29,6 +30,25 @@ static std::string join(const std::vector<std::string>& v,
         if (i + 1 < v.size()) out += sep;
     }
     return out;
+}
+
+inline void split_train_test(const std::vector<Sample>& all,
+                             double              test_ratio,
+                             uint32_t            seed,
+                             std::vector<Sample>& train_out,
+                             std::vector<Sample>& test_out)
+{
+    if (all.empty()) return;
+
+    std::vector<Sample> tmp = all;           // 复制再打乱
+    std::mt19937 rng(seed);
+    std::shuffle(tmp.begin(), tmp.end(), rng);
+
+    size_t n_test = std::max<size_t>(1, std::lround(tmp.size() * test_ratio));
+    size_t split  = tmp.size() - n_test;
+
+    train_out.assign(tmp.begin(),           tmp.begin() + split);
+    test_out .assign(tmp.begin() + split,   tmp.end());
 }
 
 /* ----------------------------------------------------------- */
@@ -73,6 +93,7 @@ int main(int argc, char* argv[])
     hp.subsample         = 0.7;
     hp.colsample         = 0.8;
     hp.skip_train        = false;
+    hp.vib               = false;
     bool mix_folds = false;
 
     for (int i = 1; i < argc; ++i) {
@@ -98,8 +119,14 @@ int main(int argc, char* argv[])
         else if (a.rfind("--database=",0)==0)      database = a.substr(11);
         else if (a == "--mix")                  mix_folds = true;
         else if (a == "--use_col")               g_use_col_feat = true;
+        else if (a == "--vib")                 { hp.vib = true; g_use_vib = true; }
+        else if (a == "--shap")             hp.shap = true;
         else                                       logW("ignored arg: "+a);
     }
+
+    // if (hp.vib && hp.shap) {
+    //     logE("Cannot enable --vib and --shap together");  return 1;
+    // }
 
     if (g_use_col_feat)
         g_need_col_plans = true;
@@ -195,6 +222,8 @@ int main(int argc, char* argv[])
     /* ---------- fast-path: only inference when --skip_train ---------- */
     if (hp.skip_train) {
         
+        std::vector<Sample> DS_test;
+
         if (data_dirs.size() == 1 && !mix_folds) {
             /* —— 单目录时，用跟训练阶段一模一样的切分 —— */
             auto all_samp = build_subset(data_dirs, ALL);        // same dir

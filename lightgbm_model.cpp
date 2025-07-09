@@ -5,8 +5,11 @@
 #include <thread>
 #include <cmath>
 #include <unordered_map>
+#include <cassert>
 
 #include "model_iface.hpp"
+#include "vib.hpp"
+#include "shap_util.hpp"
 
 #if __cplusplus < 201402L   // 只有 C++14 之前的标准才进这里
 #include <memory>
@@ -32,10 +35,7 @@ inline T clamp_val(const T& v, const T& lo, const T& hi)
 /* ★ util – sigmoid(raw_score) → [0,1] 概率 */
 inline double sigmoid(double z){ return 1.0 / (1.0 + std::exp(-z)); }
 
-/* ★ util – 断言简化 */
-inline void chk(bool ok,const char*msg){
-    if(!ok){ std::cerr<<"[FATAL] "<<msg<<'\n'; std::abort(); }
-}
+
 
 /* ---------- Regret-Aware BCE 目标 ------------------------------
  *  grad = (p-y) * regret
@@ -133,6 +133,17 @@ int time_obj_grad_hess(const double* score,        /* raw scores      */
     return 0;   // success
 }
 
+static bool copy_file_bin(const std::string& src,
+                          const std::string& dst)
+{
+    std::ifstream fin(src, std::ios::binary);
+    if (!fin) return false;
+    std::ofstream fout(dst, std::ios::binary);
+    if (!fout) return false;
+    fout << fin.rdbuf();          // 一行把整文件搬过去
+    return (bool)fout;
+}
+
 class LGBModel : public IModel {
     std::string booster_; //"goss" or "rf"
     bool        use_custom_loss_; 
@@ -169,6 +180,8 @@ public:
         /* ───── build training subset (identical logic) ─────────── */
         std::vector<const Sample*> S;
         std::vector<const Sample*> S_focus; // 二次训练用焦点样本
+
+        
         
         for (const auto& s : DS) {
             bool in_main = false;
@@ -190,6 +203,94 @@ public:
         }
             
 
+        /* ===== (A) 可选 VIB 特征筛选 =================================== */
+        std::vector<int> feat_keep;
+        int F = NUM_FEATS;
+
+        if (opt.vib) {
+            std::vector<std::array<float,NUM_FEATS>> VX;
+            std::vector<int> Vy;
+            VX.reserve(S.size()); Vy.reserve(S.size());
+            for (auto* p:S){ VX.push_back(p->feat); Vy.push_back(p->label); }
+
+            VibSelector vib;
+            vib.fit(VX, Vy, /*lambda=*/1e-3, /*max_it=*/200);
+
+            feat_keep = vib.keep;
+            if (feat_keep.empty())
+                throw std::runtime_error("VIB – no non-zero feature!");
+
+            F = (int)feat_keep.size();
+            logI("[VIB] kept "+std::to_string(F)+"/"+std::to_string(NUM_FEATS));
+        }
+
+        /* ---------- (可选) SHAP 特征选择 ------------------------------- */
+
+        if (opt.shap) {
+
+            /* 1. 先把训练子集 S 拷进矩阵 X_full */
+            const int Nfull = (int)S.size();
+            std::vector<float> X_full(size_t(Nfull) * NUM_FEATS);
+            std::vector<float> y_full(Nfull);
+            for (int i = 0; i < Nfull; ++i) {
+                const Sample& s = *S[i];
+                std::copy(s.feat.begin(), s.feat.end(),
+                        X_full.begin() + size_t(i) * NUM_FEATS);
+                y_full[i] = s.label;
+            }
+
+            /* 2. 构建临时 Dataset & Booster（树数 50 就够） */
+            DatasetHandle dtmp = nullptr;
+            chk(!LGBM_DatasetCreateFromMat(X_full.data(), C_API_DTYPE_FLOAT32,
+                                        Nfull, NUM_FEATS, 1, "", nullptr, &dtmp),
+                "DatasetCreate(tmp) failed");
+            LGBM_DatasetSetField(dtmp, "label", y_full.data(), Nfull, C_API_DTYPE_FLOAT32);
+
+            const std::string param_tmp =
+                "boosting=goss objective=binary num_leaves=64 learning_rate=0.1 "
+                "verbosity=-1 num_threads=8 num_iterations=50";
+            BoosterHandle btmp = nullptr;
+            chk(!LGBM_BoosterCreate(dtmp, param_tmp.c_str(), &btmp),
+                "BoosterCreate(tmp) failed");
+            for (int it = 0, fin; it < 50; ++it)
+                LGBM_BoosterUpdateOneIter(btmp, &fin);
+
+            /* 3. 取 mean(|SHAP|) */
+            auto mean = shap_mean_abs(X_full, Nfull, NUM_FEATS, btmp);
+
+            /* 4. 选择阈值：均值 > 0 或取 Top-k (这里选 Top-k=32) */
+            struct IdVal { int id; double v; };
+            std::vector<IdVal> iv;
+            for (int j = 0; j < NUM_FEATS; ++j)
+                iv.push_back({j, mean[j]});
+            std::sort(iv.begin(), iv.end(),
+                    [](auto& a, auto& b){ return a.v > b.v; });
+
+            const int K = 32;                         // ← 可调
+            for (int k = 0; k < K && iv[k].v > 0; ++k)
+                feat_keep.push_back(iv[k].id);
+            std::sort(feat_keep.begin(), feat_keep.end());
+
+            if (feat_keep.empty())
+                throw std::runtime_error("SHAP – no important feature!");
+
+            F = (int)feat_keep.size();
+            logI("[SHAP] keep " + std::to_string(F) +
+                " / " + std::to_string(NUM_FEATS));
+
+            /* 5. 清理临时资源 */
+            LGBM_BoosterFree(btmp);
+            LGBM_DatasetFree(dtmp);
+        }
+
+        if (!feat_keep.empty()) {
+            std::sort(feat_keep.begin(), feat_keep.end());
+            feat_keep.erase(std::unique(feat_keep.begin(),
+                                        feat_keep.end()),
+                            feat_keep.end());
+            F = static_cast<int>(feat_keep.size());
+        }
+
         const int N = static_cast<int>(S.size());
         if (!N) { logE("no sample has full information"); return; }
 
@@ -198,7 +299,7 @@ public:
 
         /* ───── training matrices / label / weight ──────────────── */
         /* ───── training matrices / label / weight ──────────────── */
-        std::vector<float> X(size_t(N) * NUM_FEATS), y(N), w(N);
+        std::vector<float> X(size_t(N) * F), y(N), w(N);
         
             
         for(auto p:S) const_cast<Sample*>(p)->prev_prob = 0.5;
@@ -231,8 +332,15 @@ public:
                 }
 
                 /* ---------- 复制特征 & 标签 ---------- */
-                std::copy(s.feat.begin(), s.feat.end(),
-                        X.begin() + i * NUM_FEATS);
+                // std::copy(s.feat.begin(), s.feat.end(),
+                //         X.begin() + i * NUM_FEATS);
+                if (feat_keep.empty()) {      // 普通模式
+                    std::copy(s.feat.begin(), s.feat.end(),
+                            X.begin() + size_t(i) * F);
+                } else {                      // VIB 模式，只拷贝保留列
+                    for (int k = 0; k < F; ++k)
+                        X[size_t(i) * F + k] = s.feat[ feat_keep[k] ];
+                }
 
                 const double rt = std::max(s.row_t, EPS_RUNTIME);
                 const double ct = std::max(s.col_t, EPS_RUNTIME);
@@ -284,7 +392,7 @@ public:
             /* ========== 2. 创建 dtrain / dvalid / booster ========== */
             DatasetHandle dtrain = nullptr, dvalid = nullptr;
             chk(!LGBM_DatasetCreateFromMat(X.data(), C_API_DTYPE_FLOAT32,
-                                        N, NUM_FEATS, 1, "",
+                                        N, F, 1, "",
                                         nullptr, &dtrain),
                 "DatasetCreate failed");
             LGBM_DatasetSetField(dtrain, "label",  y.data(), N, C_API_DTYPE_FLOAT32);
@@ -292,13 +400,21 @@ public:
 
             if (!va.empty()) {                          // 你的原来的验证集构造逻辑
                 Nv = static_cast<int>(va.size());
-                Xv.resize(size_t(Nv) * NUM_FEATS);
+                Xv.resize(size_t(Nv) * F);
                 yv.resize(Nv);
                 va_rt.resize(Nv);
                 va_ct.resize(Nv);
                 for (int i = 0; i < Nv; ++i) {
-                    std::copy(va[i].feat.begin(), va[i].feat.end(),
-                            Xv.begin() + i*NUM_FEATS);
+                    // std::copy(va[i].feat.begin(), va[i].feat.end(),
+                    //         Xv.begin() + i*NUM_FEATS);
+                    if (feat_keep.empty()) {      // 普通模式
+                        std::copy(va[i].feat.begin(), va[i].feat.end(),
+                                Xv.begin() + size_t(i) * F);
+                    } else {                      // VIB 模式，只拷贝保留列
+                        for (int k = 0; k < F; ++k)
+                            Xv[size_t(i) * F + k] = va[i].feat[ feat_keep[k] ];
+                    }
+
                     double rt = std::max(va[i].row_t, EPS_RUNTIME);
                     double ct = std::max(va[i].col_t, EPS_RUNTIME);
                     yv[i] = float(std::log(rt) - std::log(ct));
@@ -307,7 +423,7 @@ public:
                     // yv[i] /= std::max(1e-6, gb); 
                 }
                 chk(!LGBM_DatasetCreateFromMat(Xv.data(), C_API_DTYPE_FLOAT32,
-                                            Nv, NUM_FEATS, 1, "",
+                                            Nv, F, 1, "",
                                             dtrain, &dvalid),
                     "DatasetCreate(valid) failed");
                 LGBM_DatasetSetField(dvalid, "label", yv.data(), Nv, C_API_DTYPE_FLOAT32);
@@ -404,7 +520,7 @@ public:
                 int64_t out_len = 0;
                 LGBM_BoosterPredictForMat(
                     booster, X.data(), C_API_DTYPE_FLOAT32,
-                    N, NUM_FEATS, 1, C_API_PREDICT_RAW_SCORE,
+                    N, F, 1, C_API_PREDICT_RAW_SCORE,
                     /*start_iteration=*/it,        /*num_iteration=*/1,
                     "", &out_len, delta.data());
 
@@ -473,15 +589,24 @@ public:
             int64_t out_len = 0;
             chk(!LGBM_BoosterPredictForMat(
                     booster, X.data(), C_API_DTYPE_FLOAT32,
-                    N, NUM_FEATS, 1, C_API_PREDICT_NORMAL,
+                    N, F, 1, C_API_PREDICT_NORMAL,
                     -1, 0, "", &out_len, raw.data()),
                 "PredictForMat failed");
             for (size_t i = 0; i < S.size(); ++i)
                 const_cast<Sample*>(S[i])->prev_prob = sigmoid(raw[i]);
 
             /* ========== 5. 仅最后一轮落盘 ========== */
-            if (cur_epoch == MAX_EPOCH - 1)
+            if (cur_epoch == MAX_EPOCH - 1) {
                 LGBM_BoosterSaveModel(booster, 0, -1, 0, model_path.c_str());
+                std::ofstream ff(model_path + ".feat");
+                if (!feat_keep.empty()) {
+                    for (size_t k = 0; k < feat_keep.size(); ++k) {
+                        if (k) ff << ' ';
+                        ff << feat_keep[k];
+                    }
+                }
+            }
+               
 
             /* ========== 6. 清理，下一轮重建 ========== */
             LGBM_BoosterFree(booster);
@@ -557,12 +682,19 @@ public:
     {
         const int N = DS.size();
         
-        vector<float> X(size_t(N) * NUM_FEATS);
-        for (int i = 0; i < N; ++i)
-            std::copy(DS[i].feat.begin(), DS[i].feat.end(),
-                    X.begin() + i * NUM_FEATS);
+        // vector<float> X(size_t(N) * NUM_FEATS);
+        // for (int i = 0; i < N; ++i)
+        //     std::copy(DS[i].feat.begin(), DS[i].feat.end(),
+        //             X.begin() + i * NUM_FEATS);
 
 
+        // --- probe .feat ---
+        std::vector<int> keep;
+        std::ifstream fin_feat(path+".feat");
+        if (fin_feat){
+            int id; while(fin_feat>>id) keep.push_back(id);
+        }
+        int F = keep.empty()? NUM_FEATS : (int)keep.size();
 
         BoosterHandle booster = nullptr; int iters = 0;
         int err = LGBM_BoosterCreateFromModelfile(path.c_str(),
@@ -573,10 +705,33 @@ public:
             throw std::runtime_error("cannot load model");
         }
 
+        int n_feat_trained = 0;
+        LGBM_BoosterGetNumFeature(booster, &n_feat_trained);
+        if (F != n_feat_trained) {
+            throw std::runtime_error(
+                "feature-count mismatch: model=" + std::to_string(n_feat_trained) +
+                "  input=" + std::to_string(F) +
+                ".  Did you copy the correct .feat file?");
+        }
+
+        /* 构造特征矩阵 */
+        std::vector<float> X(size_t(N)*F);
+        for(int i=0;i<N;++i){
+            if(keep.empty())
+                std::copy(DS[i].feat.begin(), DS[i].feat.end(), X.begin()+i*F);
+            else
+                for(int k=0;k<F;++k) X[i*F+k] = DS[i].feat[ keep[k] ];
+        }
+
+
+
+
+        
+
         vector<double> pred(N); int64_t out_len = 0;
         LGBM_BoosterPredictForMat(
             booster, X.data(), C_API_DTYPE_FLOAT32,
-            N, NUM_FEATS, 1, C_API_PREDICT_NORMAL,
+            N, F, 1, C_API_PREDICT_NORMAL,
             -1, 0, "", &out_len, pred.data());
         LGBM_BoosterFree(booster);
 

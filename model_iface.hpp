@@ -17,6 +17,8 @@ struct TrainOpt {
     int epochs = 10000;
     int patience=10;
     int hidden1=128;
+    bool vib = false;
+    bool shap = false;
 };
 
 struct IModel {

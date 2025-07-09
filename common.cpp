@@ -23,6 +23,7 @@
 #include <set>
 #include <thread>
 #include <stdexcept>
+#include <cassert>
 
 #include "json.hpp"
 

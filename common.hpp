@@ -14,6 +14,8 @@
 #include <unordered_set>
 #include <fstream>
 #include <unordered_map>
+#include <cassert>
+#include <iostream>
 
 /* ---------- 依赖库 ---------- */
 #include <Eigen/Dense>
@@ -35,6 +37,10 @@ extern bool g_need_col_plans;            // 默认 = true
 extern bool g_use_col_feat;          // 默认为 false，由 CLI 设置
 
 
+/* ★ util – 断言简化 */
+inline void chk(bool ok,const char*msg){
+    if(!ok){ std::cerr<<"[FATAL] "<<msg<<'\n'; std::abort(); }
+}
 
 /* 全局：键 = schema / data_dir，值 = 该库总大小（GB） */
 extern std::unordered_map<std::string,double> g_db_size_gb;
