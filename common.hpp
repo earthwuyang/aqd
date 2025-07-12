@@ -25,12 +25,10 @@ using json = nlohmann::json;
 using namespace std;
 
 /* ---------- 全局常量 ---------- */
-constexpr int    ORIG_FEATS   = 124;      // feature dim
+constexpr int    NUM_FEATS   = 24;      // feature dim
 constexpr double EPS_RUNTIME = 1e-2;
 constexpr double COST_THR    = 5e4;
 
-constexpr int EMB_DIM = 0;
-constexpr int NUM_FEATS = ORIG_FEATS + EMB_DIM;
 
 /* ---------- 全局开关 ---------- */
 extern bool g_need_col_plans;            // 默认 = true
@@ -94,23 +92,28 @@ struct TblStats {
     bool   compressed  = false;
 };
 
-struct Agg{
-    double re=0,rp=0,f=0,rc=0,ec=0,pc=0,dr=0,selSum=0,selMin=1e30,selMax=0,
-           ratioSum=0,ratioMax=0,maxPrefix=0,minRead=1e30,fanoutMax=0;
-    int    cnt=0,cRange=0,cRef=0,cEq=0,cIdx=0,cFull=0,idxUse=0,sumPK=0,
-           coverCount=0,maxDepth=0;
-    bool   grp=false,ord=false,tmp=false;
-    double outerRows      = 0;   // first non-ALL driver cardinality
-    int    eqChainDepth   = 0;   // longest consecutive eq_ref chain
-    int    _curEqChain    = 0;   // internal: running counter
-    double lateFanMax  = 0;   // ❶ NEW  – max fan-out seen at depth ≥ 4
-    double pcDepth3 = 0;        // Σ prefix_cost of tables at depth == 3
-    bool  hashJoin = false;          // NEW – any table used hash join‐buffer
-    int preds_total  = 0;   // # predicates seen
-    int preds_pushed = 0;   // # that were pushed below table layer
 
-    /* — (ii) long- vs short-branch row ratio for joins — */
-    double join_ratio_max = 1.0;   // ≥1, larger ⇒ bigger fan-out
+/* ---------- aggregation struct --------------------------------------- */
+struct Agg
+{
+    /* base counters ------------------------------------------------ */
+    double re=0, rp=0, f=0, rc=0, ec=0, pc=0, dr=0;
+    int    cRange=0, cRef=0, cEq=0, cIdx=0, cFull=0, idxUse=0;
+    int    sumPK=0, cnt=0, coverCount=0;
+
+    /* selectivity / shape */
+    double selSum=0, selMin=1e30, selMax=0;
+
+    /* misc extrema */
+    double maxPrefix=0, minRead=1e30;
+
+    /* plan-level flags / counters */
+    double ratioSum=0, ratioMax=0;
+    int    maxDepth=0, eqChainDepth=0, _curEqChain=0;
+    bool   grp=false, ord=false, tmp=false;
+    double outerRows=0;
+    double pcDepth3=0;                 // depth-3 prefix-cost
+    double join_ratio_max=0;           // long/short branch ratio
 };
 
 struct ColStats {

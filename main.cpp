@@ -87,8 +87,8 @@ int main(int argc, char* argv[])
 
     TrainOpt hp;                 // generic hyper-param struct you defined
     uint32_t seed        = 42;
-    hp.trees             = 800;  // sensible defaults
-    hp.max_depth         = 12;
+    hp.trees             = 400;  // sensible defaults
+    hp.max_depth         = 4;
     hp.lr                = 0.06;
     hp.subsample         = 0.7;
     hp.colsample         = 0.8;
@@ -153,14 +153,14 @@ int main(int argc, char* argv[])
         /* data_dirs 里的目录名就是 MySQL schema 名；若不是，请在这里替换 */
         std::vector<std::string> dbs = data_dirs;
 
-        if (!populate_col_stats(sql_host, sql_port, sql_user, sql_pass, dbs))
-            logW("populate_col_stats() failed – column-level features will degrade");
+        // if (!populate_col_stats(sql_host, sql_port, sql_user, sql_pass, dbs))
+        //     logW("populate_col_stats() failed – column-level features will degrade");
 
-        if (!populate_tbl_stats(sql_host, sql_port, sql_user, sql_pass, dbs))
-            logW("populate_tbl_stats() failed – table-level features will degrade");
+        // if (!populate_tbl_stats(sql_host, sql_port, sql_user, sql_pass, dbs))
+        //     logW("populate_tbl_stats() failed – table-level features will degrade");
 
-        /* (可选) 预加载所有索引列全集 — 只影响 covering-index 相关特征 */
-        load_all_index_defs(sql_host, sql_port, sql_user, sql_pass, dbs);
+        // /* (可选) 预加载所有索引列全集 — 只影响 covering-index 相关特征 */
+        // load_all_index_defs(sql_host, sql_port, sql_user, sql_pass, dbs);
         collect_db_sizes(sql_host, sql_port, sql_user, sql_pass, data_dirs);
     }
 

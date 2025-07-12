@@ -1,0 +1,1 @@
+g++ -std=c++11 -O2 -pthread compare_concurrency.cpp    -o compare_concurrency  -I/home/wuy/software/json-develop/single_include/nlohmann -L/usr/local/lib -L/home/wuy/software/LightGBM/ -I/home/wuy/software/LightGBM/include -l_lightgbm  -I/usr/include/mysql -L/usr/lib64/mysql -lmysqlclient -lstdc++fs -pthread

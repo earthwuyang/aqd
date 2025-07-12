@@ -34,6 +34,15 @@ using namespace std;
 
 using json = nlohmann::json;
 
+/*───────────────────────────────────────────────────────────
+ *  Abridged Agg / walk / plan2feat
+ *  –   keeps only the 32 features:
+ *      0 1 2 3 5 6 8 9 12 14 21 22 23 25 26 27 30 31 32 33
+ *      34 35 38 39 44 47 57 62 63 64 96 123
+ *───────────────────────────────────────────────────────────*/
+
+
+
 std::unordered_map<std::string,double> g_db_size_gb;
 
 
@@ -430,155 +439,226 @@ void load_all_index_defs(const string &host,int port,
 /* -------------------------------------------------------------------- */
 
 
+/* 旧: /10.0 → 取值 10⁵ 以上就饱和 */
+inline double log_tanh(double v, double c = 20.0) {
+    return std::tanh(std::log1p(std::max(0.0, v)) / c);   // c=20
+}
 
-/* -------------------------------------------------------------------------- */
-/* Recursive traversal over the JSON plan tree                                */
-/* Collects per-table statistics into an Agg struct                           */
-/* -------------------------------------------------------------------------- */
-void walk(const json& n, Agg& a, int depth = 1)
+
+inline double log_scale(double v, double k = 1e6){
+    return std::log1p(v) / std::log1p(k);   // v=k 时输出 1
+}
+
+/* ---------- 计表数：旧版 JSON 同样含 "table" ----------*/
+static int count_tables(const json& node){
+    int cnt = 0;
+    std::function<void(const json&)> rec = [&](const json& n){
+        if(n.is_object()){
+            if(n.contains("table")) ++cnt;
+            for(const auto& kv : n.items()) rec(kv.value());
+        }else if(n.is_array()){
+            for(const auto& v : n) rec(v);
+        }
+    };
+    rec(node);
+    return cnt;
+}
+
+/* ---------- 全树找 MIN / MAX 函数 ----------*/
+static bool tree_has_minmax(const json& node){
+    if(node.is_object()){
+        if(node.contains("function") && node["function"].is_string()){
+            std::string fn = node["function"];
+            std::transform(fn.begin(),fn.end(),fn.begin(),::tolower);
+            if(fn=="min" || fn=="max") return true;
+        }
+        for(const auto& kv:node.items())
+            if(tree_has_minmax(kv.value())) return true;
+    }else if(node.is_array()){
+        for(const auto& v:node)
+            if(tree_has_minmax(v)) return true;
+    }
+    return false;
+}
+
+static bool has_grouping(const json& qb){
+    /* 各版本 key 略不同，这里罗列常见几种 */
+    return qb.contains("grouping_operation") ||
+           qb.contains("grouping")           ||
+           qb.contains("grouping_sets");
+}
+
+static bool min_or_max_no_group(const json& qb){
+    return tree_has_minmax(qb) && !has_grouping(qb);
+}
+
+/* ===================================================================== *
+ *  walk()  – recursive aggregation over a MySQL JSON plan
+ *           (now fully robust to string-encoded numbers)
+ * ===================================================================== */
+void walk(const nlohmann::json& n, Agg& a, int depth = 1)
 {
-    /* ---------- OBJECT node ------------------------------------------------ */
-    if (n.is_object()) {
+    using json = nlohmann::json;
 
-        /* ---- TABLE node ---- */
-        if (n.contains("table") && n["table"].is_object()) {
-
+    if (n.is_object())
+    {
+        /* ── TABLE node ─────────────────────────────────────────────── */
+        if (n.contains("table") && n["table"].is_object())
+        {
             const auto& t  = n["table"];
-            if (t.contains("using_join_buffer") &&
-                t["using_join_buffer"].is_string() &&
-                t["using_join_buffer"].get<string>() == "hash join")
-            {
-                a.hashJoin = true;
-            }
             const auto& ci = t.value("cost_info", json::object());
 
-            /* basic numerical fields */
             double re = safe_f(t , "rows_examined_per_scan");
             double rp = safe_f(t , "rows_produced_per_join");
             double fl = safe_f(t , "filtered");
+
             double rc = safe_f(ci, "read_cost");
             double ec = safe_f(ci, "eval_cost");
             double pc = safe_f(ci, "prefix_cost");
-            double dr = ci.contains("data_read_per_join") && ci["data_read_per_join"].is_string()
-                        ? str_size_to_num(ci["data_read_per_join"].get<string>())
-                        : safe_f(ci, "data_read_per_join");
 
-            /* aggregate into Agg */
+            double dr = ci.contains("data_read_per_join") && ci["data_read_per_join"].is_string()
+                      ? str_size_to_num(ci["data_read_per_join"].get<std::string>())
+                      : safe_f(ci, "data_read_per_join");
+
             a.re += re;  a.rp += rp;  a.f  += fl;
-            a.rc += rc;  a.ec += ec;  a.pc += pc;  a.dr += dr;  a.cnt++;
-            if (depth == 3) a.pcDepth3 += pc;         // <── NEW
+            a.rc += rc;  a.ec += ec;  a.pc += pc;
+            a.dr += dr;  a.cnt++;
 
             a.maxPrefix = std::max(a.maxPrefix, pc);
             a.minRead   = std::min(a.minRead , rc);
 
             if (re > 0) {
                 double sel = rp / re;
-                a.selSum   += sel;
-                a.selMin    = std::min(a.selMin, sel);
-                a.selMax    = std::max(a.selMax, sel);
-                a.fanoutMax = std::max(a.fanoutMax, sel);
-
-                /* ❷ NEW: late fan-out (depth ≥ 4) */
-                if (depth >= 4)
-                    a.lateFanMax = std::max(a.lateFanMax, sel);
+                a.selSum += sel;
+                a.selMin  = std::min(a.selMin, sel);
+                a.selMax  = std::max(a.selMax, sel);
             }
 
-            double ratio = ec > 0 ? rc / ec : rc;
-            a.ratioSum  += ratio;
-            a.ratioMax   = std::max(a.ratioMax, ratio);
+            double ratio = (ec > 0 ? rc / ec : rc);
+            a.ratioSum += ratio;
+            a.ratioMax  = std::max(a.ratioMax, ratio);
 
-
-            if (t.contains("attached_condition") ||
-                    t.contains("pushed_index_condition") ||
-                    t.contains("pushed_join_condition"))
-                {
-                    ++a.preds_total;
-                    if (t.contains("pushed_index_condition") ||
-                        t.contains("pushed_join_condition"))
-                        ++a.preds_pushed;
-                }
-
-            /* access-type counters ----------------------------------------- */
+            /* access-type counters */
             const std::string at = t.value("access_type", "ALL");
-            if      (at == "range")   a.cRange++;
-            else if (at == "ref")     a.cRef++;
-            else if (at == "eq_ref")  a.cEq++;
-            else if (at == "index")   a.cIdx++;
-            else                      a.cFull++;
+            if      (at == "range")   ++a.cRange;
+            else if (at == "ref")     ++a.cRef;
+            else if (at == "eq_ref")  ++a.cEq;
+            else if (at == "index")   ++a.cIdx;
+            else                      ++a.cFull;
 
-            if (getBool(t, "using_index")) a.idxUse++;
-
+            if (t.value("using_index", false)) ++a.idxUse;
             if (t.contains("possible_keys") && t["possible_keys"].is_array())
                 a.sumPK += int(t["possible_keys"].size());
 
-            /* covering-index check ----------------------------------------- */
-            if (t.contains("used_columns") && t["used_columns"].is_array() &&
-                t.contains("key") && t["key"].is_string())
-            {
-                const std::string idx = t["key"];
-                auto it = indexCols.find(idx);
-                if (it != indexCols.end()) {
-                    bool cover = true;
-                    for (const auto& u : t["used_columns"])
-                        if (!u.is_string() ||
-                            !it->second.count(u.get<string>()))
-                        { cover = false; break; }
-                    if (cover) a.coverCount++;
-                }
-            }
+            /* row-win helpers */
+            if (a.outerRows == 0 && at != "ALL") a.outerRows = re;
 
-            /* ---------- NEW “row-wins” signals ---------------------------- */
-
-            /* 1️⃣ first non-ALL access  -> outerRows */
-            if (a.outerRows == 0 && at != "ALL")
-                a.outerRows = re;
-
-            /* 2️⃣ consecutive eq_ref chain depth */
             if (at == "eq_ref") {
-                a._curEqChain++;
+                ++a._curEqChain;
                 a.eqChainDepth = std::max(a.eqChainDepth, a._curEqChain);
             } else {
-                a._curEqChain = 0;          // break the chain
+                a._curEqChain = 0;
             }
-        } /* end TABLE node */
 
-        /* plan-level flags --------------------------------------------------- */
-        if (n.contains("grouping_operation"))                                  a.grp = true;
-        if (n.contains("ordering_operation") || getBool(n, "using_filesort"))  a.ord = true;
-        if (getBool(n, "using_temporary_table"))                               a.tmp = true;
+            if (depth == 3) a.pcDepth3 += pc;
+        }
 
+        /* plan-level flags */
+        if (n.contains("grouping_operation"))                                   a.grp = true;
+        if (n.contains("ordering_operation") || n.value("using_filesort", 0))   a.ord = true;
+        if (n.value("using_temporary_table", 0))                                a.tmp = true;
+
+        /* nested-loop long/short branch ratio (uses safe_f) */
         if (n.contains("nested_loop") && n["nested_loop"].is_array()) {
             const auto& nl = n["nested_loop"];
             if (nl.size() >= 2) {
-                auto rows_of = [](const json& x)->double {
-                    if (x.contains("table"))
-                        return safe_f(x["table"], "rows_produced_per_join");
-                    return safe_f(x, "rows_produced_per_join");
+                auto rows_of = [](const json& x) -> double {
+                    return x.contains("table")
+                         ? safe_f(x["table"], "rows_produced_per_join")
+                         : safe_f(x,          "rows_produced_per_join");
                 };
                 double l = rows_of(nl[0]), r = rows_of(nl[1]);
-                if (l > 0 && r > 0) {
-                    double ratio = std::max(l, r) / std::max(1.0, std::min(l, r));
-                    a.join_ratio_max = std::max(a.join_ratio_max, ratio);
-                }
+                if (l > 0 && r > 0)
+                    a.join_ratio_max =
+                        std::max(a.join_ratio_max,
+                                 std::max(l, r) / std::max(1.0, std::min(l, r)));
             }
         }
 
-
-        /* recurse into children (skip “table” key we already handled) */
+        /* recurse (skip the “table” key already handled) */
         for (const auto& kv : n.items())
-            if (kv.key() != "table")
-                walk(kv.value(), a, depth + 1);
+            if (kv.key() != "table") walk(kv.value(), a, depth + 1);
     }
-
-    /* ---------- ARRAY node ------------------------------------------------- */
-    else if (n.is_array()) {
+    else if (n.is_array())
         for (const auto& v : n) walk(v, a, depth);
-    }
 
-    /* update maximum nesting depth */
     a.maxDepth = std::max(a.maxDepth, depth);
 }
 
+
+
+bool plan2feat(const nlohmann::json& plan, float f[NUM_FEATS])
+{
+  using json = nlohmann::json;
+
+  if (!plan.contains("query_block")) return false;
+  const json *qb = &plan["query_block"];
+
+  if (qb->contains("union_result")) {
+    const auto &specs = (*qb)["union_result"]["query_specifications"];
+    if (specs.is_array() && !specs.empty())
+      qb = &specs[0]["query_block"];
+  }
+
+  Agg a; walk(*qb, a);                       // ← your existing walk()
+  if (!a.cnt) return false;
+
+  const double inv   = 1.0 / a.cnt;
+  const double qCost = safe_f(qb->value("cost_info", json::object()),
+                              "query_cost");
+
+  int k = 0; auto PUSH = [&](double v){ f[k++] = float(v); };
+
+  /* ----------- 24 features, ALL mirrored in kernel --------------- */
+  PUSH(log_tanh(a.re * inv));              // 0
+  PUSH(log_tanh(a.rp * inv));              // 1
+  PUSH(log_tanh(a.rc * inv));              // 2
+  PUSH(log_tanh(a.pc * inv));              // 3
+
+  PUSH(a.cRef   * inv);                    // 4
+  PUSH(a.cEq    * inv);                    // 5
+  PUSH(a.idxUse * inv);                    // 6
+
+  PUSH(a.selMin);                          // 7
+  PUSH(a.ratioMax);                        // 8
+
+  PUSH(std::log1p(qCost) / 15.0);          // 9
+
+  PUSH(log_tanh((a.pc*inv) / std::max(1e-6, a.rc*inv)));  // 10
+  PUSH(log_tanh((a.rc*inv) / std::max(1e-6, a.re*inv)));  // 11
+
+  PUSH(a.cnt);                             // 12
+  PUSH(a.cnt ? double(a.sumPK)/a.cnt : 0); // 13
+
+  PUSH(log_tanh(a.maxPrefix));             // 14
+  PUSH(log_tanh(a.minRead < 1e30 ? a.minRead : 0)); // 15
+
+  PUSH(a.selMax - a.selMin);               // 16
+  PUSH(a.idxUse / double(std::max(1, a.cRange+a.cRef+
+                                     a.cEq  +a.cIdx)));   // 17
+
+  PUSH(log_tanh(a.re*inv) - log_tanh(a.selSum*inv));       // 18
+
+  PUSH(log_tanh(a.maxPrefix * inv));        // 19
+  PUSH(a.selMin>0 ? a.selMax/a.selMin : 0); // 20
+  PUSH(log_tanh(a.outerRows));              // 21
+  PUSH(double(a.eqChainDepth));             // 22
+
+  PUSH(log_tanh((a.pc>0?a.pc:1e-6) /
+                std::max(1e-6, a.pcDepth3)));             // 23
+
+  return k == NUM_FEATS;                    // 24 columns
+}
 
 
 
@@ -878,415 +958,8 @@ const TblStats& lookup_tbl(const string& id){
     return (it==tblStats.end())?dflt:it->second;
 }
 
-/* 旧: /10.0 → 取值 10⁵ 以上就饱和 */
-inline double log_tanh(double v, double c = 20.0) {
-    return std::tanh(std::log1p(std::max(0.0, v)) / c);   // c=20
-}
 
-inline double log_scale(double v, double k = 1e6){
-    return std::log1p(v) / std::log1p(k);   // v=k 时输出 1
-}
 
-/* ---------- 计表数：旧版 JSON 同样含 "table" ----------*/
-static int count_tables(const json& node){
-    int cnt = 0;
-    std::function<void(const json&)> rec = [&](const json& n){
-        if(n.is_object()){
-            if(n.contains("table")) ++cnt;
-            for(const auto& kv : n.items()) rec(kv.value());
-        }else if(n.is_array()){
-            for(const auto& v : n) rec(v);
-        }
-    };
-    rec(node);
-    return cnt;
-}
-
-/* ---------- 全树找 MIN / MAX 函数 ----------*/
-static bool tree_has_minmax(const json& node){
-    if(node.is_object()){
-        if(node.contains("function") && node["function"].is_string()){
-            std::string fn = node["function"];
-            std::transform(fn.begin(),fn.end(),fn.begin(),::tolower);
-            if(fn=="min" || fn=="max") return true;
-        }
-        for(const auto& kv:node.items())
-            if(tree_has_minmax(kv.value())) return true;
-    }else if(node.is_array()){
-        for(const auto& v:node)
-            if(tree_has_minmax(v)) return true;
-    }
-    return false;
-}
-
-static bool has_grouping(const json& qb){
-    /* 各版本 key 略不同，这里罗列常见几种 */
-    return qb.contains("grouping_operation") ||
-           qb.contains("grouping")           ||
-           qb.contains("grouping_sets");
-}
-
-static bool min_or_max_no_group(const json& qb){
-    return tree_has_minmax(qb) && !has_grouping(qb);
-}
-
-
-bool plan2feat(const json &plan, float f[NUM_FEATS])
-{
-    
-
-    if (!plan.contains("query_block")) return false;
-    const json *qb = &plan["query_block"];
-
-    /* UNION  → use first branch */
-    if (qb->contains("union_result")) {
-        const auto &specs = (*qb)["union_result"]["query_specifications"];
-        if (specs.is_array() && !specs.empty())
-            qb = &specs[0]["query_block"];
-    }
-
-    /* ---------- ❶ OLD 65-dim aggregation ---------- */
-    Agg a; walk(*qb, a);
-    if (!a.cnt) return false;
-
-    const double inv = 1.0 / a.cnt;
-    int   k      = 0;
-    double qCost = safe_f(qb->value("cost_info", json::object()), "query_cost");
-    double rootRow = safe_f(*qb, "rows_produced_per_join");
-
-#define PUSH(x) f[k++] = static_cast<float>(x)
-
-    /* --- 0‒6 basic costs / rows ------------------------------------ */
-    PUSH(log_tanh(a.re * inv)); PUSH(log_tanh(a.rp * inv)); PUSH(log_tanh(a.f * inv));
-    PUSH(log_tanh(a.rc * inv)); PUSH(log_tanh(a.ec * inv)); PUSH(log_tanh(a.pc * inv));
-    PUSH(log_tanh(a.dr * inv));
-
-    /* --- 7‒12 access-type counters (ratio) ------------------------- */
-    PUSH(a.cRange * inv); PUSH(a.cRef * inv); PUSH(a.cEq * inv);
-    PUSH(a.cIdx   * inv); PUSH(a.cFull* inv); PUSH(a.idxUse* inv);
-
-    /* --- 13‒17 selectivity / shape -------------------------------- */
-    PUSH(a.selSum * inv); PUSH(a.selMin); PUSH(a.selMax);
-    PUSH(a.maxDepth);     PUSH(a.fanoutMax);
-
-    /* --- 18‒20 plan-level flags ----------------------------------- */
-    PUSH(a.grp); PUSH(a.ord); PUSH(a.tmp);
-
-    /* --- 21‒22 rc/ec ratios --------------------------------------- */
-    PUSH(a.ratioSum * inv); PUSH(a.ratioMax);
-
-    /* --- 23‒24 root cost & rows ----------------------------------- */
-    PUSH(std::log1p(qCost) / 15.0); PUSH(log_tanh(rootRow));
-
-    /* --- 25‒27 derived cost ratios -------------------------------- */
-    PUSH(log_tanh((a.pc * inv) / std::max(1e-6, a.rc * inv)));
-    PUSH(log_tanh((a.rc * inv) / std::max(1e-6, a.re * inv)));
-    PUSH(log_tanh((a.ec * inv) / std::max(1e-6, a.re * inv)));
-
-    /* --- 28‒31 misc counters -------------------------------------- */
-    PUSH(a.cnt == 1); PUSH(a.cnt > 1);
-    PUSH(log_tanh(a.maxDepth * (a.idxUse * inv)));
-    PUSH(log_tanh((a.idxUse * inv) / std::max(a.cFull * inv, 1e-3)));
-
-    /* --- 32‒39 other stats ---------------------------------------- */
-    PUSH(a.cnt);
-    PUSH(a.cnt ? double(a.sumPK) / a.cnt : 0);
-    PUSH(log_tanh(a.maxPrefix));
-    PUSH(log_tanh(a.minRead < 1e30 ? a.minRead : 0));
-    PUSH(a.cnt > 1 ? double(a.cnt - 1) / a.cnt : 0);
-    PUSH(rootRow > 0 ? double(a.re) / rootRow : 0);
-    PUSH(a.selMax - a.selMin);
-    PUSH(a.idxUse / double(std::max(1, a.cRange + a.cRef +
-                                       a.cEq   + a.cIdx)));
-
-    /* --- 40‒43 covering-index & big-cost flags -------------------- */
-    PUSH(std::log1p(qCost) / 15.0);
-    PUSH(std::log1p(qCost) > 11.5);
-    PUSH(a.cnt ? double(a.coverCount) / a.cnt : 0);
-    PUSH(a.coverCount == a.cnt);
-
-    /* --- 44‒46 log-diffs & counts -------------------------------- */
-    PUSH(log_tanh(a.re * inv) - log_tanh(a.selSum * inv));
-    PUSH(a.cnt);
-    PUSH(log_tanh(a.cnt));
-
-    /* --- 47‒50 PK / cover counters ------------------------------- */
-    PUSH(a.sumPK);
-    PUSH(a.cnt ? double(a.sumPK) / a.cnt : 0);
-    PUSH(a.coverCount);
-    PUSH(a.cnt ? double(a.coverCount) / a.cnt : 0);
-
-    /* --- 51‒56 repeated access shares ----------------------------- */
-    PUSH(a.idxUse * inv); PUSH(a.cRange * inv); PUSH(a.cRef * inv);
-    PUSH(a.cEq   * inv);  PUSH(a.cIdx  * inv);  PUSH(a.cFull * inv);
-
-    /* --- 57‒59 prefix / read extremes ----------------------------- */
-    PUSH(log_tanh(a.maxPrefix * inv));
-    PUSH(log_tanh(a.minRead < 1e30 ? a.minRead : 0));
-    PUSH(a.selMax - a.selMin);
-
-    /* --- 60‒62 extremes & ratios ---------------------------------- */
-    PUSH(a.ratioMax);
-    PUSH(a.fanoutMax);
-    PUSH(a.selMin > 0 ? double(a.selMax / a.selMin) : 0);
-
-    /* --- 63‒64 row-wins signals ----------------------------------- */
-    PUSH(log_tanh(a.outerRows));
-    PUSH(a.eqChainDepth);
-
-    /* ❸  NEW 65 : late-fan-out  -------------------------- */
-    double late_f = 0.0;
-    if (a.lateFanMax > a.selMin + 1e-9) {           // make sure we have a signal
-        double ratio = a.lateFanMax / std::max(1e-6, a.selMin);
-        /* soft-cap :  ratio ≈ e⁴  =>  late_f = 1.0  */
-        late_f = std::min(1.0, std::log(ratio) / 4.0);
-    }
-    PUSH(late_f);     // k == old_k + 1   (remember for asserts)
-
-    /* ------------------------------------------------------------------ */
-    /* ❷ NEW 18-dim Information-Schema / P-Schema table-level meta        */
-    /* ------------------------------------------------------------------ */
-
-    /* Gather touched tables ---------------------------------------- */
-    unordered_set<string> touched_tbls;  // "db.tbl"
-    function<void(const json&)> collect_tbl = [&](const json &n){
-        if (n.is_object()) {
-            if (n.contains("table") && n["table"].is_object()) {
-                string tbl = n["table"].value("table_name", "");
-                string db  = "";              // add if db present in plan
-                touched_tbls.insert(db + "." + tbl);
-            }
-            for (const auto &kv : n.items()) collect_tbl(kv.value());
-        } else if (n.is_array())
-            for (const auto &v : n) collect_tbl(v);
-    };
-    collect_tbl(*qb);
-
-    /* Aggregate ---------------------------------------------------- */
-    double rows_avg=0,rows_max=0,data_mb_avg=0,idx_mb_avg=0,
-           frag_max=0,part_avg=0,upd_max=0,
-           idx_cnt_avg=0,uniq_ratio_avg=0,cover_ratio_avg=0,
-           pk_len_log_avg=0;
-    bool   compressed_any=false;
-    const int tbl_n = touched_tbls.size();
-
-    for (const auto &id : touched_tbls) {
-        const TblStats &s = lookup_tbl(id);
-        rows_avg      += s.rows;
-        rows_max       = max(rows_max, s.rows);
-        data_mb_avg   += s.data_bytes/1e6;
-        idx_mb_avg    += s.idx_bytes /1e6;
-        frag_max       = max(frag_max, s.frag_ratio);
-        part_avg      += s.partitions;
-        upd_max        = max(upd_max , s.upd_pct);
-        idx_cnt_avg   += s.idx_cnt;
-        uniq_ratio_avg += s.idx_cnt ? double(s.uniq_cnt)/s.idx_cnt : 0;
-        cover_ratio_avg+= s.total_cols? double(s.cover_cols)/s.total_cols : 0;
-        pk_len_log_avg += log1p_clip(s.pk_len);
-        compressed_any|= s.compressed;
-    }
-    if (tbl_n) {
-        rows_avg      /= tbl_n;
-        data_mb_avg   /= tbl_n;
-        idx_mb_avg    /= tbl_n;
-        part_avg      /= tbl_n;
-        idx_cnt_avg   /= tbl_n;
-        uniq_ratio_avg/= tbl_n;
-        cover_ratio_avg/=tbl_n;
-        pk_len_log_avg/= tbl_n;
-    }
-
-    /* 65-82 push --------------------------------------------------- */
-    // PUSH(log_scale(rows_avg, 1e8));           // 65
-    // PUSH(log_scale(rows_max, 1e8));           // 66
-    // PUSH(log_scale(data_mb_avg, 1e8));        // 67
-    // PUSH(log_scale(idx_mb_avg, 1e8));         // 68
-    double rel_rows_avg = rows_avg / std::max(1.0, rootRow);
-    double rel_rows_max = rows_max / std::max(1.0, rows_avg);
-    double rel_data_mb  = data_mb_avg / std::max(1.0, idx_mb_avg+data_mb_avg);
-    double rel_idx_mb   = idx_mb_avg  / std::max(1.0, data_mb_avg);
-
-    PUSH(log_scale(rel_rows_avg, 1e2));   // 65
-    PUSH(log_scale(rel_rows_max, 1e2));   // 66
-    PUSH(log_scale(rel_data_mb , 1e0));   // 67
-    PUSH(log_scale(rel_idx_mb  , 1e0));   // 68
-
-
-    PUSH(frag_max);               // 69
-    PUSH(part_avg);               // 70
-    PUSH(upd_max);                // 71
-    PUSH(idx_cnt_avg / 16.0);     // 72   (light normalisation)
-    PUSH(uniq_ratio_avg);         // 73
-    PUSH(cover_ratio_avg);        // 74
-    PUSH(pk_len_log_avg);         // 75
-    PUSH(0); PUSH(0); PUSH(0);    // 76-78 reserved / stub
-    PUSH(compressed_any);         // 79
-    PUSH(std::thread::hardware_concurrency()/64.0); // 80
-    PUSH(0);                      // 81  buffer-pool hit% (optionally filled)
-    PUSH(0);                      // 82  IMCI hit% (optionally filled)
-
-    /* ------------------------------------------------------------------ */
-    /* ❸ Column-histogram features (width / NDV / dtype)  ─ 12 dims        */
-    /* ------------------------------------------------------------------ */
-    unordered_set<string> touched_cols;     // "db.tbl.col"
-    function<void(const json&)> collect_col = [&](const json &n){
-        if (n.is_object()) {
-            if (n.contains("table") && n["table"].is_object()) {
-                const auto &t = n["table"];
-                if (t.contains("used_columns") && t["used_columns"].is_array()){
-                    string tbl = t.value("table_name", "");
-                    string db  = "";                // add DB if available
-                    for (const auto &c : t["used_columns"])
-                        if (c.is_string())
-                            touched_cols.insert(db+"."+tbl+"."+c.get<string>());
-                }
-            }
-            for (const auto &kv : n.items()) collect_col(kv.value());
-        } else if (n.is_array())
-            for (const auto &v : n) collect_col(v);
-    };
-    collect_col(*qb);
-
-    array<float,4> width_hist{0,0,0,0};
-    array<float,3> ndv_hist  {0,0,0};
-    array<float,5> type_hist {0,0,0,0,0};
-
-    for (const auto &id : touched_cols) {
-        ColStats s = lookup_col_stats(id);
-
-        if      (s.avg_width<=4)   width_hist[0]+=1;
-        else if (s.avg_width<=16)  width_hist[1]+=1;
-        else if (s.avg_width<=64)  width_hist[2]+=1;
-        else                       width_hist[3]+=1;
-
-        if      (s.ndv<=1e3)       ndv_hist[0]+=1;
-        else if (s.ndv<=1e5)       ndv_hist[1]+=1;
-        else                       ndv_hist[2]+=1;
-
-        if (s.dtype<COL_DTYPE_N)   type_hist[s.dtype]+=1;
-    }
-    normalise(width_hist); normalise(ndv_hist); normalise(type_hist);
-    // for (float v:width_hist) {
-    //     logI("width_hist=" + std::to_string(v));
-    // }
-    // for (float v:ndv_hist) {
-    //     logI("ndv_hist=" + std::to_string(v));
-    // }
-
-    // for (float v:type_hist) {
-    //     logI("type_hist=" + std::to_string(v));
-    // }
-
-    for (float v:width_hist) PUSH(v);
-    for (float v:ndv_hist)   PUSH(v);
-    for (float v:type_hist)  PUSH(v);
-
-    /* ❹ NEW 96 : depth-3 prefix-cost ratio ---------------------- */
-    double pc_d3 = std::max(1e-6, a.pcDepth3);
-    double pc_ratio_d3 = log_tanh( (a.pc > 0 ? a.pc : 1e-6) / pc_d3 );   // ln(pc_total/pc_depth3)
-    PUSH(pc_ratio_d3);            // k += 1   → 96-th index
-
-
-    double cum_fan = 0, amp_step = 0;
-    if (a.outerRows > 0 && rootRow > a.outerRows * 1.0001) {
-        cum_fan = std::log(rootRow / a.outerRows);
-        amp_step = cum_fan / std::max(1, a.maxDepth - 1);
-    }
-    PUSH(cum_fan);   // 97
-    PUSH(amp_step);  // 98
-    double rows_max_raw   = rows_max;                 // 不取 log
-    double data_mb_total  = data_mb_avg * tbl_n;      // 粗略总数据量
-    double qcost_per_row  = qCost / std::max(1.0, rows_max_raw);
-
-    // PUSH(rows_max_raw);   // 99
-    // PUSH(data_mb_total);  // 100
-    PUSH(log_scale(rows_max_raw , 1e10));   // 99  (10 B 行 ≈ 1.0)
-    PUSH(log_scale(data_mb_total, 1e10));   // 100 (10 TB ≈ 1.0)
-    PUSH(qcost_per_row);  // 101
-
-    double kRows = std::max(1.0, rows_max_raw / 1e3);
-    double mbRead= std::max(1.0, data_mb_total);
-    PUSH(std::log1p(qCost / kRows) / 15.0);   // 102
-    PUSH(std::log1p(qCost / mbRead) / 15.0);  // 103
-
-    double point_ratio   = (a.cRef + a.cEq) * inv;              // ref+eq_ref share
-    double narrow_ratio  = width_hist[0] + width_hist[1];       // ≤16‑B列占比
-    bool   hash_prefetch = a.hashJoin && (a.idxUse * inv > 0.5);
-
-    PUSH(point_ratio   > 0.70);   // 104 – 行窄+点查 → 行存
-    PUSH(narrow_ratio  > 0.80);   // 105 – 窄列占比高 → 行存
-    PUSH(hash_prefetch);          // 106 – 索引已命中仍建哈希 → 行存
-
-
-    /* === 新增 3 个维度 (放在 107-109，可自行调整顺序) =========== */
-    int    tbl_cnt  = count_tables(*qb);            // ①
-    bool   agg_flag = min_or_max_no_group(*qb);     // ②
-    double probe_vs_outer = 0.0;                    // ③
-    if(a.outerRows > 0.0)
-        probe_vs_outer = rootRow / a.outerRows;     // >1 → 后续 fan-out
-
-    PUSH( std::min(1.0, tbl_cnt / 64.0) );          // feat[107]  num_tables (0-1)
-    PUSH( agg_flag ? 1.0f : 0.0f );                 // feat[108]  has_minmax_no_group
-    PUSH( log_tanh( probe_vs_outer ) );             // feat[109]  rows_probe / rows_outer
-
-
-    double biggest_ratio = (a.selMax > 0 && a.outerRows > 0)
-                            ? a.selMax / a.outerRows : 1.0;
-    PUSH( log_tanh(biggest_ratio) );   // feat[110]
-
-    double late_rows_norm = log_scale(rootRow, 1e8);   // 产出行数归一到 0–1
-    PUSH( late_rows_norm );     // 111
-
-    /* === NEW: shrink manual heuristics into explicit features === */
-    /* ❺ 额外辅助量：outer_rows_norm & fanout --------------------------- */
-    double outer_rows_norm = 0.0;                    // ≤0.05 说明 outerRows 很小
-    if (a.outerRows > 0.0)
-        outer_rows_norm = log_scale(a.outerRows, 1e6);   // 0-1 归一：1e6 行≈1.0
-
-    double fanout = a.fanoutMax;                     // 已在 walk() 中统计
-    /* ------------------------------------------------------------------ */
-    // F112  point_and_narrow  (Row-win 信号)
-    bool point_and_narrow = (point_ratio > 0.70 && narrow_ratio > 0.80);
-    PUSH( point_and_narrow ? 1.0f : 0.0f );
-
-    // F113  mid_fan_signal   (small core + mid fan-out + late fan)
-    bool mid_fan_signal =
-        (outer_rows_norm < 0.05) && (fanout > 5.0 && fanout < 20.0) &&
-        (cum_fan > 0.4);
-    PUSH( mid_fan_signal ? 1.0f : 0.0f );
-
-    // F114  minmax_without_group
-    PUSH( agg_flag ? 1.0f : 0.0f );   // 已经算过 agg_flag
-
-    /* === (i) predicate selectivity & push-down one-hots — 8 dims === */
-    double sel_avg = a.selSum * inv;               // 0-1
-    auto oh_sel = [&](double v){
-        PUSH(v<=0.01);          // ultra-selective
-        PUSH(v>0.01 && v<=0.10);
-        PUSH(v>0.10 && v<=0.50);
-        PUSH(v>0.50);
-    };
-    oh_sel(sel_avg);
-
-    double pdr = (a.preds_total>0) ?
-                double(a.preds_pushed)/a.preds_total : 0.0;
-    auto oh_pdr = [&](double v){
-        PUSH(v==0);
-        PUSH(v>0   && v<=0.30);
-        PUSH(v>0.30&& v<=0.70);
-        PUSH(v>0.70);
-    };
-    oh_pdr(pdr);
-
-    /* === (ii) max join long/short branch ratio — 1 dim === */
-    PUSH( std::log1p(a.join_ratio_max) );          // soft-log, 1 →0  // F123
-
-#undef PUSH
-    if (k != ORIG_FEATS) {
-        throw std::runtime_error("paln2feat feature count mismatch");
-    }
-    return k == ORIG_FEATS;       
-}
 
 // parseColPlan now uses per-dir stats for numeric norms and a global op2id map
 Graph parseColPlan(const json& j,
