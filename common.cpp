@@ -24,6 +24,7 @@
 #include <thread>
 #include <stdexcept>
 #include <cassert>
+#include <iomanip>
 
 #include "json.hpp"
 
@@ -33,6 +34,86 @@
 using namespace std;
 
 using json = nlohmann::json;
+
+/* ────────── NEW: feature 缓存 ────────── */
+using FeatVec = std::array<float, NUM_FEATS>;
+
+/* key = <dataset_dir>/<query_id>   例如  tpch_sf1/42 */
+static std::unordered_map<std::string, FeatVec> FEAT_CACHE;
+
+
+/* -----------------------------------------------------------
+ *  load_features_for_dir()
+ *    读取 <dir>/features_24d.csv ，填充 FEAT_CACHE
+ * ----------------------------------------------------------- */
+static void
+load_features_for_dir(const std::string& dir)
+{
+    std::string csv = dir + "/features_24d.csv";
+    if (!file_exists(csv)) {
+        logW("features_24d.csv not found in " + dir);
+        return;
+    }
+    std::ifstream fin(csv);
+    std::string line; std::getline(fin, line);          // skip header
+
+    while (std::getline(fin, line)) {
+        std::stringstream ss(line);
+        std::string tok;
+
+        /* —— 读 query_id —— */
+        std::getline(ss, tok, ',');
+        std::string qid = tok;
+
+        /* —— 读 24 维特征 —— */
+        FeatVec fv{};
+        for (int i = 0; i < NUM_FEATS; ++i) {
+            std::getline(ss, tok, ',');
+            fv[i] = tok.empty() ? 0.f : std::stof(tok);
+        }
+        /* —— 剩余 SQL 列忽略 —— */
+
+        FEAT_CACHE.emplace(dir + '/' + qid, std::move(fv));
+    }
+    logI("Loaded feature cache for " + dir);
+}
+
+bool
+load_plan_file(const std::string& fp_row,
+               const std::string& qid,
+               const std::string& rowDir,
+               const std::string& colDir,
+               float             feat[NUM_FEATS],
+               double&           qcost,
+               Graph&            colGraph,
+               bool              need_col)        // ← 原参数保留
+{
+    /* =========== 1. 第一次遇到目录时，加载 CSV =========== */
+    if (FEAT_CACHE.empty() ||
+        FEAT_CACHE.find(rowDir + '/' + qid) == FEAT_CACHE.end())
+        load_features_for_dir(rowDir.substr(0, rowDir.find_last_of('/')));
+
+    /* =========== 2. 直接取 24 维特征 =========== */
+    auto it = FEAT_CACHE.find(rowDir + '/' + qid);
+    if (it == FEAT_CACHE.end()) {
+        logW("feature vector missing for " + qid);
+        return false;
+    }
+    std::copy(it->second.begin(), it->second.end(), feat);
+
+    /* query_cost 等可置 0（或从 CSV 追加一列再读取） */
+    qcost = 0.0;
+
+    /* 列计划不再需要，可根据 need_col 决定是否仍解析 */
+    if (need_col) {
+        /* 如仍想保留旧 GNN 功能，按原逻辑解析 col-plan；
+           否则返回空 Graph 即可 */
+        colGraph = Graph{};
+    }
+
+    return true;
+}
+
 
 /*───────────────────────────────────────────────────────────
  *  Abridged Agg / walk / plan2feat
@@ -492,10 +573,12 @@ static bool min_or_max_no_group(const json& qb){
     return tree_has_minmax(qb) && !has_grouping(qb);
 }
 
+
 /* ===================================================================== *
  *  walk()  – recursive aggregation over a MySQL JSON plan
  *           (now fully robust to string-encoded numbers)
  * ===================================================================== */
+
 void walk(const nlohmann::json& n, Agg& a, int depth = 1)
 {
     using json = nlohmann::json;
@@ -510,47 +593,34 @@ void walk(const nlohmann::json& n, Agg& a, int depth = 1)
 
             double re = safe_f(t , "rows_examined_per_scan");
             double rp = safe_f(t , "rows_produced_per_join");
-            double fl = safe_f(t , "filtered");
+            double filtered = safe_f(t , "filtered");
+            double fl = std::max(0.01, filtered) / 100.0;
 
             double rc = safe_f(ci, "read_cost");
             double ec = safe_f(ci, "eval_cost");
             double pc = safe_f(ci, "prefix_cost");
 
-            double dr = ci.contains("data_read_per_join") && ci["data_read_per_join"].is_string()
-                      ? str_size_to_num(ci["data_read_per_join"].get<std::string>())
-                      : safe_f(ci, "data_read_per_join");
-
-            a.re += re;  a.rp += rp;  a.f  += fl;
-            a.rc += rc;  a.ec += ec;  a.pc += pc;
-            a.dr += dr;  a.cnt++;
-
-            a.maxPrefix = std::max(a.maxPrefix, pc);
+            a.re += re;  a.rp += rp;  a.rc += rc;  a.ec += ec;  a.pc += pc;  ++a.cnt;
             a.minRead   = std::min(a.minRead , rc);
+            a.maxPrefix = std::max(a.maxPrefix, pc);
 
-            if (re > 0) {
-                double sel = rp / re;
-                a.selSum += sel;
-                a.selMin  = std::min(a.selMin, sel);
-                a.selMax  = std::max(a.selMax, sel);
-            }
+            a.selSum += fl;
+            a.selMin  = std::min(a.selMin, fl);
+            a.selMax  = std::max(a.selMax, fl);
 
-            double ratio = (ec > 0 ? rc / ec : rc);
-            a.ratioSum += ratio;
-            a.ratioMax  = std::max(a.ratioMax, ratio);
+            if (ec > 1e-12) a.ratioMax = std::max(a.ratioMax, rc / ec);
 
-            /* access-type counters */
             const std::string at = t.value("access_type", "ALL");
             if      (at == "range")   ++a.cRange;
             else if (at == "ref")     ++a.cRef;
             else if (at == "eq_ref")  ++a.cEq;
             else if (at == "index")   ++a.cIdx;
-            else                      ++a.cFull;
 
             if (t.value("using_index", false)) ++a.idxUse;
-            if (t.contains("possible_keys") && t["possible_keys"].is_array())
-                a.sumPK += int(t["possible_keys"].size());
 
-            /* row-win helpers */
+            if (t.contains("possible_keys") && t["possible_keys"].is_array())
+                a.sumPK += static_cast<int>(t["possible_keys"].size());
+
             if (a.outerRows == 0 && at != "ALL") a.outerRows = re;
 
             if (at == "eq_ref") {
@@ -561,41 +631,26 @@ void walk(const nlohmann::json& n, Agg& a, int depth = 1)
             }
 
             if (depth == 3) a.pcDepth3 += pc;
+
+            a.maxDepth = std::max(a.maxDepth, depth);
         }
 
-        /* plan-level flags */
-        if (n.contains("grouping_operation"))                                   a.grp = true;
-        if (n.contains("ordering_operation") || n.value("using_filesort", 0))   a.ord = true;
-        if (n.value("using_temporary_table", 0))                                a.tmp = true;
-
-        /* nested-loop long/short branch ratio (uses safe_f) */
+        /* Handle nested_loop to increment depth progressively */
         if (n.contains("nested_loop") && n["nested_loop"].is_array()) {
-            const auto& nl = n["nested_loop"];
-            if (nl.size() >= 2) {
-                auto rows_of = [](const json& x) -> double {
-                    return x.contains("table")
-                         ? safe_f(x["table"], "rows_produced_per_join")
-                         : safe_f(x,          "rows_produced_per_join");
-                };
-                double l = rows_of(nl[0]), r = rows_of(nl[1]);
-                if (l > 0 && r > 0)
-                    a.join_ratio_max =
-                        std::max(a.join_ratio_max,
-                                 std::max(l, r) / std::max(1.0, std::min(l, r)));
+            int sub_depth = depth;
+            for (const auto& v : n["nested_loop"]) {
+                walk(v, a, sub_depth);
+                sub_depth += 1;
             }
+        } else {
+            /* recurse (skip the “table” and "nested_loop" keys already handled) */
+            for (const auto& kv : n.items())
+                if (kv.key() != "table" && kv.key() != "nested_loop") walk(kv.value(), a, depth + 1);
         }
-
-        /* recurse (skip the “table” key already handled) */
-        for (const auto& kv : n.items())
-            if (kv.key() != "table") walk(kv.value(), a, depth + 1);
     }
     else if (n.is_array())
         for (const auto& v : n) walk(v, a, depth);
-
-    a.maxDepth = std::max(a.maxDepth, depth);
 }
-
-
 
 bool plan2feat(const nlohmann::json& plan, float f[NUM_FEATS])
 {
@@ -610,59 +665,50 @@ bool plan2feat(const nlohmann::json& plan, float f[NUM_FEATS])
       qb = &specs[0]["query_block"];
   }
 
-  Agg a; walk(*qb, a);                       // ← your existing walk()
+  Agg a; walk(*qb, a);
   if (!a.cnt) return false;
 
   const double inv   = 1.0 / a.cnt;
   const double qCost = safe_f(qb->value("cost_info", json::object()),
                               "query_cost");
 
+  auto lt = [](double v) { return std::tanh(std::log1p(std::max(0.0, v)) / 20.0); };
+
   int k = 0; auto PUSH = [&](double v){ f[k++] = float(v); };
 
-  /* ----------- 24 features, ALL mirrored in kernel --------------- */
-  PUSH(log_tanh(a.re * inv));              // 0
-  PUSH(log_tanh(a.rp * inv));              // 1
-  PUSH(log_tanh(a.rc * inv));              // 2
-  PUSH(log_tanh(a.pc * inv));              // 3
+  PUSH( lt(a.re*inv) );                              // 0
+  PUSH( lt(a.rp*inv) );                              // 1
+  PUSH( lt(a.rc*inv) );                              // 2
+  PUSH( lt(a.pc*inv) );                              // 3
 
-  PUSH(a.cRef   * inv);                    // 4
-  PUSH(a.cEq    * inv);                    // 5
-  PUSH(a.idxUse * inv);                    // 6
+  PUSH( a.cRef   *inv );                             // 4
+  PUSH( a.cEq    *inv );                             // 5
+  PUSH( a.idxUse *inv );                             // 6
 
-  PUSH(a.selMin);                          // 7
-  PUSH(a.ratioMax);                        // 8
+  PUSH( a.selMin );                                  // 7
+  PUSH( a.ratioMax );                                // 8
+  PUSH( std::log1p(qCost)/15.0 );                    // 9
 
-  PUSH(std::log1p(qCost) / 15.0);          // 9
+  PUSH( lt((a.pc*inv)/std::max(1e-6,a.rc*inv)) );    // 10
+  PUSH( lt((a.rc*inv)/std::max(1e-6,a.re*inv)) );    // 11
 
-  PUSH(log_tanh((a.pc*inv) / std::max(1e-6, a.rc*inv)));  // 10
-  PUSH(log_tanh((a.rc*inv) / std::max(1e-6, a.re*inv)));  // 11
+  PUSH( a.cnt );                                     // 12
+  PUSH( a.cnt ? double(a.sumPK)/a.cnt : 0 );         // 13
+  PUSH( lt(a.maxPrefix) );                           // 14
+  PUSH( lt(a.minRead < 1e30 ? a.minRead : 0) );      // 15
 
-  PUSH(a.cnt);                             // 12
-  PUSH(a.cnt ? double(a.sumPK)/a.cnt : 0); // 13
+  PUSH( a.selMax - a.selMin );                       // 16
+  PUSH( a.idxUse / double(std::max(1, a.cRange + a.cRef + a.cEq + a.cIdx)) ); // 17
 
-  PUSH(log_tanh(a.maxPrefix));             // 14
-  PUSH(log_tanh(a.minRead < 1e30 ? a.minRead : 0)); // 15
+  PUSH( lt(a.re*inv) - lt(a.selSum*inv) );           // 18
+  PUSH( lt(a.maxPrefix*inv) );                       // 19
+  PUSH( a.selMin > 0 ? a.selMax / a.selMin : 0 );    // 20
+  PUSH( lt(a.outerRows) );                           // 21
+  PUSH( double(a.eqChainDepth) );                    // 22
+  PUSH( lt( (a.pc > 0 ? a.pc : 1e-6) / std::max(1e-6, a.pcDepth3) ) ); // 23
 
-  PUSH(a.selMax - a.selMin);               // 16
-  PUSH(a.idxUse / double(std::max(1, a.cRange+a.cRef+
-                                     a.cEq  +a.cIdx)));   // 17
-
-  PUSH(log_tanh(a.re*inv) - log_tanh(a.selSum*inv));       // 18
-
-  PUSH(log_tanh(a.maxPrefix * inv));        // 19
-  PUSH(a.selMin>0 ? a.selMax/a.selMin : 0); // 20
-  PUSH(log_tanh(a.outerRows));              // 21
-  PUSH(double(a.eqChainDepth));             // 22
-
-  PUSH(log_tanh((a.pc>0?a.pc:1e-6) /
-                std::max(1e-6, a.pcDepth3)));             // 23
-
-  return k == NUM_FEATS;                    // 24 columns
+  return k == NUM_FEATS;
 }
-
-
-
-
 std::unordered_map<std::string, ColStats> colStats;
 
 
@@ -1093,42 +1139,42 @@ ColStats& get_col_stats_for_dir(const std::string& dir)
 
 
 
-/* 额外加一个缺省参数 bool need_col = g_need_col_plans */
-bool
-load_plan_file(const std::string& fp_row,
-               const std::string& qid,
-               const std::string& rowDir,
-               const std::string& colDir,
-               float             feat[NUM_FEATS],
-               double&           qcost,
-               Graph&            colGraph,
-               bool              need_col)     // ← 新增
-{
-    /* ----------- row plan：保持不动 ----------- */
-    if (!file_exists(fp_row)) return false;
-    std::ifstream in(fp_row);
-    nlohmann::json j;  try { in >> j; } catch (...) { return false; }
+// /* 额外加一个缺省参数 bool need_col = g_need_col_plans */
+// bool
+// load_plan_file(const std::string& fp_row,
+//                const std::string& qid,
+//                const std::string& rowDir,
+//                const std::string& colDir,
+//                float             feat[NUM_FEATS],
+//                double&           qcost,
+//                Graph&            colGraph,
+//                bool              need_col)     // ← 新增
+// {
+//     /* ----------- row plan：保持不动 ----------- */
+//     if (!file_exists(fp_row)) return false;
+//     std::ifstream in(fp_row);
+//     nlohmann::json j;  try { in >> j; } catch (...) { return false; }
 
-    if (!plan2feat(j, feat)) return false;
-    qcost = j.contains("query_block")
-              ? safe_f(j["query_block"].value("cost_info", json::object()),
-                       "query_cost")
-              : 0.0;
+//     if (!plan2feat(j, feat)) return false;
+//     qcost = j.contains("query_block")
+//               ? safe_f(j["query_block"].value("cost_info", json::object()),
+//                        "query_cost")
+//               : 0.0;
 
-    /* ----------- column plan：按需解析 -------- */
-    if (need_col) {
-        std::string fp_col = colDir + "/" + qid + ".json";
-        if (file_exists(fp_col)) {
-            try {
-                std::ifstream ic(fp_col);  nlohmann::json cj;  ic >> cj;
-                const ColStats& st = get_col_stats_for_dir(colDir);
-                const auto&     id = global_op2id();
-                colGraph = parseColPlan(cj, st, id);
-            } catch (...) { /* bad column plan ⇒ 忽略 */ }
-        }
-    }
-    return true;
-}
+//     /* ----------- column plan：按需解析 -------- */
+//     if (need_col) {
+//         std::string fp_col = colDir + "/" + qid + ".json";
+//         if (file_exists(fp_col)) {
+//             try {
+//                 std::ifstream ic(fp_col);  nlohmann::json cj;  ic >> cj;
+//                 const ColStats& st = get_col_stats_for_dir(colDir);
+//                 const auto&     id = global_op2id();
+//                 colGraph = parseColPlan(cj, st, id);
+//             } catch (...) { /* bad column plan ⇒ 忽略 */ }
+//         }
+//     }
+//     return true;
+// }
 
 
 
@@ -1182,118 +1228,126 @@ std::vector<Fold> make_cv3(const std::vector<std::string>& dirs)
 using DirSamples = unordered_map<string, vector<Sample>>;
 
 
+/* ──────────────────────────────────────────────────────────
+ *  load_all_datasets() ― 新版
+ *    · 不再读取 row_plans / column_plans
+ *    · 仅依赖
+ *        <dir>/query_costs.csv   （9 列）
+ *        <dir>/features_24d.csv  （25 列：query_id + 24-dim）
+ * ──────────────────────────────────────────────────────────*/
 DirSamples
 load_all_datasets(const std::string& base,
                   const std::vector<std::string>& dirs)
 {
-    DirSamples M;
+    DirSamples M;                                         // {dir ⇒ vector<Sample>}
 
     for (const auto& d : dirs)
     {
-        /* ---------- per-dataset paths ---------- */
-        std::string csv        = base + "/" + d + "/query_costs.csv";
-        std::string rowPlanDir = base + "/" + d + "/row_plans";
-        std::string colPlanDir = base + "/" + d + "/column_plans";
+        /* 1) 路径拼接 ---------------------------------------------------- */
+        const std::string dir_path = base + '/' + d;
+        const std::string csv_meta = dir_path + "/query_costs.csv";
+        const std::string csv_feat = dir_path + "/features_24d.csv";
 
-        if (!file_exists(csv) || !is_directory(rowPlanDir)) {
-            logW("skip " + d + "  (missing csv or row_plans dir)");
+        if (!file_exists(csv_meta) || !file_exists(csv_feat)) {
+            logW("skip " + d + "  (missing csv)");
             continue;
         }
 
-        /* ========== ★★ 1. 预先构建/读取本目录的列计划统计 ★★ ========== */
-        const ColStats& cst = get_col_stats_for_dir(colPlanDir);
+        /* 2) 一次性把 24-d 特征读进 FEAT_CACHE -------------------------- *
+         *    load_features_for_dir() 已在前文实现；
+         *    key = "<dir_path>/<query_id>"
+         * --------------------------------------------------------------- */
+        load_features_for_dir(dir_path);
 
-        /* ========== ★★ 2. 合并本目录的 op2id → 全球 map ★★ ========== */
-        for (const auto& kv : cst.op2id)        // kv = {opName,id}
-            GLOBAL_OP2ID.emplace(kv);           // 已存在的不覆盖
-        
-
-        /* ---------- read meta (csv) ------------ */
-        struct Meta { int lab; double rt, ct; int fann, hybrid; };
+        /* 3) 读取 meta（延迟 / 预测标签等） ----------------------------- */
+        struct Meta {
+            double rt = 60, ct = 60;     // row_time / column_time（秒）
+            double qcost = 0;            // optimizer cost
+            int    cost = -1;            // cost_rule 预测 (0/1) – 可选
+            int    hyb  = -1;            // hybrid_use_imci
+            int    fann = -1;            // fann_use_imci
+            int    label = -1;           // use_imci (gt)
+        };
         std::unordered_map<std::string, Meta> meta;
 
         {
-            std::ifstream fin(csv);
-            std::string line; std::getline(fin, line);          // header
-            while (std::getline(fin, line)) {
+            std::ifstream fin(csv_meta);
+            std::string line;
+            std::getline(fin, line);                     // ← 跳过 header
+
+            while (std::getline(fin, line))
+            {
+                /* CSV 最后一列是完整 SQL，里面可能含逗号。
+                 * 因此只解析前 8 列，其余全部丢给 query 字段。 */
                 std::stringstream ss(line);
-                std::string qid, lab, rt, ct, fann, hyb;
-                std::getline(ss, qid , ',');
-                std::getline(ss, lab , ',');
-                std::getline(ss, rt  , ',');
-                std::getline(ss, ct  , ',');
-                std::getline(ss, hyb , ',');
-                std::getline(ss, fann, ',');
 
-                meta[qid] = {
-                    lab  == "1",
-                    rt.empty()   ? 60 : std::stod(rt),
-                    ct.empty()   ? 60 : std::stod(ct),
-                    fann.empty() ? -1 : std::stoi(fann),
-                    hyb .empty() ? -1 : std::stoi(hyb)
-                };
+                std::string qid, use_imci, rt, ct, qcost,
+                            cost_flag, hyb_flag, fann_flag;
+
+                std::getline(ss, qid      , ',');   // 0
+                std::getline(ss, use_imci , ',');   // 1
+                std::getline(ss, rt       , ',');   // 2
+                std::getline(ss, ct       , ',');   // 3
+                std::getline(ss, qcost    , ',');   // 4
+                std::getline(ss, cost_flag, ',');   // 5
+                std::getline(ss, hyb_flag , ',');   // 6
+                std::getline(ss, fann_flag, ',');   // 7
+                /* 第 8 列开始是原始 SQL，忽略即可 */
+
+                Meta m;
+                m.label = use_imci.empty() ? -1 : std::stoi(use_imci);
+                m.rt    = rt.empty()      ? 60.0  : std::stod(rt);
+                m.ct    = ct.empty()      ? 60.0  : std::stod(ct);
+                m.qcost = qcost.empty()   ? 0.0   : std::stod(qcost);
+                m.cost  = cost_flag.empty()? -1   : std::stoi(cost_flag);
+                m.hyb   = hyb_flag.empty() ? -1   : std::stoi(hyb_flag);
+                m.fann  = fann_flag.empty()? -1   : std::stoi(fann_flag);
+
+                meta.emplace(qid, std::move(m));
             }
         }
 
-        /* ---------- collect *.json in row_plans ---------- */
-        std::vector<std::string> rowFiles;
-        if (DIR* dirp = ::opendir(rowPlanDir.c_str())) {
-            while (dirent* dp = ::readdir(dirp)) {
-                if (dp->d_type == DT_REG && has_ext(dp->d_name, ".json"))
-                    rowFiles.emplace_back(dp->d_name);      // keep basename only
-            }
-            ::closedir(dirp);
-        }
-
-        /* ---------- parse plans -------------------------- */
+        /* 4) 构造 Sample 向量 ------------------------------------------ */
         std::vector<Sample> samples;
-        samples.reserve(rowFiles.size());
+        samples.reserve(meta.size());
 
-        size_t cur = 0, tot = rowFiles.size();
-        logI("|- collecting row-plan list ...");
-        for (const auto& baseName : rowFiles) {
-            if (++cur % 500 == 0) progress("row-scan "+d, cur, tot);
+        for (const auto& kv : meta)
+        {
+            const std::string& qid = kv.first;
+            const Meta&        m   = kv.second;
 
-            std::string qid = strip_ext(baseName);
-            auto itm = meta.find(qid);
-            if (itm == meta.end()) continue;                // no meta row
-
-            
-
-            Sample s;
-            /* NB: fp_row is full path now */
-            std::string fp_row = rowPlanDir + "/" + baseName;
-            if (!load_plan_file(fp_row, qid, rowPlanDir, colPlanDir,
-                                s.feat.data(), s.qcost, s.colGraph))
+            /* 4-a) 找到预缓存的 24-d 特征 ------------------------------ */
+            auto it_feat = FEAT_CACHE.find(dir_path + '/' + qid);
+            if (it_feat == FEAT_CACHE.end()) {
+                logW("feature vector missing for " + d + '/' + qid);
                 continue;
+            }
 
-            // if (g_use_col_feat) {
-            //     /* 1. 用你的 GNN 读 column plan 得到嵌入向量 */
-            //     auto emb = gnn_encoder(s.colGraph);          // 长度 = EMB_DIM
+            /* 4-b) 组装 Sample ---------------------------------------- */
+            Sample s;
+            std::copy(it_feat->second.begin(),
+                      it_feat->second.end(),
+                      s.feat.begin());
 
-            //     /* 2. 追加到 Sample 的特征尾部 */
-            //     std::copy(emb.begin(), emb.end(),
-            //             s.feat.begin() + ORIG_FEATS);      // 从第 ORIG_FEATS 位开始写
-            // }
-
-            /* fill meta columns */
-            // s.label        = itm->second.lab;
-            s.label  = int(itm->second.ct <= itm->second.rt);
-            s.row_t        = itm->second.rt;
-            s.col_t        = itm->second.ct;
-            s.fann_pred    = itm->second.fann;
-            s.hybrid_pred  = itm->second.hybrid;
-            s.dir_tag = d;
+            s.qcost       = m.qcost;          // 供 cost-rule 动态阈值使用
+            s.colGraph    = Graph{};          // 新管线无列计划
+            s.row_t       = m.rt;
+            s.col_t       = m.ct;
+            s.label       = int(m.ct <= m.rt);      // 只认真实 runtime
+            s.fann_pred   = m.fann;
+            s.hybrid_pred = m.hyb;
+            s.dir_tag     = d;
+            /* 若想保留 cost_rule 预测，可把 m.cost 写进 Sample 新字段 */
 
             samples.emplace_back(std::move(s));
         }
 
-        cerr << '\n';
         logI("dir " + d + " → " + std::to_string(samples.size()) + " samples");
         M.emplace(d, std::move(samples));
     }
     return M;
 }
+
 
 
 /* —— helper: 把若干目录样本合并 —— */

@@ -66,7 +66,7 @@ int main(int argc, char* argv[])
 
     /* ───── CLI / hyper-params ─────────────────────────────── */
     std::string model_type  = "lightgbm";
-    std::string base        = "/home/wuy/query_costs";
+    std::string base        = "/home/wuy/query_costs_trace";
     std::vector<std::string> data_dirs{
         "tpch_sf1",
         "tpch_sf10",

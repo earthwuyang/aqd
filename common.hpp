@@ -93,29 +93,24 @@ struct TblStats {
 };
 
 
-/* ---------- aggregation struct --------------------------------------- */
-struct Agg
-{
-    /* base counters ------------------------------------------------ */
-    double re=0, rp=0, f=0, rc=0, ec=0, pc=0, dr=0;
-    int    cRange=0, cRef=0, cEq=0, cIdx=0, cFull=0, idxUse=0;
-    int    sumPK=0, cnt=0, coverCount=0;
-
-    /* selectivity / shape */
-    double selSum=0, selMin=1e30, selMax=0;
-
-    /* misc extrema */
-    double maxPrefix=0, minRead=1e30;
-
-    /* plan-level flags / counters */
-    double ratioSum=0, ratioMax=0;
-    int    maxDepth=0, eqChainDepth=0, _curEqChain=0;
-    bool   grp=false, ord=false, tmp=false;
-    double outerRows=0;
-    double pcDepth3=0;                 // depth-3 prefix-cost
-    double join_ratio_max=0;           // long/short branch ratio
+struct Agg {
+  double re=0,rp=0,rc=0,pc=0,ec=0;
+  double selSum=0,selMin=1e30,selMax=0,ratioMax=0;
+  double maxPrefix=0,minRead=1e30,pcDepth3=0,outerRows=0;
+  int cnt=0,cRange=0,cRef=0,cEq=0,cIdx=0,idxUse=0,sumPK=0;
+  int maxDepth=0,_curEqChain=0,eqChainDepth=0;
 };
 
+bool
+load_plan_file(const std::string& fp_row,
+               const std::string& qid,
+               const std::string& rowDir,
+               const std::string& colDir,
+               float             feat[NUM_FEATS],
+               double&           qcost,
+               Graph&            colGraph,
+               bool              need_col) ;
+               
 struct ColStats {
     double   avg_width = 8;        // bytes
     double   ndv       = 1000;     // distinct values

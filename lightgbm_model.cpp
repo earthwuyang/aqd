@@ -317,7 +317,7 @@ public:
             double P = 0, N0 = 0;
             for (auto p : S) p->label ? ++P : ++N0;
             double w_pos = 1 * N / (2 * P);   // ↑ 1.3
-            double w_neg = 3 * N / (2 * N0);  // ↓ 0.9
+            double w_neg = 1 * N / (2 * N0);  // ↓ 0.9
 
             for (int i = 0; i < N; ++i) {
                 const Sample& s = *S[i];
@@ -396,7 +396,14 @@ public:
                                         nullptr, &dtrain),
                 "DatasetCreate failed");
             LGBM_DatasetSetField(dtrain, "label",  y.data(), N, C_API_DTYPE_FLOAT32);
-            LGBM_DatasetSetField(dtrain, "weight", w.data(), N, C_API_DTYPE_FLOAT32);
+            if (use_custom_loss_)
+            {
+
+            }
+            else {
+                LGBM_DatasetSetField(dtrain, "weight", w.data(), N, C_API_DTYPE_FLOAT32);
+            }
+            
 
             if (!va.empty()) {                          // 你的原来的验证集构造逻辑
                 Nv = static_cast<int>(va.size());
@@ -447,7 +454,7 @@ public:
                 }
             }
 
-
+            use_custom_loss_ = 0;
             /* --- 参数字符串 param 与你旧代码完全一样 --- */
             std::string param = "boosting=" + booster_
                   + " objective=" + (use_custom_loss_? "none" : "regression_l2")
@@ -488,11 +495,11 @@ public:
                 if (use_custom_loss_) {
                     /* 1. 先拿当前 raw score */
                 
-                    // int64_t out_len = 0;
-                    // LGBM_BoosterPredictForMat(
-                    //     booster, X.data(), C_API_DTYPE_FLOAT32,
-                    //     N, NUM_FEATS, 1, C_API_PREDICT_RAW_SCORE,
-                    //     -1, 0, "", &out_len, raw.data());
+                    int64_t out_len = 0;
+                    LGBM_BoosterPredictForMat(
+                        booster, X.data(), C_API_DTYPE_FLOAT32,
+                        N, NUM_FEATS, 1, C_API_PREDICT_RAW_SCORE,
+                        -1, 0, "", &out_len, raw.data());
 
                     /* 2. 算 grad / hess */
                     std::vector<double> gD(N), hD(N);
