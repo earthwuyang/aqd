@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-bench_routing_modes.py  –  Poisson arrivals, one-thread-per-query.
-当 --dataset 省略时，从所有 15 个内置 benchmark 随机抽取 --limit 条查询。
+benchmark_tpcds_sf100.py  –  Poisson arrivals, concurrent execution, TPC-DS SF100.
+
+• 自动遍历 --sql_dir 下的 *.sql，将文件里的多条查询全部拆分出来。
+• 对每条查询随机生成泊松到达时间，在 5 种 ROUTING_MODES 下并发执行。
+• 结果写 CSV：每行 = 1 条查询，列 = 各模式的执行时长（s）。timeout 记为 args.timeout/1000。
 """
 
 from __future__ import annotations
-import argparse, csv, random, sys, time, os
+import argparse, csv, os, random, sys, time
 from pathlib import Path
 from statistics import mean
 from threading import Thread, Lock
@@ -15,17 +18,12 @@ from typing import List, Tuple
 import pymysql
 import pymysql.err
 from tqdm import tqdm
+import random
+from pathlib import Path
+from typing import List, Optional
 
 # ───────────────────────────── config ──────────────────────────────
 HOST, PORT, USER, PASS = "127.0.0.1", 44444, "root", ""
-
-ALL_DATASETS = [
-    "tpch_sf1",  "tpch_sf10",  "tpch_sf100",
-    "tpcds_sf1", "tpcds_sf10", "tpcds_sf100",
-    "hybench_sf1", "hybench_sf10",
-    "airline", "credit", "carcinogenesis",
-    "employee", "financial", "geneea", "hepatitis",
-]
 
 ROUTING_MODES = {
     "row_only":      ["SET use_imci_engine = OFF"],
@@ -54,49 +52,68 @@ ROUTING_MODES = {
 }
 
 # ─────────────────────────── utilities ─────────────────────────────
-def load_sql_file(path: Path) -> List[str]:
-    """读 .sql 文件并去掉注释/空行；只做最简单的 split。"""
+def split_sql(text: str) -> List[str]:
+    """
+    传入完整 SQL 文本，按分号切分为多条；忽略 -- 开头的行注释。
+    不处理内部嵌套分号（TPC-DS 模板不会遇到）。
+    """
+    stmts, buff = [], []
+    for ln in text.splitlines():
+        ln = ln.strip()
+        if ln.startswith("--") or not ln:
+            continue
+        buff.append(ln)
+        if ln.endswith(";"):
+            stmts.append(" ".join(buff)[:-1])   # 去掉末尾分号
+            buff.clear()
+    if buff:                                   # 万一最后一句忘了分号
+        stmts.append(" ".join(buff))
+    return stmts
+
+
+def load_queries(sql_dir: Path,
+                 limit: Optional[int] = None,
+                 seed: Optional[int] = None) -> List[str]:
+    """
+    读取 sql_dir 下所有 .sql 文件的查询：
+      • 先按文件名排序依次读入（保证全量覆写时顺序可预期）
+      • split_sql() 切分出每条 SQL
+      • 再整体 shuffle（seed 不为 None 时保证可复现）
+      • 最后按 limit 截断
+    """
     qs: List[str] = []
-    if not path.exists():
-        return qs
-    with path.open() as f:
-        for ln in f:
-            s = ln.strip()
-            if s and not s.startswith("--"):
-                qs.append(s.rstrip(";").replace('"', ""))
-    return qs
+    for p in sorted(sql_dir.glob("*.sql")):
+        text = p.read_text(encoding="utf-8", errors="ignore")
+        qs.extend(split_sql(text))
+
+    rng = random.Random(seed)   # 独立 RNG，避免影响全局
+    rng.shuffle(qs)
+
+    return qs[:limit] if (limit and limit > 0) else qs
 
 
-def gather_dataset_queries(ds: str, data_dir: Path) -> List[str]:
-    """给定数据集名，返回两类 workload 的 SQL 列表。"""
-    wk_dir = data_dir / "workloads" / ds
-    qs_ap = load_sql_file(wk_dir / "workload_100k_s1_group_order_by_more_complex.sql")
-    qs_tp = load_sql_file(wk_dir / "TP_queries.sql")
-    return qs_tp + qs_ap
-
-
-def poisson_arrivals(n: int, mean_sec: float, seed: int) -> List[float]:
-    rng = random.Random(seed)
-    t, out = 0.0, []
+def poisson_arrivals(n: int, mean_sec: float, rng: random.Random) -> List[float]:
+    t, arr = 0.0, []
     for _ in range(n):
         t += rng.expovariate(1.0 / mean_sec)
-        out.append(t)
-    return out
+        arr.append(t)
+    return arr
 
 
 def log_fail(tag: str, idx: int, err: Exception, sql: str) -> None:
     snippet = sql.replace("\n", " ")[:120] + ("…" if len(sql) > 120 else "")
     if isinstance(err, pymysql.MySQLError) and err.args:
-        print(f"[{tag} #{idx}] errno {err.args[0]}: {err.args[1]}\n"
-              f"   SQL: {snippet}", file=sys.stderr)
+        # print(f"[{tag} #{idx}] errno {err.args[0]}: {err.args[1]}\n"
+        #       f"   SQL: {snippet}", file=sys.stderr)
+        pass
     else:
-        print(f"[{tag} #{idx}] {err}\n"
-              f"   SQL: {snippet}", file=sys.stderr)
+        print(f"[{tag} #{idx}] {err}\n   SQL: {snippet}", file=sys.stderr)
 
 # ───────────────────── per-query execution thread ───────────────────
 def execute_query(idx: int,
-                  task: Tuple[str, str],     # (db, sql)
-                  arrival_rel: float,
+                  sql: str,
+                  db: str,
+                  arrival: float,
                   sess_sql: list[str],
                   args,
                   lat: list,
@@ -104,16 +121,13 @@ def execute_query(idx: int,
                   bar,
                   lock: Lock,
                   tag: str) -> None:
-    db, sql = task
     TIMEOUT_S = args.timeout / 1000.0
 
-    # 1) wait until its arrival time
-    target = bench_start + arrival_rel
-    remain = target - time.perf_counter()
+    # 1) wait until its scheduled arrival time
+    remain = bench_start + arrival - time.perf_counter()
     if remain > 0:
         time.sleep(remain)
 
-    # 2) connect & run
     try:
         conn = pymysql.connect(host=HOST, port=PORT, user=USER,
                                password=PASS, db=db, autocommit=True)
@@ -135,7 +149,7 @@ def execute_query(idx: int,
         with lock:
             lat[idx] = time.perf_counter() - t0
     except pymysql.err.OperationalError as e:
-        if e.args and e.args[0] in (3024, 1317):      # timeout
+        if e.args and e.args[0] in (3024, 1317):      # 3024 = query-timeout
             with lock:
                 lat[idx] = TIMEOUT_S
         else:
@@ -154,20 +168,21 @@ def execute_query(idx: int,
 
 # ───────────────────────── one routing mode ─────────────────────────
 def run_mode(tag: str,
-             tasks: List[Tuple[str, str]],
+             queries: List[str],
              arrivals: List[float],
+             db: str,
              args):
-    n = len(tasks)
+    n = len(queries)
     lat: List[float | None] = [None] * n
-    bar = tqdm(total=n, desc=tag, ncols=70, leave=False)
+    bar = tqdm(total=n, desc=tag, ncols=72, leave=False)
     bench_start = time.perf_counter()
 
     threads: List[Thread] = []
     lock = Lock()
 
-    for i, (job, rel) in enumerate(zip(tasks, arrivals)):
+    for i, (q, arr) in enumerate(zip(queries, arrivals)):
         th = Thread(target=execute_query,
-                    args=(i, job, rel,
+                    args=(i, q, db, arr,
                           ROUTING_MODES[tag],
                           args, lat, bench_start, bar, lock, tag),
                     daemon=True)
@@ -192,65 +207,48 @@ def write_csv(path: Path, mode_res: dict):
 # ──────────────────────────── main ────────────────────────────────
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--dataset", help="单个数据集；省略则跨库随机抽样")
-    ap.add_argument("--data_dir", default="/home/wuy/query_costs_trace/")
-    ap.add_argument("--ap"); ap.add_argument("--tp")
+    ap.add_argument("--sql_dir", default="/home/wuy/datasets/tpcds-kit/tpcds-kit/tools/queries",
+                    help="生成的 TPC-DS .sql 文件所在目录")
+    ap.add_argument("--db", default="tpcds_sf100",
+                    help="数据库名（已加载好 SF100 数据）")
+    ap.add_argument("--limit", "-n", type=int, default=100,
+                    help="抽取前 n 条查询")
     ap.add_argument("--timeout", type=int, default=600000,
                     help="per-query timeout (ms)")
-    ap.add_argument("--limit", "-n", type=int, default=50)
-    ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--mean_interval", type=float, default=50,
-                    help="平均到达间隔 (ms)")
+                    help="Poisson 平均到达间隔 (ms)")
     ap.add_argument("--qps", type=float,
-                    help="目标 QPS（设后覆盖 mean_interval）")
-    ap.add_argument("--out", default="routing_bench.csv")
+                    help="目标 QPS（设置后覆盖 mean_interval）")
+    ap.add_argument("--seed", type=int, default=42)
+    ap.add_argument("--out", default="tpcds_bench.csv")
     args = ap.parse_args()
 
-    random.seed(args.seed)
-
+    rng = random.Random(args.seed)
     mean_ms  = 1000 / args.qps if args.qps else args.mean_interval
     mean_sec = mean_ms / 1000.0
-    data_dir = Path(args.data_dir)
 
-    # ── 1. 读入 SQL ────────────────────────────────────────────────
-    tasks: List[Tuple[str, str]] = []        # (db, sql)
-    if args.dataset:                         # 单库
-        ds = args.dataset
-        dset_dir = data_dir / "workloads" / ds
-        qs_ap = load_sql_file(Path(args.ap) if args.ap else
-                              dset_dir / "workload_100k_s1_group_order_by_more_complex.sql")
-        qs_tp = load_sql_file(Path(args.tp) if args.tp else
-                              dset_dir / "TP_queries.sql")
-        for q in qs_tp + qs_ap:
-            tasks.append((ds, q))
-    else:                                    # 跨库随机抽样
-        print(f"gathering queries")
-        for ds in tqdm(ALL_DATASETS):
-            qs = gather_dataset_queries(ds, data_dir)
-            tasks.extend((ds, q) for q in qs)
-
-    if not tasks:
-        print("No queries found — check --data_dir / file paths.", file=sys.stderr)
+    sql_dir = Path(args.sql_dir)
+    if not sql_dir.exists():
+        print(f"--sql_dir {sql_dir} 不存在", file=sys.stderr)
         sys.exit(1)
 
-    random.shuffle(tasks)
-    if 0 < args.limit < len(tasks):
-        tasks = tasks[:args.limit]
+    queries = load_queries(sql_dir, args.limit)
+    if not queries:
+        print("没有读到任何查询，请确认 --sql_dir 里有 .sql 文件", file=sys.stderr)
+        sys.exit(1)
 
-    tp_cnt = sum(1 for db, _ in tasks if db.endswith("TP"))
-    ap_cnt = len(tasks) - tp_cnt
-    print(f"Loaded {len(tasks)} queries "
-          f"(sampled from {len(set(db for db, _ in tasks))} datasets)")
+    print(f"Loaded {len(queries)} queries from {sql_dir}  "
+          f"(db = {args.db})")
 
-    arrivals = poisson_arrivals(len(tasks), mean_sec, args.seed)
+    arrivals = poisson_arrivals(len(queries), mean_sec, rng)
 
-    # ── 2. 按 routing-mode benchmark ──────────────────────────────
+    # ── benchmark 各 routing-mode ──────────────────────────────────
     mode_res = {}
     for tag in ROUTING_MODES:
-        # if tag in ("row_only", "col_only"):   # 跳过单引擎 baseline
-        #     continue
+        if tag in ("row_only", "col_only"):
+            continue
         print(f"\n=== {tag} ===")
-        mk, lats = run_mode(tag, tasks, arrivals, args)
+        mk, lats = run_mode(tag, queries, arrivals, args.db, args)
 
         ok      = [v for v in lats if v not in (None, args.timeout/1000.0)]
         to      = [v for v in lats if v == args.timeout/1000.0]
@@ -265,7 +263,7 @@ def main():
 
         mode_res[tag] = (mk, lats)
 
-    # ── 3. 写 CSV ──────────────────────────────────────────────────
+    # ── 输出 CSV ───────────────────────────────────────────────────
     write_csv(Path(args.out), mode_res)
     print(f"\nPer-query latencies saved to {args.out}")
 
