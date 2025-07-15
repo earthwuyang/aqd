@@ -68,6 +68,7 @@ int main(int argc, char* argv[])
     std::string model_type  = "lightgbm";
     std::string base        = "/home/wuy/query_costs_trace";
     std::vector<std::string> data_dirs{
+        "tpcds_sf1_templates",
         "tpch_sf1",
         "tpch_sf10",
         "tpch_sf100",
