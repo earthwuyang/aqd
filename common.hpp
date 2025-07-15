@@ -25,7 +25,7 @@ using json = nlohmann::json;
 using namespace std;
 
 /* ---------- 全局常量 ---------- */
-constexpr int    NUM_FEATS   = 24;      // feature dim
+constexpr int    NUM_FEATS   = 36;      // feature dim
 constexpr double EPS_RUNTIME = 1e-2;
 constexpr double COST_THR    = 5e4;
 

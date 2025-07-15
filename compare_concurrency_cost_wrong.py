@@ -217,8 +217,8 @@ def main():
     for tag in ROUTING_MODES:
         # if tag in ("row_only", "col_only"):        # baseline 可删减
         #     continue
-        if tag == "col_only":
-            continue
+        # if tag == "col_only":
+        #     continue
         print(f"\n=== {tag} ===")
         mk, lats = run_mode(tag, tasks, arrivals, args)
 

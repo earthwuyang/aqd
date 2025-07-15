@@ -47,7 +47,7 @@ def _extract_24feats(trace_obj: Any) -> List[float]:
         if isinstance(n, dict):
             if "row_column_dispatch_features" in n:
                 fn = n["row_column_dispatch_features"]
-                return [fn[str(i)] for i in range(24)]
+                return [fn[str(i)] for i in range(36)]
             st.extend(n.values())
         elif isinstance(n, list):
             st.extend(n)
@@ -221,7 +221,7 @@ def collect_dataset(ds: str,
                               "cost_use_imci", "hybrid_use_imci",
                               "fann_use_imci", "query"])
         if new_feat_hdr:
-            wr_feat.writerow(["query_id"] + [f"f{i:02d}" for i in range(24)])
+            wr_feat.writerow(["query_id"] + [f"f{i:02d}" for i in range(36)])
 
         id_offset = existing          # 继续递增 query_id
         done = 0
