@@ -1,0 +1,42 @@
+{
+  "Bio": {
+    "fibros": "char",
+    "activity": "char",
+    "b_id": "int"
+  },
+  "dispat": {
+    "m_id": "int",
+    "sex": "char",
+    "age": "char",
+    "Type": "char"
+  },
+  "indis": {
+    "got": "char",
+    "gpt": "char",
+    "alb": "char",
+    "tbil": "char",
+    "dbil": "char",
+    "che": "char",
+    "ttt": "char",
+    "ztt": "char",
+    "tcho": "char",
+    "tp": "char",
+    "in_id": "int"
+  },
+  "inf": {
+    "dur": "char",
+    "a_id": "int"
+  },
+  "rel11": {
+    "b_id": "int",
+    "m_id": "int"
+  },
+  "rel12": {
+    "in_id": "int",
+    "m_id": "int"
+  },
+  "rel13": {
+    "a_id": "int",
+    "m_id": "int"
+  }
+}

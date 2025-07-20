@@ -1,9 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-bench_routing_modes.py  –  Poisson arrivals, one-thread-per-query
-只执行 “cost-threshold 选错” 的语句：
-    cost_use_imci != use_imci    (来自 query_costs.csv)
+bench_routing_modes.py  –  multiple arrival patterns, one-thread-per-query.
+
+1. 读取 query_costs.csv 中 “cost_use_imci ≠ use_imci” 的 SQL。
+2. 支持三种到达模型：
+      • 默认 Poisson (`--poisson_qps`)
+      • 爆发 Burst   (`--burst` …)
+      • 锯齿 Sawtooth (`--saw`  …)
+3. 并发执行多种 ROUTING_MODES（cost_thresh / hybrid_opt / lgbm_kernel / lgbm_kernel_mm1）。
+4. 结果输出 CSV：query_idx, <mode>_lat …
 """
 
 from __future__ import annotations
@@ -52,6 +58,14 @@ ROUTING_MODES = {
         "SET fann_model_routing_enabled  = ON",
         "SET GLOBAL hybrid_opt_fetch_imci_stats_thread_enabled = ON",
     ],
+    "lgbm_kernel_mm1": [
+        "SET use_imci_engine = ON",
+        "SET cost_threshold_for_imci = 1",
+        "SET hybrid_opt_dispatch_enabled = ON",
+        "SET fann_model_routing_enabled  = ON",
+        "SET GLOBAL hybrid_opt_fetch_imci_stats_thread_enabled = ON",
+        "SET use_mm1_time = ON"
+    ],
 }
 
 # ─────────────────────────── utilities ─────────────────────────────
@@ -73,6 +87,7 @@ def load_mismatched_from_csv(path: Path) -> List[str]:
     return qs
 
 
+# ---------- arrival patterns ----------
 def poisson_arrivals(n: int, mean_sec: float, seed: int) -> List[float]:
     rng = random.Random(seed)
     t, out = 0.0, []
@@ -82,31 +97,73 @@ def poisson_arrivals(n: int, mean_sec: float, seed: int) -> List[float]:
     return out
 
 
+def burst_arrivals(n: int,
+                   burst_qps: float,
+                   pause_ms: float,
+                   burst_len: int,
+                   seed: int) -> List[float]:
+    """爆发: 连续 burst_len 条查询以 burst_qps 速率到达，然后空档 pause_ms。"""
+    rng = random.Random(seed)
+    arrivals: list[float] = []
+    t = 0.0
+    intra = 1.0 / burst_qps
+    while len(arrivals) < n:
+        for _ in range(min(burst_len, n - len(arrivals))):
+            arrivals.append(t)
+            t += intra
+        t += pause_ms / 1000.0
+        rng.random()  # 抖动 RNG
+    return arrivals
+
+
+def sawtooth_arrivals(n: int,
+                      base_qps: float,
+                      peak_qps: float,
+                      period_ms: float,
+                      seed: int) -> List[float]:
+    """锯齿: QPS 线性上升到峰值再骤降，再循环。"""
+    rng = random.Random(seed)
+    arrivals: list[float] = []
+    t = 0.0
+    step_cnt = 20                        # 一齿分 20 个线性段
+    while len(arrivals) < n:
+        for frac in (i / step_cnt for i in range(step_cnt + 1)):
+            cur_qps = base_qps + (peak_qps - base_qps) * frac
+            dt = 1.0 / cur_qps
+            seg_len = period_ms / 1000.0 / step_cnt
+            num = max(1, int(seg_len / dt))
+            for _ in range(min(num, n - len(arrivals))):
+                arrivals.append(t)
+                t += dt
+            if len(arrivals) >= n:
+                break
+    arrivals = [a + rng.uniform(-0.5, 0.5) * 1e-3 for a in arrivals]
+    arrivals.sort()
+    return arrivals
+
+
 def log_fail(tag: str, idx: int, err: Exception, sql: str):
     snippet = sql.replace("\n", " ")[:120] + ("…" if len(sql) > 120 else "")
     print(f"[{tag} #{idx}] {err}\n   SQL: {snippet}", file=sys.stderr)
 
 # ───────────────────── per-query execution thread ───────────────────
 def execute_query(idx: int,
-                  task: Tuple[str, str],       # (db, sql)
+                  task: Tuple[str, str],
                   arrival_rel: float,
                   sess_sql: list[str],
                   args,
                   lat: list,
                   bench_start: float,
-                  bar,
-                  lock: Lock,
+                  bar, lock: Lock,
                   tag: str) -> None:
     db, sql = task
     TIMEOUT_S = args.timeout / 1000.0
 
-    # 1) wait until its arrival time
-    target = bench_start + arrival_rel
-    remain = target - time.perf_counter()
+    # wait until its arrival time
+    remain = bench_start + arrival_rel - time.perf_counter()
     if remain > 0:
         time.sleep(remain)
 
-    # 2) connect & run
     try:
         conn = pymysql.connect(host=HOST, port=PORT, user=USER,
                                password=PASS, db=db, autocommit=True)
@@ -122,7 +179,7 @@ def execute_query(idx: int,
 
     t0 = time.perf_counter()
     try:
-        cur.execute(sql); cur.fetchall()
+        cur.execute(sql);  cur.fetchall()
         with lock:
             lat[idx] = time.perf_counter() - t0
     except pymysql.err.OperationalError as e:
@@ -177,27 +234,40 @@ def main():
     pa.add_argument("--data_dir", default="/home/wuy/query_costs_trace/")
     pa.add_argument("--timeout", type=int, default=600000,
                     help="per-query timeout (ms)")
-    pa.add_argument("--limit", "-n", type=int, default=50)
+    pa.add_argument("--limit", "-n", type=int, default=100)
     pa.add_argument("--seed", type=int, default=42)
-    pa.add_argument("--mean_interval", type=float, default=50,
-                    help="平均到达间隔 (ms)")
-    pa.add_argument("--qps", type=float,
-                    help="目标 QPS（设后覆盖 mean_interval）")
+
+    # arrival pattern (互斥)
+    grp = pa.add_mutually_exclusive_group()
+    grp.add_argument("--poisson_qps", type=float,
+                     help="Poisson 到达的目标 QPS")
+    grp.add_argument("--burst", action="store_true",
+                     help="使用 burst 到达模式")
+    grp.add_argument("--saw", action="store_true",
+                     help="使用锯齿到达模式")
+
+    # burst parameters
+    pa.add_argument("--burst_qps", type=float, default=800)
+    pa.add_argument("--pause_ms", type=float, default=200)
+    pa.add_argument("--burst_len", type=int, default=200)
+
+    # sawtooth parameters
+    pa.add_argument("--base_qps", type=float, default=50)
+    pa.add_argument("--peak_qps", type=float, default=800)
+    pa.add_argument("--period_ms", type=float, default=500)
+
     pa.add_argument("--out", default="routing_bench.csv")
     args = pa.parse_args()
 
     random.seed(args.seed)
-    mean_ms  = 1000 / args.qps if args.qps else args.mean_interval
-    mean_sec = mean_ms / 1000.0
     data_dir = Path(args.data_dir)
 
-    # ── 1. 收集 SQL (mis-route only) ───────────────────────────────
-    tasks: List[Tuple[str, str]] = []          # (db, sql)
+    # ── 1. 收集 SQL ───────────────────────────────────────────
+    tasks: List[Tuple[str, str]] = []
     datasets = [args.dataset] if args.dataset else ALL_DATASETS
     for ds in datasets:
         csv_path = data_dir / ds / "query_costs.csv"
-        qs = load_mismatched_from_csv(csv_path)
-        tasks.extend((ds, q) for q in qs)
+        tasks.extend((ds, q) for q in load_mismatched_from_csv(csv_path))
 
     if not tasks:
         print("No mismatched queries found, abort.", file=sys.stderr)
@@ -210,15 +280,35 @@ def main():
     print(f"Loaded {len(tasks)} mis-routed queries "
           f"from {len(set(db for db, _ in tasks))} dataset(s)")
 
-    arrivals = poisson_arrivals(len(tasks), mean_sec, args.seed)
+    # ── 2. 生成到达时间 ─────────────────────────────────────────
+    if args.burst:
+        arrivals = burst_arrivals(
+            n=len(tasks), seed=args.seed,
+            burst_qps=args.burst_qps,
+            pause_ms=args.pause_ms,
+            burst_len=args.burst_len)
+        print(f"Arrival pattern: BURST  (burst_qps={args.burst_qps}, "
+              f"pause_ms={args.pause_ms}, burst_len={args.burst_len})")
+    elif args.saw:
+        arrivals = sawtooth_arrivals(
+            n=len(tasks), seed=args.seed,
+            base_qps=args.base_qps,
+            peak_qps=args.peak_qps,
+            period_ms=args.period_ms)
+        print(f"Arrival pattern: SAWTOOTH "
+              f"(base_qps={args.base_qps}, peak_qps={args.peak_qps}, "
+              f"period_ms={args.period_ms})")
+    else:
+        qps = args.poisson_qps if args.poisson_qps else 20.0
+        arrivals = poisson_arrivals(
+            n=len(tasks), mean_sec=1.0 / qps, seed=args.seed)
+        print(f"Arrival pattern: POISSON  (qps={qps})")
 
-    # ── 2. benchmark 各 routing-mode ───────────────────────────────
+    # ── 3. benchmark 各 routing-mode ───────────────────────────
     mode_res = {}
     for tag in ROUTING_MODES:
-        # if tag in ("row_only", "col_only"):        # baseline 可删减
-        #     continue
-        # if tag == "col_only":
-        #     continue
+        if tag in ("row_only", "col_only"):  # 需要时可打开
+            continue
         print(f"\n=== {tag} ===")
         mk, lats = run_mode(tag, tasks, arrivals, args)
 
@@ -229,10 +319,11 @@ def main():
         qps  = len(ok) / mk if mk else 0.0
 
         print(f"makespan {mk:.2f}s  avg {avg:.4f}s  "
-              f"qps {qps:.2f}/s  (ok {len(ok)} | timeout {len(to)} | fail {fail})")
+              f"qps {qps:.2f}/s  "
+              f"(ok {len(ok)} | timeout {len(to)} | fail {fail})")
         mode_res[tag] = (mk, lats)
 
-    # ── 3. 输出 CSV ────────────────────────────────────────────────
+    # ── 4. 输出 CSV ────────────────────────────────────────────
     write_csv(Path(args.out), mode_res)
     print(f"\nPer-query latencies saved to {args.out}")
 

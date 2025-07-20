@@ -1,0 +1,79 @@
+{
+  "nation": {
+    "n_nationkey": "int",
+    "n_name": "char",
+    "n_regionkey": "int",
+    "n_comment": "char"
+  },
+  "region": {
+    "r_regionkey": "int",
+    "r_name": "char",
+    "r_comment": "char"
+  },
+  "part": {
+    "p_partkey": "int",
+    "p_name": "char",
+    "p_mfgr": "char",
+    "p_brand": "char",
+    "p_type": "char",
+    "p_size": "int",
+    "p_container": "char",
+    "p_retailprice": "float",
+    "p_comment": "char"
+  },
+  "supplier": {
+    "s_suppkey": "int",
+    "s_name": "char",
+    "s_address": "char",
+    "s_nationkey": "int",
+    "s_phone": "char",
+    "s_acctbal": "float",
+    "s_comment": "char"
+  },
+  "partsupp": {
+    "ps_partkey": "int",
+    "ps_suppkey": "int",
+    "ps_availqty": "int",
+    "ps_supplycost": "float",
+    "ps_comment": "char"
+  },
+  "customer": {
+    "c_custkey": "int",
+    "c_name": "char",
+    "c_address": "char",
+    "c_nationkey": "int",
+    "c_phone": "char",
+    "c_acctbal": "float",
+    "c_mktsegment": "char",
+    "c_comment": "char"
+  },
+  "orders": {
+    "o_orderkey": "int",
+    "o_custkey": "int",
+    "o_orderstatus": "char",
+    "o_totalprice": "float",
+    "o_orderdate": "date",
+    "o_orderpriority": "char",
+    "o_clerk": "char",
+    "o_shippriority": "int",
+    "o_comment": "char"
+  },
+  "lineitem": {
+    "l_orderkey": "int",
+    "l_partkey": "int",
+    "l_suppkey": "int",
+    "l_linenumber": "int",
+    "l_quantity": "float",
+    "l_extendedprice": "float",
+    "l_discount": "float",
+    "l_tax": "float",
+    "l_returnflag": "char",
+    "l_linestatus": "char",
+    "l_shipdate": "date",
+    "l_commitdate": "date",
+    "l_receiptdate": "date",
+    "l_shipinstruct": "char",
+    "l_shipmode": "char",
+    "l_comment": "char"
+  }
+}

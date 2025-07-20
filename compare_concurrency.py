@@ -51,6 +51,14 @@ ROUTING_MODES = {
         "SET fann_model_routing_enabled  = ON",
         "SET GLOBAL hybrid_opt_fetch_imci_stats_thread_enabled = ON",
     ],
+    "lgbm_kernel_mm1": [
+        "SET use_imci_engine = ON",
+        "SET cost_threshold_for_imci = 1",
+        "SET hybrid_opt_dispatch_enabled = ON",
+        "SET fann_model_routing_enabled  = ON",
+        "SET GLOBAL hybrid_opt_fetch_imci_stats_thread_enabled = ON",
+        "SET use_mm1_time = ON"
+    ]
 }
 
 # ─────────────────────────── utilities ─────────────────────────────
@@ -87,7 +95,8 @@ def poisson_arrivals(n: int, mean_sec: float, seed: int) -> List[float]:
 def log_fail(tag: str, idx: int, err: Exception, sql: str) -> None:
     snippet = sql.replace("\n", " ")[:120] + ("…" if len(sql) > 120 else "")
     if isinstance(err, pymysql.MySQLError) and err.args:
-        print(f"[{tag} #{idx}] errno {err.args[0]}: {err.args[1]}\n"
+        if err.args[0] != 1064:
+            print(f"[{tag} #{idx}] errno {err.args[0]}: {err.args[1]}\n"
               f"   SQL: {snippet}", file=sys.stderr)
     else:
         print(f"[{tag} #{idx}] {err}\n"
@@ -249,6 +258,8 @@ def main():
     for tag in ROUTING_MODES:
         # if tag in ("row_only", "col_only"):   # 跳过单引擎 baseline
         #     continue
+        if not tag.startswith('lgbm'):
+            continue
         print(f"\n=== {tag} ===")
         mk, lats = run_mode(tag, tasks, arrivals, args)
 
