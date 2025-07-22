@@ -47,17 +47,17 @@ ROUTING_MODES = {
         "SET fann_model_routing_enabled  = ON",
         "SET GLOBAL hybrid_opt_fetch_imci_stats_thread_enabled = ON",
     ],
-    # "lgbm_kernel_mm1": [
-    #     "SET use_imci_engine = ON",
-    #     "SET cost_threshold_for_imci = 1",
-    #     "SET hybrid_opt_dispatch_enabled = ON",
-    #     "SET fann_model_routing_enabled  = ON",
-    #     "SET GLOBAL hybrid_opt_fetch_imci_stats_thread_enabled = ON",
-    #     "SET use_mm1_time = ON"
-    # ],
+    "lgbm_kernel_mm1": [
+        "SET use_imci_engine = ON",
+        "SET cost_threshold_for_imci = 1",
+        "SET hybrid_opt_dispatch_enabled = ON",
+        "SET fann_model_routing_enabled  = ON",
+        "SET GLOBAL hybrid_opt_fetch_imci_stats_thread_enabled = ON",
+        "SET use_mm1_time = ON"
+    ],
 }
 # 写 CSV 时的列顺序
-BENCH_MODES = ["cost_thresh", "hybrid_opt", "lgbm_kernel"]
+BENCH_MODES = ["cost_thresh", "hybrid_opt", "lgbm_kernel", "lgbm_kernel_mm1"]
 # BENCH_MODES = ["lgbm_kernel_mm1"]
 
 # ─────────────────────────── utilities ─────────────────────────────

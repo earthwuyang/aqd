@@ -47,6 +47,14 @@ ROUTING_MODES = {
         "SET fann_model_routing_enabled  = ON",
         "SET GLOBAL hybrid_opt_fetch_imci_stats_thread_enabled = ON",
     ],
+    "lgbm_kernel_mm1": [
+        "SET use_imci_engine = ON",
+        "SET cost_threshold_for_imci = 1",
+        "SET hybrid_opt_dispatch_enabled = ON",
+        "SET fann_model_routing_enabled  = ON",
+        "SET GLOBAL hybrid_opt_fetch_imci_stats_thread_enabled = ON",
+        "SET use_mm1_time = ON"
+    ]
 }
 
 # ────────────────── utilities ────────────────────────────
@@ -208,6 +216,8 @@ def main():
     mode_res = {}
     for tag in ROUTING_MODES:
         if tag in ("row_only", "col_only"):   # 如需 baseline 去掉本行
+            continue
+        if not tag.startswith('lightgbm'):
             continue
         print(f"\n=== {tag} ===")
         mk, lats = run_mode(tag, queries, arrivals, args.db, args)
