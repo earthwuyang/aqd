@@ -212,6 +212,49 @@ int main(int argc, char* argv[])
     for(auto&kv:ALL) DIR_W[kv.first]=std::pow(tot/kv.second.size(),0.2);
     global_stats().freeze();
 
+
+    /* ============================================================= *
+    *  Shortcut: the user passed only ONE directory via --data_dirs *
+    *           → do a simple 90/10 in-dataset split               *
+    * ============================================================= */
+    if (data_dirs.size() == 1)
+    {
+        const std::string dir = data_dirs.front();
+        auto all_samp = build_subset({dir}, ALL);
+
+        if (all_samp.empty()) {
+            logE("dataset '"+dir+"' has zero samples");  return 1;
+        }
+
+        /* 90 % train   10 % test (at least one sample each) */
+        std::vector<Sample> DS_tr, DS_te;
+        split_train_test(all_samp, /*test_ratio=*/0.10, seed, DS_tr, DS_te);
+
+        std::cout << "\n[Single-dir] '" << dir << "'  "
+                << "train=" << DS_tr.size()
+                << "  test="  << DS_te.size() << '\n';
+
+        /* checkpoint path */
+        const std::string ckpt_dir = "checkpoints";
+        if (!is_directory(ckpt_dir))
+            ::mkdir(ckpt_dir.c_str(), 0755);
+        const std::string mp = ckpt_dir + '/' + model_type + "_" + dir + ".txt";
+
+        /* train or load */
+        if (!hp.skip_train) {
+            std::unordered_map<std::string,double> ONE_W{{dir,1.0}};
+            learner->train(DS_tr, DS_te, mp, hp, ONE_W);
+            logI("finished training, model → " + mp);
+        } else if (!file_exists(mp)) {
+            logE("skip_train set but model '" + mp + "' not found");  return 1;
+        }
+
+        /* evaluate on the 10 % hold-out */
+        auto pred = learner->predict(mp, DS_te);
+        report_metrics(pred, DS_te);
+        return 0;            // ← program ends here for single-dir mode
+    }
+    
     /* ========== 5. Build fixed 5×3 test groups ============== */
     static auto groups = make_5x3_partition(data_dirs, seed);
 
