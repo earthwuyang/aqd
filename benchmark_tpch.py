@@ -24,8 +24,8 @@ from tqdm import tqdm
 HOST, PORT, USER, PASS = "127.0.0.1", 44444, "root", ""
 
 ROUTING_MODES = {
-    "row_only":      ["SET use_imci_engine = OFF"],
-    "col_only":      ["SET use_imci_engine = FORCED"],
+    # "row_only":      ["SET use_imci_engine = OFF"],
+    # "col_only":      ["SET use_imci_engine = FORCED"],
     "cost_thresh": [
         "SET use_imci_engine = ON",
         "SET cost_threshold_for_imci = 50000",
@@ -215,10 +215,10 @@ def main():
 
     mode_res = {}
     for tag in ROUTING_MODES:
-        if tag in ("row_only", "col_only"):   # 如需 baseline 去掉本行
-            continue
-        if not tag.startswith('lightgbm'):
-            continue
+        # if tag in ("row_only", "col_only"):   # 如需 baseline 去掉本行
+        #     continue
+        # if not tag.startswith('lightgbm'):
+        #     continue
         print(f"\n=== {tag} ===")
         mk, lats = run_mode(tag, queries, arrivals, args.db, args)
 
@@ -232,7 +232,7 @@ def main():
               f"qps {qps_eff:.2f}/s  (ok {len(ok)} | timeout {len(to)} | fail {fail})")
         mode_res[tag] = (mk, lats)
 
-    write_csv(Path(args.out), mode_res)
+    # write_csv(Path(args.out), mode_res)
     print(f"\nPer-query latencies saved to {args.out}")
 
 if __name__ == "__main__":

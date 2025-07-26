@@ -296,26 +296,39 @@ def main():
     print("\n[32-feat model] Confusion-matrix (true rows / pred cols):")
     print(cm32)
     print(f"accuracy={acc32:.4f}  precision={prec32:.4f}  recall={rec32:.4f}")
-
-    # ------------------------------------------------------------------
-    #  SHAP heat-map for the 32-feature model
-    # ------------------------------------------------------------------
+    
     expl32   = shap.TreeExplainer(clf32.booster_)
-    sv32_all = expl32.shap_values(X_32, check_additivity=False)   # list of 2 arrays
-    sv32     = sv32_all[1] if isinstance(sv32_all, list) else sv32_all
-    # shape now : (n_samples, 32)
+    sv32_all = expl32.shap_values(X_32, check_additivity=False)
+    sv32     = sv32_all[1] if isinstance(sv32_all, list) else sv32_all  # <-- sv32 exists
+    # ---------------------------------------------------------------
+    # SHAP heat-map – first 16 features from Table \ref{tab:feat-top32}
+    # ---------------------------------------------------------------
+    TABLE16 = [
+        "avg_rc", "qcost/bytes", "avg_pc", "min_read", "max_prefix",
+        "avg_bytes", "join_imb", "keyPartsRatio", "keySelAvg", "keyLenAvg",
+        "avg_rc/ec", "pc/pcDepth3", "rootRows", "avg_re", "max_rc/ec",
+        "outerRows"
+    ]
 
-    heat_df = pd.DataFrame(sv32, columns=FIXED32).T   # (32 × n_samples)
-    plt.figure(figsize=(10, 0.45*len(FIXED32)+3))
-    sns.heatmap(heat_df, cmap="coolwarm", center=0,
+    # safety check: are they all present?
+    missing = [f for f in TABLE16 if f not in X_32.columns]
+    if missing:
+        raise ValueError("Missing columns for heat-map: " + ", ".join(missing))
+
+    # keep the 16 columns and keep them in the same order as TABLE16
+    sv_tab16  = sv32[:, [FIXED32.index(f) for f in TABLE16]]
+    heat_df16 = pd.DataFrame(sv_tab16, columns=TABLE16).T
+
+    plt.figure(figsize=(10, 0.08*len(TABLE16) + 3))
+    sns.heatmap(heat_df16, cmap="coolwarm", center=0,
                 cbar_kws={"label": "SHAP value"})
     plt.yticks(rotation=0)
-    plt.title("SHAP Heat-map – 32 selected features")
+    plt.title("SHAP Heat-map – top 16 features (Table \\ref{tab:feat-top32})")
     plt.xlabel("Sample Index")
     plt.tight_layout()
-    plt.savefig("shap_heatmap_top32.png", dpi=150)
+    plt.savefig("shap_heatmap_table16.png", dpi=150)
     plt.close()
-    print("[✓] shap_heatmap_top32.png written")
+    print("[✓] shap_heatmap_table16.png written")
 
 
     # ---------- save both boosters -------------------------------------

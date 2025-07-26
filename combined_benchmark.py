@@ -40,6 +40,14 @@ ALL_DATASETS = [
 ]
 
 ROUTING_MODES = {
+    "row_only": [
+        "SET GLOBAL max_user_connections=10001",
+        "SET use_imci_engine=off"
+    ],
+    "col_only": [
+        "SET GLOBAL max_user_connections=10001",
+        "SET use_imci_engine=forced"
+    ],
     "cost_threshold": [
         "SET GLOBAL max_user_connections=10001",
         "SET use_imci_engine = ON",
@@ -184,8 +192,8 @@ def load_mismatched_from_csv(
             try:
                 row_t = float(r["row_time"])
                 col_t = float(r["column_time"])
-                if int(r["use_imci"]) == int(r["cost_use_imci"]) and row_t < 60 and col_t < 60:
-                    continue
+                # if int(r["use_imci"]) == int(r["cost_use_imci"]) and row_t < 60 and col_t < 60:
+                #     continue
                 if TP_heavy and row_t >= col_t:
                     continue
                 if AP_heavy and col_t >= row_t:
@@ -735,6 +743,9 @@ def plot_resource_comparison(resource_data: Dict[str, List[Dict]], output_prefix
     
     for mode, samples in resource_data.items():
         if not samples:
+            continue
+            
+        if mode not in mode_styles.keys():
             continue
             
         t0 = samples[0]['timestamp']

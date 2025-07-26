@@ -26,6 +26,14 @@ HOST, PORT, USER, PASS = "127.0.0.1", 44444, "root", ""
 
 ROUTING_MODES = {
     # 仅保留需要写 CSV 的三种模式；其余模式可按需添加/测试
+    "row_only": [
+        "SET GLOBAL max_user_connections=10001",
+        "SET use_imci_engine=off"
+    ],
+    "col_only": [
+        "SET GLOBAL max_user_connections=10001",
+        "SET use_imci_engine=forced"
+    ],
     "cost_thresh": [
         "SET use_imci_engine = ON",
         "SET cost_threshold_for_imci = 50000",

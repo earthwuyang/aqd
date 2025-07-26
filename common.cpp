@@ -1246,7 +1246,7 @@ load_all_datasets(const std::string& base,
         /* 1) 路径拼接 ---------------------------------------------------- */
         const std::string dir_path = base + '/' + d;
         const std::string csv_meta = dir_path + "/query_costs.csv";
-        const std::string csv_feat = dir_path + "/features_24d.csv";
+        const std::string csv_feat = dir_path + "/features_140d.csv";
 
         if (!file_exists(csv_meta) || !file_exists(csv_feat)) {
             logW("skip " + d + "  (missing csv)");

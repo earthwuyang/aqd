@@ -102,4 +102,5 @@ python combined_benchmark.py --mysqld_pid <pid> --rounds 1 -n 1000 --warmup_quer
 ### collect training data
 python preprocessing/collect_query_costs_trace_all_datasets.py
 
-## shap analysis
+## shap analysis and draw heatmap
+python shap_analysis.py
