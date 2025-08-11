@@ -1008,6 +1008,8 @@ def run_full_benchmark(args):
             print(f"\n--- Round {round_num}/{args.rounds} ---")
             
             for mode in ROUTING_MODES:
+                # if not mode.startswith("lightgbm"):
+                #     continue
                 print(f"\nRunning {mode}...")
                 makespan, latencies, stats, resources = run_mode(
                     mode, current_tasks, arrivals, args, monitor_resources=True

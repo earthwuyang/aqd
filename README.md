@@ -1,3 +1,14 @@
+## Memo
+### versions:
+PolarDB_802: linThompson_sampling
+row_column_routing: ensemble_model_32_features
+
+### mysqld start:
+bash run_polardb_constrained_resource.sh
+./mysqld --defaults-file=/home/jitu.wy/mypolardb/db/fann_model.cnf &
+yum install fann-devel
+
+
 ## Generate Training Data
 
 ### create database, create schema, load data, create indexes, alter all tables to be columnar
@@ -104,3 +115,14 @@ python preprocessing/collect_query_costs_trace_all_datasets.py
 
 ## shap analysis and draw heatmap
 python shap_analysis.py
+
+
+## set cgroup: resource constraints
+cgcreate -g cpu,memory:mysqld_grp
+
+use only 10% of a core, 10ms out of every 100ms.
+echo 100000 | sudo tee /sys/fs/cgroup/cpu/mysqld_grp/cpu.cfs_period_us
+echo 10000  | sudo tee /sys/fs/cgroup/cpu/mysqld_grp/cpu.cfs_quota_us   
+
+Then move mysqld into this group:
+cgclassify -g cpu,memory:mysqld_grp 73474

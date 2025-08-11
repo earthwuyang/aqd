@@ -228,7 +228,7 @@ int main(int argc, char* argv[])
             /* —— 单目录时，用跟训练阶段一模一样的切分 —— */
             auto all_samp = build_subset(data_dirs, ALL);        // same dir
             std::vector<Sample> dummy_tr;   // 不需要，用占位
-            split_train_test(all_samp, 0.05, seed, dummy_tr, DS_test);
+            split_train_test(all_samp, 0.9, seed, dummy_tr, DS_test);
         } else {
             /* —— 多目录时，沿用原逻辑 —— */
             DS_test = build_subset(data_dirs, ALL);
@@ -321,7 +321,9 @@ int main(int argc, char* argv[])
     global_stats().freeze();
 
     /* choose 3 random dirs as hold-out test (oracle  ≈ 20 %)  */
-    std::vector<std::string> test_dirs = pick_test3(data_dirs, seed);
+    // std::vector<std::string> test_dirs = pick_test3(data_dirs, seed);
+    std::vector<std::string> test_dirs = {"tpcds_sf1","geneea","financial"};
+
 
     std::cout << "\n[Split] TEST dirs : " << join(test_dirs) << '\n';
 
