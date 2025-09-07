@@ -116,6 +116,34 @@ Files: `src/include/duckdb/main/lightgbm_router.hpp`, `src/main/query_router/lig
 - Fix the LightGBM C API call signature in C++ and guard it behind compile flags.
 - Create `scripts/dev_setup.sh` to bootstrap environment consistently.
 
+## AQD Paper vs. Implementation Consistency
+- Offline training (paper): Self-paced, Taylor-weighted LightGBM boosting with cost-aware sample weights, SHAP-guided feature reduction, 5-fold CV ensemble and majority voting.
+  - In repo: No self-paced/Taylor-weighted boosting pipeline. `enhanced_lightgbm_trainer.py` trains a standard LightGBM classifier (no custom weights/ensemble logic). `advanced_aqd_system.py` uses random base weights as a stand-in for LightGBM. Mismatch.
+- Online residual learning (paper): LinTS-Delta over a signed residual Δt with log(1+·) transform and counterfactual latency estimates; maintains Bayesian posterior with V and b; combines s_t (LightGBM margin) and u_t (Thompson score).
+  - In repo: `advanced_aqd_system.py` mirrors the structure (EWMA counterfactuals, log residual, V/b update, Thompson sampling, tanh fusion). However, features are placeholders (`feature_i`, many random), not the paper’s engineered set; base model is not the trained LightGBM margin. Partially consistent in form, not in substance.
+- Resource regulation (paper): Mahalanobis distance of utilization deviation from target γ, integrated with OCO; jointly considers CPU and memory; normalized score, combined with latency term using load-adaptive weight ω_t.
+  - In repo: Implements Mahalanobis distance with tanh normalization, but signs only by CPU deviation, and engine utilizations are simulated via Beta samples rather than measured per-engine usage. No OCO-target update visible. Conceptual alignment, practical mismatch.
+- Adaptive fusion (paper): ω_t derived from system load (queueing-theoretic motivation) to trade latency vs. balance.
+  - In repo: ω_t based on crude QPS thresholds from a short history. Heuristic differs from paper’s utilization-driven rationale.
+- Feature engineering (paper): 142 raw features → 32 via SHAP; consistent order and schema across offline/online.
+  - In repo: Multiple ad-hoc feature sets across scripts; `advanced_aqd_system.py` mixes trivial text flags with random features; no shared schema with collectors/trainers. Mismatch.
+- Integration target (paper): Production integration into a dual-engine HTAP system with ultra-low inference overhead.
+  - In repo: AQD exists as a Python simulation/evaluator, not integrated with DuckDB kernel or the C++ router. The C++ path implements a LightGBM router and heuristics only; AQD stages are absent. Strong mismatch.
+
+Overall: The Python AQD prototype matches the paper’s algorithmic stages at a high level but uses simulated features/resources and a dummy base model. The kernel-level DuckDB code does not implement AQD; it only contains a LightGBM router scaffold with heuristic fallback.
+
+### AQD Integration Gaps (C++/Kernel)
+- Missing AQD online loop: No LinTS-Delta state, no resource regulation, no ω_t fusion in the kernel path.
+- No way to ingest base LightGBM margin s_t trained with the paper’s weighting/ensemble; current C++ scaler/model loading does not reflect the paper’s output format/spec.
+- No per-engine utilization telemetry to compute Mahalanobis score in-process.
+- No setting/SQL hooks to toggle AQD mode or provide feedback for online updates.
+
+### Immediate Harmonization Proposals
+- Replace random base model in `advanced_aqd_system.py` with loading a real LightGBM margin model from `models/`; align feature vector order and length with the collector.
+- Wire actual DuckDB query features into the AQD prototype (consume feature logger JSONL) and ensure identical preprocessing in offline/online.
+- Add per-engine utilization collectors (or adapters to existing monitors) so AQD uses measured CPU/memory shares instead of random samples; add OCO-style target updates if in the paper’s method.
+- Expose an `SET query_routing_method='aqd'` path that invokes the AQD decision in-kernel, with a minimal state store for V, b, and EWMAs.
+
 ## Notable Files Scanned
 - C++: `src/include/duckdb/main/lightgbm_router.hpp`, `src/main/query_router/lightgbm_router.cpp`, C++ demos/tests.
 - Python: data collection (`training_data_collector.py`, `comprehensive_data_collector.py`, `massive_training_collector.py`), trainers (`ml_model_trainer.py`, `enhanced_lightgbm_trainer.py`), and demos.
