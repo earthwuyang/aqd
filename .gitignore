@@ -5,7 +5,7 @@ dist/
 CMakeFiles/
 CMakeCache.txt
 cmake_install.cmake
-Makefile
+# Makefile
 *.make
 
 # Binaries and compiled files
