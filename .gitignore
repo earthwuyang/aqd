@@ -2,3 +2,13 @@ postgresql_build
 postgresql_data
 benchmark_data
 data
+*.db
+*.duckdb
+benchmark_datasets.db
+logs/
+models/
+__pycache__/
+*.pyc
+*.pyo
+duckdb_cli-linux-amd64.zip
+duckdb
