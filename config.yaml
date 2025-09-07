@@ -1,0 +1,185 @@
+# Intelligent Query Routing System Configuration
+# Centralized configuration for reproducible experiments
+
+# Database Configuration
+databases:
+  postgresql:
+    host: localhost
+    port: 5432
+    database: postgres
+    user: "${POSTGRES_USER:-postgres}"
+    password: "${POSTGRES_PASSWORD:-}"
+    
+  duckdb:
+    # Path to DuckDB binary (relative to project root)
+    binary_path: "${DUCKDB_BINARY:-duckdb_src/build/release/duckdb}"
+    # Memory limit for DuckDB
+    memory_limit: "8GB"
+    threads: 4
+
+# File Paths (all relative to project root)
+paths:
+  # Data directories
+  data_dir: "data"
+  artifacts_dir: "artifacts"
+  logs_dir: "logs"
+  models_dir: "models"
+  
+  # Training data
+  benchmark_datasets: "data/benchmark_datasets.db"
+  training_data: "artifacts/training_data.jsonl"
+  
+  # Models and scalers
+  lightgbm_model: "artifacts/lightgbm_model.txt"
+  scaler_params: "artifacts/scaler_params.json"
+  
+  # Generated queries
+  query_log: "artifacts/generated_queries.jsonl"
+
+# Query Generation (TiDB AQD)
+query_generation:
+  # Number of queries per dataset
+  ap_queries_per_dataset: 10000  # Analytical Processing
+  tp_queries_per_dataset: 10000  # Transactional Processing
+  
+  # Query complexity parameters
+  max_joins: 3
+  max_aggregations: 5
+  max_predicates: 5
+  
+  # Randomization seed for reproducibility
+  random_seed: 42
+
+# Training Configuration
+training:
+  # LightGBM parameters
+  lightgbm:
+    objective: "multiclass"
+    num_class: 3  # postgresql, duckdb, postgres_query
+    metric: "multi_logloss"
+    boosting_type: "gbdt"
+    num_leaves: 31
+    learning_rate: 0.05
+    feature_fraction: 0.9
+    bagging_fraction: 0.8
+    bagging_freq: 5
+    verbose: -1
+    num_boost_round: 1000
+    early_stopping_rounds: 100
+  
+  # Feature engineering
+  features:
+    # Enable feature scaling
+    enable_scaling: true
+    # Feature selection threshold
+    importance_threshold: 0.01
+  
+  # Train/validation split
+  validation_split: 0.2
+  
+  # Cross-validation folds
+  cv_folds: 5
+
+# Routing Methods
+routing:
+  # Available routing methods
+  methods:
+    - "duckdb_default"      # Route everything to DuckDB
+    - "cost_threshold"      # Cost-based routing
+    - "lightgbm_static"     # Static LightGBM predictions
+    - "lightgbm_dynamic"    # Dynamic AQD with Thompson Sampling
+  
+  # Cost threshold parameters
+  cost_threshold:
+    postgresql_threshold: 10000   # Route to PostgreSQL if cost < this
+    duckdb_threshold: 50000      # Route to DuckDB if cost < this
+    # Otherwise use postgres_query()
+  
+  # Dynamic routing (AQD) parameters
+  dynamic_routing:
+    # Warm-up phase
+    enable_warmup: true
+    warmup_queries: 100
+    guided_exploration_rate: 0.4  # 40% optimal decisions during warm-up
+    
+    # Thompson Sampling
+    alpha_prior: 1.0
+    beta_prior: 1.0
+    exploration_factor: 1.0
+    
+    # Mahalanobis resource management
+    enable_mahalanobis: true
+    cpu_weight: 0.3
+    memory_weight: 0.7
+
+# Evaluation Configuration
+evaluation:
+  # Test set size
+  test_queries: 5000
+  
+  # Concurrent testing
+  concurrent_tests:
+    query_batches: [100, 200, 1000]
+    timeout_seconds: 300
+  
+  # Performance metrics
+  metrics:
+    - "accuracy"
+    - "precision"
+    - "recall"
+    - "f1_score"
+    - "latency_p50"
+    - "latency_p95"
+    - "throughput"
+  
+  # Benchmarking
+  benchmark:
+    # Repeat each test N times for statistical significance
+    num_repetitions: 3
+    # Warm-up queries before measurement
+    warmup_queries: 50
+
+# Logging Configuration
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  
+  # Log files
+  files:
+    main: "logs/query_routing.log"
+    training: "logs/training.log"
+    evaluation: "logs/evaluation.log"
+  
+  # Query logging for DuckDB
+  duckdb_query_log:
+    enable: true
+    path: "logs/duckdb_queries.jsonl"
+
+# Development and Debugging
+development:
+  # Enable debug mode
+  debug: false
+  
+  # Quick testing with smaller datasets
+  quick_test:
+    enable: false
+    max_queries: 1000
+    datasets: ["northwind", "sakila"]
+  
+  # Visualization
+  plots:
+    enable: true
+    output_dir: "artifacts/plots"
+    formats: ["png", "pdf"]
+
+# System Resources
+resources:
+  # Maximum memory usage
+  max_memory_gb: 16
+  
+  # CPU cores to use
+  max_cpu_cores: 8
+  
+  # Timeouts
+  query_timeout_seconds: 60
+  training_timeout_minutes: 120

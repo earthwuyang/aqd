@@ -1,0 +1,83 @@
+# Build artifacts
+build/
+dist/
+*.egg-info/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+*.make
+
+# Binaries and compiled files
+*.so
+*.a
+*.o
+*.dylib
+*.dll
+*.exe
+postgresql/
+duckdb_cli-*.zip*
+*.duckdb_extension
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Machine Learning Models
+models/
+*.joblib
+*.pkl
+*.model
+*.txt.model
+lightgbm_model.*
+scaler_*.json
+
+# Data and Logs
+data/
+logs/
+*.log
+*.jsonl
+*.db
+*.duckdb
+artifacts/
+results/
+
+# Environment specific
+.env
+.env.*
+config.local.*
+
+# IDE and Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# User-specific artifacts
+.claude/
+**/wuy/**
+/data/wuy/
+
+# Generated documentation
+docs/_build/
+site/
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.orig
