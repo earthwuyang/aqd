@@ -1,0 +1,236 @@
+2025-09-07 15:13:04,107 - INFO - === ZSCE Query Generator for PostgreSQL + DuckDB AQD ===
+2025-09-07 15:13:04,108 - INFO - Based on TiDB AQD (Automatic Query Diversification) methodology
+2025-09-07 15:13:04,108 - INFO - 
+=== Generating ZSCE queries for dataset: aqd_benchmark ===
+2025-09-07 15:13:04,108 - INFO - Analyzing dataset schema
+2025-09-07 15:13:04,115 - ERROR - PostgreSQL connection failed: connection to server at "localhost" (127.0.0.1), port 5432 failed: FATAL:  role "postgres" does not exist
+
+2025-09-07 15:13:04,115 - ERROR - Failed to analyze schema
+2025-09-07 15:13:04,115 - INFO - 
+=== ZSCE Generation Complete ===
+2025-09-07 15:13:04,115 - INFO - Success: False
+2025-09-07 15:13:04,115 - INFO - Summary saved to: data/zsce_queries/zsce_generation_summary.json
+2025-09-07 15:22:12,046 - INFO - === ZSCE Query Generator for PostgreSQL + DuckDB AQD ===
+2025-09-07 15:22:12,046 - INFO - Based on TiDB AQD (Automatic Query Diversification) methodology
+2025-09-07 15:22:12,046 - INFO - 
+=== Generating ZSCE queries for dataset: aqd_benchmark ===
+2025-09-07 15:22:12,046 - INFO - Analyzing dataset schema
+2025-09-07 15:22:12,052 - ERROR - PostgreSQL connection failed: connection to server at "localhost" (127.0.0.1), port 5432 failed: FATAL:  role "postgres" does not exist
+
+2025-09-07 15:22:12,052 - ERROR - Failed to analyze schema
+2025-09-07 15:22:12,052 - INFO - 
+=== ZSCE Generation Complete ===
+2025-09-07 15:22:12,052 - INFO - Success: False
+2025-09-07 15:22:12,052 - INFO - Summary saved to: data/zsce_queries_test/zsce_generation_summary.json
+2025-09-07 15:24:18,093 - INFO - === ZSCE Query Generator for PostgreSQL + DuckDB AQD ===
+2025-09-07 15:24:18,093 - INFO - Based on TiDB AQD (Automatic Query Diversification) methodology
+2025-09-07 15:24:18,093 - INFO - 
+=== Generating ZSCE queries for dataset: aqd_benchmark ===
+2025-09-07 15:24:18,093 - INFO - Analyzing dataset schema
+2025-09-07 15:24:18,108 - ERROR - PostgreSQL connection failed: connection to server at "localhost" (127.0.0.1), port 5432 failed: FATAL:  role "postgres" does not exist
+
+2025-09-07 15:24:18,109 - ERROR - Failed to analyze schema
+2025-09-07 15:24:18,109 - INFO - 
+=== ZSCE Generation Complete ===
+2025-09-07 15:24:18,109 - INFO - Success: False
+2025-09-07 15:24:18,109 - INFO - Summary saved to: data/zsce_queries_test/zsce_generation_summary.json
+2025-09-07 15:31:33,581 - INFO - === ZSCE Query Generator for PostgreSQL + DuckDB AQD ===
+2025-09-07 15:31:33,581 - INFO - Based on TiDB AQD (Automatic Query Diversification) methodology
+2025-09-07 15:31:33,581 - INFO - 
+=== Generating ZSCE queries for dataset: aqd_benchmark ===
+2025-09-07 15:31:33,581 - INFO - Analyzing dataset schema
+2025-09-07 15:31:33,588 - INFO - Analyzing table: users
+2025-09-07 15:31:33,589 - WARNING - Error getting stats for users.user_id: relation "users" does not exist
+LINE 9:                     FROM users
+                                 ^
+
+2025-09-07 15:31:33,589 - WARNING - Error getting stats for users.name: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:31:33,589 - WARNING - Error getting stats for users.email: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:31:33,589 - WARNING - Error getting stats for users.created_at: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:31:33,589 - WARNING - Error getting stats for users.status: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:31:33,589 - WARNING - Error getting stats for users.age: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:31:33,589 - WARNING - Error getting stats for users.city: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:31:33,589 - INFO - Analyzing table: orders
+2025-09-07 15:31:33,589 - WARNING - Error getting stats for orders.order_id: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:31:33,590 - WARNING - Error getting stats for orders.user_id: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:31:33,590 - WARNING - Error getting stats for orders.product_id: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:31:33,590 - WARNING - Error getting stats for orders.quantity: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:31:33,590 - WARNING - Error getting stats for orders.price: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:31:33,590 - WARNING - Error getting stats for orders.order_date: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:31:33,590 - WARNING - Error getting stats for orders.status: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:31:33,590 - WARNING - Error getting stats for orders.total_amount: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:31:33,590 - INFO - Analyzing table: products
+2025-09-07 15:31:33,590 - WARNING - Error getting stats for products.product_id: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:31:33,590 - WARNING - Error getting stats for products.name: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:31:33,591 - WARNING - Error getting stats for products.category: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:31:33,591 - WARNING - Error getting stats for products.price: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:31:33,591 - WARNING - Error getting stats for products.stock: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:31:33,591 - WARNING - Error getting stats for products.created_at: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:31:33,591 - WARNING - Error getting stats for products.description: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:31:33,591 - INFO - Found 3 tables, 2 relationships
+2025-09-07 15:31:33,591 - INFO - Generating 10 AP queries...
+2025-09-07 15:31:33,600 - INFO - Generated 10 AP queries -> data/zsce_queries_test/aqd_benchmark/workload_10k_ap_queries.sql
+2025-09-07 15:31:33,600 - INFO - Generating 10 TP queries...
+2025-09-07 15:31:33,605 - INFO - Generated 10 TP queries -> data/zsce_queries_test/aqd_benchmark/workload_10k_tp_queries.sql
+2025-09-07 15:31:33,605 - INFO - Total ZSCE queries generated for aqd_benchmark: 20
+2025-09-07 15:31:33,606 - INFO - 
+=== ZSCE Generation Complete ===
+2025-09-07 15:31:33,606 - INFO - Success: True
+2025-09-07 15:31:33,606 - INFO - Total queries generated: 20
+2025-09-07 15:31:33,606 - INFO - Duration: 0.0 seconds (817.8 queries/sec)
+2025-09-07 15:31:33,606 - INFO - Summary saved to: data/zsce_queries_test/zsce_generation_summary.json
+2025-09-07 15:32:35,933 - INFO - === ZSCE Query Generator for PostgreSQL + DuckDB AQD ===
+2025-09-07 15:32:35,933 - INFO - Based on TiDB AQD (Automatic Query Diversification) methodology
+2025-09-07 15:32:35,942 - INFO - Found 8 imported datasets: Airline, genes, imdb_small, world, sakila, northwind, Basketball_men, financial
+2025-09-07 15:32:35,942 - INFO - 
+=== Generating ZSCE queries for dataset: Airline ===
+2025-09-07 15:32:35,942 - INFO - Analyzing dataset schema
+2025-09-07 15:32:35,950 - INFO - Analyzing table: users
+2025-09-07 15:32:35,951 - WARNING - Error getting stats for users.user_id: relation "users" does not exist
+LINE 9:                     FROM users
+                                 ^
+
+2025-09-07 15:32:35,951 - WARNING - Error getting stats for users.name: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:32:35,951 - WARNING - Error getting stats for users.email: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:32:35,951 - WARNING - Error getting stats for users.created_at: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:32:35,951 - WARNING - Error getting stats for users.status: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:32:35,951 - WARNING - Error getting stats for users.age: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:32:35,951 - WARNING - Error getting stats for users.city: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:32:35,951 - INFO - Analyzing table: orders
+2025-09-07 15:32:35,951 - WARNING - Error getting stats for orders.order_id: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:32:35,952 - WARNING - Error getting stats for orders.user_id: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:32:35,952 - WARNING - Error getting stats for orders.product_id: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:32:35,952 - WARNING - Error getting stats for orders.quantity: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:32:35,952 - WARNING - Error getting stats for orders.price: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:32:35,952 - WARNING - Error getting stats for orders.order_date: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:32:35,952 - WARNING - Error getting stats for orders.status: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:32:35,952 - WARNING - Error getting stats for orders.total_amount: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:32:35,952 - INFO - Analyzing table: products
+2025-09-07 15:32:35,952 - WARNING - Error getting stats for products.product_id: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:32:35,952 - WARNING - Error getting stats for products.name: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:32:35,953 - WARNING - Error getting stats for products.category: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:32:35,953 - WARNING - Error getting stats for products.price: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:32:35,953 - WARNING - Error getting stats for products.stock: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:32:35,953 - WARNING - Error getting stats for products.created_at: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:32:35,953 - WARNING - Error getting stats for products.description: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:32:35,953 - INFO - Found 3 tables, 2 relationships
+2025-09-07 15:32:35,953 - INFO - Generating 10 AP queries...
+2025-09-07 15:32:35,964 - INFO - Generated 10 AP queries -> data/zsce_queries_test/Airline/workload_10k_ap_queries.sql
+2025-09-07 15:32:35,964 - INFO - Generating 10 TP queries...
+2025-09-07 15:32:35,969 - INFO - Generated 10 TP queries -> data/zsce_queries_test/Airline/workload_10k_tp_queries.sql
+2025-09-07 15:32:35,969 - INFO - Total ZSCE queries generated for Airline: 20
+2025-09-07 15:32:35,969 - INFO - 
+=== ZSCE Generation Complete ===
+2025-09-07 15:32:35,970 - INFO - Success: True
+2025-09-07 15:32:35,970 - INFO - Total queries generated: 20
+2025-09-07 15:32:35,970 - INFO - Duration: 0.0 seconds (558.4 queries/sec)
+2025-09-07 15:32:35,970 - INFO - Summary saved to: data/zsce_queries_test/zsce_generation_summary.json
+2025-09-07 15:33:14,222 - INFO - === ZSCE Query Generator for PostgreSQL + DuckDB AQD ===
+2025-09-07 15:33:14,222 - INFO - Based on TiDB AQD (Automatic Query Diversification) methodology
+2025-09-07 15:33:14,229 - INFO - Found 10 imported datasets: Credit, ccs, Airline, genes, imdb_small, world, sakila, northwind, Basketball_men, financial
+2025-09-07 15:33:14,229 - INFO - 
+=== Generating ZSCE queries for dataset: Credit ===
+2025-09-07 15:33:14,229 - INFO - Analyzing dataset schema
+2025-09-07 15:33:14,240 - INFO - Analyzing table: users
+2025-09-07 15:33:14,241 - WARNING - Error getting stats for users.user_id: relation "users" does not exist
+LINE 9:                     FROM users
+                                 ^
+
+2025-09-07 15:33:14,241 - WARNING - Error getting stats for users.name: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:33:14,241 - WARNING - Error getting stats for users.email: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:33:14,241 - WARNING - Error getting stats for users.created_at: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:33:14,241 - WARNING - Error getting stats for users.status: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:33:14,241 - WARNING - Error getting stats for users.age: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:33:14,242 - WARNING - Error getting stats for users.city: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:33:14,242 - INFO - Analyzing table: orders
+2025-09-07 15:33:14,242 - WARNING - Error getting stats for orders.order_id: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:33:14,242 - WARNING - Error getting stats for orders.user_id: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:33:14,242 - WARNING - Error getting stats for orders.product_id: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:33:14,242 - WARNING - Error getting stats for orders.quantity: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:33:14,242 - WARNING - Error getting stats for orders.price: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:33:14,242 - WARNING - Error getting stats for orders.order_date: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:33:14,242 - WARNING - Error getting stats for orders.status: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:33:14,242 - WARNING - Error getting stats for orders.total_amount: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:33:14,243 - INFO - Analyzing table: products
+2025-09-07 15:33:14,243 - WARNING - Error getting stats for products.product_id: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:33:14,243 - WARNING - Error getting stats for products.name: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:33:14,243 - WARNING - Error getting stats for products.category: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:33:14,243 - WARNING - Error getting stats for products.price: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:33:14,243 - WARNING - Error getting stats for products.stock: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:33:14,243 - WARNING - Error getting stats for products.created_at: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:33:14,243 - WARNING - Error getting stats for products.description: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 15:33:14,243 - INFO - Found 3 tables, 2 relationships
+2025-09-07 15:33:14,243 - INFO - Generating 1,000 AP queries...
+2025-09-07 15:33:14,773 - INFO - Generated 1,000 AP queries -> data/zsce_queries_production/Credit/workload_10k_ap_queries.sql
+2025-09-07 15:33:14,773 - INFO - Generating 1,000 TP queries...
+2025-09-07 15:33:15,172 - INFO - Generated 1,000 TP queries -> data/zsce_queries_production/Credit/workload_10k_tp_queries.sql
+2025-09-07 15:33:15,172 - INFO - Total ZSCE queries generated for Credit: 2,000
+2025-09-07 15:33:15,173 - INFO - 
+=== ZSCE Generation Complete ===
+2025-09-07 15:33:15,173 - INFO - Success: True
+2025-09-07 15:33:15,173 - INFO - Total queries generated: 2,000
+2025-09-07 15:33:15,173 - INFO - Duration: 1.0 seconds (2104.8 queries/sec)
+2025-09-07 15:33:15,173 - INFO - Summary saved to: data/zsce_queries_production/zsce_generation_summary.json

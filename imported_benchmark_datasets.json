@@ -1,0 +1,61 @@
+{
+  "datasets": [
+    {
+      "name": "financial",
+      "tables": 8,
+      "total_rows": 1079680
+    },
+    {
+      "name": "Basketball_men",
+      "tables": 9,
+      "total_rows": 44822
+    },
+    {
+      "name": "northwind",
+      "tables": 25,
+      "total_rows": 3324
+    },
+    {
+      "name": "sakila",
+      "tables": 15,
+      "total_rows": 47273
+    },
+    {
+      "name": "world",
+      "tables": 3,
+      "total_rows": 5302
+    },
+    {
+      "name": "imdb_small",
+      "tables": 7,
+      "total_rows": 4395
+    },
+    {
+      "name": "genes",
+      "tables": 3,
+      "total_rows": 6118
+    },
+    {
+      "name": "Airline",
+      "tables": 19,
+      "total_rows": 481415
+    },
+    {
+      "name": "ccs",
+      "tables": 5,
+      "total_rows": 423050
+    },
+    {
+      "name": "Credit",
+      "tables": 8,
+      "total_rows": 1646573
+    }
+  ],
+  "stats": {
+    "databases_imported": 10,
+    "tables_imported": 102,
+    "total_rows": 3741933,
+    "duration_seconds": 256.397861
+  },
+  "timestamp": "2025-09-07T15:33:36.846221"
+}

@@ -1,0 +1,2035 @@
+2025-09-07 14:40:10,613 - INFO - === Starting LightGBM Training on Current Data ===
+2025-09-07 14:40:10,613 - INFO - Connecting to databases...
+2025-09-07 14:40:10,647 - INFO - Collecting 1000 training samples...
+2025-09-07 14:40:10,647 - INFO - Collected 0 samples...
+2025-09-07 14:40:10,701 - WARNING - Error collecting sample 3: column u.id does not exist
+LINE 1: ...e, COUNT(o.id) FROM users u LEFT JOIN orders o ON u.id = o.u...
+                                                             ^
+
+2025-09-07 14:40:10,701 - WARNING - Error collecting sample 4: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,701 - WARNING - Error collecting sample 5: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,702 - WARNING - Error collecting sample 6: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,702 - WARNING - Error collecting sample 7: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,702 - WARNING - Error collecting sample 8: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,702 - WARNING - Error collecting sample 9: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,702 - WARNING - Error collecting sample 10: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,702 - WARNING - Error collecting sample 11: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,702 - WARNING - Error collecting sample 12: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,702 - WARNING - Error collecting sample 13: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,702 - WARNING - Error collecting sample 14: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,703 - WARNING - Error collecting sample 15: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,703 - WARNING - Error collecting sample 16: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,703 - WARNING - Error collecting sample 17: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,703 - WARNING - Error collecting sample 18: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,703 - WARNING - Error collecting sample 19: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,703 - WARNING - Error collecting sample 20: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,703 - WARNING - Error collecting sample 21: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,703 - WARNING - Error collecting sample 22: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,703 - WARNING - Error collecting sample 23: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,703 - WARNING - Error collecting sample 24: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,704 - WARNING - Error collecting sample 25: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,704 - WARNING - Error collecting sample 26: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,704 - WARNING - Error collecting sample 27: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,704 - WARNING - Error collecting sample 28: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,704 - WARNING - Error collecting sample 29: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,704 - WARNING - Error collecting sample 30: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,704 - WARNING - Error collecting sample 31: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,704 - WARNING - Error collecting sample 32: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,704 - WARNING - Error collecting sample 33: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,705 - WARNING - Error collecting sample 34: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,705 - WARNING - Error collecting sample 35: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,705 - WARNING - Error collecting sample 36: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,705 - WARNING - Error collecting sample 37: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,705 - WARNING - Error collecting sample 38: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,705 - WARNING - Error collecting sample 39: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,705 - WARNING - Error collecting sample 40: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,705 - WARNING - Error collecting sample 41: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,705 - WARNING - Error collecting sample 42: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,705 - WARNING - Error collecting sample 43: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,706 - WARNING - Error collecting sample 44: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,706 - WARNING - Error collecting sample 45: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,706 - WARNING - Error collecting sample 46: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,706 - WARNING - Error collecting sample 47: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,706 - WARNING - Error collecting sample 48: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,706 - WARNING - Error collecting sample 49: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,706 - WARNING - Error collecting sample 50: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,706 - WARNING - Error collecting sample 51: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,706 - WARNING - Error collecting sample 52: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,706 - WARNING - Error collecting sample 53: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,707 - WARNING - Error collecting sample 54: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,707 - WARNING - Error collecting sample 55: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,707 - WARNING - Error collecting sample 56: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,707 - WARNING - Error collecting sample 57: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,707 - WARNING - Error collecting sample 58: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,707 - WARNING - Error collecting sample 59: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,707 - WARNING - Error collecting sample 60: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,707 - WARNING - Error collecting sample 61: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,707 - WARNING - Error collecting sample 62: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,707 - WARNING - Error collecting sample 63: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,708 - WARNING - Error collecting sample 64: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,708 - WARNING - Error collecting sample 65: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,708 - WARNING - Error collecting sample 66: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,708 - WARNING - Error collecting sample 67: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,708 - WARNING - Error collecting sample 68: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,708 - WARNING - Error collecting sample 69: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,708 - WARNING - Error collecting sample 70: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,708 - WARNING - Error collecting sample 71: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,708 - WARNING - Error collecting sample 72: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,708 - WARNING - Error collecting sample 73: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,709 - WARNING - Error collecting sample 74: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,709 - WARNING - Error collecting sample 75: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,709 - WARNING - Error collecting sample 76: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,709 - WARNING - Error collecting sample 77: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,709 - WARNING - Error collecting sample 78: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,709 - WARNING - Error collecting sample 79: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,709 - WARNING - Error collecting sample 80: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,709 - WARNING - Error collecting sample 81: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,709 - WARNING - Error collecting sample 82: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,709 - WARNING - Error collecting sample 83: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,710 - WARNING - Error collecting sample 84: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,710 - WARNING - Error collecting sample 85: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,710 - WARNING - Error collecting sample 86: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,710 - WARNING - Error collecting sample 87: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,710 - WARNING - Error collecting sample 88: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,710 - WARNING - Error collecting sample 89: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,710 - WARNING - Error collecting sample 90: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,710 - WARNING - Error collecting sample 91: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,710 - WARNING - Error collecting sample 92: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,711 - WARNING - Error collecting sample 93: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,711 - WARNING - Error collecting sample 94: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,711 - WARNING - Error collecting sample 95: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,711 - WARNING - Error collecting sample 96: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,711 - WARNING - Error collecting sample 97: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,711 - WARNING - Error collecting sample 98: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,711 - WARNING - Error collecting sample 99: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,711 - INFO - Collected 100 samples...
+2025-09-07 14:40:10,711 - WARNING - Error collecting sample 100: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,711 - WARNING - Error collecting sample 101: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,711 - WARNING - Error collecting sample 102: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,712 - WARNING - Error collecting sample 103: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,712 - WARNING - Error collecting sample 104: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,712 - WARNING - Error collecting sample 105: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,712 - WARNING - Error collecting sample 106: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,712 - WARNING - Error collecting sample 107: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,712 - WARNING - Error collecting sample 108: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,712 - WARNING - Error collecting sample 109: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,712 - WARNING - Error collecting sample 110: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,712 - WARNING - Error collecting sample 111: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,712 - WARNING - Error collecting sample 112: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,712 - WARNING - Error collecting sample 113: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,713 - WARNING - Error collecting sample 114: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,713 - WARNING - Error collecting sample 115: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,713 - WARNING - Error collecting sample 116: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,713 - WARNING - Error collecting sample 117: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,713 - WARNING - Error collecting sample 118: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,713 - WARNING - Error collecting sample 119: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,713 - WARNING - Error collecting sample 120: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,713 - WARNING - Error collecting sample 121: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,713 - WARNING - Error collecting sample 122: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,714 - WARNING - Error collecting sample 123: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,714 - WARNING - Error collecting sample 124: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,714 - WARNING - Error collecting sample 125: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,714 - WARNING - Error collecting sample 126: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,714 - WARNING - Error collecting sample 127: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,714 - WARNING - Error collecting sample 128: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,714 - WARNING - Error collecting sample 129: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,714 - WARNING - Error collecting sample 130: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,714 - WARNING - Error collecting sample 131: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,714 - WARNING - Error collecting sample 132: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,715 - WARNING - Error collecting sample 133: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,715 - WARNING - Error collecting sample 134: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,715 - WARNING - Error collecting sample 135: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,715 - WARNING - Error collecting sample 136: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,715 - WARNING - Error collecting sample 137: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,715 - WARNING - Error collecting sample 138: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,715 - WARNING - Error collecting sample 139: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,715 - WARNING - Error collecting sample 140: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,715 - WARNING - Error collecting sample 141: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,715 - WARNING - Error collecting sample 142: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,716 - WARNING - Error collecting sample 143: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,716 - WARNING - Error collecting sample 144: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,716 - WARNING - Error collecting sample 145: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,716 - WARNING - Error collecting sample 146: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,716 - WARNING - Error collecting sample 147: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,716 - WARNING - Error collecting sample 148: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,716 - WARNING - Error collecting sample 149: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,716 - WARNING - Error collecting sample 150: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,716 - WARNING - Error collecting sample 151: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,716 - WARNING - Error collecting sample 152: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,717 - WARNING - Error collecting sample 153: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,717 - WARNING - Error collecting sample 154: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,717 - WARNING - Error collecting sample 155: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,717 - WARNING - Error collecting sample 156: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,717 - WARNING - Error collecting sample 157: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,717 - WARNING - Error collecting sample 158: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,717 - WARNING - Error collecting sample 159: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,717 - WARNING - Error collecting sample 160: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,717 - WARNING - Error collecting sample 161: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,717 - WARNING - Error collecting sample 162: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,718 - WARNING - Error collecting sample 163: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,718 - WARNING - Error collecting sample 164: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,718 - WARNING - Error collecting sample 165: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,718 - WARNING - Error collecting sample 166: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,718 - WARNING - Error collecting sample 167: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,718 - WARNING - Error collecting sample 168: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,718 - WARNING - Error collecting sample 169: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,718 - WARNING - Error collecting sample 170: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,718 - WARNING - Error collecting sample 171: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,718 - WARNING - Error collecting sample 172: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,719 - WARNING - Error collecting sample 173: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,719 - WARNING - Error collecting sample 174: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,719 - WARNING - Error collecting sample 175: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,719 - WARNING - Error collecting sample 176: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,719 - WARNING - Error collecting sample 177: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,719 - WARNING - Error collecting sample 178: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,719 - WARNING - Error collecting sample 179: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,719 - WARNING - Error collecting sample 180: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,719 - WARNING - Error collecting sample 181: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,719 - WARNING - Error collecting sample 182: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,719 - WARNING - Error collecting sample 183: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,720 - WARNING - Error collecting sample 184: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,720 - WARNING - Error collecting sample 185: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,720 - WARNING - Error collecting sample 186: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,720 - WARNING - Error collecting sample 187: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,720 - WARNING - Error collecting sample 188: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,720 - WARNING - Error collecting sample 189: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,720 - WARNING - Error collecting sample 190: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,720 - WARNING - Error collecting sample 191: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,720 - WARNING - Error collecting sample 192: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,720 - WARNING - Error collecting sample 193: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,721 - WARNING - Error collecting sample 194: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,721 - WARNING - Error collecting sample 195: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,721 - WARNING - Error collecting sample 196: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,721 - WARNING - Error collecting sample 197: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,721 - WARNING - Error collecting sample 198: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,721 - WARNING - Error collecting sample 199: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,721 - INFO - Collected 200 samples...
+2025-09-07 14:40:10,721 - WARNING - Error collecting sample 200: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,721 - WARNING - Error collecting sample 201: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,722 - WARNING - Error collecting sample 202: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,722 - WARNING - Error collecting sample 203: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,722 - WARNING - Error collecting sample 204: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,722 - WARNING - Error collecting sample 205: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,722 - WARNING - Error collecting sample 206: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,722 - WARNING - Error collecting sample 207: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,722 - WARNING - Error collecting sample 208: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,723 - WARNING - Error collecting sample 209: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,723 - WARNING - Error collecting sample 210: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,723 - WARNING - Error collecting sample 211: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,723 - WARNING - Error collecting sample 212: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,723 - WARNING - Error collecting sample 213: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,723 - WARNING - Error collecting sample 214: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,723 - WARNING - Error collecting sample 215: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,723 - WARNING - Error collecting sample 216: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,723 - WARNING - Error collecting sample 217: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,723 - WARNING - Error collecting sample 218: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,724 - WARNING - Error collecting sample 219: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,724 - WARNING - Error collecting sample 220: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,724 - WARNING - Error collecting sample 221: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,724 - WARNING - Error collecting sample 222: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,724 - WARNING - Error collecting sample 223: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,724 - WARNING - Error collecting sample 224: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,724 - WARNING - Error collecting sample 225: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,724 - WARNING - Error collecting sample 226: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,724 - WARNING - Error collecting sample 227: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,724 - WARNING - Error collecting sample 228: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,725 - WARNING - Error collecting sample 229: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,725 - WARNING - Error collecting sample 230: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,725 - WARNING - Error collecting sample 231: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,725 - WARNING - Error collecting sample 232: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,725 - WARNING - Error collecting sample 233: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,725 - WARNING - Error collecting sample 234: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,725 - WARNING - Error collecting sample 235: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,725 - WARNING - Error collecting sample 236: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,725 - WARNING - Error collecting sample 237: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,725 - WARNING - Error collecting sample 238: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,725 - WARNING - Error collecting sample 239: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,726 - WARNING - Error collecting sample 240: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,726 - WARNING - Error collecting sample 241: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,726 - WARNING - Error collecting sample 242: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,726 - WARNING - Error collecting sample 243: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,726 - WARNING - Error collecting sample 244: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,726 - WARNING - Error collecting sample 245: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,726 - WARNING - Error collecting sample 246: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,726 - WARNING - Error collecting sample 247: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,726 - WARNING - Error collecting sample 248: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,726 - WARNING - Error collecting sample 249: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,727 - WARNING - Error collecting sample 250: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,727 - WARNING - Error collecting sample 251: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,727 - WARNING - Error collecting sample 252: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,727 - WARNING - Error collecting sample 253: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,727 - WARNING - Error collecting sample 254: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,727 - WARNING - Error collecting sample 255: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,727 - WARNING - Error collecting sample 256: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,727 - WARNING - Error collecting sample 257: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,727 - WARNING - Error collecting sample 258: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,727 - WARNING - Error collecting sample 259: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,728 - WARNING - Error collecting sample 260: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,728 - WARNING - Error collecting sample 261: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,728 - WARNING - Error collecting sample 262: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,728 - WARNING - Error collecting sample 263: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,728 - WARNING - Error collecting sample 264: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,728 - WARNING - Error collecting sample 265: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,728 - WARNING - Error collecting sample 266: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,728 - WARNING - Error collecting sample 267: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,728 - WARNING - Error collecting sample 268: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,728 - WARNING - Error collecting sample 269: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,729 - WARNING - Error collecting sample 270: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,729 - WARNING - Error collecting sample 271: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,729 - WARNING - Error collecting sample 272: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,729 - WARNING - Error collecting sample 273: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,729 - WARNING - Error collecting sample 274: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,729 - WARNING - Error collecting sample 275: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,729 - WARNING - Error collecting sample 276: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,729 - WARNING - Error collecting sample 277: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,729 - WARNING - Error collecting sample 278: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,729 - WARNING - Error collecting sample 279: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,730 - WARNING - Error collecting sample 280: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,730 - WARNING - Error collecting sample 281: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,730 - WARNING - Error collecting sample 282: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,730 - WARNING - Error collecting sample 283: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,730 - WARNING - Error collecting sample 284: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,730 - WARNING - Error collecting sample 285: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,730 - WARNING - Error collecting sample 286: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,730 - WARNING - Error collecting sample 287: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,730 - WARNING - Error collecting sample 288: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,730 - WARNING - Error collecting sample 289: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,731 - WARNING - Error collecting sample 290: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,731 - WARNING - Error collecting sample 291: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,731 - WARNING - Error collecting sample 292: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,731 - WARNING - Error collecting sample 293: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,731 - WARNING - Error collecting sample 294: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,731 - WARNING - Error collecting sample 295: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,731 - WARNING - Error collecting sample 296: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,731 - WARNING - Error collecting sample 297: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,731 - WARNING - Error collecting sample 298: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,731 - WARNING - Error collecting sample 299: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,731 - INFO - Collected 300 samples...
+2025-09-07 14:40:10,732 - WARNING - Error collecting sample 300: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,732 - WARNING - Error collecting sample 301: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,732 - WARNING - Error collecting sample 302: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,732 - WARNING - Error collecting sample 303: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,732 - WARNING - Error collecting sample 304: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,732 - WARNING - Error collecting sample 305: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,732 - WARNING - Error collecting sample 306: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,732 - WARNING - Error collecting sample 307: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,732 - WARNING - Error collecting sample 308: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,732 - WARNING - Error collecting sample 309: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,732 - WARNING - Error collecting sample 310: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,733 - WARNING - Error collecting sample 311: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,733 - WARNING - Error collecting sample 312: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,733 - WARNING - Error collecting sample 313: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,733 - WARNING - Error collecting sample 314: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,733 - WARNING - Error collecting sample 315: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,733 - WARNING - Error collecting sample 316: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,733 - WARNING - Error collecting sample 317: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,733 - WARNING - Error collecting sample 318: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,733 - WARNING - Error collecting sample 319: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,734 - WARNING - Error collecting sample 320: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,734 - WARNING - Error collecting sample 321: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,734 - WARNING - Error collecting sample 322: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,734 - WARNING - Error collecting sample 323: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,734 - WARNING - Error collecting sample 324: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,734 - WARNING - Error collecting sample 325: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,734 - WARNING - Error collecting sample 326: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,734 - WARNING - Error collecting sample 327: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,734 - WARNING - Error collecting sample 328: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,734 - WARNING - Error collecting sample 329: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,735 - WARNING - Error collecting sample 330: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,735 - WARNING - Error collecting sample 331: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,735 - WARNING - Error collecting sample 332: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,735 - WARNING - Error collecting sample 333: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,735 - WARNING - Error collecting sample 334: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,735 - WARNING - Error collecting sample 335: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,735 - WARNING - Error collecting sample 336: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,735 - WARNING - Error collecting sample 337: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,735 - WARNING - Error collecting sample 338: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,735 - WARNING - Error collecting sample 339: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,736 - WARNING - Error collecting sample 340: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,736 - WARNING - Error collecting sample 341: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,736 - WARNING - Error collecting sample 342: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,736 - WARNING - Error collecting sample 343: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,736 - WARNING - Error collecting sample 344: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,736 - WARNING - Error collecting sample 345: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,736 - WARNING - Error collecting sample 346: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,736 - WARNING - Error collecting sample 347: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,736 - WARNING - Error collecting sample 348: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,736 - WARNING - Error collecting sample 349: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,737 - WARNING - Error collecting sample 350: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,737 - WARNING - Error collecting sample 351: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,737 - WARNING - Error collecting sample 352: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,737 - WARNING - Error collecting sample 353: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,737 - WARNING - Error collecting sample 354: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,737 - WARNING - Error collecting sample 355: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,737 - WARNING - Error collecting sample 356: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,737 - WARNING - Error collecting sample 357: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,737 - WARNING - Error collecting sample 358: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,737 - WARNING - Error collecting sample 359: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,738 - WARNING - Error collecting sample 360: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,738 - WARNING - Error collecting sample 361: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,738 - WARNING - Error collecting sample 362: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,738 - WARNING - Error collecting sample 363: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,738 - WARNING - Error collecting sample 364: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,738 - WARNING - Error collecting sample 365: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,738 - WARNING - Error collecting sample 366: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,738 - WARNING - Error collecting sample 367: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,738 - WARNING - Error collecting sample 368: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,738 - WARNING - Error collecting sample 369: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,739 - WARNING - Error collecting sample 370: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,739 - WARNING - Error collecting sample 371: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,739 - WARNING - Error collecting sample 372: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,739 - WARNING - Error collecting sample 373: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,739 - WARNING - Error collecting sample 374: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,739 - WARNING - Error collecting sample 375: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,739 - WARNING - Error collecting sample 376: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,739 - WARNING - Error collecting sample 377: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,739 - WARNING - Error collecting sample 378: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,739 - WARNING - Error collecting sample 379: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,739 - WARNING - Error collecting sample 380: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,740 - WARNING - Error collecting sample 381: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,740 - WARNING - Error collecting sample 382: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,740 - WARNING - Error collecting sample 383: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,740 - WARNING - Error collecting sample 384: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,740 - WARNING - Error collecting sample 385: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,740 - WARNING - Error collecting sample 386: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,740 - WARNING - Error collecting sample 387: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,740 - WARNING - Error collecting sample 388: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,740 - WARNING - Error collecting sample 389: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,740 - WARNING - Error collecting sample 390: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,741 - WARNING - Error collecting sample 391: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,741 - WARNING - Error collecting sample 392: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,741 - WARNING - Error collecting sample 393: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,741 - WARNING - Error collecting sample 394: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,741 - WARNING - Error collecting sample 395: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,741 - WARNING - Error collecting sample 396: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,741 - WARNING - Error collecting sample 397: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,741 - WARNING - Error collecting sample 398: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,741 - WARNING - Error collecting sample 399: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,741 - INFO - Collected 400 samples...
+2025-09-07 14:40:10,741 - WARNING - Error collecting sample 400: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,742 - WARNING - Error collecting sample 401: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,742 - WARNING - Error collecting sample 402: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,742 - WARNING - Error collecting sample 403: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,742 - WARNING - Error collecting sample 404: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,742 - WARNING - Error collecting sample 405: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,742 - WARNING - Error collecting sample 406: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,742 - WARNING - Error collecting sample 407: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,742 - WARNING - Error collecting sample 408: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,742 - WARNING - Error collecting sample 409: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,742 - WARNING - Error collecting sample 410: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,743 - WARNING - Error collecting sample 411: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,743 - WARNING - Error collecting sample 412: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,743 - WARNING - Error collecting sample 413: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,743 - WARNING - Error collecting sample 414: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,743 - WARNING - Error collecting sample 415: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,743 - WARNING - Error collecting sample 416: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,743 - WARNING - Error collecting sample 417: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,743 - WARNING - Error collecting sample 418: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,743 - WARNING - Error collecting sample 419: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,743 - WARNING - Error collecting sample 420: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,744 - WARNING - Error collecting sample 421: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,744 - WARNING - Error collecting sample 422: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,744 - WARNING - Error collecting sample 423: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,744 - WARNING - Error collecting sample 424: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,744 - WARNING - Error collecting sample 425: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,744 - WARNING - Error collecting sample 426: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,744 - WARNING - Error collecting sample 427: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,744 - WARNING - Error collecting sample 428: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,744 - WARNING - Error collecting sample 429: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,744 - WARNING - Error collecting sample 430: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,745 - WARNING - Error collecting sample 431: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,745 - WARNING - Error collecting sample 432: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,745 - WARNING - Error collecting sample 433: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,745 - WARNING - Error collecting sample 434: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,745 - WARNING - Error collecting sample 435: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,745 - WARNING - Error collecting sample 436: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,745 - WARNING - Error collecting sample 437: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,745 - WARNING - Error collecting sample 438: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,745 - WARNING - Error collecting sample 439: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,745 - WARNING - Error collecting sample 440: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,746 - WARNING - Error collecting sample 441: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,746 - WARNING - Error collecting sample 442: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,746 - WARNING - Error collecting sample 443: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,746 - WARNING - Error collecting sample 444: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,746 - WARNING - Error collecting sample 445: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,746 - WARNING - Error collecting sample 446: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,746 - WARNING - Error collecting sample 447: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,746 - WARNING - Error collecting sample 448: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,746 - WARNING - Error collecting sample 449: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,746 - WARNING - Error collecting sample 450: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,747 - WARNING - Error collecting sample 451: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,747 - WARNING - Error collecting sample 452: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,747 - WARNING - Error collecting sample 453: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,747 - WARNING - Error collecting sample 454: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,747 - WARNING - Error collecting sample 455: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,747 - WARNING - Error collecting sample 456: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,747 - WARNING - Error collecting sample 457: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,747 - WARNING - Error collecting sample 458: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,747 - WARNING - Error collecting sample 459: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,747 - WARNING - Error collecting sample 460: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,748 - WARNING - Error collecting sample 461: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,748 - WARNING - Error collecting sample 462: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,748 - WARNING - Error collecting sample 463: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,748 - WARNING - Error collecting sample 464: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,748 - WARNING - Error collecting sample 465: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,748 - WARNING - Error collecting sample 466: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,748 - WARNING - Error collecting sample 467: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,748 - WARNING - Error collecting sample 468: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,748 - WARNING - Error collecting sample 469: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,748 - WARNING - Error collecting sample 470: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,749 - WARNING - Error collecting sample 471: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,749 - WARNING - Error collecting sample 472: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,749 - WARNING - Error collecting sample 473: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,749 - WARNING - Error collecting sample 474: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,749 - WARNING - Error collecting sample 475: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,749 - WARNING - Error collecting sample 476: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,749 - WARNING - Error collecting sample 477: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,749 - WARNING - Error collecting sample 478: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,749 - WARNING - Error collecting sample 479: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,749 - WARNING - Error collecting sample 480: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,750 - WARNING - Error collecting sample 481: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,750 - WARNING - Error collecting sample 482: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,751 - WARNING - Error collecting sample 483: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,751 - WARNING - Error collecting sample 484: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,751 - WARNING - Error collecting sample 485: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,751 - WARNING - Error collecting sample 486: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,751 - WARNING - Error collecting sample 487: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,751 - WARNING - Error collecting sample 488: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,751 - WARNING - Error collecting sample 489: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,751 - WARNING - Error collecting sample 490: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,751 - WARNING - Error collecting sample 491: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,752 - WARNING - Error collecting sample 492: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,752 - WARNING - Error collecting sample 493: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,752 - WARNING - Error collecting sample 494: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,752 - WARNING - Error collecting sample 495: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,752 - WARNING - Error collecting sample 496: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,752 - WARNING - Error collecting sample 497: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,752 - WARNING - Error collecting sample 498: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,752 - WARNING - Error collecting sample 499: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,752 - INFO - Collected 500 samples...
+2025-09-07 14:40:10,752 - WARNING - Error collecting sample 500: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,752 - WARNING - Error collecting sample 501: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,753 - WARNING - Error collecting sample 502: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,753 - WARNING - Error collecting sample 503: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,753 - WARNING - Error collecting sample 504: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,753 - WARNING - Error collecting sample 505: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,753 - WARNING - Error collecting sample 506: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,753 - WARNING - Error collecting sample 507: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,753 - WARNING - Error collecting sample 508: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,753 - WARNING - Error collecting sample 509: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,753 - WARNING - Error collecting sample 510: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,754 - WARNING - Error collecting sample 511: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,754 - WARNING - Error collecting sample 512: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,754 - WARNING - Error collecting sample 513: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,754 - WARNING - Error collecting sample 514: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,754 - WARNING - Error collecting sample 515: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,754 - WARNING - Error collecting sample 516: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,754 - WARNING - Error collecting sample 517: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,754 - WARNING - Error collecting sample 518: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,754 - WARNING - Error collecting sample 519: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,754 - WARNING - Error collecting sample 520: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,754 - WARNING - Error collecting sample 521: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,755 - WARNING - Error collecting sample 522: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,755 - WARNING - Error collecting sample 523: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,755 - WARNING - Error collecting sample 524: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,755 - WARNING - Error collecting sample 525: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,755 - WARNING - Error collecting sample 526: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,755 - WARNING - Error collecting sample 527: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,755 - WARNING - Error collecting sample 528: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,755 - WARNING - Error collecting sample 529: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,755 - WARNING - Error collecting sample 530: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,755 - WARNING - Error collecting sample 531: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,756 - WARNING - Error collecting sample 532: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,756 - WARNING - Error collecting sample 533: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,756 - WARNING - Error collecting sample 534: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,756 - WARNING - Error collecting sample 535: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,756 - WARNING - Error collecting sample 536: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,756 - WARNING - Error collecting sample 537: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,756 - WARNING - Error collecting sample 538: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,756 - WARNING - Error collecting sample 539: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,756 - WARNING - Error collecting sample 540: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,756 - WARNING - Error collecting sample 541: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,757 - WARNING - Error collecting sample 542: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,757 - WARNING - Error collecting sample 543: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,757 - WARNING - Error collecting sample 544: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,757 - WARNING - Error collecting sample 545: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,757 - WARNING - Error collecting sample 546: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,757 - WARNING - Error collecting sample 547: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,757 - WARNING - Error collecting sample 548: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,757 - WARNING - Error collecting sample 549: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,757 - WARNING - Error collecting sample 550: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,757 - WARNING - Error collecting sample 551: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,758 - WARNING - Error collecting sample 552: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,758 - WARNING - Error collecting sample 553: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,758 - WARNING - Error collecting sample 554: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,758 - WARNING - Error collecting sample 555: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,758 - WARNING - Error collecting sample 556: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,758 - WARNING - Error collecting sample 557: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,758 - WARNING - Error collecting sample 558: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,758 - WARNING - Error collecting sample 559: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,758 - WARNING - Error collecting sample 560: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,758 - WARNING - Error collecting sample 561: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,758 - WARNING - Error collecting sample 562: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,759 - WARNING - Error collecting sample 563: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,759 - WARNING - Error collecting sample 564: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,759 - WARNING - Error collecting sample 565: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,759 - WARNING - Error collecting sample 566: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,759 - WARNING - Error collecting sample 567: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,759 - WARNING - Error collecting sample 568: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,759 - WARNING - Error collecting sample 569: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,759 - WARNING - Error collecting sample 570: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,759 - WARNING - Error collecting sample 571: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,759 - WARNING - Error collecting sample 572: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,760 - WARNING - Error collecting sample 573: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,760 - WARNING - Error collecting sample 574: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,760 - WARNING - Error collecting sample 575: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,760 - WARNING - Error collecting sample 576: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,760 - WARNING - Error collecting sample 577: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,760 - WARNING - Error collecting sample 578: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,760 - WARNING - Error collecting sample 579: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,760 - WARNING - Error collecting sample 580: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,760 - WARNING - Error collecting sample 581: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,760 - WARNING - Error collecting sample 582: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,761 - WARNING - Error collecting sample 583: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,761 - WARNING - Error collecting sample 584: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,761 - WARNING - Error collecting sample 585: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,761 - WARNING - Error collecting sample 586: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,761 - WARNING - Error collecting sample 587: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,761 - WARNING - Error collecting sample 588: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,761 - WARNING - Error collecting sample 589: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,761 - WARNING - Error collecting sample 590: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,761 - WARNING - Error collecting sample 591: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,761 - WARNING - Error collecting sample 592: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,761 - WARNING - Error collecting sample 593: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,762 - WARNING - Error collecting sample 594: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,762 - WARNING - Error collecting sample 595: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,762 - WARNING - Error collecting sample 596: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,762 - WARNING - Error collecting sample 597: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,762 - WARNING - Error collecting sample 598: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,762 - WARNING - Error collecting sample 599: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,762 - INFO - Collected 600 samples...
+2025-09-07 14:40:10,762 - WARNING - Error collecting sample 600: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,762 - WARNING - Error collecting sample 601: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,762 - WARNING - Error collecting sample 602: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,762 - WARNING - Error collecting sample 603: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,763 - WARNING - Error collecting sample 604: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,763 - WARNING - Error collecting sample 605: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,763 - WARNING - Error collecting sample 606: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,763 - WARNING - Error collecting sample 607: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,763 - WARNING - Error collecting sample 608: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,763 - WARNING - Error collecting sample 609: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,763 - WARNING - Error collecting sample 610: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,763 - WARNING - Error collecting sample 611: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,763 - WARNING - Error collecting sample 612: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,763 - WARNING - Error collecting sample 613: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,763 - WARNING - Error collecting sample 614: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,764 - WARNING - Error collecting sample 615: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,764 - WARNING - Error collecting sample 616: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,764 - WARNING - Error collecting sample 617: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,764 - WARNING - Error collecting sample 618: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,764 - WARNING - Error collecting sample 619: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,764 - WARNING - Error collecting sample 620: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,764 - WARNING - Error collecting sample 621: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,764 - WARNING - Error collecting sample 622: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,764 - WARNING - Error collecting sample 623: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,764 - WARNING - Error collecting sample 624: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,765 - WARNING - Error collecting sample 625: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,765 - WARNING - Error collecting sample 626: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,765 - WARNING - Error collecting sample 627: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,765 - WARNING - Error collecting sample 628: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,765 - WARNING - Error collecting sample 629: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,765 - WARNING - Error collecting sample 630: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,765 - WARNING - Error collecting sample 631: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,765 - WARNING - Error collecting sample 632: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,765 - WARNING - Error collecting sample 633: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,765 - WARNING - Error collecting sample 634: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,766 - WARNING - Error collecting sample 635: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,766 - WARNING - Error collecting sample 636: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,766 - WARNING - Error collecting sample 637: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,766 - WARNING - Error collecting sample 638: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,766 - WARNING - Error collecting sample 639: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,766 - WARNING - Error collecting sample 640: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,766 - WARNING - Error collecting sample 641: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,766 - WARNING - Error collecting sample 642: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,766 - WARNING - Error collecting sample 643: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,766 - WARNING - Error collecting sample 644: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,766 - WARNING - Error collecting sample 645: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,767 - WARNING - Error collecting sample 646: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,767 - WARNING - Error collecting sample 647: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,767 - WARNING - Error collecting sample 648: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,767 - WARNING - Error collecting sample 649: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,767 - WARNING - Error collecting sample 650: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,767 - WARNING - Error collecting sample 651: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,767 - WARNING - Error collecting sample 652: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,767 - WARNING - Error collecting sample 653: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,767 - WARNING - Error collecting sample 654: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,767 - WARNING - Error collecting sample 655: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,768 - WARNING - Error collecting sample 656: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,768 - WARNING - Error collecting sample 657: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,768 - WARNING - Error collecting sample 658: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,768 - WARNING - Error collecting sample 659: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,768 - WARNING - Error collecting sample 660: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,768 - WARNING - Error collecting sample 661: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,768 - WARNING - Error collecting sample 662: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,768 - WARNING - Error collecting sample 663: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,768 - WARNING - Error collecting sample 664: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,768 - WARNING - Error collecting sample 665: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,768 - WARNING - Error collecting sample 666: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,769 - WARNING - Error collecting sample 667: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,769 - WARNING - Error collecting sample 668: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,769 - WARNING - Error collecting sample 669: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,769 - WARNING - Error collecting sample 670: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,769 - WARNING - Error collecting sample 671: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,769 - WARNING - Error collecting sample 672: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,769 - WARNING - Error collecting sample 673: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,769 - WARNING - Error collecting sample 674: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,769 - WARNING - Error collecting sample 675: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,769 - WARNING - Error collecting sample 676: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,770 - WARNING - Error collecting sample 677: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,770 - WARNING - Error collecting sample 678: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,770 - WARNING - Error collecting sample 679: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,770 - WARNING - Error collecting sample 680: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,770 - WARNING - Error collecting sample 681: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,770 - WARNING - Error collecting sample 682: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,770 - WARNING - Error collecting sample 683: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,770 - WARNING - Error collecting sample 684: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,770 - WARNING - Error collecting sample 685: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,770 - WARNING - Error collecting sample 686: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,770 - WARNING - Error collecting sample 687: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,771 - WARNING - Error collecting sample 688: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,771 - WARNING - Error collecting sample 689: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,771 - WARNING - Error collecting sample 690: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,771 - WARNING - Error collecting sample 691: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,771 - WARNING - Error collecting sample 692: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,771 - WARNING - Error collecting sample 693: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,771 - WARNING - Error collecting sample 694: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,771 - WARNING - Error collecting sample 695: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,771 - WARNING - Error collecting sample 696: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,771 - WARNING - Error collecting sample 697: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,772 - WARNING - Error collecting sample 698: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,772 - WARNING - Error collecting sample 699: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,772 - INFO - Collected 700 samples...
+2025-09-07 14:40:10,772 - WARNING - Error collecting sample 700: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,772 - WARNING - Error collecting sample 701: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,772 - WARNING - Error collecting sample 702: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,772 - WARNING - Error collecting sample 703: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,772 - WARNING - Error collecting sample 704: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,772 - WARNING - Error collecting sample 705: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,772 - WARNING - Error collecting sample 706: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,772 - WARNING - Error collecting sample 707: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,772 - WARNING - Error collecting sample 708: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,773 - WARNING - Error collecting sample 709: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,773 - WARNING - Error collecting sample 710: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,773 - WARNING - Error collecting sample 711: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,773 - WARNING - Error collecting sample 712: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,773 - WARNING - Error collecting sample 713: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,773 - WARNING - Error collecting sample 714: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,773 - WARNING - Error collecting sample 715: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,773 - WARNING - Error collecting sample 716: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,773 - WARNING - Error collecting sample 717: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,773 - WARNING - Error collecting sample 718: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,774 - WARNING - Error collecting sample 719: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,774 - WARNING - Error collecting sample 720: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,774 - WARNING - Error collecting sample 721: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,774 - WARNING - Error collecting sample 722: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,774 - WARNING - Error collecting sample 723: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,774 - WARNING - Error collecting sample 724: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,774 - WARNING - Error collecting sample 725: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,774 - WARNING - Error collecting sample 726: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,774 - WARNING - Error collecting sample 727: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,774 - WARNING - Error collecting sample 728: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,775 - WARNING - Error collecting sample 729: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,775 - WARNING - Error collecting sample 730: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,775 - WARNING - Error collecting sample 731: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,775 - WARNING - Error collecting sample 732: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,775 - WARNING - Error collecting sample 733: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,775 - WARNING - Error collecting sample 734: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,775 - WARNING - Error collecting sample 735: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,775 - WARNING - Error collecting sample 736: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,775 - WARNING - Error collecting sample 737: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,775 - WARNING - Error collecting sample 738: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,776 - WARNING - Error collecting sample 739: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,776 - WARNING - Error collecting sample 740: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,776 - WARNING - Error collecting sample 741: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,776 - WARNING - Error collecting sample 742: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,776 - WARNING - Error collecting sample 743: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,776 - WARNING - Error collecting sample 744: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,776 - WARNING - Error collecting sample 745: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,776 - WARNING - Error collecting sample 746: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,776 - WARNING - Error collecting sample 747: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,776 - WARNING - Error collecting sample 748: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,777 - WARNING - Error collecting sample 749: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,777 - WARNING - Error collecting sample 750: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,777 - WARNING - Error collecting sample 751: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,777 - WARNING - Error collecting sample 752: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,777 - WARNING - Error collecting sample 753: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,777 - WARNING - Error collecting sample 754: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,777 - WARNING - Error collecting sample 755: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,777 - WARNING - Error collecting sample 756: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,777 - WARNING - Error collecting sample 757: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,777 - WARNING - Error collecting sample 758: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,778 - WARNING - Error collecting sample 759: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,778 - WARNING - Error collecting sample 760: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,778 - WARNING - Error collecting sample 761: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,778 - WARNING - Error collecting sample 762: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,778 - WARNING - Error collecting sample 763: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,778 - WARNING - Error collecting sample 764: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,778 - WARNING - Error collecting sample 765: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,778 - WARNING - Error collecting sample 766: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,778 - WARNING - Error collecting sample 767: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,778 - WARNING - Error collecting sample 768: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,779 - WARNING - Error collecting sample 769: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,779 - WARNING - Error collecting sample 770: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,779 - WARNING - Error collecting sample 771: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,779 - WARNING - Error collecting sample 772: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,779 - WARNING - Error collecting sample 773: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,779 - WARNING - Error collecting sample 774: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,779 - WARNING - Error collecting sample 775: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,779 - WARNING - Error collecting sample 776: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,779 - WARNING - Error collecting sample 777: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,779 - WARNING - Error collecting sample 778: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,779 - WARNING - Error collecting sample 779: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,780 - WARNING - Error collecting sample 780: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,780 - WARNING - Error collecting sample 781: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,780 - WARNING - Error collecting sample 782: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,780 - WARNING - Error collecting sample 783: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,780 - WARNING - Error collecting sample 784: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,780 - WARNING - Error collecting sample 785: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,780 - WARNING - Error collecting sample 786: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,780 - WARNING - Error collecting sample 787: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,780 - WARNING - Error collecting sample 788: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,780 - WARNING - Error collecting sample 789: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,781 - WARNING - Error collecting sample 790: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,781 - WARNING - Error collecting sample 791: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,781 - WARNING - Error collecting sample 792: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,781 - WARNING - Error collecting sample 793: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,781 - WARNING - Error collecting sample 794: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,781 - WARNING - Error collecting sample 795: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,781 - WARNING - Error collecting sample 796: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,781 - WARNING - Error collecting sample 797: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,781 - WARNING - Error collecting sample 798: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,781 - WARNING - Error collecting sample 799: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,781 - INFO - Collected 800 samples...
+2025-09-07 14:40:10,782 - WARNING - Error collecting sample 800: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,782 - WARNING - Error collecting sample 801: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,782 - WARNING - Error collecting sample 802: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,782 - WARNING - Error collecting sample 803: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,782 - WARNING - Error collecting sample 804: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,782 - WARNING - Error collecting sample 805: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,782 - WARNING - Error collecting sample 806: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,782 - WARNING - Error collecting sample 807: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,782 - WARNING - Error collecting sample 808: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,782 - WARNING - Error collecting sample 809: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,783 - WARNING - Error collecting sample 810: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,783 - WARNING - Error collecting sample 811: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,783 - WARNING - Error collecting sample 812: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,783 - WARNING - Error collecting sample 813: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,783 - WARNING - Error collecting sample 814: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,783 - WARNING - Error collecting sample 815: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,783 - WARNING - Error collecting sample 816: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,783 - WARNING - Error collecting sample 817: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,783 - WARNING - Error collecting sample 818: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,783 - WARNING - Error collecting sample 819: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,784 - WARNING - Error collecting sample 820: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,784 - WARNING - Error collecting sample 821: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,784 - WARNING - Error collecting sample 822: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,784 - WARNING - Error collecting sample 823: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,784 - WARNING - Error collecting sample 824: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,784 - WARNING - Error collecting sample 825: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,784 - WARNING - Error collecting sample 826: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,784 - WARNING - Error collecting sample 827: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,784 - WARNING - Error collecting sample 828: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,784 - WARNING - Error collecting sample 829: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,785 - WARNING - Error collecting sample 830: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,785 - WARNING - Error collecting sample 831: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,785 - WARNING - Error collecting sample 832: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,785 - WARNING - Error collecting sample 833: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,785 - WARNING - Error collecting sample 834: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,785 - WARNING - Error collecting sample 835: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,785 - WARNING - Error collecting sample 836: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,785 - WARNING - Error collecting sample 837: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,785 - WARNING - Error collecting sample 838: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,785 - WARNING - Error collecting sample 839: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,786 - WARNING - Error collecting sample 840: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,787 - WARNING - Error collecting sample 841: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,787 - WARNING - Error collecting sample 842: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,787 - WARNING - Error collecting sample 843: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,787 - WARNING - Error collecting sample 844: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,787 - WARNING - Error collecting sample 845: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,787 - WARNING - Error collecting sample 846: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,787 - WARNING - Error collecting sample 847: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,787 - WARNING - Error collecting sample 848: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,787 - WARNING - Error collecting sample 849: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,787 - WARNING - Error collecting sample 850: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,788 - WARNING - Error collecting sample 851: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,788 - WARNING - Error collecting sample 852: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,788 - WARNING - Error collecting sample 853: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,788 - WARNING - Error collecting sample 854: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,788 - WARNING - Error collecting sample 855: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,788 - WARNING - Error collecting sample 856: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,788 - WARNING - Error collecting sample 857: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,788 - WARNING - Error collecting sample 858: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,788 - WARNING - Error collecting sample 859: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,788 - WARNING - Error collecting sample 860: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,789 - WARNING - Error collecting sample 861: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,789 - WARNING - Error collecting sample 862: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,789 - WARNING - Error collecting sample 863: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,789 - WARNING - Error collecting sample 864: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,789 - WARNING - Error collecting sample 865: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,789 - WARNING - Error collecting sample 866: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,789 - WARNING - Error collecting sample 867: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,789 - WARNING - Error collecting sample 868: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,789 - WARNING - Error collecting sample 869: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,789 - WARNING - Error collecting sample 870: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,790 - WARNING - Error collecting sample 871: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,790 - WARNING - Error collecting sample 872: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,790 - WARNING - Error collecting sample 873: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,790 - WARNING - Error collecting sample 874: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,790 - WARNING - Error collecting sample 875: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,790 - WARNING - Error collecting sample 876: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,790 - WARNING - Error collecting sample 877: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,790 - WARNING - Error collecting sample 878: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,790 - WARNING - Error collecting sample 879: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,791 - WARNING - Error collecting sample 880: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,791 - WARNING - Error collecting sample 881: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,791 - WARNING - Error collecting sample 882: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,791 - WARNING - Error collecting sample 883: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,791 - WARNING - Error collecting sample 884: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,791 - WARNING - Error collecting sample 885: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,791 - WARNING - Error collecting sample 886: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,791 - WARNING - Error collecting sample 887: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,791 - WARNING - Error collecting sample 888: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,791 - WARNING - Error collecting sample 889: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,792 - WARNING - Error collecting sample 890: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,792 - WARNING - Error collecting sample 891: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,792 - WARNING - Error collecting sample 892: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,792 - WARNING - Error collecting sample 893: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,792 - WARNING - Error collecting sample 894: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,792 - WARNING - Error collecting sample 895: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,792 - WARNING - Error collecting sample 896: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,792 - WARNING - Error collecting sample 897: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,792 - WARNING - Error collecting sample 898: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,792 - WARNING - Error collecting sample 899: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,792 - INFO - Collected 900 samples...
+2025-09-07 14:40:10,793 - WARNING - Error collecting sample 900: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,793 - WARNING - Error collecting sample 901: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,793 - WARNING - Error collecting sample 902: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,793 - WARNING - Error collecting sample 903: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,793 - WARNING - Error collecting sample 904: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,793 - WARNING - Error collecting sample 905: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,793 - WARNING - Error collecting sample 906: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,793 - WARNING - Error collecting sample 907: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,793 - WARNING - Error collecting sample 908: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,793 - WARNING - Error collecting sample 909: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,794 - WARNING - Error collecting sample 910: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,794 - WARNING - Error collecting sample 911: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,794 - WARNING - Error collecting sample 912: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,794 - WARNING - Error collecting sample 913: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,794 - WARNING - Error collecting sample 914: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,794 - WARNING - Error collecting sample 915: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,794 - WARNING - Error collecting sample 916: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,794 - WARNING - Error collecting sample 917: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,794 - WARNING - Error collecting sample 918: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,794 - WARNING - Error collecting sample 919: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,794 - WARNING - Error collecting sample 920: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,795 - WARNING - Error collecting sample 921: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,795 - WARNING - Error collecting sample 922: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,795 - WARNING - Error collecting sample 923: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,795 - WARNING - Error collecting sample 924: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,795 - WARNING - Error collecting sample 925: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,795 - WARNING - Error collecting sample 926: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,795 - WARNING - Error collecting sample 927: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,795 - WARNING - Error collecting sample 928: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,795 - WARNING - Error collecting sample 929: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,795 - WARNING - Error collecting sample 930: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,796 - WARNING - Error collecting sample 931: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,796 - WARNING - Error collecting sample 932: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,796 - WARNING - Error collecting sample 933: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,796 - WARNING - Error collecting sample 934: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,796 - WARNING - Error collecting sample 935: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,796 - WARNING - Error collecting sample 936: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,796 - WARNING - Error collecting sample 937: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,796 - WARNING - Error collecting sample 938: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,796 - WARNING - Error collecting sample 939: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,796 - WARNING - Error collecting sample 940: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,796 - WARNING - Error collecting sample 941: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,797 - WARNING - Error collecting sample 942: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,797 - WARNING - Error collecting sample 943: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,797 - WARNING - Error collecting sample 944: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,797 - WARNING - Error collecting sample 945: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,797 - WARNING - Error collecting sample 946: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,797 - WARNING - Error collecting sample 947: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,797 - WARNING - Error collecting sample 948: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,797 - WARNING - Error collecting sample 949: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,797 - WARNING - Error collecting sample 950: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,797 - WARNING - Error collecting sample 951: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,798 - WARNING - Error collecting sample 952: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,798 - WARNING - Error collecting sample 953: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,798 - WARNING - Error collecting sample 954: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,798 - WARNING - Error collecting sample 955: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,798 - WARNING - Error collecting sample 956: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,798 - WARNING - Error collecting sample 957: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,798 - WARNING - Error collecting sample 958: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,798 - WARNING - Error collecting sample 959: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,798 - WARNING - Error collecting sample 960: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,798 - WARNING - Error collecting sample 961: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,798 - WARNING - Error collecting sample 962: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,799 - WARNING - Error collecting sample 963: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,799 - WARNING - Error collecting sample 964: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,799 - WARNING - Error collecting sample 965: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,799 - WARNING - Error collecting sample 966: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,799 - WARNING - Error collecting sample 967: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,799 - WARNING - Error collecting sample 968: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,799 - WARNING - Error collecting sample 969: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,799 - WARNING - Error collecting sample 970: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,799 - WARNING - Error collecting sample 971: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,799 - WARNING - Error collecting sample 972: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,800 - WARNING - Error collecting sample 973: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,800 - WARNING - Error collecting sample 974: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,800 - WARNING - Error collecting sample 975: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,800 - WARNING - Error collecting sample 976: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,800 - WARNING - Error collecting sample 977: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,800 - WARNING - Error collecting sample 978: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,800 - WARNING - Error collecting sample 979: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,800 - WARNING - Error collecting sample 980: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,800 - WARNING - Error collecting sample 981: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,800 - WARNING - Error collecting sample 982: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,801 - WARNING - Error collecting sample 983: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,801 - WARNING - Error collecting sample 984: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,801 - WARNING - Error collecting sample 985: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,801 - WARNING - Error collecting sample 986: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,801 - WARNING - Error collecting sample 987: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,801 - WARNING - Error collecting sample 988: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,801 - WARNING - Error collecting sample 989: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,801 - WARNING - Error collecting sample 990: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,801 - WARNING - Error collecting sample 991: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,801 - WARNING - Error collecting sample 992: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,801 - WARNING - Error collecting sample 993: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,802 - WARNING - Error collecting sample 994: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,802 - WARNING - Error collecting sample 995: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,802 - WARNING - Error collecting sample 996: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,802 - WARNING - Error collecting sample 997: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,802 - WARNING - Error collecting sample 998: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,802 - WARNING - Error collecting sample 999: current transaction is aborted, commands ignored until end of transaction block
+
+2025-09-07 14:40:10,802 - INFO - Successfully collected 3 training samples
+2025-09-07 14:40:10,802 - INFO - Training LightGBM model...
+2025-09-07 14:40:10,802 - INFO - Training data shape: (3, 32)
+2025-09-07 14:40:10,802 - INFO - Target distribution: [3]
+2025-09-07 14:40:11,540 - INFO - === TRAINING RESULTS ===
+2025-09-07 14:40:11,540 - INFO - Dispatch Accuracy: 1.0000 (100.00%)
+2025-09-07 14:40:11,540 - INFO - Total Training Samples: 3
+2025-09-07 14:40:11,540 - INFO - Train/Test Split: 2/1
+2025-09-07 14:40:11,540 - ERROR - Training failed: '1'
+2025-09-07 14:42:15,748 - INFO - === Starting LightGBM Training on Current Data ===
+2025-09-07 14:42:15,748 - INFO - Connecting to databases...
+2025-09-07 14:42:15,770 - INFO - Collecting 300 training samples...
+2025-09-07 14:42:17,954 - INFO - Collected 50 samples...
+2025-09-07 14:42:20,255 - INFO - Collected 100 samples...
+2025-09-07 14:42:22,312 - INFO - Collected 150 samples...
+2025-09-07 14:42:24,538 - INFO - Collected 200 samples...
+2025-09-07 14:42:26,696 - INFO - Collected 250 samples...
+2025-09-07 14:42:29,027 - INFO - Successfully collected 300 training samples
+2025-09-07 14:42:29,027 - INFO - Training LightGBM model...
+2025-09-07 14:42:29,029 - INFO - Training data shape: (300, 32)
+2025-09-07 14:42:29,029 - INFO - Target distribution: [204  96]
+2025-09-07 14:42:34,832 - INFO - === TRAINING RESULTS ===
+2025-09-07 14:42:34,833 - INFO - Dispatch Accuracy: 0.6833 (68.33%)
+2025-09-07 14:42:34,834 - INFO - Total Training Samples: 300
+2025-09-07 14:42:34,834 - INFO - Train/Test Split: 240/60
+2025-09-07 14:42:34,844 - INFO - Results saved to results/lightgbm_dispatch_accuracy.json

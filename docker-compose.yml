@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  pg_duckdb_aqd:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pg_duckdb_aqd
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./data:/home/postgres/aqd_workspace/data
+      - ./models:/home/postgres/aqd_workspace/models
+      - ./logs:/home/postgres/aqd_workspace/logs
+      - ./results:/home/postgres/aqd_workspace/results
+    environment:
+      - POSTGRES_DB=aqd_test
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    stdin_open: true
+    tty: true
+    command: ["./start.sh", "bash"]
+
+volumes:
+  postgres_data:
+    driver: local

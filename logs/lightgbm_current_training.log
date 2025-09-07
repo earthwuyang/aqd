@@ -1,0 +1,19 @@
+2025-09-07 15:03:10,292 - INFO - === Training LightGBM on Current Collected Data ===
+2025-09-07 15:03:10,302 - INFO - Loaded original collection: 600 records
+2025-09-07 15:03:10,360 - INFO - Loaded data/comprehensive/dataset_1_small_oltp_oltp_partial_1000.json: 1000 records
+2025-09-07 15:03:10,492 - INFO - Loaded data/comprehensive/dataset_1_small_oltp_oltp_partial_2000.json: 2000 records
+2025-09-07 15:03:10,665 - INFO - Loaded data/comprehensive/dataset_1_small_oltp_oltp_partial_3000.json: 3000 records
+2025-09-07 15:03:10,665 - INFO - Total training data loaded: 6600 records
+2025-09-07 15:03:10,665 - INFO - Data sources:
+2025-09-07 15:03:10,665 - INFO -   - Original: 600 records
+2025-09-07 15:03:10,665 - INFO -   - dataset_1_small_oltp_oltp_partial_1000.json: 1000 records
+2025-09-07 15:03:10,665 - INFO -   - dataset_1_small_oltp_oltp_partial_2000.json: 2000 records
+2025-09-07 15:03:10,665 - INFO -   - dataset_1_small_oltp_oltp_partial_3000.json: 3000 records
+2025-09-07 15:03:10,666 - INFO - Preparing training data...
+2025-09-07 15:03:10,809 - INFO - Prepared training data: 6600 samples, 42 features
+2025-09-07 15:03:10,809 - INFO - Label distribution: [6496  104]
+2025-09-07 15:03:10,811 - INFO - Training LightGBM model...
+2025-09-07 15:03:10,811 - INFO - Class distribution: {0: 6496, 1: 104}
+2025-09-07 15:03:10,817 - INFO - Training set: 5280 samples
+2025-09-07 15:03:10,818 - INFO - Test set: 1320 samples
+2025-09-07 15:04:16,316 - INFO - Training complete - Test Accuracy: 1.0000

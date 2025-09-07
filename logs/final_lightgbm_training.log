@@ -1,0 +1,34 @@
+2025-09-07 15:42:36,478 - INFO - 🚀 Starting Final LightGBM Model Training
+2025-09-07 15:42:36,478 - INFO - ============================================================
+2025-09-07 15:42:36,478 - INFO - 📂 Loading ZSCE training data...
+2025-09-07 15:42:36,479 - INFO - Found 3 training data files
+2025-09-07 15:42:36,488 - INFO - Loaded 400 records from data/zsce_training_data_20250907_154000_enhanced.json
+2025-09-07 15:42:36,497 - INFO - Loaded 400 records from data/zsce_training_data_20250907_154000.json
+2025-09-07 15:42:36,505 - INFO - Loaded 400 records from data/zsce_training_data_20250907_153936.json
+2025-09-07 15:42:36,528 - INFO - 📊 Total training records: 1,200
+2025-09-07 15:42:36,529 - INFO - 🔧 Preparing features and labels...
+2025-09-07 15:42:36,530 - INFO - Using 363 successful dual executions
+2025-09-07 15:42:36,531 - INFO - Using 29 features: ['query_length', 'word_count', 'has_select', 'has_from', 'has_where', 'has_join', 'has_group_by', 'has_order_by', 'has_having', 'has_limit', 'has_count', 'has_sum', 'has_avg', 'has_min', 'has_max', 'num_joins', 'num_tables', 'num_conditions', 'num_aggregates', 'num_equals', 'num_comparisons', 'num_likes', 'num_ins', 'num_strings', 'num_numbers', 'has_subquery', 'has_union', 'has_distinct', 'has_case']
+2025-09-07 15:42:36,534 - INFO - Final feature set: 32 features
+2025-09-07 15:42:36,536 - INFO - 🚀 Training LightGBM model...
+2025-09-07 15:42:36,536 - INFO - Classes: ['duckdb' 'postgresql']
+2025-09-07 15:42:36,539 - INFO - Training set: 290 samples
+2025-09-07 15:42:36,539 - INFO - Test set: 73 samples
+2025-09-07 15:42:36,545 - INFO - Performing hyperparameter optimization...
+2025-09-07 15:48:05,355 - INFO - 🚀 Starting Final LightGBM Model Training
+2025-09-07 15:48:05,355 - INFO - ============================================================
+2025-09-07 15:48:05,355 - INFO - 📂 Loading ZSCE training data...
+2025-09-07 15:48:05,355 - INFO - Found 3 training data files
+2025-09-07 15:48:05,362 - INFO - Loaded 400 records from data/zsce_training_data_20250907_154000_enhanced.json
+2025-09-07 15:48:05,368 - INFO - Loaded 400 records from data/zsce_training_data_20250907_154000.json
+2025-09-07 15:48:05,374 - INFO - Loaded 400 records from data/zsce_training_data_20250907_153936.json
+2025-09-07 15:48:05,385 - INFO - 📊 Total training records: 1,200
+2025-09-07 15:48:05,386 - INFO - 🔧 Preparing features and labels...
+2025-09-07 15:48:05,387 - INFO - Using 363 successful dual executions
+2025-09-07 15:48:05,387 - INFO - Using 29 features: ['query_length', 'word_count', 'has_select', 'has_from', 'has_where', 'has_join', 'has_group_by', 'has_order_by', 'has_having', 'has_limit', 'has_count', 'has_sum', 'has_avg', 'has_min', 'has_max', 'num_joins', 'num_tables', 'num_conditions', 'num_aggregates', 'num_equals', 'num_comparisons', 'num_likes', 'num_ins', 'num_strings', 'num_numbers', 'has_subquery', 'has_union', 'has_distinct', 'has_case']
+2025-09-07 15:48:05,389 - INFO - Final feature set: 32 features
+2025-09-07 15:48:05,390 - INFO - 🚀 Training LightGBM model...
+2025-09-07 15:48:05,390 - INFO - Classes: ['duckdb' 'postgresql']
+2025-09-07 15:48:05,392 - INFO - Training set: 290 samples
+2025-09-07 15:48:05,392 - INFO - Test set: 73 samples
+2025-09-07 15:48:05,397 - INFO - Performing hyperparameter optimization...

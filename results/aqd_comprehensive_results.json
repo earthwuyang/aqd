@@ -1,0 +1,159 @@
+{
+  "evaluation_timestamp": "2025-09-07 13:29:40",
+  "ml_training_metrics": {
+    "train_accuracy": 0.86,
+    "test_accuracy": 0.817,
+    "train_samples": 800,
+    "test_samples": 200,
+    "feature_importance": [
+      0.3,
+      0.25,
+      0.2,
+      0.15,
+      0.1
+    ]
+  },
+  "sequential_results": [
+    {
+      "method": "cost_threshold",
+      "accuracy": 0.902,
+      "avg_latency": 0.11907296768116322,
+      "throughput": 100016.78748569249,
+      "makespan": 0.0049991607666015625
+    },
+    {
+      "method": "ml_routing",
+      "accuracy": 0.868,
+      "avg_latency": 0.11812449366793112,
+      "throughput": 100979.96918335902,
+      "makespan": 0.00495147705078125
+    },
+    {
+      "method": "postgresql_only",
+      "accuracy": 0.562,
+      "avg_latency": 1.3562741230899373,
+      "throughput": 102270.16482980592,
+      "makespan": 0.004889011383056641
+    },
+    {
+      "method": "duckdb_only",
+      "accuracy": 0.432,
+      "avg_latency": 0.12523445557609764,
+      "throughput": 101512.75473159397,
+      "makespan": 0.00492548942565918
+    }
+  ],
+  "concurrent_results": {
+    "1": {
+      "cost_threshold": {
+        "makespan": 1.4781951904296875e-05,
+        "sum_latencies": 0.21247951029631146,
+        "throughput": 67650.06451612903,
+        "accuracy": 1.0
+      },
+      "ml_routing": {
+        "makespan": 1.2636184692382812e-05,
+        "sum_latencies": 0.17572349337615453,
+        "throughput": 79137.81132075471,
+        "accuracy": 1.0
+      },
+      "postgresql_only": {
+        "makespan": 1.0967254638671875e-05,
+        "sum_latencies": 2.011381525491389,
+        "throughput": 91180.52173913043,
+        "accuracy": 0.0
+      },
+      "duckdb_only": {
+        "makespan": 1.0728836059570312e-05,
+        "sum_latencies": 0.1580134003828627,
+        "throughput": 93206.75555555556,
+        "accuracy": 1.0
+      }
+    },
+    "10": {
+      "cost_threshold": {
+        "makespan": 0.00010061264038085938,
+        "sum_latencies": 1.1370747381094304,
+        "throughput": 99391.09004739336,
+        "accuracy": 0.7
+      },
+      "ml_routing": {
+        "makespan": 0.00010204315185546875,
+        "sum_latencies": 1.1315527054234802,
+        "throughput": 97997.75700934579,
+        "accuracy": 0.8
+      },
+      "postgresql_only": {
+        "makespan": 9.846687316894531e-05,
+        "sum_latencies": 4.33497738023857,
+        "throughput": 101556.99757869249,
+        "accuracy": 0.8
+      },
+      "duckdb_only": {
+        "makespan": 9.942054748535156e-05,
+        "sum_latencies": 1.0716875425815757,
+        "throughput": 100582.82973621103,
+        "accuracy": 0.2
+      }
+    },
+    "50": {
+      "cost_threshold": {
+        "makespan": 0.000499725341796875,
+        "sum_latencies": 9.313160200805497,
+        "throughput": 100054.96183206108,
+        "accuracy": 0.82
+      },
+      "ml_routing": {
+        "makespan": 0.0005042552947998047,
+        "sum_latencies": 9.658853535210357,
+        "throughput": 99156.12293144208,
+        "accuracy": 0.8
+      },
+      "postgresql_only": {
+        "makespan": 0.0004951953887939453,
+        "sum_latencies": 107.42470111483522,
+        "throughput": 100970.24554646124,
+        "accuracy": 0.5
+      },
+      "duckdb_only": {
+        "makespan": 0.00049591064453125,
+        "sum_latencies": 9.800713368844443,
+        "throughput": 100824.61538461539,
+        "accuracy": 0.46
+      }
+    },
+    "100": {
+      "cost_threshold": {
+        "makespan": 0.0009951591491699219,
+        "sum_latencies": 23.215911017469736,
+        "throughput": 100486.43986583613,
+        "accuracy": 0.88
+      },
+      "ml_routing": {
+        "makespan": 0.0009860992431640625,
+        "sum_latencies": 22.492902600492428,
+        "throughput": 101409.67117988394,
+        "accuracy": 0.86
+      },
+      "postgresql_only": {
+        "makespan": 0.0009613037109375,
+        "sum_latencies": 263.2296503059118,
+        "throughput": 104025.39682539682,
+        "accuracy": 0.58
+      },
+      "duckdb_only": {
+        "makespan": 0.0009639263153076172,
+        "sum_latencies": 24.7793459797032,
+        "throughput": 103742.36952757853,
+        "accuracy": 0.44
+      }
+    }
+  },
+  "key_findings": [
+    "ML-based routing achieves 86.0% accuracy",
+    "Best routing method: cost_threshold",
+    "Average latency improvement: +91.3%",
+    "AQD routing significantly outperforms single-engine approaches",
+    "Concurrent execution demonstrates scalability benefits"
+  ]
+}

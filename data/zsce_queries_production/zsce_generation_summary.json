@@ -1,0 +1,12 @@
+{
+  "total_queries_generated": 2000,
+  "ap_queries": 1000,
+  "tp_queries": 1000,
+  "generation_duration_seconds": 0.950192928314209,
+  "queries_per_second": 2104.835702732826,
+  "dataset": "Credit",
+  "output_directory": "data/zsce_queries_production",
+  "timestamp": "2025-09-07 15:33:15",
+  "methodology": "ZSCE (Zero-Shot Cross-Engine) adapted from TiDB AQD",
+  "success": true
+}

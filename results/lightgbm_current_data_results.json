@@ -1,0 +1,155 @@
+{
+  "test_accuracy": 1.0,
+  "auc_score": 1.0,
+  "total_samples": 6600,
+  "train_samples": 5280,
+  "test_samples": 1320,
+  "train_distribution": [
+    5197,
+    83
+  ],
+  "test_distribution": [
+    1299,
+    21
+  ],
+  "classification_report": {
+    "0": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 1299.0
+    },
+    "1": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 21.0
+    },
+    "accuracy": 1.0,
+    "macro avg": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 1320.0
+    },
+    "weighted avg": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 1320.0
+    }
+  },
+  "confusion_matrix": [
+    [
+      1299,
+      0
+    ],
+    [
+      0,
+      21
+    ]
+  ],
+  "feature_importance": {
+    "cost_per_row": 21.673573065549135,
+    "duck_execution_time": 344.29085440933704,
+    "filter_selectivity": 0.0,
+    "is_mixed": 0.0,
+    "is_olap": 0.0,
+    "is_oltp": 602.6012851446867,
+    "join_complexity": 0.0,
+    "num_aggregates": 0.0,
+    "num_between": 0.0,
+    "num_case": 0.0,
+    "num_distinct": 1.8701200485229492,
+    "num_filters": 0.0,
+    "num_group_by": 0.0,
+    "num_hashjoin": 0.0,
+    "num_having": 0.0,
+    "num_in": 0.0,
+    "num_indexscan": 0.0,
+    "num_join": 0.0,
+    "num_joins_plan": 0.0,
+    "num_like": 0.0,
+    "num_limits": 0.0,
+    "num_mergejoin": 0.0,
+    "num_nestloop": 0.0,
+    "num_order_by": 1632.603899601847,
+    "num_select": 0.0,
+    "num_seqscan": 0.0,
+    "num_sorts": 0.0,
+    "num_subquery": 0.0,
+    "num_tables": 0.0,
+    "num_union": 0.0,
+    "num_where": 0.0,
+    "num_with": 0.0,
+    "performance_ratio": 657.1392376422882,
+    "pg_execution_time": 162.39653205871582,
+    "plan_depth": 0.0,
+    "plan_rows": 0.0,
+    "plan_width": 0.0,
+    "query_length": 143658.1589017585,
+    "scan_ratio": 0.0,
+    "startup_cost": 0.0,
+    "time_difference": 0.7453646026551723,
+    "total_cost": 0.0
+  },
+  "top_10_features": [
+    [
+      "query_length",
+      143658.1589017585
+    ],
+    [
+      "num_order_by",
+      1632.603899601847
+    ],
+    [
+      "performance_ratio",
+      657.1392376422882
+    ],
+    [
+      "is_oltp",
+      602.6012851446867
+    ],
+    [
+      "duck_execution_time",
+      344.29085440933704
+    ],
+    [
+      "pg_execution_time",
+      162.39653205871582
+    ],
+    [
+      "cost_per_row",
+      21.673573065549135
+    ],
+    [
+      "num_distinct",
+      1.8701200485229492
+    ],
+    [
+      "time_difference",
+      0.7453646026551723
+    ],
+    [
+      "filter_selectivity",
+      0.0
+    ]
+  ],
+  "model_params": {
+    "objective": "binary",
+    "metric": "binary_logloss",
+    "boosting_type": "gbdt",
+    "num_leaves": 31,
+    "learning_rate": 0.05,
+    "feature_fraction": 0.9,
+    "bagging_fraction": 0.8,
+    "bagging_freq": 5,
+    "verbose": -1,
+    "random_state": 42,
+    "is_unbalance": true,
+    "min_child_samples": 20,
+    "reg_alpha": 0.1,
+    "reg_lambda": 0.1
+  },
+  "best_iteration": 200
+}

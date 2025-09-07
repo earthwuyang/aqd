@@ -1,0 +1,12 @@
+{
+  "dataset": "Airline",
+  "methodology": "ZSCE (Zero-Shot Cross-Engine) adapted from TiDB AQD",
+  "ap_queries": 10,
+  "tp_queries": 10,
+  "total_queries": 20,
+  "tables": 3,
+  "relationships": 2,
+  "ap_file": "data/zsce_queries_test/Airline/workload_10k_ap_queries.sql",
+  "tp_file": "data/zsce_queries_test/Airline/workload_10k_tp_queries.sql",
+  "timestamp": "2025-09-07 15:32:35"
+}

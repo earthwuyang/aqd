@@ -1,0 +1,12 @@
+{
+  "total_queries_generated": 20,
+  "ap_queries": 10,
+  "tp_queries": 10,
+  "generation_duration_seconds": 0.03581595420837402,
+  "queries_per_second": 558.4103632599536,
+  "dataset": "Airline",
+  "output_directory": "data/zsce_queries_test",
+  "timestamp": "2025-09-07 15:32:35",
+  "methodology": "ZSCE (Zero-Shot Cross-Engine) adapted from TiDB AQD",
+  "success": true
+}

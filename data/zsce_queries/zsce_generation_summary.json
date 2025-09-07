@@ -1,0 +1,12 @@
+{
+  "total_queries_generated": 0,
+  "ap_queries": 100,
+  "tp_queries": 100,
+  "generation_duration_seconds": 0.007496833801269531,
+  "queries_per_second": 0.0,
+  "dataset": "aqd_benchmark",
+  "output_directory": "data/zsce_queries",
+  "timestamp": "2025-09-07 15:13:04",
+  "methodology": "ZSCE (Zero-Shot Cross-Engine) adapted from TiDB AQD",
+  "success": false
+}

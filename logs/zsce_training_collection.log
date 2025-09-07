@@ -1,0 +1,122 @@
+2025-09-07 15:39:36,692 - INFO - 🚀 Starting ZSCE Training Data Collection
+2025-09-07 15:39:36,692 - INFO - ============================================================
+2025-09-07 15:39:36,697 - INFO - ✓ Connected to PostgreSQL
+2025-09-07 15:39:36,741 - INFO - ✓ Connected to DuckDB
+2025-09-07 15:39:36,742 - INFO - Found 2 ZSCE query files
+2025-09-07 15:39:36,742 - INFO - Processing Credit TP queries from data/zsce_queries_production/Credit/workload_10k_tp_queries.sql
+2025-09-07 15:39:36,743 - INFO - Executing 200 TP queries on Credit
+2025-09-07 15:39:36,759 - INFO -   Processed 10/200 queries
+2025-09-07 15:39:36,764 - INFO -   Processed 20/200 queries
+2025-09-07 15:39:36,768 - INFO -   Processed 30/200 queries
+2025-09-07 15:39:36,773 - INFO -   Processed 40/200 queries
+2025-09-07 15:39:36,777 - INFO -   Processed 50/200 queries
+2025-09-07 15:39:36,783 - INFO -   Processed 60/200 queries
+2025-09-07 15:39:36,787 - INFO -   Processed 70/200 queries
+2025-09-07 15:39:36,791 - INFO -   Processed 80/200 queries
+2025-09-07 15:39:36,796 - INFO -   Processed 90/200 queries
+2025-09-07 15:39:36,801 - INFO -   Processed 100/200 queries
+2025-09-07 15:39:36,806 - INFO -   Processed 110/200 queries
+2025-09-07 15:39:36,810 - INFO -   Processed 120/200 queries
+2025-09-07 15:39:36,814 - INFO -   Processed 130/200 queries
+2025-09-07 15:39:36,822 - INFO -   Processed 140/200 queries
+2025-09-07 15:39:36,826 - INFO -   Processed 150/200 queries
+2025-09-07 15:39:36,830 - INFO -   Processed 160/200 queries
+2025-09-07 15:39:36,835 - INFO -   Processed 170/200 queries
+2025-09-07 15:39:36,839 - INFO -   Processed 180/200 queries
+2025-09-07 15:39:36,844 - INFO -   Processed 190/200 queries
+2025-09-07 15:39:36,849 - INFO -   Processed 200/200 queries
+2025-09-07 15:39:36,849 - INFO - Processing Credit AP queries from data/zsce_queries_production/Credit/workload_10k_ap_queries.sql
+2025-09-07 15:39:36,850 - INFO - Executing 200 AP queries on Credit
+2025-09-07 15:39:36,854 - INFO -   Processed 10/200 queries
+2025-09-07 15:39:36,859 - INFO -   Processed 20/200 queries
+2025-09-07 15:39:36,863 - INFO -   Processed 30/200 queries
+2025-09-07 15:39:36,867 - INFO -   Processed 40/200 queries
+2025-09-07 15:39:36,872 - INFO -   Processed 50/200 queries
+2025-09-07 15:39:36,877 - INFO -   Processed 60/200 queries
+2025-09-07 15:39:36,882 - INFO -   Processed 70/200 queries
+2025-09-07 15:39:36,886 - INFO -   Processed 80/200 queries
+2025-09-07 15:39:36,890 - INFO -   Processed 90/200 queries
+2025-09-07 15:39:36,895 - INFO -   Processed 100/200 queries
+2025-09-07 15:39:36,899 - INFO -   Processed 110/200 queries
+2025-09-07 15:39:36,904 - INFO -   Processed 120/200 queries
+2025-09-07 15:39:36,908 - INFO -   Processed 130/200 queries
+2025-09-07 15:39:36,913 - INFO -   Processed 140/200 queries
+2025-09-07 15:39:36,917 - INFO -   Processed 150/200 queries
+2025-09-07 15:39:36,922 - INFO -   Processed 160/200 queries
+2025-09-07 15:39:36,926 - INFO -   Processed 170/200 queries
+2025-09-07 15:39:36,931 - INFO -   Processed 180/200 queries
+2025-09-07 15:39:36,936 - INFO -   Processed 190/200 queries
+2025-09-07 15:39:36,941 - INFO -   Processed 200/200 queries
+2025-09-07 15:39:36,958 - INFO - 💾 Saved 400 training records to data/zsce_training_data_20250907_153936.json
+2025-09-07 15:39:36,958 - INFO - 
+============================================================
+2025-09-07 15:39:36,958 - INFO - 📈 ZSCE TRAINING DATA COLLECTION SUMMARY
+2025-09-07 15:39:36,958 - INFO - ============================================================
+2025-09-07 15:39:36,958 - INFO - ⏱️  Duration: 0:00:00.265960
+2025-09-07 15:39:36,958 - INFO - 📊 Total queries processed: 400
+2025-09-07 15:39:36,958 - INFO - ✅ Successful dual executions: 0
+2025-09-07 15:39:36,958 - INFO - 🔸 PostgreSQL only: 0
+2025-09-07 15:39:36,958 - INFO - 🔹 DuckDB only: 0
+2025-09-07 15:39:36,958 - INFO - ❌ Failed executions: 400
+2025-09-07 15:39:36,958 - INFO - 💾 Training records collected: 400
+2025-09-07 15:40:00,197 - INFO - 🚀 Starting ZSCE Training Data Collection
+2025-09-07 15:40:00,198 - INFO - ============================================================
+2025-09-07 15:40:00,204 - INFO - ✓ Connected to PostgreSQL
+2025-09-07 15:40:00,245 - INFO - ✓ Connected to DuckDB
+2025-09-07 15:40:00,245 - INFO - Found 2 ZSCE query files
+2025-09-07 15:40:00,245 - INFO - Processing Credit TP queries from data/zsce_queries_production/Credit/workload_10k_tp_queries.sql
+2025-09-07 15:40:00,246 - INFO - Executing 200 TP queries on Credit
+2025-09-07 15:40:00,265 - INFO -   Processed 10/200 queries
+2025-09-07 15:40:00,269 - INFO -   Processed 20/200 queries
+2025-09-07 15:40:00,273 - INFO -   Processed 30/200 queries
+2025-09-07 15:40:00,278 - INFO -   Processed 40/200 queries
+2025-09-07 15:40:00,282 - INFO -   Processed 50/200 queries
+2025-09-07 15:40:00,287 - INFO -   Processed 60/200 queries
+2025-09-07 15:40:00,291 - INFO -   Processed 70/200 queries
+2025-09-07 15:40:00,295 - INFO -   Processed 80/200 queries
+2025-09-07 15:40:00,300 - INFO -   Processed 90/200 queries
+2025-09-07 15:40:00,305 - INFO -   Processed 100/200 queries
+2025-09-07 15:40:00,309 - INFO -   Processed 110/200 queries
+2025-09-07 15:40:00,313 - INFO -   Processed 120/200 queries
+2025-09-07 15:40:00,317 - INFO -   Processed 130/200 queries
+2025-09-07 15:40:00,321 - INFO -   Processed 140/200 queries
+2025-09-07 15:40:00,326 - INFO -   Processed 150/200 queries
+2025-09-07 15:40:00,330 - INFO -   Processed 160/200 queries
+2025-09-07 15:40:00,335 - INFO -   Processed 170/200 queries
+2025-09-07 15:40:00,339 - INFO -   Processed 180/200 queries
+2025-09-07 15:40:00,344 - INFO -   Processed 190/200 queries
+2025-09-07 15:40:00,348 - INFO -   Processed 200/200 queries
+2025-09-07 15:40:00,348 - INFO - Processing Credit AP queries from data/zsce_queries_production/Credit/workload_10k_ap_queries.sql
+2025-09-07 15:40:00,349 - INFO - Executing 200 AP queries on Credit
+2025-09-07 15:40:00,354 - INFO -   Processed 10/200 queries
+2025-09-07 15:40:00,358 - INFO -   Processed 20/200 queries
+2025-09-07 15:40:00,363 - INFO -   Processed 30/200 queries
+2025-09-07 15:40:00,367 - INFO -   Processed 40/200 queries
+2025-09-07 15:40:00,371 - INFO -   Processed 50/200 queries
+2025-09-07 15:40:00,376 - INFO -   Processed 60/200 queries
+2025-09-07 15:40:00,381 - INFO -   Processed 70/200 queries
+2025-09-07 15:40:00,385 - INFO -   Processed 80/200 queries
+2025-09-07 15:40:00,389 - INFO -   Processed 90/200 queries
+2025-09-07 15:40:00,394 - INFO -   Processed 100/200 queries
+2025-09-07 15:40:00,398 - INFO -   Processed 110/200 queries
+2025-09-07 15:40:00,403 - INFO -   Processed 120/200 queries
+2025-09-07 15:40:00,408 - INFO -   Processed 130/200 queries
+2025-09-07 15:40:00,412 - INFO -   Processed 140/200 queries
+2025-09-07 15:40:00,417 - INFO -   Processed 150/200 queries
+2025-09-07 15:40:00,421 - INFO -   Processed 160/200 queries
+2025-09-07 15:40:00,426 - INFO -   Processed 170/200 queries
+2025-09-07 15:40:00,431 - INFO -   Processed 180/200 queries
+2025-09-07 15:40:00,448 - INFO -   Processed 190/200 queries
+2025-09-07 15:40:00,453 - INFO -   Processed 200/200 queries
+2025-09-07 15:40:00,471 - INFO - 💾 Saved 400 training records to data/zsce_training_data_20250907_154000.json
+2025-09-07 15:40:00,472 - INFO - 
+============================================================
+2025-09-07 15:40:00,472 - INFO - 📈 ZSCE TRAINING DATA COLLECTION SUMMARY
+2025-09-07 15:40:00,472 - INFO - ============================================================
+2025-09-07 15:40:00,472 - INFO - ⏱️  Duration: 0:00:00.274072
+2025-09-07 15:40:00,472 - INFO - 📊 Total queries processed: 400
+2025-09-07 15:40:00,472 - INFO - ✅ Successful dual executions: 0
+2025-09-07 15:40:00,472 - INFO - 🔸 PostgreSQL only: 0
+2025-09-07 15:40:00,472 - INFO - 🔹 DuckDB only: 0
+2025-09-07 15:40:00,472 - INFO - ❌ Failed executions: 400
+2025-09-07 15:40:00,472 - INFO - 💾 Training records collected: 400
