@@ -22,10 +22,9 @@ import numpy as np
 import psycopg2
 from tqdm import tqdm
 import sqlite3
+from pathlib import Path
 
 # Import DuckDB for schema introspection
-import sys
-sys.path.insert(0, '/home/wuy/DB/duckdb/duckdb_src/build/release/tools/pythonpkg')
 import duckdb
 
 # Database connection configuration
@@ -36,7 +35,11 @@ POSTGRESQL_CONFIG = {
     'user': 'wuy'
 }
 
-DUCKDB_PATH = '/home/wuy/DB/pg_duckdb_postgres/data/benchmark_datasets.db'
+# Resolve repository base directory relative to this file
+BASE_DIR = Path(__file__).resolve().parent
+
+# DuckDB database path (relative to repo)
+DUCKDB_PATH = str(BASE_DIR / 'data' / 'benchmark_datasets.db')
 
 
 class Datatype(Enum):
@@ -878,7 +881,7 @@ def generate_queries_for_dataset(schema_name, target_dir, num_ap_queries=10000, 
 
 def main():
     parser = argparse.ArgumentParser(description='Generate benchmark queries for PostgreSQL/DuckDB query routing')
-    parser.add_argument('--output_dir', type=str, default='/home/wuy/DB/pg_duckdb_postgres/data/benchmark_queries',
+    parser.add_argument('--output_dir', type=str, default=str(BASE_DIR / 'data' / 'benchmark_queries'),
                        help='Directory to store generated query workloads')
     parser.add_argument('--datasets', nargs='+', default=None,
                        help='Specific datasets to generate queries for (default: all available)')

@@ -34,6 +34,8 @@ make install-deps
 
 # Create Python environment
 make setup
+
+pip install -r requirements.txt
 ```
 
 ### 2. Build and Install PostgreSQL with AQD
@@ -61,13 +63,13 @@ make lightgbm       # LightGBM trainer only
 ### 4. Import Benchmark Data
 ```bash
 # Import real datasets for testing
-python3 import_benchmark_datasets.py --datasets financial sakila world imdb_small
+python3 import_benchmark_datasets.py 
 ```
 
 ### 5. Generate Test Queries  
 ```bash
 # Generate AP and TP queries for benchmarking
-python3 generate_benchmark_queries.py --datasets financial sakila --num_ap_queries 1000 --num_tp_queries 1000
+python3 generate_benchmark_queries.py  --num_ap_queries 10000 --num_tp_queries 10000
 ```
 
 ### 6. Collect Training Data

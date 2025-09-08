@@ -33,10 +33,13 @@ POSTGRESQL_CONFIG = {
     'database': 'postgres'
 }
 
-# DuckDB configuration
+# Resolve repository base directory relative to this file
+BASE_DIR = Path(__file__).resolve().parent
+
+# DuckDB configuration (relative to repo)
 DUCKDB_CONFIG = {
-    'binary': '/home/wuy/DB/pg_duckdb_postgres/duckdb/duckdb',
-    'database': '/home/wuy/DB/pg_duckdb_postgres/data/benchmark_datasets.db'
+    'binary': str(BASE_DIR / 'duckdb' / 'duckdb'),
+    'database': str(BASE_DIR / 'data' / 'benchmark_datasets.db')
 }
 
 # Select 10+ databases known to have good data for benchmarking
@@ -58,8 +61,8 @@ SELECTED_DATABASES = [
     'Seznam'         # Czech web data
 ]
 
-# Data directory
-DATA_DIR = '/home/wuy/DB/pg_duckdb_postgres/data/benchmark_data'
+# Data directory (relative to repo)
+DATA_DIR = str(BASE_DIR / 'data' / 'benchmark_data')
 
 class BenchmarkDatasetImporter:
     def __init__(self):
@@ -413,10 +416,13 @@ class BenchmarkDatasetImporter:
             'timestamp': datetime.now().isoformat()
         }
         
-        with open('/data/wuy/db/imported_benchmark_datasets.json', 'w') as f:
+        # Save results file under repo data directory
+        results_path = BASE_DIR / 'data' / 'imported_benchmark_datasets.json'
+        os.makedirs(results_path.parent, exist_ok=True)
+        with open(results_path, 'w') as f:
             json.dump(results, f, indent=2)
         
-        print(f"\n💾 Import results saved to /data/wuy/db/imported_benchmark_datasets.json")
+        print(f"\n💾 Import results saved to {results_path}")
         
         if len(successful_imports) >= 10:
             print(f"\n🎉 Successfully imported {len(successful_imports)} benchmark datasets!")
@@ -436,8 +442,16 @@ def run_import_in_tmux():
     subprocess.run(["tmux", "kill-session", "-t", session_name], 
                   capture_output=True)
     
-    # Create new tmux session and run import
-    python_cmd = f"cd /home/wuy/DB/duckdb && python3 -c 'from import_benchmark_datasets import BenchmarkDatasetImporter; importer = BenchmarkDatasetImporter(); result = importer.run_with_tmux(); print(\"Import completed with result:\", result)'"
+    # Create new tmux session and run import from this repo directory
+    base_dir = Path(__file__).resolve().parent
+    python_cmd = (
+        f"cd {base_dir} && "
+        "python3 -c "
+        "'from import_benchmark_datasets import BenchmarkDatasetImporter; "
+        "importer = BenchmarkDatasetImporter(); "
+        "result = importer.run_with_tmux(); "
+        "print(\"Import completed with result:\", result)'"
+    )
     
     tmux_cmd = [
         "tmux", "new-session", "-d", "-s", session_name,
