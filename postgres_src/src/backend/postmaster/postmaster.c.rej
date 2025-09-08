@@ -1,6 +1,14 @@
 --- src/backend/postmaster/postmaster.c
 +++ src/backend/postmaster/postmaster.c
-@@ -1194,6 +1195,9 @@ PostmasterMain(int argc, char *argv[])
+@@ -84,6 +84,7 @@
+ #include <sys/wait.h>
+ #include <ctype.h>
+ 
++#include "../../../aqd_feature_logger.h"
+ #include "access/transam.h"
+ #include "access/xlog.h"
+ #include "bootstrap/bootstrap.h"
+@@ -1193,6 +1194,9 @@ PostmasterMain(int argc, char *argv[])
  	 */
  	load_hba();
  	load_ident();

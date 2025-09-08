@@ -10,6 +10,7 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <set>
 #include <algorithm>
 #include <random>
 #include <chrono>
@@ -21,8 +22,8 @@
 // LightGBM
 #include <LightGBM/c_api.h>
 
-// SHAP analysis
-#include <shap/shap.hpp>
+// SHAP analysis (disabled for portable build)
+// #include <shap/shap.hpp>
 
 using json = nlohmann::json;
 
@@ -123,7 +124,7 @@ public:
         for (const auto& record : data) {
             if (record.contains("features") && record["features"].is_object()) {
                 for (auto& [key, value] : record["features"].items()) {
-                    if (key.starts_with("feature_") && value.is_number()) {
+                    if (key.compare(0, 8, "feature_") == 0 && value.is_number()) {
                         all_feature_names.insert(key);
                     }
                 }
@@ -375,7 +376,8 @@ public:
             // Evaluate on validation set
             if (validation_data.num_samples() > 0 && iter % 10 == 0) {
                 double val_score;
-                ret = LGBM_BoosterGetEval(booster, 1, &val_score);
+                int out_len;
+                ret = LGBM_BoosterGetEval(booster, 1, &out_len, &val_score);
                 if (ret == 0) {
                     if (val_score < best_score) {
                         best_score = val_score;
@@ -552,6 +554,7 @@ public:
     
     void perform_shap_analysis(size_t max_samples = 1000) {
         std::cout << "\n=== SHAP Analysis for Feature Selection ===" << std::endl;
+        std::cout << "SHAP analysis disabled in portable build - using feature importance as proxy" << std::endl;
         
         // This would require actual SHAP library integration
         // For now, we use feature importance as a proxy

@@ -24,9 +24,10 @@ CXX = g++
 CFLAGS = -O2 -g -Wall -Wextra
 CXXFLAGS = -O2 -g -Wall -Wextra -std=c++17
 
-# Library paths
-LIGHTGBM_LIBS = -llightgbm
-JSON_LIBS = -lnlohmann_json
+# Library paths - using local dependencies
+LIGHTGBM_INCLUDE = -I$(PWD)/include
+LIGHTGBM_LIBS = $(PWD)/lib/lib_lightgbm.a -lgomp -lpthread
+JSON_LIBS = 
 OPENSSL_LIBS = -lssl -lcrypto
 
 # Python environment
@@ -94,7 +95,6 @@ install-deps:
 		libxslt-dev \
 		libicu-dev \
 		zlib1g-dev \
-		liblightgbm-dev \
 		nlohmann-json3-dev \
 		python3-dev \
 		python3-venv \
@@ -106,12 +106,17 @@ install-deps:
 # PostgreSQL with AQD extensions
 postgres: $(BUILD_DIR)/postgres_configured $(BUILD_DIR)/aqd_integrated
 	@echo "Building PostgreSQL with AQD extensions..."
+	# Ensure all generated headers are ready (errcodes.h, catalog *_d.h, etc.)
+	cd $(POSTGRES_SRC) && $(MAKE) -C src/backend generated-headers
+	# Now run the parallel build
 	cd $(POSTGRES_SRC) && $(MAKE) -j$(shell nproc)
 	cd $(POSTGRES_SRC) && $(MAKE) install
 	@echo "PostgreSQL with AQD built and installed to $(INSTALL_DIR)"
 
 $(BUILD_DIR)/postgres_configured: $(POSTGRES_SRC)/configure
 	@echo "Configuring PostgreSQL..."
+	# Ensure build/install dirs exist even under parallel make
+	@mkdir -p $(BUILD_DIR) $(INSTALL_DIR) $(DATA_DIR)
 	cd $(POSTGRES_SRC) && ./configure $(PG_CONFIG_OPTIONS)
 	touch $@
 
@@ -124,8 +129,13 @@ $(BUILD_DIR)/aqd_integrated: aqd_feature_logger.h aqd_feature_logger.c aqd_query
 	cp aqd_query_router.h $(POSTGRES_SRC)/src/include/
 	cp aqd_query_router.c $(POSTGRES_SRC)/src/backend/utils/misc/
 	
-	# Apply integration patches (best-effort, idempotent)
-	cd $(POSTGRES_SRC) && patch -p1 < ../aqd_integration.patch || true
+	# Apply integration patch only if not already integrated
+	@if ! grep -q "aqd_define_guc_variables" $(POSTGRES_SRC)/src/backend/utils/misc/guc.c; then \
+	  echo "Applying AQD integration patch..."; \
+	  cd $(POSTGRES_SRC) && patch -p1 < ../aqd_integration.patch; \
+	else \
+	  echo "AQD integration patch already applied; skipping."; \
+	fi
 	
 	touch $@
 
@@ -134,7 +144,7 @@ lightgbm: $(BUILD_DIR)/lightgbm_trainer
 
 $(BUILD_DIR)/lightgbm_trainer: lightgbm_trainer.cpp
 	@echo "Building LightGBM trainer..."
-	$(CXX) $(CXXFLAGS) -o $@ $< $(LIGHTGBM_LIBS) $(JSON_LIBS)
+	$(CXX) $(CXXFLAGS) $(LIGHTGBM_INCLUDE) -o $@ $< $(LIGHTGBM_LIBS) $(JSON_LIBS)
 	@echo "LightGBM trainer built: $@"
 
 # Data collection pipeline

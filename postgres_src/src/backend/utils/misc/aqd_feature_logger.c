@@ -13,7 +13,6 @@
 #include "access/table.h"
 #include "catalog/pg_statistic.h"
 #include "commands/explain.h"
-#include "catalog/catalog.h"
 #include "executor/executor.h" 
 #include "nodes/nodeFuncs.h"
 #include "optimizer/cost.h"
@@ -35,7 +34,6 @@
 #include "utils/syscache.h"
 /* costsize.h was removed/merged in PG16; cost.h covers needed APIs */
 #include <math.h>
-#include <ctype.h>
 
 #include <sys/resource.h>
 #include <sys/time.h>
@@ -150,43 +148,28 @@ aqd_extract_query_features(AQDQueryFeatures *features,
     
     /* Extract features by category */
     int feature_idx = 0;
-
-    /* Always-safe, cheap features first */
-    feature_idx += aqd_extract_query_structure_features(&features->features[feature_idx],
-                                                        query_text, planned_stmt);
-    feature_idx += aqd_extract_optimizer_cost_features(&features->features[feature_idx],
+    
+    feature_idx += aqd_extract_query_structure_features(&features->features[feature_idx], 
+                                                       query_text, planned_stmt);
+    
+    feature_idx += aqd_extract_optimizer_cost_features(&features->features[feature_idx], 
                                                       planned_stmt);
-
-    /* Avoid heavy and catalog-touching work for system/catalog-only queries */
-    bool has_user_rel = false;
-    for (ListCell *lc = list_head(planned_stmt->rtable); lc != NULL; lc = lnext(planned_stmt->rtable, lc))
-    {
-        RangeTblEntry *rte = (RangeTblEntry *) lfirst(lc);
-        if (rte->rtekind == RTE_RELATION && !IsCatalogRelationOid(rte->relid))
-        {
-            has_user_rel = true;
-            break;
-        }
-    }
-
-    if (has_user_rel)
-    {
-        feature_idx += aqd_extract_table_stats_features(&features->features[feature_idx],
-                                                        planned_stmt);
-    }
-
-    feature_idx += aqd_extract_plan_structure_features(&features->features[feature_idx],
-                                                       planned_stmt);
-
-    feature_idx += aqd_extract_resource_estimation_features(&features->features[feature_idx],
-                                                            planned_stmt, query_desc);
-
-    feature_idx += aqd_extract_cardinality_features(&features->features[feature_idx],
-                                                    planned_stmt);
-
-    feature_idx += aqd_extract_selectivity_features(&features->features[feature_idx],
-                                                    planned_stmt);
-
+    
+    feature_idx += aqd_extract_table_stats_features(&features->features[feature_idx], 
+                                                   planned_stmt);
+    
+    feature_idx += aqd_extract_plan_structure_features(&features->features[feature_idx], 
+                                                      planned_stmt);
+    
+    feature_idx += aqd_extract_resource_estimation_features(&features->features[feature_idx], 
+                                                           planned_stmt, query_desc);
+    
+    feature_idx += aqd_extract_cardinality_features(&features->features[feature_idx], 
+                                                   planned_stmt);
+    
+    feature_idx += aqd_extract_selectivity_features(&features->features[feature_idx], 
+                                                   planned_stmt);
+    
     feature_idx += aqd_extract_system_state_features(&features->features[feature_idx]);
     
     features->num_features = Min(feature_idx, AQD_MAX_FEATURES);
@@ -609,13 +592,12 @@ aqd_normalize_query(const char *query_text)
 {
     /* Simple normalization - remove extra whitespace */
     char *normalized = pstrdup(query_text);
-    unsigned char *src = (unsigned char *) normalized;
-    char *dst = normalized;
+    char *src = normalized, *dst = normalized;
     bool in_space = false;
     
     while (*src)
     {
-        if (isspace((int)*src))
+        if (isspace(*src))
         {
             if (!in_space)
             {
@@ -625,7 +607,7 @@ aqd_normalize_query(const char *query_text)
         }
         else
         {
-            *dst++ = (char) tolower((int)*src);
+            *dst++ = tolower(*src);
             in_space = false;
         }
         src++;

@@ -16,7 +16,6 @@ override CPPFLAGS := -I. -I$(srcdir) $(CPPFLAGS)
 
 OBJS = \
 	aqd_feature_logger.o \
-	aqd_dispatcher.o \
 	lightgbm_inference.o \
 	conffiles.o \
 	guc.o \

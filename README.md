@@ -29,23 +29,27 @@ Based on actual concurrent benchmark testing on real PostgreSQL system:
 
 ### 1. Setup Environment
 ```bash
-# Install dependencies (Ubuntu/Debian)
-sudo apt-get install -y build-essential cmake pkg-config libssl-dev \
-    libreadline-dev libxml2-dev libxslt-dev python3-dev python3-pip
+# Install system dependencies (Ubuntu/Debian)
+make install-deps
 
 # Create Python environment
-python3 -m venv venv
-source venv/bin/activate
-pip install psycopg2-binary duckdb pandas numpy lightgbm scikit-learn tqdm
+make setup
 ```
 
-### 2. Build PostgreSQL with AQD
+### 2. Build and Install PostgreSQL with AQD
 ```bash
-# Compile PostgreSQL with AQD feature extraction
+# Full build including LightGBM trainer (portable - no external LightGBM required)
 make -j$(nproc)
-cd postgres_src
-make install
+
+# Install PostgreSQL binaries to install/bin
+# make install
+
+# Or build components separately:
+make postgres      # PostgreSQL with AQD extensions only  
+make lightgbm       # LightGBM trainer only
 ```
+
+**Note**: After running `make`, you **must** run `make install` to create the `install/bin` directory with PostgreSQL binaries.
 
 ### 3. Initialize and Start Database
 ```bash
@@ -83,6 +87,20 @@ python3 train_lightgbm_model.py --data_dir data/execution_data --output_dir mode
 # Test all routing methods with concurrent queries
 python3 final_routing_benchmark.py
 ```
+
+## 🔧 **Portable Dependencies**
+
+This project includes all necessary dependencies for a standalone build:
+
+### LightGBM Integration
+- **Headers**: `include/LightGBM/` - Complete LightGBM C API and headers
+- **Library**: `lib/lib_lightgbm.a` - Static library for portable linking
+- **JSON**: `include/nlohmann/` - nlohmann JSON headers
+
+### Build Requirements
+- Only requires standard system packages (no external LightGBM installation)
+- Uses OpenMP for parallel processing (`-lgomp -lpthread`)
+- All dependencies included in the repository
 
 ## 🛠️ **Source Code Modifications**
 

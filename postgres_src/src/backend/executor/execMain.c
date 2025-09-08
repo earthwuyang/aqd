@@ -39,8 +39,6 @@
 
 #include "../../../aqd_feature_logger.h"
 #include "access/heapam.h"
-#include "aqd_feature_logger.h"
-#include "aqd_dispatcher.h"
 #include "access/htup_details.h"
 #include "access/sysattr.h"
 #include "access/tableam.h"
@@ -204,33 +202,16 @@ standard_ExecutorStart(QueryDesc *queryDesc, int eflags)
 	Assert(queryDesc->sourceText != NULL);
 	estate->es_sourceText = queryDesc->sourceText;
 
-	/* AQD: Initialize feature extraction if enabled */
-	if (aqd_enable_feature_logging && !aqd_feature_extractor.enabled)
-	{
-		aqd_init_feature_extractor();
-	}
-
 	/*
 	 * Fill in the query environment, if any, from queryDesc.
 	 */
 	estate->es_queryEnv = queryDesc->queryEnv;
 
 	/* AQD: Initialize feature extraction if enabled */
-	if (aqd_is_feature_extraction_enabled())
+	if (aqd_enable_feature_logging && !aqd_feature_extractor.enabled)
 	{
 		aqd_init_feature_extractor();
 	}
-
-    /* AQD: Make routing decision only if applying decision is enabled */
-    if (aqd_apply_decision && queryDesc->operation == CMD_SELECT && !IsInParallelMode())
-    {
-        AQDDispatchDecision decision = aqd_make_dispatch_decision(
-            estate->es_sourceText, queryDesc->plannedstmt, queryDesc);
-        if (decision.engine == AQD_ENGINE_DUCKDB)
-            SetConfigOption("duckdb.force_execution", "on", PGC_SUSET, PGC_S_SESSION);
-        else
-            SetConfigOption("duckdb.force_execution", "off", PGC_SUSET, PGC_S_SESSION);
-    }
 
 	/*
 	 * If non-read-only query, set the command ID to mark output tuples with
@@ -334,6 +315,7 @@ ExecutorRun(QueryDesc *queryDesc,
 	else
 		standard_ExecutorRun(queryDesc, direction, count, execute_once);
 
+	/* AQD: Feature extraction disabled - requires proper AQD integration */
 }
 
 void
@@ -362,17 +344,6 @@ standard_ExecutorRun(QueryDesc *queryDesc,
 	/* Allow instrumentation of Executor overall runtime */
 	if (queryDesc->totaltime)
 		InstrStartNode(queryDesc->totaltime);
-
-    /* AQD: Feature logging and routing decision */
-    if (aqd_is_feature_extraction_enabled())
-    {
-        AQDQueryFeatures features;
-        aqd_extract_query_features(&features, queryDesc->sourceText,
-                                   queryDesc->plannedstmt, queryDesc);
-        aqd_log_features_to_file(&features);
-    }
-
-    /* AQD: Do not change GUCs here; decision done at ExecutorStart */
 
 	/*
 	 * extract information from the query descriptor and the query feature.

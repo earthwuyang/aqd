@@ -170,3 +170,11 @@ postgresql-*.tar.gz
 
 # Track small configuration files
 !CLAUDE.md
+
+# =======================
+# Portable Dependencies (Track These)
+# =======================
+!include/
+!include/**/*
+!lib/
+!lib/**/*

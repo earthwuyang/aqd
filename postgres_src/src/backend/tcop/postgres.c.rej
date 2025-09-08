@@ -1,6 +1,14 @@
 --- src/backend/tcop/postgres.c
 +++ src/backend/tcop/postgres.c
-@@ -4570,6 +4571,10 @@ PostgresMain(const char *dbname, const char *username)
+@@ -25,6 +25,7 @@
+ #include <unistd.h>
+ #include <signal.h>
+ 
++#include "../../../aqd_feature_logger.h"
+ #include "access/parallel.h"
+ #include "access/printtup.h"
+ #include "access/xact.h"
+@@ -4569,6 +4570,10 @@ PostgresMain(const char *dbname, const char *username)
  		 */
  		pgstat_report_activity(STATE_IDLE, NULL);
  

@@ -50,7 +50,6 @@
 #include "utils/memutils.h"
 #include "utils/timestamp.h"
 #include "aqd_feature_logger.h"
-#include "aqd_dispatcher.h"
 
 
 #define CONFIG_FILENAME "postgresql.conf"
@@ -1514,7 +1513,6 @@ InitializeGUCOptions(void)
 
     /* AQD: Define custom GUC variables */
     aqd_define_guc_variables();
-    aqd_define_dispatch_guc_variables();
 
 	/*
 	 * Load all variables with their compiled-in defaults, and initialize
@@ -5124,12 +5122,6 @@ MarkGUCPrefixReserved(const char *className)
 	GUCHashEntry *hentry;
 	MemoryContext oldcontext;
 
-
-	/* AQD: Define custom GUC variables */
-	aqd_define_guc_variables();
-
-	/* AQD: Define custom GUC variables */
-	aqd_define_guc_variables();
 
 	/*
 	 * Check for existing placeholders.  We must actually remove invalid
