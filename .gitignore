@@ -49,7 +49,7 @@ data/
 *.csv
 *.parquet
 *.tsv
-*.dat
+# *.dat
 *.tar.gz
 *.zip
 
