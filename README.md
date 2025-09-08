@@ -34,8 +34,6 @@ make install-deps
 
 # Create Python environment
 make setup
-
-pip install -r requirements.txt
 ```
 
 ### 2. Build and Install PostgreSQL with AQD
