@@ -1,0 +1,172 @@
+# AQD (Adaptive Query Dispatcher) .gitignore
+# Only track source code, ignore large data files and build artifacts
+
+# =======================
+# Build Artifacts
+# =======================
+build/
+install/
+pgdata/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.so
+*.o
+*.a
+*.lo
+*.la
+*.dylib
+*.dll
+*.exe
+*.out
+test_simple
+test_model_load
+test_inference
+
+# =======================
+# PostgreSQL Build Files
+# =======================
+postgres_src/src/test/regress/tmp_check/
+postgres_src/src/test/regress/log/
+postgres_src/src/test/regress/results/
+postgres_src/config.log
+postgres_src/config.status
+postgres_src/GNUmakefile
+postgres_src/src/Makefile.global
+postgres_src/src/include/pg_config.h
+postgres_src/src/include/stamp-h1
+postgres_src/contrib/pg_duckdb/Makefile
+
+# =======================
+# Large Data Files & Datasets
+# =======================
+data/
+*.db
+*.duckdb
+*.sqlite
+*.csv
+*.parquet
+*.tsv
+*.dat
+*.tar.gz
+*.zip
+
+# Specific data directories
+data/benchmark_datasets/
+data/execution_data/
+data/benchmark_queries/
+
+# =======================
+# ML Models & Training Results
+# =======================
+models/
+results/
+*.pkl
+*.joblib
+*.h5
+*.onnx
+*.pb
+
+# Specific model files
+lightgbm_model.txt
+model_metadata.json
+
+# =======================
+# Log Files
+# =======================
+*.log
+*.out
+*.err
+postgresql.log
+compile*.log
+build/*.log
+experiments.log
+dual_execution.log
+data_import*.log
+
+# =======================
+# Runtime & Temporary Files
+# =======================
+*.tmp
+*.temp
+*.pid
+*.lock
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Temporary PostgreSQL files
+postmaster.pid
+pg_log/
+pg_stat_tmp/
+
+# =======================
+# Python Environment
+# =======================
+.env
+.venv
+*.egg-info/
+dist/
+wheels/
+*.wheel
+
+# =======================
+# IDE & Editor Files  
+# =======================
+.vscode/
+.idea/
+*.sublime-*
+.vim/
+tags
+TAGS
+
+# =======================
+# System Files
+# =======================
+.cache/
+.local/
+*.bak
+*.backup
+
+# =======================
+# Screen Sessions & TMux
+# =======================
+screenlog.*
+tmux-client-*.log
+
+# =======================
+# Large Generated Files
+# =======================
+# Large SQL query files
+workload_*_queries.sql
+benchmark_*.sql
+*_execution_data.json
+*_benchmark*.json
+training_data.csv
+aqd_training_data.csv
+
+# Downloaded archives
+postgresql-*.tar.gz
+
+# =======================
+# IMPORTANT: Keep These Source Files
+# =======================
+# Track all essential source code
+!*.c
+!*.h  
+!*.cpp
+!*.hpp
+!*.py
+!*.sh
+!Makefile*
+!README.md
+!LICENSE
+!requirements.txt
+!.gitignore
+
+# Track small configuration files
+!CLAUDE.md

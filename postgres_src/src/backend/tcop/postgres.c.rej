@@ -1,0 +1,13 @@
+--- src/backend/tcop/postgres.c
++++ src/backend/tcop/postgres.c
+@@ -4570,6 +4571,10 @@ PostgresMain(const char *dbname, const char *username)
+ 		 */
+ 		pgstat_report_activity(STATE_IDLE, NULL);
+ 
++		/* AQD: Periodic cleanup */
++		if (aqd_feature_extractor.enabled && aqd_feature_extractor.total_queries % 100 == 0)
++			fflush(aqd_feature_extractor.log_file);
++
+ 		ReadyForQuery(whereToSendOutput);
+ 		send_ready_for_query = false;
+ 	}

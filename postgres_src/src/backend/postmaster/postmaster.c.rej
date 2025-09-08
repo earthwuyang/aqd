@@ -1,0 +1,12 @@
+--- src/backend/postmaster/postmaster.c
++++ src/backend/postmaster/postmaster.c
+@@ -1194,6 +1195,9 @@ PostmasterMain(int argc, char *argv[])
+ 	 */
+ 	load_hba();
+ 	load_ident();
++
++	/* AQD: Initialize feature extraction system */
++	atexit(aqd_cleanup_feature_extractor);
+ 
+ 	/*
+ 

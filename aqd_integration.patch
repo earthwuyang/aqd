@@ -1,0 +1,148 @@
+diff --git a/src/backend/executor/execMain.c b/src/backend/executor/execMain.c
+index abcdef..123456 100644
+--- a/src/backend/executor/execMain.c
++++ b/src/backend/executor/execMain.c
+@@ -37,6 +37,7 @@
+  */
+ #include "postgres.h"
+ 
++#include "../../../aqd_feature_logger.h"
+ #include "access/heapam.h"
+ #include "access/htup_details.h"
+ #include "access/sysattr.h"
+@@ -209,6 +210,12 @@ ExecutorStart(QueryDesc *queryDesc, int eflags)
+ 	/* Always save param types, even if parser didn't give us any */
+ 	queryDesc->params = params;
+ 
++	/* AQD: Initialize feature extraction if enabled */
++	if (aqd_enable_feature_logging && !aqd_feature_extractor.enabled)
++	{
++		aqd_init_feature_extractor();
++	}
++
+ 	/*
+ 	 * Initialize the plan state tree
+ 	 */
+@@ -257,6 +264,21 @@ ExecutorRun(QueryDesc *queryDesc,
+ 	EState	   *estate;
+ 	CmdType		operation;
+ 	DestReceiver *dest;
++	TimestampTz start_time = 0;
++	AQDQueryFeatures *aqd_features = NULL;
++
++	/* AQD: Start feature extraction if enabled */
++	if (aqd_is_feature_extraction_enabled())
++	{
++		start_time = GetCurrentTimestamp();
++		aqd_features = (AQDQueryFeatures *) palloc0(sizeof(AQDQueryFeatures));
++		
++		aqd_extract_query_features(aqd_features,
++									queryDesc->sourceText,
++									queryDesc->plannedstmt,
++									queryDesc);
++		aqd_features->start_time = start_time;
++	}
+ 
+ 	Assert(queryDesc != NULL);
+ 
+@@ -301,6 +323,20 @@ ExecutorRun(QueryDesc *queryDesc,
+ 		ExecutePlan(estate, queryDesc->planstate, false, operation, sendTuples, count, direction, dest, execute_once);
+ 	else
+ 		standard_ExecutorRun(queryDesc, direction, count, execute_once);
++
++	/* AQD: Complete feature extraction and log */
++	if (aqd_features)
++	{
++		TimestampTz end_time = GetCurrentTimestamp();
++		aqd_features->end_time = end_time;
++		aqd_features->execution_time_ms = 
++			(double) (end_time - start_time) / 1000.0;
++		aqd_features->postgres_time_ms = aqd_features->execution_time_ms;
++		aqd_features->duckdb_time_ms = 0.0; /* Will be set by routing logic */
++		
++		aqd_log_features_to_file(aqd_features);
++		pfree(aqd_features);
++	}
+ }
+ 
+ /*
+@@ -385,6 +421,12 @@ ExecutorEnd(QueryDesc *queryDesc)
+ 	 */
+ 	FreeQueryDesc(queryDesc);
+ }
++
++	/* AQD: Cleanup feature extractor if needed */
++	if (aqd_feature_extractor.enabled && 
++		aqd_feature_extractor.total_queries > 0 &&
++		aqd_feature_extractor.total_queries % 1000 == 0)
++		elog(DEBUG1, "AQD: Processed %d queries", aqd_feature_extractor.total_queries);
+ }
+ 
+ /*
+diff --git a/src/backend/utils/misc/guc.c b/src/backend/utils/misc/guc.c
+index abcdef..123456 100644
+--- a/src/backend/utils/misc/guc.c
++++ b/src/backend/utils/misc/guc.c
+@@ -26,6 +26,7 @@
+ #include <unistd.h>
+ #include <math.h>
+ 
++#include "../../../aqd_feature_logger.h"
+ #include "access/commit_ts.h"
+ #include "access/gin.h"
+ #include "access/rmgr.h"
+@@ -5127,6 +5128,9 @@ InitializeGUCOptions(void)
+ 		build_guc_variables();
+ 	}
+ 
++	/* AQD: Define custom GUC variables */
++	aqd_define_guc_variables();
++
+ 	/*
+ 	 * Prevent any attempt to override the transaction modes from
+ 	 * non-interactive sources.
+diff --git a/src/backend/tcop/postgres.c b/src/backend/tcop/postgres.c
+index abcdef..123456 100644
+--- a/src/backend/tcop/postgres.c
++++ b/src/backend/tcop/postgres.c
+@@ -25,6 +25,7 @@
+ #include <unistd.h>
+ #include <signal.h>
+ 
++#include "../../../aqd_feature_logger.h"
+ #include "access/parallel.h"
+ #include "access/printtup.h"
+ #include "access/xact.h"
+@@ -4569,6 +4570,10 @@ PostgresMain(const char *dbname, const char *username)
+ 		 */
+ 		pgstat_report_activity(STATE_IDLE, NULL);
+ 
++		/* AQD: Periodic cleanup */
++		if (aqd_feature_extractor.enabled && aqd_feature_extractor.total_queries % 100 == 0)
++			fflush(aqd_feature_extractor.log_file);
++
+ 		ReadyForQuery(whereToSendOutput);
+ 		send_ready_for_query = false;
+ 	}
+diff --git a/src/backend/postmaster/postmaster.c b/src/backend/postmaster/postmaster.c
+index abcdef..123456 100644
+--- a/src/backend/postmaster/postmaster.c
++++ b/src/backend/postmaster/postmaster.c
+@@ -84,6 +84,7 @@
+ #include <sys/wait.h>
+ #include <ctype.h>
+ 
++#include "../../../aqd_feature_logger.h"
+ #include "access/transam.h"
+ #include "access/xlog.h"
+ #include "bootstrap/bootstrap.h"
+@@ -1193,6 +1194,9 @@ PostmasterMain(int argc, char *argv[])
+ 	 */
+ 	load_hba();
+ 	load_ident();
++
++	/* AQD: Initialize feature extraction system */
++	atexit(aqd_cleanup_feature_extractor);
+ 
+ 	/*
+ 	 * If we're not running under the postmaster, now we can initialize

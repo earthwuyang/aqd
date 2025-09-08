@@ -1,0 +1,10 @@
+--- src/backend/utils/misc/guc.c
++++ src/backend/utils/misc/guc.c
+@@ -26,6 +26,7 @@
+ #include <unistd.h>
+ #include <math.h>
+ 
++#include "../../../aqd_feature_logger.h"
+ #include "access/commit_ts.h"
+ #include "access/gin.h"
+ #include "access/rmgr.h"
