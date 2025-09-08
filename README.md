@@ -64,6 +64,13 @@ make lightgbm       # LightGBM trainer only
 python3 import_benchmark_datasets.py 
 ```
 
+### 4b. Import TPC-H and TPC-DS (1GB, optional)
+```bash
+# Clones and builds tpch-kit/tpcds-kit, generates 1GB, loads into PG/DuckDB
+python3 import_tpc_datasets.py
+```
+Outputs are loaded into DuckDB at `data/benchmark_datasets.db` and PostgreSQL under schemas `tpch_sf1` and `tpcds_sf1`. Requires `git`, `make`, and a C compiler available in your environment.
+
 ### 5. Generate Test Queries  
 ```bash
 # Generate AP and TP queries for benchmarking
@@ -275,6 +282,7 @@ pg_duckdb_postgres/
 ├── collect_dual_execution_data.py  # Data collection
 ├── final_routing_benchmark.py      # Concurrent benchmarking
 ├── import_benchmark_datasets.py    # Dataset import
+├── import_tpc_datasets.py          # TPC-H/TPC-DS import (1GB by default)
 ├── generate_benchmark_queries.py   # Query generation  
 ├── data/                           # Training data and models
 │   ├── execution_data/             # Collected dual execution results

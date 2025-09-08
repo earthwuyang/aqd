@@ -206,7 +206,7 @@ class TPCImporter:
 
     # ---------- Loading ----------
     def load_into_duckdb(self, suite: str):
-        schema = 'tpch' if suite == 'tpch' else 'tpcds'
+        schema = (f'tpch_sf{self.sf}' if suite == 'tpch' else f'tpcds_sf{self.sf}')
         subprocess.run([DUCKDB_CONFIG['binary'], DUCKDB_CONFIG['database'], '-c', f'CREATE SCHEMA IF NOT EXISTS "{schema}";'], capture_output=True)
         csv_dir = DATA_DIR / suite / 'csv'
         for csv_path in sorted(csv_dir.glob('*.csv')):
@@ -224,7 +224,7 @@ class TPCImporter:
 
     def load_into_postgresql(self, suite: str):
         self.ensure_pg_conn()
-        schema = 'tpch' if suite == 'tpch' else 'tpcds'
+        schema = (f'tpch_sf{self.sf}' if suite == 'tpch' else f'tpcds_sf{self.sf}')
         cur = self.pg_conn.cursor()
         cur.execute(f'CREATE SCHEMA IF NOT EXISTS "{schema}"')
         csv_dir = DATA_DIR / suite / 'csv'
@@ -299,4 +299,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
