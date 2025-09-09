@@ -189,8 +189,9 @@ class GenQueryAP:
                 if len(columns) == 0:
                     continue
                 table, col = columns[0]
+                # Use native numeric columns directly to avoid engine-specific casting issues
                 aggregation_str_list.append(
-                    f"{str(aggregator)}(CAST(NULLIF({table}.{col}, '') AS DOUBLE PRECISION))"
+                    f"{str(aggregator)}({table}.{col})"
                 )
                 
         aggregation_str = ', '.join(group_by_cols + [f'{agg} as agg_{i}' for i, agg in enumerate(aggregation_str_list)])
@@ -504,13 +505,13 @@ class APQueryGenerator:
             if stats['num_unique'] < 100:  # int_neq_predicate_threshold
                 reasonable_ops += [Operator.EQ, Operator.NEQ]
             literal = self.sample_literal_from_percentiles(stats['percentiles'], randstate, round_val=True)
-            # Cast numeric columns to DOUBLE for cross-engine compatibility (PG TEXT imports)
-            expr = f"CAST(NULLIF({table}.{col_name}, '') AS DOUBLE PRECISION)"
+            # Use the column directly (numeric in both engines per import typing)
+            expr = f"{table}.{col_name}"
             return ColumnPredicate(table, col_name, rand_choice(randstate, reasonable_ops), literal, expr=expr)
         elif stats['datatype'] == 'FLOAT':
             reasonable_ops = [Operator.LEQ, Operator.GEQ]
             literal = self.sample_literal_from_percentiles(stats['percentiles'], randstate, round_val=False)
-            expr = f"CAST(NULLIF({table}.{col_name}, '') AS DOUBLE PRECISION)"
+            expr = f"{table}.{col_name}"
             return ColumnPredicate(table, col_name, rand_choice(randstate, reasonable_ops), literal, expr=expr)
         elif stats['datatype'] == 'CATEGORICAL':
             reasonable_ops = [Operator.EQ, Operator.NEQ]

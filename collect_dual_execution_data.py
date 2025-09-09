@@ -35,10 +35,12 @@ POSTGRESQL_CONFIG = {
     'database': 'postgres',
     'user': 'wuy'
 }
-
-DUCKDB_PATH = '/home/wuy/DB/pg_duckdb_postgres/data/benchmark_datasets.db'
-QUERIES_BASE_DIR = '/home/wuy/DB/pg_duckdb_postgres/data/benchmark_queries'
-OUTPUT_DIR = '/home/wuy/DB/pg_duckdb_postgres/data/execution_data'
+from pathlib import Path
+# Resolve paths relative to this repository
+BASE_DIR = Path(__file__).resolve().parent
+DUCKDB_PATH = str(BASE_DIR / 'data' / 'benchmark_datasets.db')
+QUERIES_BASE_DIR = str(BASE_DIR / 'data' / 'benchmark_queries')
+OUTPUT_DIR = str(BASE_DIR / 'data' / 'execution_data')
 
 # Logging setup
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -173,9 +175,25 @@ class DualExecutionCollector:
     
     def execute_postgres_query(self, query_text, dataset_name):
         """Execute query on PostgreSQL and extract AQD features"""
-        if not self.pg_conn:
-            return None, "No PostgreSQL connection", None
-            
+        # Ensure connection to the correct PostgreSQL database (each dataset in its own DB)
+        try:
+            if self.pg_conn:
+                try:
+                    self.pg_conn.close()
+                except Exception:
+                    pass
+            pg_cfg = POSTGRESQL_CONFIG.copy()
+            pg_cfg['database'] = dataset_name
+            self.pg_conn = psycopg2.connect(**pg_cfg)
+            self.pg_conn.autocommit = True
+            # Enable AQD feature logging
+            cursor = self.pg_conn.cursor()
+            cursor.execute("SET aqd.enable_feature_logging = on;")
+            cursor.execute("SET aqd.feature_log_file = '/tmp/aqd_features.json';")
+            cursor.close()
+        except Exception as e:
+            return None, f"Failed to connect to PostgreSQL DB '{dataset_name}': {e}", None
+        
         try:
             with self.timeout_context(self.timeout_seconds):
                 cursor = self.pg_conn.cursor()
@@ -184,8 +202,36 @@ class DualExecutionCollector:
                 if os.path.exists('/tmp/aqd_features.json'):
                     os.remove('/tmp/aqd_features.json')
                 
-                # Modify query for schema qualification
-                modified_query = self.modify_query_for_schema(query_text, dataset_name)
+                # Quote reserved table keywords without schema qualification
+                import re
+                reserved_table_keywords = ['order', 'user', 'table', 'index', 'view', 'trigger', 'function', 'procedure']
+                modified_query = query_text
+                for keyword in reserved_table_keywords:
+                    modified_query = re.sub(rf'(?<!")\b({keyword})\.', rf'"{keyword}".', modified_query, flags=re.IGNORECASE)
+
+                # Heuristic rewrites for PostgreSQL: cast numeric comparisons and aggregates
+                # Cast column side of comparisons like t.c >= 123 to handle TEXT-typed numeric columns
+                def _repl_cmp(m):
+                    tbl, col, op, num = m.groups()
+                    return f"CAST(NULLIF({tbl}.{col}::text, '') AS DOUBLE PRECISION) {op} {num}"
+
+                modified_query = re.sub(
+                    r"(\b[a-zA-Z_][a-zA-Z0-9_]*)\.(\b[a-zA-Z_][a-zA-Z0-9_]*)\s*(=|!=|<=|>=|<|>)\s*([0-9]+(?:\.[0-9]+)?)",
+                    _repl_cmp,
+                    modified_query,
+                )
+
+                # Cast aggregation arguments (AVG/SUM/MIN/MAX) similarly
+                def _repl_agg(m):
+                    func, tbl, col = m.groups()
+                    return f"{func}(CAST(NULLIF({tbl}.{col}::text, '') AS DOUBLE PRECISION))"
+
+                modified_query = re.sub(
+                    r"\b(AVG|SUM|MIN|MAX)\s*\(\s*([a-zA-Z_][a-zA-Z0-9_]*)\.([a-zA-Z_][a-zA-Z0-9_]*)\s*\)",
+                    _repl_agg,
+                    modified_query,
+                    flags=re.IGNORECASE,
+                )
                 
                 # Execute query with timing
                 start_time = time.perf_counter()
