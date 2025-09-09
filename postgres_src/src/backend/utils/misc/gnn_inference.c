@@ -1,158 +1,61 @@
 #include "postgres.h"
 #include "gnn_inference.h"
 #include "utils/memutils.h"
-#include <stdio.h>
 #include <string.h>
-#include <math.h>
 
-static void relu_vec(double *x, int n)
-{
-    for (int i = 0; i < n; i++)
-        if (x[i] < 0.0) x[i] = 0.0;
-}
-
-static int op_type_id(NodeTag tag)
-{
-    /* Map key node types to ids (0..k); others -> small set */
-    switch (tag)
-    {
-        case T_SeqScan: return 1;
-        case T_IndexScan: return 2;
-        case T_BitmapHeapScan: return 3;
-        case T_NestLoop: return 4;
-        case T_MergeJoin: return 5;
-        case T_HashJoin: return 6;
-        case T_Sort: return 7;
-        case T_Agg: return 8;
-        case T_Group: return 9;
-        default: return 0;
+static int op_type_id(NodeTag tag){
+    switch(tag){
+        case T_SeqScan: return 1; case T_IndexScan: return 2; case T_BitmapHeapScan: return 3;
+        case T_NestLoop: return 4; case T_MergeJoin: return 5; case T_HashJoin: return 6;
+        case T_Sort: return 7; case T_Agg: return 8; case T_Group: return 9; default: return 0;
     }
 }
 
-static void plan_node_features(Plan *plan, double *feat, int d)
-{
-    /* Build a small feature vector: [one-hot op, rows, width, cost per row] */
-    memset(feat, 0, sizeof(double) * d);
-    int k = 10; /* one-hot size */
-    int id = op_type_id(nodeTag(plan));
-    if (id >= 0 && id < k && id < d)
-        feat[id] = 1.0;
-    int idx = k;
-    if (idx < d) feat[idx++] = (plan->plan_rows);
-    if (idx < d) feat[idx++] = (double)plan->plan_width;
-    if (idx < d)
-    {
-        double cpr = (plan->plan_rows > 0) ? (plan->total_cost / plan->plan_rows) : plan->total_cost;
-        feat[idx++] = cpr;
+static int rel_id_for_child(NodeTag tag){ int id=op_type_id(tag); if (id>=1 && id<=3) return 0; if (id>=4 && id<=6) return 1; return 2; }
+
+static int get_node_id(Plan **order, int N, Plan *p){ for (int i=0;i<N;++i) if (order[i]==p) return i; return -1; }
+
+static void plan_node_features(Plan *plan, double *feat, int d){
+    memset(feat,0,sizeof(double)*d);
+    int k=10; int id=op_type_id(nodeTag(plan)); if (id>=0 && id<k && id<d) feat[id]=1.0;
+    int idx=k; if (idx<d) feat[idx++]= (double)plan->plan_rows; if (idx<d) feat[idx++]= (double)plan->plan_width;
+    if (idx<d){ double cpr=(plan->plan_rows>0)?(plan->total_cost/plan->plan_rows):plan->total_cost; feat[idx++]=cpr; }
+}
+
+GNNModel *gnn_create_model(void){ GNNModel*m=(GNNModel*)palloc0(sizeof(GNNModel)); m->loaded=false; return m; }
+void gnn_free_model(GNNModel *model){ if(!model) return; rginn_free(&model->core); pfree(model); }
+bool gnn_load_model(GNNModel *model, const char *path){ if(!model||!path) return false; if (rginn_load(&model->core, path)!=0) return false; model->loaded=true; return true; }
+
+double gnn_predict_plan(GNNModel *model, PlannedStmt *planned_stmt){
+    if (!model || !model->loaded || !planned_stmt || !planned_stmt->planTree) return 0.0;
+    // Build nodes list BFS
+    Plan *root = planned_stmt->planTree;
+    // For simplicity traverse left/right tree; ignoring subplans for now
+    // First count nodes
+    int count=0; Plan *stack[2048]; int sp=0; stack[sp++]=root; while(sp){ Plan *p=stack[--sp]; count++; if (p->lefttree) stack[sp++]=p->lefttree; if (p->righttree) stack[sp++]=p->righttree; if (sp>=2048) break; }
+    int N=count, F=model->core.in_dim, R=3, H=model->core.hidden_dim;
+    double *X = (double*)palloc0((size_t)N*F*sizeof(double));
+    int *indptr = (int*)palloc0((size_t)R*(N+1)*sizeof(int));
+    int *indices = (int*)palloc0((size_t)(2*N)*sizeof(int)); // rough upper bound
+    // second pass assemble arrays
+    int idx=0; sp=0; stack[sp++]=root; Plan *order[2048]; while(sp){ Plan *p=stack[--sp]; order[idx++]=p; if (p->lefttree) stack[sp++]=p->lefttree; if (p->righttree) stack[sp++]=p->righttree; }
+    // map plan* to node id
+    // simple array search (small trees); could use hash if needed
+    // features and neighbors
+    int edge_count[3]={0,0,0};
+    for (int i=0;i<N;++i){ plan_node_features(order[i], &X[(size_t)i*F], F); for(int r=0;r<R;++r){ int *ind=&indptr[r*(N+1)]; ind[i+1]=ind[i]; }
+        if (order[i]->lefttree){ int r=rel_id_for_child(nodeTag(order[i]->lefttree)); int *ind=&indptr[r*(N+1)]; ind[i+1]++; indices[ind[r*(N+1)+N] + edge_count[r]++] = get_node_id(order, N, order[i]->lefttree); }
+        if (order[i]->righttree){ int r=rel_id_for_child(nodeTag(order[i]->righttree)); int *ind=&indptr[r*(N+1)]; ind[i+1]++; indices[ind[r*(N+1)+N] + edge_count[r]++] = get_node_id(order, N, order[i]->righttree); }
     }
-    /* zero-fill rest */
-}
+    // convert per-node counts to prefix sums per relation and compact indices array
+    int total=0; for(int r=0;r<R;++r){ int *ind=&indptr[r*(N+1)]; int sum=0; for(int i=0;i<=N;++i){ int tmp=ind[i]; ind[i]=total+sum; sum+=tmp; } total+=sum; }
+    // compact indices (we wrote into reserved area; for robustness, rebuild by scanning again)
+    pfree(indices); indices=(int*)palloc0((size_t)total*sizeof(int)); int cursor[3]={0,0,0};
+    for (int i=0;i<N;++i){ if (order[i]->lefttree){ int r=rel_id_for_child(nodeTag(order[i]->lefttree)); int base=indptr[r*(N+1)+i]; indices[base + cursor[r]++] = get_node_id(order, N, order[i]->lefttree); } if (order[i]->righttree){ int r=rel_id_for_child(nodeTag(order[i]->righttree)); int base=indptr[r*(N+1)+i]; indices[base + cursor[r]++] = get_node_id(order, N, order[i]->righttree); } }
 
-GNNModel *
-gnn_create_model(void)
-{
-    GNNModel *m = (GNNModel *) palloc0(sizeof(GNNModel));
-    m->weights.in_features = 16; /* default in-features */
-    m->weights.hidden_dim = 16;
-    for (int i = 0; i < m->weights.in_features; i++)
-        for (int j = 0; j < m->weights.hidden_dim; j++)
-            m->weights.W1[i][j] = 0.01; /* small init */
-    for (int j = 0; j < m->weights.hidden_dim; j++)
-        m->weights.b1[j] = 0.0;
-    for (int j = 0; j < m->weights.hidden_dim; j++)
-        m->weights.W2[j] = 0.01;
-    m->weights.b2 = 0.0;
-    m->loaded = false;
-    return m;
-}
-
-void
-gnn_free_model(GNNModel *model)
-{
-    if (!model) return;
-    pfree(model);
-}
-
-bool
-gnn_load_model(GNNModel *model, const char *path)
-{
-    if (!model || !path) return false;
-    FILE *f = fopen(path, "r");
-    if (!f) return false;
-    int fin, hidden;
-    if (fscanf(f, "%d %d\n", &fin, &hidden) != 2)
-    { fclose(f); return false; }
-    if (fin > GNN_MAX_FEATURES || hidden > GNN_MAX_HIDDEN)
-    { fclose(f); return false; }
-    model->weights.in_features = fin;
-    model->weights.hidden_dim = hidden;
-    for (int i = 0; i < fin; i++)
-        for (int j = 0; j < hidden; j++)
-            fscanf(f, "%lf", &model->weights.W1[i][j]);
-    for (int j = 0; j < hidden; j++)
-        fscanf(f, "%lf", &model->weights.b1[j]);
-    for (int j = 0; j < hidden; j++)
-        fscanf(f, "%lf", &model->weights.W2[j]);
-    fscanf(f, "%lf", &model->weights.b2);
-    fclose(f);
-    model->loaded = true;
-    return true;
-}
-
-static void aggregate_node(Plan *plan, double *out_hidden, GNNModel *model)
-{
-    /* Aggregate mean of children's hidden reps + own projected features */
-    int fin = model->weights.in_features;
-    int h = model->weights.hidden_dim;
-    double x[GNN_MAX_FEATURES];
-    plan_node_features(plan, x, fin);
-    double h_self[GNN_MAX_HIDDEN];
-    for (int j = 0; j < h; j++)
-    {
-        double s = model->weights.b1[j];
-        for (int i = 0; i < fin; i++) s += x[i] * model->weights.W1[i][j];
-        h_self[j] = s;
-    }
-
-    /* Aggregate children */
-    int child_count = 0;
-    double h_child_sum[GNN_MAX_HIDDEN];
-    for (int j = 0; j < h; j++) h_child_sum[j] = 0.0;
-    if (plan->lefttree)
-    {
-        double h_left[GNN_MAX_HIDDEN];
-        aggregate_node(plan->lefttree, h_left, model);
-        for (int j = 0; j < h; j++) h_child_sum[j] += h_left[j];
-        child_count++;
-    }
-    if (plan->righttree)
-    {
-        double h_right[GNN_MAX_HIDDEN];
-        aggregate_node(plan->righttree, h_right, model);
-        for (int j = 0; j < h; j++) h_child_sum[j] += h_right[j];
-        child_count++;
-    }
-    /* Mean aggregate */
-    if (child_count > 0)
-        for (int j = 0; j < h; j++) h_child_sum[j] /= (double)child_count;
-
-    /* Combine and activate */
-    for (int j = 0; j < h; j++)
-        out_hidden[j] = h_self[j] + h_child_sum[j];
-    relu_vec(out_hidden, h);
-}
-
-double
-gnn_predict_plan(GNNModel *model, PlannedStmt *planned_stmt)
-{
-    if (!model || !model->loaded || !planned_stmt || !planned_stmt->planTree)
-        return 0.0;
-    int h = model->weights.hidden_dim;
-    double h_root[GNN_MAX_HIDDEN];
-    aggregate_node(planned_stmt->planTree, h_root, model);
-    /* Readout to scalar */
-    double y = model->weights.b2;
-    for (int j = 0; j < h; j++) y += h_root[j] * model->weights.W2[j];
+    RGGraph g; g.N=N; g.in_dim=F; g.X=X; g.num_rel=R; g.indptr=indptr; g.indices=indices;
+    double *h0=(double*)palloc0((size_t)N*H*sizeof(double)); double *m1=(double*)palloc0((size_t)N*H*sizeof(double)); double *h1=(double*)palloc0((size_t)N*H*sizeof(double)); double *gr=(double*)palloc0((size_t)H*sizeof(double));
+    double y=rginn_forward(&model->core, &g, h0, m1, h1, gr);
+    pfree(h0); pfree(m1); pfree(h1); pfree(gr); pfree(X); pfree(indptr); pfree(indices);
     return y;
 }
-

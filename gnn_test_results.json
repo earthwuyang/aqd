@@ -1,0 +1,129 @@
+[
+  {
+    "routing_method": "gnn",
+    "concurrency": 10,
+    "num_queries": 10,
+    "successful": 2,
+    "failed": 8,
+    "total_time": 0.010051250457763672,
+    "makespan": 0.010051250457763672,
+    "mean_latency": 0.0061446428298950195,
+    "median_latency": 0.0061446428298950195,
+    "p95_latency": 0.0062711238861083984,
+    "p99_latency": 0.0062711238861083984,
+    "min_latency": 0.006018161773681641,
+    "max_latency": 0.0062711238861083984,
+    "throughput": 198.98021727785948,
+    "queries_per_second": 994.9010863892975,
+    "dataset_breakdown": {
+      "imdb_small": {
+        "count": 1,
+        "mean_latency": 0.0062711238861083984
+      },
+      "tpch_sf1": {
+        "count": 1,
+        "mean_latency": 0.006018161773681641
+      }
+    },
+    "query_type_breakdown": {
+      "AP": {
+        "count": 0,
+        "mean_latency": 0
+      },
+      "TP": {
+        "count": 2,
+        "mean_latency": 0.0061446428298950195
+      }
+    }
+  },
+  {
+    "routing_method": "gnn",
+    "concurrency": 10,
+    "num_queries": 20,
+    "successful": 3,
+    "failed": 17,
+    "total_time": 0.015824556350708008,
+    "makespan": 0.015824556350708008,
+    "mean_latency": 0.005598624547322591,
+    "median_latency": 0.005651712417602539,
+    "p95_latency": 0.0058879852294921875,
+    "p99_latency": 0.0058879852294921875,
+    "min_latency": 0.005256175994873047,
+    "max_latency": 0.0058879852294921875,
+    "throughput": 189.5787745016799,
+    "queries_per_second": 1263.858496677866,
+    "dataset_breakdown": {
+      "imdb_small": {
+        "count": 1,
+        "mean_latency": 0.005256175994873047
+      },
+      "tpch_sf1": {
+        "count": 1,
+        "mean_latency": 0.005651712417602539
+      },
+      "Credit": {
+        "count": 1,
+        "mean_latency": 0.0058879852294921875
+      }
+    },
+    "query_type_breakdown": {
+      "AP": {
+        "count": 0,
+        "mean_latency": 0
+      },
+      "TP": {
+        "count": 3,
+        "mean_latency": 0.005598624547322591
+      }
+    }
+  },
+  {
+    "routing_method": "gnn",
+    "concurrency": 10,
+    "num_queries": 50,
+    "successful": 7,
+    "failed": 43,
+    "total_time": 0.045446157455444336,
+    "makespan": 0.045446157455444336,
+    "mean_latency": 0.007558720452444894,
+    "median_latency": 0.006190061569213867,
+    "p95_latency": 0.01874399185180664,
+    "p99_latency": 0.01874399185180664,
+    "min_latency": 0.004854679107666016,
+    "max_latency": 0.01874399185180664,
+    "throughput": 154.02842378616583,
+    "queries_per_second": 1100.2030270440416,
+    "dataset_breakdown": {
+      "imdb_small": {
+        "count": 1,
+        "mean_latency": 0.005520820617675781
+      },
+      "tpch_sf1": {
+        "count": 1,
+        "mean_latency": 0.006239414215087891
+      },
+      "Credit": {
+        "count": 1,
+        "mean_latency": 0.006190061569213867
+      },
+      "sakila": {
+        "count": 3,
+        "mean_latency": 0.005405584971110026
+      },
+      "tpcds_sf1": {
+        "count": 1,
+        "mean_latency": 0.01874399185180664
+      }
+    },
+    "query_type_breakdown": {
+      "AP": {
+        "count": 2,
+        "mean_latency": 0.011951208114624023
+      },
+      "TP": {
+        "count": 5,
+        "mean_latency": 0.005801725387573242
+      }
+    }
+  }
+]

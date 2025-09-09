@@ -54,6 +54,7 @@ void rginn_backward_update(RGINNModel *m, const RGGraph *g,
 
 // Save/load model text format compatible with kernel loader
 int rginn_save(const RGINNModel *m, const char *path);
+int rginn_load(RGINNModel *m, const char *path);
 
 #ifdef __cplusplus
 }

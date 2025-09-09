@@ -8,6 +8,8 @@
 #include <algorithm>
 #include <numeric>
 #include <limits>
+#include <random>
+#include <cstdio>
 #include <glob.h>
 #include <nlohmann/json.hpp>
 extern "C" {
@@ -20,6 +22,13 @@ static int op_type_id(const std::string& t){
     if (t=="Seq Scan") return 1; if (t=="Index Scan") return 2; if (t=="Bitmap Heap Scan") return 3;
     if (t=="Nested Loop") return 4; if (t=="Merge Join") return 5; if (t=="Hash Join") return 6;
     if (t=="Sort") return 7; if (t=="Aggregate") return 8; if (t=="Group") return 9; return 0;
+}
+
+static int rel_id_for_child(const std::string& t){
+    int id = op_type_id(t);
+    if (id==1 || id==2 || id==3) return 0; // scans
+    if (id==4 || id==5 || id==6) return 1; // joins
+    return 2; // others
 }
 
 struct GraphBuild {
@@ -50,10 +59,11 @@ static void build_graph_from_plan(const json& plan, int in_dim, GraphBuild& gb){
             }
         }
     }
-    gb.N = (int)nodes.size(); gb.F = in_dim; gb.R = 1; // fallback to single relation for stability
+    gb.N = (int)nodes.size(); gb.F = in_dim; gb.R = 3; // scans, joins, others
     gb.X.assign((size_t)gb.N * gb.F, 0.0);
     gb.indptr.assign((size_t)gb.R * (gb.N + 1), 0);
-    std::vector<int> neigh;
+    // adjacency per relation per node
+    std::vector<std::vector<std::vector<int>>> adj(gb.R, std::vector<std::vector<int>>(gb.N));
     // features
     const int k = 10; int idx;
     for (int i=0;i<gb.N;++i){
@@ -70,11 +80,25 @@ static void build_graph_from_plan(const json& plan, int in_dim, GraphBuild& gb){
         if (idx<gb.F) gb.X[i*gb.F + idx++] = std::log(rows + 1.0) / 10.0;
         if (idx<gb.F) gb.X[i*gb.F + idx++] = width / 100.0;
         if (idx<gb.F) gb.X[i*gb.F + idx++] = std::log(tc + 1.0) / 10.0;
-        // neighbors single relation
-        gb.indptr[i+1] = gb.indptr[i] + (int)children[i].size();
-        for (int u : children[i]) neigh.push_back(u);
+        // neighbors by relation
+        for (int u : children[i]) {
+            int r = rel_id_for_child(types[u]);
+            if (r < 0 || r >= gb.R) r = 2; // default others
+            adj[r][i].push_back(u);
+        }
     }
-    gb.indices = std::move(neigh);
+    // build CSR per relation and concatenate indices
+    gb.indices.clear();
+    int base = 0;
+    for (int r = 0; r < gb.R; ++r) {
+        int *ind = &gb.indptr[(size_t)r * (gb.N + 1)];
+        ind[0] = base;
+        for (int i = 0; i < gb.N; ++i) {
+            base += (int)adj[r][i].size();
+            ind[i+1] = base;
+            for (int dst : adj[r][i]) gb.indices.push_back(dst);
+        }
+    }
 }
 
 // Structure to hold training examples
@@ -227,7 +251,7 @@ int main(int argc, char** argv){
 
     const int in_dim = 16; 
     const int hidden = 32;  // Increased hidden dimension
-    const int num_rel = 1;
+    const int num_rel = 3;  // scans, joins, others
     const int max_epochs = 200;  // Maximum epochs with early stopping
     const double learning_rate = 1e-3;
     const int patience = 20;  // Early stopping patience
@@ -276,7 +300,9 @@ int main(int argc, char** argv){
     std::cerr << "\n";
     
     // Shuffle examples for better training
-    std::random_shuffle(all_examples.begin(), all_examples.end());
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::shuffle(all_examples.begin(), all_examples.end(), gen);
     
     // Split into train/test (80/20)
     size_t train_size = all_examples.size() * 0.8;
@@ -292,15 +318,19 @@ int main(int argc, char** argv){
     int epochs_without_improvement = 0;
     int best_epoch = 0;
     
-    // Save best model state
-    RGINNModel best_model = model;
+    // Save best model state (we'll save/load from file instead of copying)
+    std::string temp_best_model_path = out_path + ".best.tmp";
     
     for (int ep = 0; ep < max_epochs; ++ep) {
+        std::cerr << "Starting epoch " << ep << "...\n";
         double total_train_loss = 0.0;
         int train_batch_count = 0;
         
         // Train on training set
         for (size_t idx = 0; idx < train_size; ++idx) {
+            if (idx % 1000 == 0) {
+                std::cerr << "  Training example " << idx << "/" << train_size << "\r";
+            }
             const auto& ex = all_examples[idx];
             
             GraphBuild gb; 
@@ -312,16 +342,7 @@ int main(int argc, char** argv){
             g.in_dim = in_dim; 
             g.X = gb.X.data(); 
             g.num_rel = gb.R;
-            
-            std::vector<int> ind((size_t)g.num_rel * (g.N + 1));
-            int base = 0;
-            for (int r = 0; r < g.num_rel; ++r){
-                int total_r = gb.indptr[(size_t)r * (g.N + 1) + g.N];
-                for (int i = 0; i <= g.N; ++i) 
-                    ind[(size_t)r * (g.N + 1) + i] = base + gb.indptr[(size_t)r * (g.N + 1) + i];
-                base += total_r;
-            }
-            g.indptr = ind.data(); 
+            g.indptr = gb.indptr.data(); 
             g.indices = gb.indices.data();
             
             std::vector<double> h0((size_t)g.N * hidden), m1((size_t)g.N * hidden), 
@@ -355,16 +376,7 @@ int main(int argc, char** argv){
             g.in_dim = in_dim; 
             g.X = gb.X.data(); 
             g.num_rel = gb.R;
-            
-            std::vector<int> ind((size_t)g.num_rel * (g.N + 1));
-            int base = 0;
-            for (int r = 0; r < g.num_rel; ++r){
-                int total_r = gb.indptr[(size_t)r * (g.N + 1) + g.N];
-                for (int i = 0; i <= g.N; ++i) 
-                    ind[(size_t)r * (g.N + 1) + i] = base + gb.indptr[(size_t)r * (g.N + 1) + i];
-                base += total_r;
-            }
-            g.indptr = ind.data(); 
+            g.indptr = gb.indptr.data();
             g.indices = gb.indices.data();
             
             std::vector<double> h0((size_t)g.N * hidden), m1((size_t)g.N * hidden), 
@@ -384,7 +396,7 @@ int main(int argc, char** argv){
             best_val_loss = avg_val_loss;
             best_epoch = ep;
             epochs_without_improvement = 0;
-            best_model = model;  // Save best model
+            rginn_save(&model, temp_best_model_path.c_str());  // Save best model to file
         } else {
             epochs_without_improvement++;
         }
@@ -407,7 +419,8 @@ int main(int argc, char** argv){
             std::cerr << "\nEarly stopping triggered after " << ep + 1 << " epochs.\n";
             std::cerr << "Best validation loss: " << best_val_loss 
                      << " (RMSE: " << std::sqrt(best_val_loss) << ") at epoch " << best_epoch << "\n";
-            model = best_model;  // Restore best model
+            // Restore best model from file
+            rginn_load(&model, temp_best_model_path.c_str());
             break;
         }
     }
@@ -571,6 +584,9 @@ int main(int argc, char** argv){
     std::cerr << "Trained R-GINN on " << train_size << " examples\n";
     std::cerr << "Model saved to: " << out_path << "\n";
     std::cerr << "Final test accuracy: " << std::setprecision(1) << accuracy << "%\n";
+    
+    // Clean up temporary best model file
+    std::remove(temp_best_model_path.c_str());
     
     return 0;
 }

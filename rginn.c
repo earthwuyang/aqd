@@ -68,7 +68,7 @@ double rginn_forward(const RGINNModel *m, const RGGraph *g,
             int start = indptr[n];
             int end = indptr[n+1];
             // sum neighbors
-            double sumH[H]; for (int j=0;j<H;++j) sumH[j]=0.0;
+            double *sumH = (double*)calloc(H, sizeof(double));
             for (int e = start; e < end; ++e) {
                 int u = g->indices[e];
                 const double *hu = &h0[(size_t)u * H];
@@ -82,6 +82,7 @@ double rginn_forward(const RGINNModel *m, const RGGraph *g,
                 for (int k = 0; k < H; ++k) s += wrow[k] * sumH[k];
                 mm[j] += s;
             }
+            free(sumH);
         }
     }
     // h1 = ReLU(A m1 + b)
@@ -119,7 +120,8 @@ void rginn_backward_update(RGINNModel *m, const RGGraph *g,
     double gbout = dy;
     for (int j=0;j<H;++j) gWout[j] = dy * greadout[j];
     // dL/d(readout) = dy * Wout
-    double dG[H]; for (int j=0;j<H;++j) dG[j] = dy * m->Wout[j];
+    double *dG = (double*)calloc(H, sizeof(double));
+    for (int j=0;j<H;++j) dG[j] = dy * m->Wout[j];
     // distribute to nodes: dL/dh1[n] += dG
     double *dh1 = (double*)calloc((size_t)N*H,sizeof(double));
     for (int n=0;n<N;++n) {
@@ -164,7 +166,7 @@ void rginn_backward_update(RGINNModel *m, const RGGraph *g,
             const int *indptr = &g->indptr[(size_t)r*(N+1)];
             int start = indptr[n]; int end = indptr[n+1];
             // gWr += outer(dm, sum_h0_neighbors)
-            double sumH[H]; for (int j=0;j<H;++j) sumH[j]=0.0;
+            double *sumH = (double*)calloc(H, sizeof(double));
             for (int e=start;e<end;++e){
                 int u=g->indices[e];
                 const double* hu=&h0[(size_t)u*H];
@@ -184,6 +186,7 @@ void rginn_backward_update(RGINNModel *m, const RGGraph *g,
                     dh0[(size_t)u*H + k] += s;
                 }
             }
+            free(sumH);
         }
     }
     // back through h0 = ReLU(Win x + b): z0
@@ -216,7 +219,7 @@ void rginn_backward_update(RGINNModel *m, const RGGraph *g,
     for (int i=0;i<H*m->in_dim;++i) m->Win[i]-=lr*gWin[i]; for (int j=0;j<H;++j) m->bin[j]-=lr*gbin[j];
 
     // free
-    free(gWout); free(dh1); free(dz1); free(gA); free(gb); free(dm1); free(gWr); free(dh0); free(dz0); free(gWin); free(gbin);
+    free(gWout); free(dG); free(dh1); free(dz1); free(gA); free(gb); free(dm1); free(gWr); free(dh0); free(dz0); free(gWin); free(gbin);
 }
 
 int rginn_save(const RGINNModel *m, const char *path){
@@ -248,6 +251,118 @@ int rginn_save(const RGINNModel *m, const char *path){
     // Wout and bout
     for(int j=0;j<m->hidden_dim;++j){ fprintf(f, "%g%s", m->Wout[j], (j+1==m->hidden_dim)?"\n":" "); }
     fprintf(f, "%g\n", m->bout);
+    fclose(f);
+    return 0;
+}
+
+int rginn_load(RGINNModel *m, const char *path) {
+    FILE *f = fopen(path, "r");
+    if (!f) return -1;
+    
+    int in_dim, hidden_dim;
+    if (fscanf(f, "%d %d", &in_dim, &hidden_dim) != 2) {
+        fclose(f);
+        return -1;
+    }
+    
+    // Free existing model if any and reinitialize
+    rginn_free(m);
+    
+    m->in_dim = in_dim;
+    m->hidden_dim = hidden_dim;
+    m->Win = (double*)calloc((size_t)hidden_dim * in_dim, sizeof(double));
+    m->bin = (double*)calloc((size_t)hidden_dim, sizeof(double));
+    
+    // Read Win
+    for (int j = 0; j < hidden_dim; ++j) {
+        for (int i = 0; i < in_dim; ++i) {
+            if (fscanf(f, "%lf", &m->Win[j*in_dim + i]) != 1) {
+                fclose(f);
+                rginn_free(m);
+                return -1;
+            }
+        }
+    }
+    
+    // Read bin
+    for (int j = 0; j < hidden_dim; ++j) {
+        if (fscanf(f, "%lf", &m->bin[j]) != 1) {
+            fclose(f);
+            rginn_free(m);
+            return -1;
+        }
+    }
+    
+    // Read num_rel
+    int num_rel;
+    if (fscanf(f, "%d", &num_rel) != 1) {
+        fclose(f);
+        rginn_free(m);
+        return -1;
+    }
+    m->num_rel = num_rel;
+    
+    m->Wr = (double*)calloc((size_t)num_rel * hidden_dim * hidden_dim, sizeof(double));
+    
+    // Read Wr
+    for (int r = 0; r < num_rel; ++r) {
+        for (int j = 0; j < hidden_dim; ++j) {
+            for (int k = 0; k < hidden_dim; ++k) {
+                if (fscanf(f, "%lf", &m->Wr[r*hidden_dim*hidden_dim + j*hidden_dim + k]) != 1) {
+                    fclose(f);
+                    rginn_free(m);
+                    return -1;
+                }
+            }
+        }
+    }
+    
+    m->A = (double*)calloc((size_t)hidden_dim * hidden_dim, sizeof(double));
+    m->b = (double*)calloc((size_t)hidden_dim, sizeof(double));
+    
+    // Read A
+    for (int j = 0; j < hidden_dim; ++j) {
+        for (int k = 0; k < hidden_dim; ++k) {
+            if (fscanf(f, "%lf", &m->A[j*hidden_dim + k]) != 1) {
+                fclose(f);
+                rginn_free(m);
+                return -1;
+            }
+        }
+    }
+    
+    // Read b
+    for (int j = 0; j < hidden_dim; ++j) {
+        if (fscanf(f, "%lf", &m->b[j]) != 1) {
+            fclose(f);
+            rginn_free(m);
+            return -1;
+        }
+    }
+    
+    m->Wout = (double*)calloc((size_t)hidden_dim, sizeof(double));
+    
+    // Read Wout
+    for (int j = 0; j < hidden_dim; ++j) {
+        if (fscanf(f, "%lf", &m->Wout[j]) != 1) {
+            fclose(f);
+            rginn_free(m);
+            return -1;
+        }
+    }
+    
+    // Read bout
+    if (fscanf(f, "%lf", &m->bout) != 1) {
+        fclose(f);
+        rginn_free(m);
+        return -1;
+    }
+    
+    // Set default values
+    m->eps = 0.0;
+    m->lr = 1e-3;
+    m->num_layers = 1;
+    
     fclose(f);
     return 0;
 }
