@@ -43,16 +43,20 @@
 /* Global feature extractor */
 AQDFeatureExtractor aqd_feature_extractor = {
     .enabled = false,
-    .log_file_path = "/tmp/aqd_features.csv",
+    .log_file_path = {0},
     .log_file = NULL,
+    .plan_log_file_path = {0},
+    .plan_log_file = NULL,
     .total_queries = 0,
     .failed_extractions = 0
 };
 
 /* Configuration variables */
 bool aqd_enable_feature_logging = false;
+bool aqd_enable_plan_logging = false;
 char *aqd_feature_log_path = NULL;
 int aqd_log_format = 0; /* CSV format by default */
+char *aqd_plan_log_path = NULL;
 
 /* Initialize the feature extractor */
 void
@@ -64,9 +68,13 @@ aqd_init_feature_extractor(void)
     /* Set default log path if not configured */
     if (!aqd_feature_log_path)
         aqd_feature_log_path = pstrdup("/tmp/aqd_features.csv");
+    if (!aqd_plan_log_path)
+        aqd_plan_log_path = pstrdup("/tmp/aqd_plans.jsonl");
     
     strncpy(aqd_feature_extractor.log_file_path, aqd_feature_log_path, 
             sizeof(aqd_feature_extractor.log_file_path) - 1);
+    strncpy(aqd_feature_extractor.plan_log_file_path, aqd_plan_log_path,
+            sizeof(aqd_feature_extractor.plan_log_file_path) - 1);
     
     /* Open log file */
     aqd_feature_extractor.log_file = fopen(aqd_feature_extractor.log_file_path, "a");
@@ -75,6 +83,14 @@ aqd_init_feature_extractor(void)
         elog(WARNING, "AQD: Failed to open feature log file: %s", 
              aqd_feature_extractor.log_file_path);
         return;
+    }
+    /* Open plan log file */
+    aqd_feature_extractor.plan_log_file = fopen(aqd_feature_extractor.plan_log_file_path, "a");
+    if (!aqd_feature_extractor.plan_log_file)
+    {
+        elog(WARNING, "AQD: Failed to open plan log file: %s",
+             aqd_feature_extractor.plan_log_file_path);
+        /* Feature logging can proceed without plan log */
     }
     
     /* Write CSV header if file is new */
@@ -101,13 +117,18 @@ aqd_init_feature_extractor(void)
 void
 aqd_cleanup_feature_extractor(void)
 {
-    if (!aqd_feature_extractor.enabled)
+    if (!aqd_feature_extractor.enabled || !aqd_enable_plan_logging)
         return;
         
     if (aqd_feature_extractor.log_file)
     {
         fclose(aqd_feature_extractor.log_file);
         aqd_feature_extractor.log_file = NULL;
+    }
+    if (aqd_feature_extractor.plan_log_file)
+    {
+        fclose(aqd_feature_extractor.plan_log_file);
+        aqd_feature_extractor.plan_log_file = NULL;
     }
     
     aqd_feature_extractor.enabled = false;
@@ -585,6 +606,45 @@ aqd_log_features_to_file(const AQDQueryFeatures *features)
     fflush(aqd_feature_extractor.log_file);
 }
 
+/* Log optimizer plan as JSON via EXPLAIN (FORMAT JSON) to JSONL file */
+void
+aqd_log_plan_json(QueryDesc *query_desc, const AQDQueryFeatures *features)
+{
+    if (!aqd_feature_extractor.enabled || !aqd_feature_extractor.plan_log_file)
+        return;
+
+    ExplainState *es = NewExplainState();
+    es->format = EXPLAIN_FORMAT_JSON;
+    es->verbose = true;
+    es->buffers = false;
+    es->analyze = false;
+    es->costs = true;
+    es->wal = false;
+
+    /* Generate JSON plan into es->str */
+    ExplainBeginOutput(es);
+    ExplainQueryText(es, query_desc);
+    ExplainPrintPlan(es, query_desc);
+    ExplainEndOutput(es);
+
+    /* es->str contains a JSON array; wrap with metadata into an object */
+    /* Ensure single-line JSONL output */
+    StringInfoData out;
+    initStringInfo(&out);
+
+    appendStringInfo(&out, "{\"query_hash\":\"%s\",\"plan\":%s}",
+                     features ? features->query_hash : "",
+                     es->str->data ? es->str->data : "null");
+
+    fprintf(aqd_feature_extractor.plan_log_file, "%s\n", out.data);
+    fflush(aqd_feature_extractor.plan_log_file);
+
+    pfree(out.data);
+    pfree(es->str->data);
+    pfree(es->str);
+    pfree(es);
+}
+
 /* Helper function implementations */
 
 char *
@@ -815,6 +875,24 @@ aqd_define_guc_variables(void)
                            PGC_SUSET,
                            0,
                            NULL, NULL, NULL);
+
+    DefineCustomStringVariable("aqd.plan_log_path",
+                              "Path for AQD plan JSONL log file",
+                              "File path where optimizer plans are logged as JSONL",
+                              &aqd_plan_log_path,
+                              "/tmp/aqd_plans.jsonl",
+                              PGC_SUSET,
+                              0,
+                              NULL, NULL, NULL);
+
+    DefineCustomBoolVariable("aqd.enable_plan_logging",
+                            "Enable logging of optimizer plans as JSONL",
+                            "When enabled, logs EXPLAIN (FORMAT JSON) for each query",
+                            &aqd_enable_plan_logging,
+                            false,
+                            PGC_SUSET,
+                            0,
+                            NULL, NULL, NULL);
 }
 
 /* Enable/disable functions */

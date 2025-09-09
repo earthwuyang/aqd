@@ -76,6 +76,8 @@ typedef struct AQDFeatureExtractor
     bool enabled;               /* Whether feature extraction is enabled */
     char log_file_path[1024];   /* Path to feature log file */
     FILE *log_file;             /* Log file handle */
+    char plan_log_file_path[1024]; /* Path to JSON plan log file (JSONL) */
+    FILE *plan_log_file;        /* Plan log file handle */
     int total_queries;          /* Total queries processed */
     int failed_extractions;     /* Failed feature extractions */
 } AQDFeatureExtractor;
@@ -152,8 +154,12 @@ extern double aqd_max_plan_width(Plan *plan);
 extern bool aqd_enable_feature_logging;
 extern char *aqd_feature_log_path;
 extern int aqd_log_format; /* 0=CSV, 1=JSON */
+extern char *aqd_plan_log_path;  /* Path to JSONL plans */
 
 /* GUC setup function */
 extern void aqd_define_guc_variables(void);
+
+/* Plan JSON logging */
+extern void aqd_log_plan_json(QueryDesc *query_desc, const AQDQueryFeatures *features);
 
 #endif /* AQD_FEATURE_LOGGER_H */

@@ -337,6 +337,8 @@ ExecutorRun(QueryDesc *queryDesc,
         aqd_features_local.execution_time_ms = ms;
         aqd_features_local.postgres_time_ms = ms;
         aqd_log_features_to_file(&aqd_features_local);
+        /* Log plan JSON to JSONL if configured */
+        aqd_log_plan_json(queryDesc, &aqd_features_local);
     }
 }
 

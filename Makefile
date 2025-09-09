@@ -1,7 +1,7 @@
 # Makefile for AQD (Adaptive Query Dispatcher) System
 # Builds PostgreSQL with AQD extensions and supporting tools
 
-.PHONY: all clean postgres lightgbm data-collection test help
+.PHONY: all clean postgres lightgbm gnn data-collection test help setup env-info venv-check venv-deps
 
 # Configuration
 POSTGRES_SRC = postgres_src
@@ -55,7 +55,15 @@ help:
 	@echo "  make lightgbm               # LightGBM trainer only"
 	@echo "  make test                   # Run tests"
 
-setup: $(BUILD_DIR) $(VENV_DIR) install-deps
+setup:
+	@echo "Setting up build environment..."
+	$(MAKE) install-deps
+	$(MAKE) $(BUILD_DIR)
+	$(MAKE) $(VENV_DIR)
+	$(MAKE) venv-deps
+	@echo "\n✅ Setup complete. Activate the virtualenv before running Python commands:"
+	@echo "   source $(VENV_DIR)/bin/activate"
+	@echo "or use: $(VENV_DIR)/bin/python your_script.py"
 
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
@@ -64,8 +72,34 @@ $(BUILD_DIR):
 
 $(VENV_DIR):
 	$(PYTHON) -m venv $(VENV_DIR)
-	$(VENV_DIR)/bin/pip install --upgrade pip
-	$(VENV_DIR)/bin/pip install -r requirements.txt
+	$(VENV_DIR)/bin/pip install --upgrade pip setuptools wheel
+
+venv-deps: $(VENV_DIR) requirements.txt
+	@echo "Installing Python packages from requirements.txt into venv..."
+	$(VENV_DIR)/bin/pip install --upgrade -r requirements.txt
+	@echo "Verifying virtualenv packages..."
+	-$(VENV_DIR)/bin/python -c "import sys; print('Python:', sys.executable)"
+	-$(VENV_DIR)/bin/python -c "import importlib; mods=['numpy','pandas','duckdb','lightgbm'];\
+for m in mods:\
+    \n    \
+    print(m+':', getattr(importlib.import_module(m), '__version__', 'unknown'))"
+
+venv-check:
+	@echo "Checking venv package availability..."
+	-$(VENV_DIR)/bin/python -c "import sys; print('Python:', sys.executable)"
+	-$(VENV_DIR)/bin/python -c "import importlib; mods=['numpy','pandas','duckdb','lightgbm','sklearn'];\
+import traceback;\
+print('Modules:');\
+\
+\
+\
+[print(' ', m, getattr(importlib.import_module(m), '__version__', 'unknown')) for m in mods]"
+
+env-info:
+	@echo "System Python: $$(command -v python3)"
+	@echo "Venv Python:   $(VENV_DIR)/bin/python"
+	@echo "Venv Pip List (top 10):"
+	-$(VENV_DIR)/bin/pip list | head -n 12
 
 requirements.txt:
 	@echo "Creating requirements.txt for Python dependencies..."
@@ -146,6 +180,14 @@ $(BUILD_DIR)/lightgbm_trainer: lightgbm_trainer.cpp
 	@echo "Building LightGBM trainer..."
 	$(CXX) $(CXXFLAGS) $(LIGHTGBM_INCLUDE) -o $@ $< $(LIGHTGBM_LIBS) $(JSON_LIBS)
 	@echo "LightGBM trainer built: $@"
+
+# GNN trainer
+gnn: $(BUILD_DIR)/gnn_trainer
+
+$(BUILD_DIR)/gnn_trainer: gnn_trainer.cpp
+	@echo "Building GNN trainer..."
+	$(CXX) $(CXXFLAGS) -o $@ $< -I/usr/include -lnlohmann_json
+	@echo "GNN trainer built: $@"
 
 # Data collection pipeline
 data-collection: $(VENV_DIR) data_collector.py generate_benchmark_queries.py import_benchmark_datasets.py

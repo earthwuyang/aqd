@@ -81,6 +81,15 @@ class FinalRoutingBenchmark:
                         break
             elif method == 'gnn':
                 cursor.execute("SET aqd.routing_method = 4;")
+                # Attempt to load a trained GNN model if available
+                base = Path(__file__).resolve().parent
+                gnn_candidates = [
+                    base / 'models' / 'gnn_model.txt',
+                ]
+                for path in gnn_candidates:
+                    if path.exists():
+                        cursor.execute(f"SET aqd.gnn_model_path = '{str(path)}';")
+                        break
             conn.commit()
         except Exception as e:
             logger.warning(f"Could not set routing method {method}: {e}")

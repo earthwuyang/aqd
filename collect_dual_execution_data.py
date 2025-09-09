@@ -83,6 +83,7 @@ class ExecutionResult:
             'postgres_error': self.postgres_error,
             'duckdb_error': self.duckdb_error,
             'aqd_features': self.aqd_features,
+            'postgres_plan': self.postgres_plan,
             'executed_postgres': self.executed_postgres,
             'executed_duckdb': self.executed_duckdb,
             'timestamp': datetime.now().isoformat()
@@ -118,7 +119,16 @@ class DualExecutionCollector:
             # Enable AQD feature logging (CSV)
             cursor = self.pg_conn.cursor()
             cursor.execute("SET aqd.enable_feature_logging = on;")
-            cursor.execute("SET aqd.feature_log_path = '/tmp/aqd_features.csv';")
+            os.makedirs(BASE_DIR / 'data' / 'execution_data', exist_ok=True)
+            feature_csv = str(BASE_DIR / 'data' / 'execution_data' / 'aqd_features.csv')
+            plan_jsonl = str(BASE_DIR / 'data' / 'execution_data' / 'aqd_plans.jsonl')
+            cursor.execute(f"SET aqd.feature_log_path = '{feature_csv}';")
+            try:
+                cursor.execute(f"SET aqd.plan_log_path = '{plan_jsonl}';")
+                cursor.execute("SET aqd.enable_plan_logging = on;")
+            except Exception:
+                # Older kernels may not have plan logging GUCs; ignore
+                pass
             cursor.execute("SET aqd.log_format = 0;")
             cursor.close()
             
@@ -187,14 +197,21 @@ class DualExecutionCollector:
             pg_cfg['database'] = dataset_name
             self.pg_conn = psycopg2.connect(**pg_cfg)
             self.pg_conn.autocommit = True
-            # Enable AQD feature logging
+            # Enable AQD feature logging into repo execution_data directory
             cursor = self.pg_conn.cursor()
             cursor.execute("SET aqd.enable_feature_logging = on;")
-            cursor.execute("SET aqd.feature_log_path = '/tmp/aqd_features.csv';")
+            feature_csv = str(BASE_DIR / 'data' / 'execution_data' / 'aqd_features.csv')
+            plan_jsonl = str(BASE_DIR / 'data' / 'execution_data' / 'aqd_plans.jsonl')
+            cursor.execute(f"SET aqd.feature_log_path = '{feature_csv}';")
+            try:
+                cursor.execute(f"SET aqd.plan_log_path = '{plan_jsonl}';")
+                cursor.execute("SET aqd.enable_plan_logging = on;")
+            except Exception:
+                pass
             cursor.execute("SET aqd.log_format = 0;")
             cursor.close()
         except Exception as e:
-            return None, f"Failed to connect to PostgreSQL DB '{dataset_name}': {e}", None
+            return None, f"Failed to connect to PostgreSQL DB '{dataset_name}': {e}", None, None
         
         try:
             with self.timeout_context(self.timeout_seconds):
@@ -244,7 +261,7 @@ class DualExecutionCollector:
                 
                 # Read AQD features from CSV log: take last non-empty line and map feature_* to aqd_feature_*
                 aqd_features = {}
-                csv_path = '/tmp/aqd_features.csv'
+                csv_path = str(BASE_DIR / 'data' / 'execution_data' / 'aqd_features.csv')
                 if os.path.exists(csv_path):
                     try:
                         with open(csv_path, 'r') as f:
@@ -268,15 +285,27 @@ class DualExecutionCollector:
                                         pass
                     except Exception as e:
                         logger.warning(f"Failed to parse AQD CSV features: {e}")
-                
-                return execution_time, None, aqd_features
+
+                # Read last plan JSONL line
+                plan_json = None
+                plan_path = str(BASE_DIR / 'data' / 'execution_data' / 'aqd_plans.jsonl')
+                if os.path.exists(plan_path):
+                    try:
+                        with open(plan_path, 'r') as f:
+                            lines = [ln.strip() for ln in f if ln.strip()]
+                        if len(lines) >= 1:
+                            plan_json = lines[-1]
+                    except Exception as e:
+                        logger.warning(f"Failed to read plan JSONL: {e}")
+
+                return execution_time, None, aqd_features, plan_json
                 
         except TimeoutError:
-            return None, "Query timeout", None
+            return None, "Query timeout", None, None
         except psycopg2.Error as e:
-            return None, str(e), None
+            return None, str(e), None, None
         except Exception as e:
-            return None, f"Unexpected error: {str(e)}", None
+            return None, f"Unexpected error: {str(e)}", None, None
     
     def execute_duckdb_query(self, query_text, dataset_name):
         """Execute query on DuckDB"""
@@ -306,10 +335,11 @@ class DualExecutionCollector:
         result = ExecutionResult(query_text, dataset, query_type, query_index)
         
         # Execute on PostgreSQL
-        pg_time, pg_error, aqd_features = self.execute_postgres_query(query_text, dataset)
+        pg_time, pg_error, aqd_features, plan_json = self.execute_postgres_query(query_text, dataset)
         result.postgres_time = pg_time
         result.postgres_error = pg_error
         result.aqd_features = aqd_features or {}
+        result.postgres_plan = plan_json
         result.executed_postgres = pg_time is not None
         
         if result.executed_postgres:
