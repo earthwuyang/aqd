@@ -38,7 +38,7 @@ POSTGRESQL_CONFIG = {
 
 DUCKDB_CONFIG = {
     'binary': str(BASE_DIR / 'duckdb' / 'duckdb'),
-    'database': str(BASE_DIR / 'data' / 'benchmark_datasets.db')
+    'databases_dir': str(BASE_DIR / 'data' / 'duckdb_databases')
 }
 
 
@@ -53,7 +53,7 @@ class TPCImporter:
         }
 
     # ---------- Utilities ----------
-    def run(self, cmd: List[str], cwd: Path | None = None, check: bool = True) -> subprocess.CompletedProcess:
+    def run_cmd(self, cmd: List[str], cwd: Path | None = None, check: bool = True) -> subprocess.CompletedProcess:
         return subprocess.run(cmd, cwd=str(cwd) if cwd else None, text=True, capture_output=True, check=check)
 
     def ensure_pg_conn(self):
@@ -91,14 +91,16 @@ class TPCImporter:
             return "TIMESTAMP"
         return "TEXT"
 
-    def get_duckdb_column_types(self, schema: str, table: str) -> Dict[str, str]:
+    def get_duckdb_column_types(self, database: str, table: str) -> Dict[str, str]:
         sql = f"""
             SELECT column_name, data_type
             FROM information_schema.columns
-            WHERE table_schema = '{schema}' AND table_name = '{table}'
+            WHERE table_name = '{table}'
             ORDER BY ordinal_position
         """
-        result = subprocess.run([DUCKDB_CONFIG['binary'], DUCKDB_CONFIG['database'], '-c', sql],
+        # Use the specific database file for this dataset
+        db_file = os.path.join(DUCKDB_CONFIG['databases_dir'], f'{database}.db')
+        result = subprocess.run([DUCKDB_CONFIG['binary'], db_file, '-c', sql],
                                 capture_output=True, text=True)
         col_types: Dict[str, str] = {}
         if result.returncode == 0:
@@ -122,43 +124,59 @@ class TPCImporter:
         repo_dir = BUILD_DIR / 'tpch' / 'tpch-kit'
         if not repo_dir.exists():
             print('⏬ Cloning tpch-kit...')
-            self.run(['git', 'clone', '--depth', '1', 'https://github.com/gregrahn/tpch-kit.git', str(repo_dir)])
+            self.run_cmd(['git', 'clone', '--depth', '1', 'https://github.com/gregrahn/tpch-kit.git', str(repo_dir)])
+        
         # Build
-        print('🔧 Building tpch-kit dbgen...')
         dbgen_dir = repo_dir / 'dbgen'
-        # Some repos need edit of makefile for GCC; try make straightforwardly
-        self.run(['make'], cwd=dbgen_dir)
         if not (dbgen_dir / 'dbgen').exists():
-            raise RuntimeError('Failed to build tpch dbgen')
+            print('🔧 Building tpch-kit dbgen...')
+            # Some repos need edit of makefile for GCC; try make straightforwardly
+            self.run_cmd(['make'], cwd=dbgen_dir)
+            if not (dbgen_dir / 'dbgen').exists():
+                raise RuntimeError('Failed to build tpch dbgen')
+        else:
+            print('✓ TPC-H dbgen already built')
+            
         # Generate data
         out_dir = DATA_DIR / 'tpch' / 'raw'
-        print(f'🧪 Generating TPC-H data at SF={self.sf}...')
-        self.run(['./dbgen', '-f', '-s', str(self.sf)], cwd=dbgen_dir)
-        # Move .tbl files to raw dir
-        for tbl in dbgen_dir.glob('*.tbl'):
-            shutil.move(str(tbl), out_dir / tbl.name)
-        print('✓ TPC-H data generated')
+        if not list(out_dir.glob('*.tbl')):
+            print(f'🧪 Generating TPC-H data at SF={self.sf}...')
+            self.run_cmd(['./dbgen', '-f', '-s', str(self.sf)], cwd=dbgen_dir)
+            # Move .tbl files to raw dir
+            for tbl in dbgen_dir.glob('*.tbl'):
+                shutil.move(str(tbl), out_dir / tbl.name)
+            print('✓ TPC-H data generated')
+        else:
+            print('✓ TPC-H data already exists')
 
     def clone_and_build_tpcds(self):
         repo_dir = BUILD_DIR / 'tpcds' / 'tpcds-kit'
         if not repo_dir.exists():
             print('⏬ Cloning tpcds-kit...')
-            self.run(['git', 'clone', '--depth', '1', 'https://github.com/gregrahn/tpcds-kit.git', str(repo_dir)])
+            self.run_cmd(['git', 'clone', '--depth', '1', 'https://github.com/gregrahn/tpcds-kit.git', str(repo_dir)])
+            
         # Build
-        print('🔧 Building tpcds-kit dsdgen...')
         tools_dir = repo_dir / 'tools'
-        # Try common build incantations
-        try:
-            self.run(['make', 'OS=LINUX'], cwd=tools_dir)
-        except subprocess.CalledProcessError:
-            self.run(['make', '-f', 'Makefile.suite'], cwd=tools_dir)
         if not (tools_dir / 'dsdgen').exists():
-            raise RuntimeError('Failed to build tpcds dsdgen')
+            print('🔧 Building tpcds-kit dsdgen...')
+            # Try common build incantations
+            try:
+                self.run_cmd(['make', 'OS=LINUX'], cwd=tools_dir)
+            except subprocess.CalledProcessError:
+                self.run_cmd(['make', '-f', 'Makefile.suite'], cwd=tools_dir)
+            if not (tools_dir / 'dsdgen').exists():
+                raise RuntimeError('Failed to build tpcds dsdgen')
+        else:
+            print('✓ TPC-DS dsdgen already built')
+            
         # Generate data
         out_dir = DATA_DIR / 'tpcds' / 'raw'
-        print(f'🧪 Generating TPC-DS data at SF={self.sf}...')
-        self.run(['./dsdgen', '-FORCE', '-SCALE', str(self.sf), '-DIR', str(out_dir)], cwd=tools_dir)
-        print('✓ TPC-DS data generated')
+        if not list(out_dir.glob('*.dat')):
+            print(f'🧪 Generating TPC-DS data at SF={self.sf}...')
+            self.run_cmd(['./dsdgen', '-FORCE', '-SCALE', str(self.sf), '-DIR', str(out_dir)], cwd=tools_dir)
+            print('✓ TPC-DS data generated')
+        else:
+            print('✓ TPC-DS data already exists')
 
     # ---------- Conversion ----------
     @staticmethod
@@ -206,49 +224,105 @@ class TPCImporter:
 
     # ---------- Loading ----------
     def load_into_duckdb(self, suite: str):
-        schema = (f'tpch_sf{self.sf}' if suite == 'tpch' else f'tpcds_sf{self.sf}')
-        subprocess.run([DUCKDB_CONFIG['binary'], DUCKDB_CONFIG['database'], '-c', f'CREATE SCHEMA IF NOT EXISTS "{schema}";'], capture_output=True)
+        database = (f'tpch_sf{self.sf}' if suite == 'tpch' else f'tpcds_sf{self.sf}')
+        # Create separate database file for this dataset
+        db_file = os.path.join(DUCKDB_CONFIG['databases_dir'], f'{database}.db')
+        os.makedirs(DUCKDB_CONFIG['databases_dir'], exist_ok=True)
+        
         csv_dir = DATA_DIR / suite / 'csv'
         for csv_path in sorted(csv_dir.glob('*.csv')):
             table = csv_path.stem
             load_sql = f"""
-                DROP TABLE IF EXISTS "{schema}"."{table}";
-                CREATE TABLE "{schema}"."{table}" AS
-                SELECT * FROM read_csv_auto('{csv_path}', header=true, null_padding=true);
+                DROP TABLE IF EXISTS "{table}";
+                CREATE TABLE "{table}" AS
+                SELECT * FROM read_csv_auto('{csv_path}', header=true, null_padding=true, parallel=false);
             """
-            result = subprocess.run([DUCKDB_CONFIG['binary'], DUCKDB_CONFIG['database'], '-c', load_sql], capture_output=True, text=True)
+            result = subprocess.run([DUCKDB_CONFIG['binary'], db_file, '-c', load_sql], capture_output=True, text=True)
             if result.returncode == 0:
-                print(f'    ✓ DuckDB loaded: {schema}.{table}')
+                print(f'    ✓ DuckDB loaded: {database}.{table}')
             else:
-                print(f'    ✗ DuckDB load failed for {schema}.{table}: {result.stderr}')
+                print(f'    ✗ DuckDB load failed for {database}.{table}: {result.stderr}')
+
+    def check_postgresql_database_exists(self, database: str) -> bool:
+        """Check if PostgreSQL database already exists"""
+        self.ensure_pg_conn()
+        cursor = self.pg_conn.cursor()
+        cursor.execute("SELECT 1 FROM pg_database WHERE datname = %s", (database,))
+        exists = cursor.fetchone() is not None
+        cursor.close()
+        return exists
+
+    def create_postgresql_database(self, database: str) -> bool:
+        """Create a separate database in PostgreSQL"""
+        self.ensure_pg_conn()
+        cursor = self.pg_conn.cursor()
+        
+        # Check if database already exists
+        cursor.execute("SELECT 1 FROM pg_database WHERE datname = %s", (database,))
+        if cursor.fetchone():
+            print(f"    ✓ Database '{database}' already exists in PostgreSQL")
+            cursor.close()
+            return True
+        
+        try:
+            # Create new database (cannot be done in a transaction)
+            cursor.execute(f'CREATE DATABASE "{database}"')
+            print(f"    ✓ Created PostgreSQL database: {database}")
+            cursor.close()
+            return True
+        except Exception as e:
+            print(f"    ✗ Failed to create PostgreSQL database {database}: {e}")
+            cursor.close()
+            return False
 
     def load_into_postgresql(self, suite: str):
-        self.ensure_pg_conn()
-        schema = (f'tpch_sf{self.sf}' if suite == 'tpch' else f'tpcds_sf{self.sf}')
-        cur = self.pg_conn.cursor()
-        cur.execute(f'CREATE SCHEMA IF NOT EXISTS "{schema}"')
-        csv_dir = DATA_DIR / suite / 'csv'
-        for csv_path in sorted(csv_dir.glob('*.csv')):
-            table = csv_path.stem
-            duck_types = self.get_duckdb_column_types(schema, table)
-            # Read header
-            with open(csv_path, 'r', encoding='utf-8') as f:
-                header = f.readline().strip().split(',')
-            cols_def = ', '.join([f'"{c}" {self.map_duckdb_to_pg_type(duck_types.get(c, "TEXT"))}' for c in header])
-            ddl = f"""
-                DROP TABLE IF EXISTS "{schema}"."{table}";
-                CREATE TABLE "{schema}"."{table}" ({cols_def});
-            """
-            cur.execute(ddl)
-            copy_sql = f"""
-                COPY "{schema}"."{table}" FROM '{csv_path}' WITH (FORMAT CSV, HEADER TRUE, NULL '', ENCODING 'UTF8');
-            """
-            try:
-                cur.execute(copy_sql)
-                print(f'    ✓ PostgreSQL loaded: {schema}.{table}')
-            except Exception as e:
-                print(f'    ✗ PostgreSQL load failed for {schema}.{table}: {e}')
-        cur.close()
+        database = (f'tpch_sf{self.sf}' if suite == 'tpch' else f'tpcds_sf{self.sf}')
+        
+        # Check if database already exists
+        if self.check_postgresql_database_exists(database):
+            print(f"    📋 PostgreSQL database '{database}' already exists - skipping PostgreSQL import")
+            return
+        
+        # Create the database first
+        if not self.create_postgresql_database(database):
+            print(f"    ✗ Failed to create database {database}, skipping PostgreSQL import")
+            return
+        
+        # Connect to the specific database
+        db_config = POSTGRESQL_CONFIG.copy()
+        db_config['database'] = database
+        
+        try:
+            db_conn = psycopg2.connect(**db_config)
+            db_conn.autocommit = True
+            cur = db_conn.cursor()
+            
+            csv_dir = DATA_DIR / suite / 'csv'
+            for csv_path in sorted(csv_dir.glob('*.csv')):
+                table = csv_path.stem
+                duck_types = self.get_duckdb_column_types(database, table)
+                # Read header
+                with open(csv_path, 'r', encoding='utf-8') as f:
+                    header = f.readline().strip().split(',')
+                cols_def = ', '.join([f'"{c}" {self.map_duckdb_to_pg_type(duck_types.get(c, "TEXT"))}' for c in header])
+                ddl = f"""
+                    DROP TABLE IF EXISTS "{table}";
+                    CREATE TABLE "{table}" ({cols_def});
+                """
+                cur.execute(ddl)
+                copy_sql = f"""
+                    COPY "{table}" FROM '{csv_path}' WITH (FORMAT CSV, HEADER TRUE, NULL '', ENCODING 'UTF8');
+                """
+                try:
+                    cur.execute(copy_sql)
+                    print(f'    ✓ PostgreSQL loaded: {database}.{table}')
+                except Exception as e:
+                    print(f'    ✗ PostgreSQL load failed for {database}.{table}: {e}')
+            cur.close()
+            db_conn.close()
+            
+        except Exception as e:
+            print(f"    ✗ Failed to connect to database {database}: {e}")
 
     # ---------- Orchestration ----------
     def connect(self):
@@ -256,9 +330,8 @@ class TPCImporter:
         # Connect PG
         self.pg_conn = psycopg2.connect(**POSTGRESQL_CONFIG)
         self.pg_conn.autocommit = True
-        # Ensure DuckDB database exists
-        os.makedirs(os.path.dirname(DUCKDB_CONFIG['database']), exist_ok=True)
-        subprocess.run([DUCKDB_CONFIG['binary'], DUCKDB_CONFIG['database'], '-c', 'SELECT 1;'], capture_output=True)
+        # Ensure DuckDB databases directory exists
+        os.makedirs(DUCKDB_CONFIG['databases_dir'], exist_ok=True)
         print('✓ Connections ready')
 
     def run(self):

@@ -29,8 +29,8 @@ MYSQL_CONFIG = {
 POSTGRESQL_CONFIG = {
     'host': 'localhost',
     'port': 5432,
-    'user': 'wuy',
-    'database': 'postgres'
+    'user': 'wuy'
+    # database will be set dynamically - admin uses 'postgres', datasets get their own databases
 }
 
 # Resolve repository base directory relative to this file
@@ -39,7 +39,7 @@ BASE_DIR = Path(__file__).resolve().parent
 # DuckDB configuration (relative to repo)
 DUCKDB_CONFIG = {
     'binary': str(BASE_DIR / 'duckdb' / 'duckdb'),
-    'database': str(BASE_DIR / 'data' / 'benchmark_datasets.db')
+    'databases_dir': str(BASE_DIR / 'data' / 'duckdb_databases')
 }
 
 # Select 10+ databases known to have good data for benchmarking
@@ -91,7 +91,10 @@ class BenchmarkDatasetImporter:
                         self.pg_conn.close()
                     except Exception:
                         pass
-                self.pg_conn = psycopg2.connect(**POSTGRESQL_CONFIG)
+                # Connect to the default 'postgres' database for administrative operations
+                admin_config = POSTGRESQL_CONFIG.copy()
+                admin_config['database'] = 'postgres'
+                self.pg_conn = psycopg2.connect(**admin_config)
                 self.pg_conn.autocommit = True
                 print("  ↻ Reconnected to PostgreSQL")
             except Exception as e:
@@ -107,18 +110,18 @@ class BenchmarkDatasetImporter:
         self.mysql_conn = mysql.connector.connect(**MYSQL_CONFIG)
         print("  ✓ Connected to CTU MySQL server")
         
-        # Connect to PostgreSQL
+        # Connect to PostgreSQL (admin connection)
         print("  Connecting to PostgreSQL...")
-        self.pg_conn = psycopg2.connect(**POSTGRESQL_CONFIG)
+        admin_config = POSTGRESQL_CONFIG.copy()
+        admin_config['database'] = 'postgres'
+        self.pg_conn = psycopg2.connect(**admin_config)
         self.pg_conn.autocommit = True
         print("  ✓ Connected to PostgreSQL")
         
-        # Ensure DuckDB database exists
+        # Ensure DuckDB databases directory exists
         print("  Setting up DuckDB...")
-        os.makedirs(os.path.dirname(DUCKDB_CONFIG['database']), exist_ok=True)
-        subprocess.run([DUCKDB_CONFIG['binary'], DUCKDB_CONFIG['database'], '-c', 'SELECT 1;'], 
-                      capture_output=True)
-        print("  ✓ DuckDB ready")
+        os.makedirs(DUCKDB_CONFIG['databases_dir'], exist_ok=True)
+        print("  ✓ DuckDB directory ready")
         
         print("✅ All database connections established")
     
@@ -208,13 +211,16 @@ class BenchmarkDatasetImporter:
 
     def get_duckdb_column_types(self, database, table):
         import subprocess
+        # Use the specific database file for this dataset
+        db_file = os.path.join(DUCKDB_CONFIG['databases_dir'], f'{database}.db')
+        
         sql = f"""
             SELECT column_name, data_type
             FROM information_schema.columns
-            WHERE table_schema = '{database}' AND table_name = '{table}'
+            WHERE table_name = '{table}'
             ORDER BY ordinal_position
         """
-        result = subprocess.run([DUCKDB_CONFIG['binary'], DUCKDB_CONFIG['database'], '-c', sql],
+        result = subprocess.run([DUCKDB_CONFIG['binary'], db_file, '-c', sql],
                                 capture_output=True, text=True)
         col_types = {}
         if result.returncode == 0:
@@ -225,55 +231,96 @@ class BenchmarkDatasetImporter:
                     col_types[parts[0]] = parts[1]
         return col_types
 
-    def create_postgresql_table(self, database, table, columns, csv_path):
-        """Create table in PostgreSQL and load CSV data with inferred types"""
+    def check_postgresql_database_exists(self, database):
+        """Check if PostgreSQL database already exists"""
         self.ensure_pg_conn()
         cursor = self.pg_conn.cursor()
-        cursor.execute(f'CREATE SCHEMA IF NOT EXISTS "{database}"')
+        cursor.execute("SELECT 1 FROM pg_database WHERE datname = %s", (database,))
+        exists = cursor.fetchone() is not None
+        cursor.close()
+        return exists
 
-        duck_types = self.get_duckdb_column_types(database, table)
-        column_defs = []
-        for col in columns:
-            pg_t = self.map_duckdb_to_pg_type(duck_types.get(col, 'TEXT'))
-            column_defs.append(f'"{col}" {pg_t}')
-
-        create_sql = f'''
-            DROP TABLE IF EXISTS "{database}"."{table}";
-            CREATE TABLE "{database}"."{table}" (
-                {', '.join(column_defs)}
-            );
-        '''
-        cursor.execute(create_sql)
-
-        copy_sql = f'''
-            COPY "{database}"."{table}" FROM '{csv_path}'
-            WITH (FORMAT CSV, HEADER TRUE, NULL '', ENCODING 'UTF8');
-        '''
+    def create_postgresql_database(self, database):
+        """Create a separate database in PostgreSQL"""
+        self.ensure_pg_conn()
+        cursor = self.pg_conn.cursor()
+        
+        # Check if database already exists
+        cursor.execute("SELECT 1 FROM pg_database WHERE datname = %s", (database,))
+        if cursor.fetchone():
+            print(f"    ✓ Database '{database}' already exists in PostgreSQL")
+            cursor.close()
+            return True
+        
         try:
+            # Create new database (cannot be done in a transaction)
+            cursor.execute(f'CREATE DATABASE "{database}"')
+            print(f"    ✓ Created PostgreSQL database: {database}")
+            cursor.close()
+            return True
+        except Exception as e:
+            print(f"    ✗ Failed to create PostgreSQL database {database}: {e}")
+            cursor.close()
+            return False
+
+    def create_postgresql_table(self, database, table, columns, csv_path):
+        """Create table in PostgreSQL database and load CSV data with inferred types"""
+        # Ensure the database exists
+        if not self.create_postgresql_database(database):
+            return False
+        
+        # Connect to the specific database
+        db_config = POSTGRESQL_CONFIG.copy()
+        db_config['database'] = database
+        
+        try:
+            db_conn = psycopg2.connect(**db_config)
+            db_conn.autocommit = True
+            cursor = db_conn.cursor()
+            
+            duck_types = self.get_duckdb_column_types(database, table)
+            column_defs = []
+            for col in columns:
+                pg_t = self.map_duckdb_to_pg_type(duck_types.get(col, 'TEXT'))
+                column_defs.append(f'"{col}" {pg_t}')
+
+            create_sql = f'''
+                DROP TABLE IF EXISTS "{table}";
+                CREATE TABLE "{table}" (
+                    {', '.join(column_defs)}
+                );
+            '''
+            cursor.execute(create_sql)
+
+            copy_sql = f'''
+                COPY "{table}" FROM '{csv_path}'
+                WITH (FORMAT CSV, HEADER TRUE, NULL '', ENCODING 'UTF8');
+            '''
             cursor.execute(copy_sql)
-            print(f"    ✓ Loaded into PostgreSQL: {database}.{table}")
+            print(f"    ✓ Loaded into PostgreSQL database: {database}.{table}")
             return True
         except Exception as e:
             print(f"    ✗ PostgreSQL load failed for {database}.{table}: {e}")
             return False
         finally:
-            cursor.close()
+            if 'cursor' in locals():
+                cursor.close()
+            if 'db_conn' in locals():
+                db_conn.close()
     
     def create_duckdb_table(self, database, table, csv_path):
         """Create table in DuckDB and load CSV data"""
-        # Create schema
-        schema_sql = f'CREATE SCHEMA IF NOT EXISTS "{database}";'
-        subprocess.run([DUCKDB_CONFIG['binary'], DUCKDB_CONFIG['database'], '-c', schema_sql],
-                      capture_output=True)
+        # Create separate database file for this dataset
+        db_file = os.path.join(DUCKDB_CONFIG['databases_dir'], f'{database}.db')
         
-        # Load CSV directly (DuckDB auto-detects types)
+        # Load CSV directly (DuckDB auto-detects types) - no schema needed since each dataset has its own database
         load_sql = f'''
-            DROP TABLE IF EXISTS "{database}"."{table}";
-            CREATE TABLE "{database}"."{table}" AS 
-            SELECT * FROM read_csv_auto('{csv_path}', header=true, null_padding=true);
+            DROP TABLE IF EXISTS "{table}";
+            CREATE TABLE "{table}" AS 
+            SELECT * FROM read_csv_auto('{csv_path}', header=true, null_padding=true, parallel=false);
         '''
         
-        result = subprocess.run([DUCKDB_CONFIG['binary'], DUCKDB_CONFIG['database'], '-c', load_sql],
+        result = subprocess.run([DUCKDB_CONFIG['binary'], db_file, '-c', load_sql],
                                capture_output=True, text=True)
         
         if result.returncode == 0:
@@ -283,7 +330,7 @@ class BenchmarkDatasetImporter:
             print(f"    ✗ DuckDB load failed for {database}.{table}: {result.stderr}")
             return False
     
-    def import_table(self, database, table):
+    def import_table(self, database, table, skip_postgresql=False):
         """Import a single table into both PostgreSQL and DuckDB"""
         print(f"    📊 Importing table: {table}")
         
@@ -296,9 +343,15 @@ class BenchmarkDatasetImporter:
             print(f"      ✗ CSV export failed: {e}")
             return 0
         
-        # Prefer importing into DuckDB first (to detect types), then Postgres with mapped types
+        # Always import into DuckDB (separate database file for each dataset)
         duck_success = self.create_duckdb_table(database, table, csv_path)
-        pg_success = self.create_postgresql_table(database, table, columns, csv_path)
+        
+        # Conditionally import into PostgreSQL
+        if skip_postgresql:
+            print(f"      ⏭️ Skipping PostgreSQL import (database already exists)")
+            pg_success = True  # Consider it successful since we're skipping intentionally
+        else:
+            pg_success = self.create_postgresql_table(database, table, columns, csv_path)
         
         # Clean up CSV file to save space
         try:
@@ -338,11 +391,17 @@ class BenchmarkDatasetImporter:
             print(f"  ⚠️ Skipping {database} - insufficient data ({total_rows} rows)")
             return False
         
+        # Check if PostgreSQL database already exists
+        pg_exists = self.check_postgresql_database_exists(database)
+        if pg_exists:
+            print(f"  📋 PostgreSQL database '{database}' already exists - skipping PostgreSQL import")
+            print(f"  🔄 Re-importing into DuckDB for consistency...")
+        
         # Import each table
         successful_tables = 0
         for table, expected_rows in table_info.items():
             try:
-                rows = self.import_table(database, table)
+                rows = self.import_table(database, table, skip_postgresql=pg_exists)
                 if rows > 0:
                     successful_tables += 1
             except Exception as e:
