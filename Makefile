@@ -34,7 +34,7 @@ OPENSSL_LIBS = -lssl -lcrypto
 PYTHON = python3
 VENV_DIR = venv
 
-all: setup postgres lightgbm
+all: setup postgres lightgbm gnn
 
 help:
 	@echo "AQD (Adaptive Query Dispatcher) Build System"
@@ -46,6 +46,8 @@ help:
 	@echo "  lightgbm      - Build LightGBM trainer"
 	@echo "  data-collection - Set up data collection pipeline"
 	@echo "  test          - Run basic tests"
+	@echo "  gnn           - Build GNN trainer"
+	@echo "  gnn-labels    - Generate GNN labels CSV from execution data"
 	@echo "  install-deps  - Install system dependencies"
 	@echo "  clean         - Clean build artifacts"
 	@echo ""
@@ -184,10 +186,15 @@ $(BUILD_DIR)/lightgbm_trainer: lightgbm_trainer.cpp
 # GNN trainer
 gnn: $(BUILD_DIR)/gnn_trainer
 
-$(BUILD_DIR)/gnn_trainer: gnn_trainer.cpp
+$(BUILD_DIR)/gnn_trainer: gnn_trainer.cpp | $(BUILD_DIR)
 	@echo "Building GNN trainer..."
-	$(CXX) $(CXXFLAGS) -o $@ $< -I/usr/include -lnlohmann_json
+	# nlohmann-json is header-only (installed via nlohmann-json3-dev); no linking needed
+	$(CXX) $(CXXFLAGS) -o $@ $< -I/usr/include
 	@echo "GNN trainer built: $@"
+
+gnn-labels:
+	@echo "Generating GNN labels from execution data..."
+	$(VENV_DIR)/bin/python make_gnn_labels.py
 
 # Data collection pipeline
 data-collection: $(VENV_DIR) data_collector.py generate_benchmark_queries.py import_benchmark_datasets.py

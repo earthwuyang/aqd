@@ -199,6 +199,92 @@ double prediction = predictor.predict(query_features);
 bool use_duckdb = (prediction > 0.0);
 ```
 
+## 🧠 Train and Use the GNN Router
+
+AQD can also route queries with a plan-aware Graph Neural Network (GNN) implemented in C/C++ inside the PostgreSQL kernel. Training is external; inference is in-kernel.
+
+### 1) Rebuild Postgres with GNN support
+- Ensure you have rebuilt and restarted PostgreSQL after recent kernel changes:
+  - `make postgres`
+  - Restart your Postgres instance (e.g., `pg_ctl -D pgdata restart`)
+
+### 2) Collect data with plan logging enabled
+- The collector configures feature and plan logging to repo paths:
+  - Features CSV: `data/execution_data/aqd_features.csv`
+  - Plans JSONL: `data/execution_data/aqd_plans.jsonl`
+- Run a small collection first to verify:
+```bash
+python3 collect_dual_execution_data.py --datasets imdb_small --max_queries 500 --timeout 30
+```
+- Confirm files exist and grow:
+```bash
+ls -lh data/execution_data/aqd_features.csv data/execution_data/aqd_plans.jsonl
+```
+
+Notes
+- If your server was not rebuilt, enabling plan logging can crash it. Rebuild and restart first.
+- The collector sets:
+  - `SET aqd.enable_feature_logging = on`
+  - `SET aqd.feature_log_path = '<repo>/data/execution_data/aqd_features.csv'`
+  - `SET aqd.plan_log_path = '<repo>/data/execution_data/aqd_plans.jsonl'`
+  - `SET aqd.enable_plan_logging = on`
+  - `SET aqd.log_format = 0`
+
+### 3) Prepare labels for GNN training
+The GNN trainer needs labels (target = log(PostgreSQL_time / DuckDB_time)) keyed by `query_hash`.
+
+- The collector stores a plan JSON for each query as `postgres_plan` in `data/execution_data/<dataset>_execution_data.json`. Each plan JSON line includes `{ "query_hash": "...", "plan": [ ... ] }`.
+
+- Create a labels CSV mapping query_hash → target with the provided helper:
+```bash
+make gnn-labels
+```
+This reads `data/execution_data/*_execution_data.json`, extracts `query_hash` from the logged plan JSON, and writes `data/execution_data/gnn_labels.csv` with the target `log(PostgreSQL/DuckDB)`.
+
+### 4) Build the C++ GNN trainer (scaffold)
+```bash
+make gnn
+```
+This generates `build/gnn_trainer`. The current trainer is a scaffold that initializes a valid weights file; you can extend it to perform real optimization.
+
+### 5) Train and export a GNN weights file
+```bash
+./build/gnn_trainer data/execution_data/aqd_plans.jsonl \
+                  data/execution_data/gnn_labels.csv \
+                  models/gnn_model.txt
+```
+Output (text) format matches the kernel reader:
+```
+in_features hidden_dim
+W1 (in_features x hidden_dim)
+b1 (hidden_dim)
+W2 (hidden_dim)
+b2 (1)
+```
+
+### 6) Load the GNN model in PostgreSQL
+In a psql session or via the benchmark runner:
+```sql
+SET aqd.routing_method = 4;                -- GNN
+SET aqd.gnn_model_path = '<repo>/models/gnn_model.txt';
+```
+The benchmark harness (`final_routing_benchmark.py`) auto-loads `models/gnn_model.txt` if present when running in GNN mode.
+
+### 7) Benchmark GNN routing
+```bash
+python3 final_routing_benchmark.py --dataset imdb_small --levels 100,200,300,400,500
+```
+The script prints per-concurrency throughput, latency, and success rate per routing method, and saves a JSON result into `results/final_routing_benchmark_<dataset>.json`.
+
+### 8) Extend the trainer (recommended)
+The provided `gnn_trainer.cpp` is a placeholder. For meaningful results:
+- Parse plan JSON into a graph (nodes = plan nodes; edges = parent/child).
+- Derive node features (op type one-hot, rows/cost/width, etc.).
+- Implement training (e.g., SGD/Adam) to fit targets in `gnn_labels.csv`.
+- Export weights in the expected text format.
+
+Once you drop in the trained weights, the kernel GNN inference (`gnn_inference.c`) will score new plans to route queries online.
+
 ## 🧪 **Experimental Validation**
 
 ### Offline Model Training
