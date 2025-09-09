@@ -310,12 +310,34 @@ ExecutorRun(QueryDesc *queryDesc,
 			ScanDirection direction, uint64 count,
 			bool execute_once)
 {
-	if (ExecutorRun_hook)
-		(*ExecutorRun_hook) (queryDesc, direction, count, execute_once);
-	else
-		standard_ExecutorRun(queryDesc, direction, count, execute_once);
+    bool do_aqd = aqd_enable_feature_logging;
+    TimestampTz aqd_start = 0, aqd_end = 0;
+    AQDQueryFeatures aqd_features_local;
 
-	/* AQD: Feature extraction disabled - requires proper AQD integration */
+    if (do_aqd)
+    {
+        memset(&aqd_features_local, 0, sizeof(AQDQueryFeatures));
+        /* Extract static features before execution */
+        aqd_extract_query_features(&aqd_features_local,
+                                   queryDesc->sourceText ? queryDesc->sourceText : "",
+                                   queryDesc->plannedstmt,
+                                   queryDesc);
+        aqd_start = GetCurrentTimestamp();
+    }
+
+    if (ExecutorRun_hook)
+        (*ExecutorRun_hook) (queryDesc, direction, count, execute_once);
+    else
+        standard_ExecutorRun(queryDesc, direction, count, execute_once);
+
+    if (do_aqd)
+    {
+        aqd_end = GetCurrentTimestamp();
+        double ms = (double)(aqd_end - aqd_start) / 1000.0;
+        aqd_features_local.execution_time_ms = ms;
+        aqd_features_local.postgres_time_ms = ms;
+        aqd_log_features_to_file(&aqd_features_local);
+    }
 }
 
 void

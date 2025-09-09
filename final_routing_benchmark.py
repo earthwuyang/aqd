@@ -1,43 +1,57 @@
 #!/usr/bin/env python3
 """
-Final Real Routing Benchmark for AQD - With Proper Type Casting
+Final Routing Benchmark using generated AP/TP workloads
+- Loads queries from data/benchmark_queries/<dataset>/{AP,TP} files
+- Runs concurrent benchmarks at scales: 100, 200, ..., 1000
 """
 
 import os
 import time
 import psycopg2
 import statistics
+import random
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import json
 import logging
+from pathlib import Path
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class FinalRoutingBenchmark:
-    def __init__(self):
+    def __init__(self, dataset='imdb_small', query_dir=None):
         self.pg_config = {
             'host': 'localhost',
             'port': 5432,
-            'database': 'postgres',
+            'database': dataset,
             'user': 'wuy'
         }
+        self.dataset = dataset
+        base_dir = Path(__file__).resolve().parent
+        self.query_base_dir = Path(query_dir) if query_dir else (base_dir / 'data' / 'benchmark_queries' / dataset)
         
-        # Working queries with proper type casting
-        self.working_queries = [
-            # These work reliably
-            "SELECT COUNT(*) FROM financial.trans;",
-            "SELECT COUNT(*) FROM financial.account;", 
-            "SELECT COUNT(*) FROM financial.disp;",
-            "SELECT COUNT(*) FROM financial.card;",
-            "SELECT COUNT(*) FROM financial.order;",
-            "SELECT type, COUNT(*) FROM financial.disp GROUP BY type;",
-            "SELECT operation, COUNT(*) FROM financial.trans WHERE operation IS NOT NULL GROUP BY operation LIMIT 5;",
-            "SELECT k_symbol, COUNT(*) FROM financial.trans WHERE k_symbol IS NOT NULL GROUP BY k_symbol LIMIT 5;",
-            "SELECT type, COUNT(*) FROM financial.card WHERE type IS NOT NULL GROUP BY type;",
-            "SELECT bank_to, COUNT(*) FROM financial.order WHERE bank_to IS NOT NULL GROUP BY bank_to LIMIT 5;",
-        ]
+        # Load AP + TP queries
+        self.generated_queries = self._load_generated_queries()
+
+    def _load_sql_file(self, path: Path):
+        if not path.exists():
+            return []
+        text = path.read_text(encoding='utf-8', errors='ignore')
+        queries = [q.strip() for q in text.split(';') if q.strip()]
+        return queries
+
+    def _load_generated_queries(self):
+        ap_path = self.query_base_dir / 'workload_10k_ap_queries.sql'
+        tp_path = self.query_base_dir / 'workload_10k_tp_queries.sql'
+        ap = self._load_sql_file(ap_path)
+        tp = self._load_sql_file(tp_path)
+        queries = ap + tp
+        if not queries:
+            logger.warning(f"No generated queries found under {self.query_base_dir}")
+        else:
+            random.shuffle(queries)
+        return queries
         
     def get_connection(self):
         return psycopg2.connect(**self.pg_config)
@@ -53,6 +67,18 @@ class FinalRoutingBenchmark:
             elif method == 'lightgbm':
                 cursor.execute("SET aqd.routing_method = 3;")
                 cursor.execute("SET aqd.enable_feature_logging = on;")
+                # Attempt to load a trained LightGBM model if available
+                base = Path(__file__).resolve().parent
+                candidates = [
+                    base / 'models' / 'real_classification_model.txt',
+                    base / 'models' / 'classification_model.txt',
+                    base / 'models' / 'routing_lightgbm.txt',
+                    base / 'models' / 'lightgbm_model.txt'
+                ]
+                for path in candidates:
+                    if path.exists():
+                        cursor.execute(f"SET aqd.lightgbm_model_path = '{str(path)}';")
+                        break
             elif method == 'gnn':
                 cursor.execute("SET aqd.routing_method = 4;")
             conn.commit()
@@ -103,17 +129,22 @@ class FinalRoutingBenchmark:
             }
     
     def run_concurrent_benchmark(self, routing_method, num_queries=100):
-        logger.info(f"Testing {routing_method} with {num_queries} queries...")
+        logger.info(f"Testing {routing_method} on dataset '{self.dataset}' with {num_queries} concurrent queries...")
         
+        if not self.generated_queries:
+            logger.error("No queries loaded. Please generate queries first.")
+            return None
+
+        # Select a slice of queries; cycle if needed
         queries_to_run = []
         for i in range(num_queries):
-            query = self.working_queries[i % len(self.working_queries)]
+            query = self.generated_queries[i % len(self.generated_queries)]
             queries_to_run.append((query, i))
         
         results = []
         start_time = time.time()
         
-        with ThreadPoolExecutor(max_workers=10) as executor:
+        with ThreadPoolExecutor(max_workers=num_queries) as executor:
             future_to_query = {
                 executor.submit(self.execute_single_query, query, routing_method, qid): (query, qid)
                 for query, qid in queries_to_run
@@ -141,83 +172,70 @@ class FinalRoutingBenchmark:
             'p95_total_time_ms': sorted([r['total_time_ms'] for r in successful])[int(0.95 * len(successful))],
         }
     
-    def run_full_benchmark(self):
+    def run_full_benchmark(self, conc_levels=None):
         methods = ['default', 'cost_threshold', 'lightgbm', 'gnn']
-        results = {}
+        results = {m: {} for m in methods}
+        conc_levels = conc_levels or [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]
         
         print("\n" + "="*90)
         print("🚀 AQD REAL ROUTING PERFORMANCE BENCHMARK")
         print("="*90)
+        print(f"Dataset: {self.dataset}")
         print("Testing actual PostgreSQL system with 4 routing methods")
-        print("100 concurrent queries per method using working query set")
+        print("Concurrent scales: 100..1000 using generated AP+TP workloads")
         print()
-        
-        for method in methods:
-            result = self.run_concurrent_benchmark(method, 100)
-            if result:
-                results[method] = result
-                logger.info(f"✅ {method}: {result['throughput_qps']:.2f} QPS, {result['avg_total_time_ms']:.1f}ms avg")
-            else:
-                logger.error(f"❌ {method}: Failed")
-        
-        if results:
-            self.print_final_results(results)
-            
+        for nq in conc_levels:
+            print(f"\n--- Concurrency: {nq} ---")
+            for method in methods:
+                result = self.run_concurrent_benchmark(method, nq)
+                if result:
+                    results[method][str(nq)] = result
+                    logger.info(f"✅ {method}@{nq}: {result['throughput_qps']:.2f} QPS, {result['avg_total_time_ms']:.1f}ms avg")
+                else:
+                    logger.error(f"❌ {method}@{nq}: Failed")
+
+        self.print_final_results(results)
         return results
     
     def print_final_results(self, results):
-        print("\n📊 FINAL PERFORMANCE RESULTS")
+        print("\n📊 FINAL PERFORMANCE RESULTS (by concurrency)")
         print("-" * 90)
-        print(f"{'Method':<15} {'Throughput':<12} {'Makespan':<10} {'Routing':<10} {'Query':<10} {'P95':<10}")
-        print(f"{'':15} {'(QPS)':<12} {'(sec)':<10} {'(ms)':<10} {'(ms)':<10} {'(ms)':<10}")
-        print("-" * 90)
-        
-        for method, data in results.items():
-            print(f"{method:<15} "
-                  f"{data['throughput_qps']:>10.2f} "
-                  f"{data['makespan_seconds']:>8.2f} "
-                  f"{data['avg_routing_time_ms']:>8.3f} "
-                  f"{data['avg_query_time_ms']:>8.1f} "
-                  f"{data['p95_total_time_ms']:>8.1f}")
-        
-        print("-" * 90)
-        
-        # Key findings
-        best_throughput = max(results.items(), key=lambda x: x[1]['throughput_qps'])
-        fastest_routing = min(results.items(), key=lambda x: x[1]['avg_routing_time_ms'])
-        lowest_latency = min(results.items(), key=lambda x: x[1]['avg_total_time_ms'])
-        
-        print(f"\n🏆 PERFORMANCE WINNERS:")
-        print(f"   Best Throughput: {best_throughput[0]} ({best_throughput[1]['throughput_qps']:.2f} QPS)")
-        print(f"   Fastest Routing: {fastest_routing[0]} ({fastest_routing[1]['avg_routing_time_ms']:.3f}ms)")  
-        print(f"   Lowest Latency:  {lowest_latency[0]} ({lowest_latency[1]['avg_total_time_ms']:.1f}ms)")
-        
-        print(f"\n💡 KEY INSIGHTS:")
-        default_qps = results.get('default', {}).get('throughput_qps', 0)
-        best_qps = best_throughput[1]['throughput_qps']
-        if default_qps > 0:
-            improvement = ((best_qps - default_qps) / default_qps) * 100
-            print(f"   ML routing improves throughput by {improvement:.1f}% over default")
-        
-        routing_overhead = statistics.mean([r['avg_routing_time_ms'] for r in results.values()])
-        print(f"   Average routing overhead: {routing_overhead:.2f}ms")
-        
+        # Aggregate summary per method across conc levels
+        for method, per_level in results.items():
+            if not per_level:
+                continue
+            print(f"\nMethod: {method}")
+            print(f"{'Conc':<6} {'QPS':>10} {'Makespan(s)':>14} {'Avg(ms)':>10} {'P95(ms)':>10} {'Success%':>10}")
+            for level in sorted(per_level.keys(), key=lambda x: int(x)):
+                d = per_level[level]
+                print(f"{level:<6} "
+                      f"{d['throughput_qps']:>10.2f} "
+                      f"{d['makespan_seconds']:>14.2f} "
+                      f"{d['avg_total_time_ms']:>10.1f} "
+                      f"{d['p95_total_time_ms']:>10.1f} "
+                      f"{(d['success_rate']*100):>9.1f}%")
+
         # Save results
         os.makedirs('results', exist_ok=True)
-        with open('results/final_routing_benchmark.json', 'w') as f:
+        out_path = f'results/final_routing_benchmark_{self.dataset}.json'
+        with open(out_path, 'w') as f:
             json.dump(results, f, indent=2)
-        
-        print(f"\n📁 Results saved to: results/final_routing_benchmark.json")
+        print(f"\n📁 Results saved to: {out_path}")
         print("="*90)
 
 def main():
-    benchmark = FinalRoutingBenchmark()
-    results = benchmark.run_full_benchmark()
+    import argparse
+    parser = argparse.ArgumentParser(description='Final routing benchmark on generated workloads')
+    parser.add_argument('--dataset', type=str, default='imdb_small', help='Dataset/database name to target')
+    parser.add_argument('--query_dir', type=str, default=None, help='Directory with generated queries for the dataset')
+    parser.add_argument('--levels', type=str, default='100,200,300,400,500,600,700,800,900,1000', help='Comma-separated concurrency levels')
+    args = parser.parse_args()
+
+    levels = [int(x) for x in args.levels.split(',') if x.strip()]
+    benchmark = FinalRoutingBenchmark(dataset=args.dataset, query_dir=args.query_dir)
+    results = benchmark.run_full_benchmark(conc_levels=levels)
     
-    if results and len(results) == 4:
-        print(f"\n✅ SUCCESS: All 4 routing methods tested successfully!")
-    else:
-        print(f"\n⚠️  Some routing methods failed to complete")
+    print("\n✅ Benchmark complete")
 
 if __name__ == '__main__':
     main()

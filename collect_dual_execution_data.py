@@ -115,10 +115,11 @@ class DualExecutionCollector:
             self.pg_conn = psycopg2.connect(**POSTGRESQL_CONFIG)
             self.pg_conn.autocommit = True
             
-            # Enable AQD feature logging
+            # Enable AQD feature logging (CSV)
             cursor = self.pg_conn.cursor()
             cursor.execute("SET aqd.enable_feature_logging = on;")
-            cursor.execute("SET aqd.feature_log_file = '/tmp/aqd_features.json';")
+            cursor.execute("SET aqd.feature_log_path = '/tmp/aqd_features.csv';")
+            cursor.execute("SET aqd.log_format = 0;")
             cursor.close()
             
             logger.info("Connected to PostgreSQL with AQD enabled")
@@ -189,7 +190,8 @@ class DualExecutionCollector:
             # Enable AQD feature logging
             cursor = self.pg_conn.cursor()
             cursor.execute("SET aqd.enable_feature_logging = on;")
-            cursor.execute("SET aqd.feature_log_file = '/tmp/aqd_features.json';")
+            cursor.execute("SET aqd.feature_log_path = '/tmp/aqd_features.csv';")
+            cursor.execute("SET aqd.log_format = 0;")
             cursor.close()
         except Exception as e:
             return None, f"Failed to connect to PostgreSQL DB '{dataset_name}': {e}", None
@@ -198,9 +200,7 @@ class DualExecutionCollector:
             with self.timeout_context(self.timeout_seconds):
                 cursor = self.pg_conn.cursor()
                 
-                # Clear any previous feature logs
-                if os.path.exists('/tmp/aqd_features.json'):
-                    os.remove('/tmp/aqd_features.json')
+                # Note: CSV log is append-only; we'll read the last line after execution
                 
                 # Quote reserved table keywords without schema qualification
                 import re
@@ -242,16 +242,32 @@ class DualExecutionCollector:
                 execution_time = end_time - start_time
                 cursor.close()
                 
-                # Read AQD features from log file
+                # Read AQD features from CSV log: take last non-empty line and map feature_* to aqd_feature_*
                 aqd_features = {}
-                if os.path.exists('/tmp/aqd_features.json'):
-                    with open('/tmp/aqd_features.json', 'r') as f:
-                        try:
-                            feature_data = json.load(f)
-                            if isinstance(feature_data, list) and len(feature_data) > 0:
-                                aqd_features = feature_data[-1]  # Get latest entry
-                        except json.JSONDecodeError:
-                            logger.warning("Failed to parse AQD features JSON")
+                csv_path = '/tmp/aqd_features.csv'
+                if os.path.exists(csv_path):
+                    try:
+                        with open(csv_path, 'r') as f:
+                            lines = [ln.strip() for ln in f if ln.strip()]
+                        if len(lines) >= 2:
+                            header = lines[0].split(',')
+                            last = lines[-1].split(',')
+                            if len(last) == len(header):
+                                row = dict(zip(header, last))
+                                for k, v in row.items():
+                                    if k.startswith('feature_'):
+                                        try:
+                                            aqd_features[f'aqd_{k}'] = float(v)
+                                        except ValueError:
+                                            pass
+                                # Include complexity_score as a named feature
+                                if 'complexity_score' in row:
+                                    try:
+                                        aqd_features['aqd_complexity_score'] = float(row['complexity_score'])
+                                    except ValueError:
+                                        pass
+                    except Exception as e:
+                        logger.warning(f"Failed to parse AQD CSV features: {e}")
                 
                 return execution_time, None, aqd_features
                 

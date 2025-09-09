@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
 AQD LightGBM Model Training
-Trains LightGBM model to predict log(postgres_time - duckdb_time) 
-for query routing decisions in the AQD system.
+Trains LightGBM model to predict log(postgres_time / duckdb_time)
+using only cached AQD kernel features (no label leakage).
 """
 
 import pandas as pd
@@ -23,8 +23,11 @@ class AQDLightGBMTrainer:
     Trains LightGBM model for AQD query routing predictions
     """
     
-    def __init__(self, data_path='/home/wuy/DB/pg_duckdb_postgres/data/execution_data'):
-        self.data_path = Path(data_path)
+    def __init__(self, data_path=None, output_dir=None):
+        base_dir = Path(__file__).resolve().parent
+        # Default to repo-relative paths if not provided
+        self.data_path = Path(data_path) if data_path else (base_dir / 'data' / 'execution_data')
+        self.models_dir = Path(output_dir) if output_dir else (base_dir / 'models')
         self.model = None
         self.feature_names = None
         self.results = {}
@@ -114,15 +117,7 @@ class AQDLightGBMTrainer:
         # Handle missing values
         df = df.fillna(0)
         
-        # Feature engineering
-        df['time_ratio'] = df['postgres_time'] / (df['duckdb_time'] + 1e-6)  # Avoid division by zero
-        df['log_time_ratio'] = np.log(df['time_ratio'] + 1e-6)
-        df['is_postgres_faster'] = (df['postgres_time'] < df['duckdb_time']).astype(int)
-        df['absolute_time_diff'] = np.abs(df['time_difference'])
-        df['log_postgres_time'] = np.log(df['postgres_time'] + 1e-6)
-        df['log_duckdb_time'] = np.log(df['duckdb_time'] + 1e-6)
-        
-        # Target variable (log-transformed time difference as in AQD paper)
+        # Target variable (log-transformed time ratio as in AQD paper)
         # Use log_time_difference which is already computed
         df['target'] = df['log_time_difference']
         
@@ -137,13 +132,13 @@ class AQDLightGBMTrainer:
     
     def prepare_features_target(self, df):
         """Prepare feature matrix and target vector"""
-        # Exclude non-feature columns and categorical columns that need encoding
-        exclude_cols = [
-            'postgres_time', 'duckdb_time', 'time_difference', 
-            'log_time_difference', 'target', 'query', 'dataset', 'query_type'
+        # Use ONLY AQD kernel cached features to avoid leakage
+        feature_cols = [
+            col for col in df.columns
+            if col.startswith('aqd_') and df[col].dtype in ['int64', 'float64']
         ]
-        
-        feature_cols = [col for col in df.columns if col not in exclude_cols and df[col].dtype in ['int64', 'float64', 'bool']]
+        if not feature_cols:
+            raise ValueError("No AQD features found in execution data. Ensure aqd feature logging is enabled and collected.")
         
         X = df[feature_cols]
         y = df['target']
@@ -262,10 +257,9 @@ class AQDLightGBMTrainer:
         plt.xlabel('Importance Score')
         plt.tight_layout()
         
-        output_dir = Path('/home/wuy/DB/pg_duckdb_postgres/models')
-        output_dir.mkdir(exist_ok=True)
-        plt.savefig(output_dir / 'feature_importance.png', dpi=150, bbox_inches='tight')
-        print(f"Feature importance plot saved to {output_dir / 'feature_importance.png'}")
+        self.models_dir.mkdir(exist_ok=True)
+        plt.savefig(self.models_dir / 'feature_importance.png', dpi=150, bbox_inches='tight')
+        print(f"Feature importance plot saved to {self.models_dir / 'feature_importance.png'}")
         
         return importance_df
     
@@ -290,10 +284,9 @@ class AQDLightGBMTrainer:
         plt.figure(figsize=(10, 6))
         shap.summary_plot(shap_values, X_shap, show=False, max_display=15)
         
-        output_dir = Path('/home/wuy/DB/pg_duckdb_postgres/models')
-        output_dir.mkdir(exist_ok=True)
-        plt.savefig(output_dir / 'shap_summary.png', dpi=150, bbox_inches='tight')
-        print(f"SHAP summary plot saved to {output_dir / 'shap_summary.png'}")
+        self.models_dir.mkdir(exist_ok=True)
+        plt.savefig(self.models_dir / 'shap_summary.png', dpi=150, bbox_inches='tight')
+        print(f"SHAP summary plot saved to {self.models_dir / 'shap_summary.png'}")
         plt.close()
         
         return shap_values
@@ -303,11 +296,10 @@ class AQDLightGBMTrainer:
         if not self.model:
             raise ValueError("No model to save")
         
-        output_dir = Path('/home/wuy/DB/pg_duckdb_postgres/models')
-        output_dir.mkdir(exist_ok=True)
+        self.models_dir.mkdir(exist_ok=True)
         
         # Save LightGBM model
-        model_path = output_dir / 'lightgbm_model.txt'
+        model_path = self.models_dir / 'lightgbm_model.txt'
         self.model.save_model(str(model_path))
         
         # Save feature names and metadata
@@ -318,14 +310,14 @@ class AQDLightGBMTrainer:
             'training_timestamp': datetime.now().isoformat()
         }
         
-        with open(output_dir / 'model_metadata.json', 'w') as f:
+        with open(self.models_dir / 'model_metadata.json', 'w') as f:
             json.dump(metadata, f, indent=2)
         
-        print(f"💾 Model saved to {output_dir}")
+        print(f"💾 Model saved to {self.models_dir}")
         print(f"   - LightGBM model: {model_path}")
-        print(f"   - Metadata: {output_dir / 'model_metadata.json'}")
+        print(f"   - Metadata: {self.models_dir / 'model_metadata.json'}")
         
-        return output_dir
+        return self.models_dir
     
     def train_complete_pipeline(self):
         """Complete training pipeline"""
@@ -399,7 +391,13 @@ class AQDLightGBMTrainer:
 
 def main():
     """Main training function"""
-    trainer = AQDLightGBMTrainer()
+    import argparse
+    parser = argparse.ArgumentParser(description='Train LightGBM for AQD using collected execution data')
+    parser.add_argument('--data_dir', type=str, default=None, help='Directory with *_execution_data.json (default: repo data/execution_data)')
+    parser.add_argument('--output_dir', type=str, default=None, help='Directory to save models (default: repo models)')
+    args = parser.parse_args()
+
+    trainer = AQDLightGBMTrainer(data_path=args.data_dir, output_dir=args.output_dir)
     success = trainer.train_complete_pipeline()
     return success
 
