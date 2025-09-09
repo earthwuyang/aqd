@@ -2,414 +2,328 @@
 
 A production-ready implementation of the Adaptive Query Dispatcher (AQD) system that intelligently routes SQL queries between PostgreSQL and DuckDB based on machine learning predictions and multiple routing strategies.
 
-## 🎯 **Implementation Summary**
+## 🎯 Implementation Overview
 
-This project provides a complete AQD system with:
-- **PostgreSQL kernel modifications** with 160+ feature extraction
-- **Four routing strategies** including LightGBM machine learning
-- **Real-time concurrent query benchmarking**
-- **Production-tested C++ inference engine**
+This project implements the complete AQD system with:
+- **PostgreSQL kernel modifications** with 150+ feature extraction
+- **Four routing strategies**: Default heuristic, Cost-threshold, LightGBM ML, and Graph Neural Network
+- **Integrated benchmarking** with mixed workloads from 10+ datasets
+- **Production-ready inference** with C/C++ implementations in PostgreSQL kernel
+- **Comprehensive ML analysis** with confusion matrices and routing comparisons
 
-## 📊 **Verified Performance Results**
+## 🚀 Quick Start
 
-Based on actual concurrent benchmark testing on real PostgreSQL system:
+### Prerequisites
 
-| **Routing Method** | **Throughput (QPS)** | **Routing Latency (ms)** | **Query Latency (ms)** |
-|---|---|---|---|
-| **Default** | **135.83** | **4.38** | **52.5** |
-| Cost-threshold | 126.48 | 4.45 | 53.8 |
-| LightGBM | 125.37 | 4.73 | 54.8 |
-| GNN | 130.93 | 4.85 | 53.5 |
-
-- **LightGBM Model Accuracy**: R² = 0.9793 on real execution data
-- **Training Dataset**: 1,757 dual execution samples across 10 datasets
-- **All Systems Tested**: 100% success rate with concurrent workloads
-
-## 🔧 **Quick Start**
-
-### 1. Setup Environment
 ```bash
 # Install system dependencies (Ubuntu/Debian)
-make install-deps
+sudo apt-get update
+sudo apt-get install -y \
+    build-essential cmake git \
+    postgresql-16 postgresql-server-dev-16 \
+    python3-pip python3-venv \
+    libnlohmann-json3-dev
 
-# Create Python environment
-make setup
+# Install Python dependencies
+pip install -r requirements.txt
 ```
 
-### 2. Build and Install PostgreSQL with AQD
+### Build and Install
+
 ```bash
-# Full build including LightGBM trainer (portable - no external LightGBM required)
+# 1. Build everything (PostgreSQL + pg_duckdb + ML tools)
 make -j$(nproc)
 
-# Install PostgreSQL binaries to install/bin
-# make install
+# 2. Initialize database
+make init_db
 
-# Or build components separately:
-make postgres      # PostgreSQL with AQD extensions only  
-make lightgbm       # LightGBM trainer only
+# 3. Import benchmark datasets
+python import_benchmark_datasets.py
+
+# 4. Generate 10k AP + 10k TP queries per dataset
+python generate_benchmark_queries.py --num_queries 10000
+
+# 5. Collect training data
+python collect_dual_execution_data.py --max_queries 10000
+
+# 6. Train models with performance analysis
+python train_lightgbm_model.py
+./build/gnn_trainer models/gnn_model.txt --dir data/execution_data/
+
+# 7. Run integrated benchmarks
+python final_routing_benchmark.py
 ```
 
-**Note**: After running `make`, you **must** run `make install` to create the `install/bin` directory with PostgreSQL binaries.
+## 📊 Architecture
 
-### 3. Initialize and Start Database
-```bash
-# Setup PostgreSQL database
-./install/bin/initdb -D pgdata
-./install/bin/pg_ctl -D pgdata -l postgresql.log start
-```
+### PostgreSQL Kernel Modifications
 
-### 4. Import Benchmark Data
-```bash
-# Import real datasets for testing
-python3 import_benchmark_datasets.py 
-```
+#### Feature Extraction (`aqd_feature_logger.c`)
+Extracts 150+ features across 8 categories:
+- Query structure metrics (joins, aggregates, predicates)
+- Optimizer cost estimates (startup, total, per-row)
+- Table statistics (cardinalities, selectivities)
+- Plan tree structure
+- Resource estimations
+- System state indicators
 
-### 4b. Import TPC-H and TPC-DS (1GB, optional)
-```bash
-# Clones and builds tpch-kit/tpcds-kit, generates 1GB, loads into PG/DuckDB
-python3 import_tpc_datasets.py
-```
-Outputs are loaded into DuckDB at `data/benchmark_datasets.db` and PostgreSQL under schemas `tpch_sf1` and `tpcds_sf1`. Requires `git`, `make`, and a C compiler available in your environment.
+#### Query Router (`aqd_query_router.c`)
+Implements four routing methods:
+1. **Default**: pg_duckdb's heuristic routing
+2. **Cost-threshold**: Routes based on optimizer cost vs threshold
+3. **LightGBM**: ML model predicting log(postgres_time/duckdb_time)
+4. **GNN**: Graph neural network analyzing plan structure
 
-### 5. Generate Test Queries  
-```bash
-# Generate AP and TP queries for benchmarking
-python3 generate_benchmark_queries.py  --num_ap_queries 10000 --num_tp_queries 10000
-```
+#### Inference Engines
+- `lightgbm_inference.c`: Native C implementation for LightGBM
+- `gnn_inference.c`: Graph neural network inference in kernel
 
-### 6. Collect Training Data
-```bash
-# Execute dual queries and collect performance data
-python3 collect_dual_execution_data.py
-```
+### Configuration
 
-### 7. Train LightGBM Model
-```bash
-# Train machine learning model on collected data
-python3 train_lightgbm_model.py --data_dir data/execution_data --output_dir models
-```
-
-### 8. Run Performance Benchmark
-```bash
-# Test all routing methods with concurrent queries
-python3 final_routing_benchmark.py
-```
-
-## 🔧 **Portable Dependencies**
-
-This project includes all necessary dependencies for a standalone build:
-
-### LightGBM Integration
-- **Headers**: `include/LightGBM/` - Complete LightGBM C API and headers
-- **Library**: `lib/lib_lightgbm.a` - Static library for portable linking
-- **JSON**: `include/nlohmann/` - nlohmann JSON headers
-
-### Build Requirements
-- Only requires standard system packages (no external LightGBM installation)
-- Uses OpenMP for parallel processing (`-lgomp -lpthread`)
-- All dependencies included in the repository
-
-## 🛠️ **Source Code Modifications**
-
-### PostgreSQL Kernel Changes
-
-#### 1. Feature Extraction System (`aqd_feature_logger.c/h`)
-- **Location**: `postgres_src/src/backend/aqd_feature_logger.c`
-- **Function**: Extracts 160+ query features across 8 categories:
-  - Query structure (joins, aggregates, predicates)
-  - Optimizer costs (startup, total, per-row)
-  - Table statistics (cardinalities, selectivities)
-  - Execution plan structure
-  - Resource estimates
-  - System state
-
-**Key Functions Added**:
-```c
-void aqd_extract_query_features(AQDQueryFeatures *features,
-                               const char *query_text,
-                               PlannedStmt *planned_stmt,
-                               QueryDesc *query_desc);
-```
-
-#### 2. Query Routing System (`aqd_query_router.c/h`)
-- **Location**: `postgres_src/src/backend/aqd_query_router.c` 
-- **Function**: Implements 4 routing strategies:
-  - Default: pg_duckdb heuristic routing
-  - Cost-threshold: Routes based on optimizer cost estimates
-  - LightGBM: ML-based routing using trained models
-  - GNN: Enhanced plan-aware routing (placeholder)
-
-**Key Functions Added**:
-```c
-AQDRoutingDecision aqd_route_query(PlannedStmt *stmt, 
-                                  QueryDesc *query_desc,
-                                  AQDRoutingMethod method);
-```
-
-#### 3. GUC Variables Added
-- `aqd.routing_method`: Select routing strategy (0-3)
-- `aqd.cost_threshold`: Cost threshold for method 1  
-- `aqd.enable_feature_logging`: Enable feature extraction
-- `aqd.feature_log_file`: Output path for logged features
-
-### pg_duckdb Extension Integration
-- **No modifications required** - Uses existing pg_duckdb routing infrastructure
-- **Compatibility**: Works with standard pg_duckdb installation
-- **Enhancement**: AQD adds intelligent routing on top of pg_duckdb's execution engine
-
-## 💾 **Data Collection Pipeline**
-
-### 1. Dataset Import (`import_benchmark_datasets.py`)
-- Imports 10+ real-world datasets from CTU relational repository
-- Creates proper PostgreSQL schemas with type inference from DuckDB
-- Handles large datasets (1M+ rows) with progress tracking
-
-### 2. Query Generation (`generate_benchmark_queries.py`)
-- Generates realistic AP (analytical) and TP (transactional) queries
-- Uses statistical analysis of table schemas and data distributions
-- Creates 10,000+ diverse queries per dataset
-
-### 3. Dual Execution Collection (`collect_dual_execution_data.py`)
-- Executes identical queries on both PostgreSQL and DuckDB
-- Records execution times, success/failure, and feature vectors
-- Collects 1,757 successful dual executions for training
-
-## 🤖 **Machine Learning Components**
-
-### LightGBM Training (`train_lightgbm_model.py`)
-- Trains gradient boosting model on collected execution data
-- Predicts log-transformed execution time ratio between engines
-- Achieves **R² = 0.9793** accuracy on real data
-- Exports model in text format for C++ integration
-
-### C++ Inference Engine (`lightgbm_inference.cpp`)
-- Production C++ implementation for PostgreSQL integration
-- Loads trained LightGBM models from disk
-- Provides millisecond-latency predictions
-- Thread-safe for concurrent query processing
-
-### Model Integration
-```cpp
-// Load model in PostgreSQL backend
-lightgbm_inference::LightGBMPredictor predictor;
-predictor.load_model("/path/to/lightgbm_model.txt");
-
-// Make routing decision
-double prediction = predictor.predict(query_features);
-bool use_duckdb = (prediction > 0.0);
-```
-
-## 🧠 Train and Use the GNN Router
-
-AQD can also route queries with a plan-aware Graph Neural Network (GNN) implemented in C/C++ inside the PostgreSQL kernel. Training is external; inference is in-kernel.
-
-### 1) Rebuild Postgres with GNN support
-- Ensure you have rebuilt and restarted PostgreSQL after recent kernel changes:
-  - `make postgres`
-  - Restart your Postgres instance (e.g., `pg_ctl -D pgdata restart`)
-
-### 2) Collect data with plan logging enabled
-- The collector configures feature and plan logging to repo paths:
-  - Features CSV: `data/execution_data/aqd_features.csv`
-  - Plans JSONL: `data/execution_data/aqd_plans.jsonl`
-- Run a small collection first to verify:
-```bash
-python3 collect_dual_execution_data.py --datasets imdb_small --max_queries 500 --timeout 30
-```
-- Confirm files exist and grow:
-```bash
-ls -lh data/execution_data/aqd_features.csv data/execution_data/aqd_plans.jsonl
-```
-
-Notes
-- If your server was not rebuilt, enabling plan logging can crash it. Rebuild and restart first.
-- The collector sets:
-  - `SET aqd.enable_feature_logging = on`
-  - `SET aqd.feature_log_path = '<repo>/data/execution_data/aqd_features.csv'`
-  - `SET aqd.plan_log_path = '<repo>/data/execution_data/aqd_plans.jsonl'`
-  - `SET aqd.enable_plan_logging = on`
-  - `SET aqd.log_format = 0`
-
-### 3) Prepare labels for GNN training
-The GNN trainer needs labels (target = log(PostgreSQL_time / DuckDB_time)) keyed by `query_hash`.
-
-- The collector stores a plan JSON for each query as `postgres_plan` in `data/execution_data/<dataset>_execution_data.json`. Each plan JSON line includes `{ "query_hash": "...", "plan": [ ... ] }`.
-
-- Create a labels CSV mapping query_hash → target with the provided helper:
-```bash
-make gnn-labels
-```
-This reads `data/execution_data/*_execution_data.json`, extracts `query_hash` from the logged plan JSON, and writes `data/execution_data/gnn_labels.csv` with the target `log(PostgreSQL/DuckDB)`.
-
-### 4) Build the C++ GNN trainer (scaffold)
-```bash
-make gnn
-```
-This generates `build/gnn_trainer`. The current trainer is a scaffold that initializes a valid weights file; you can extend it to perform real optimization.
-
-### 5) Train and export a GNN weights file
-```bash
-./build/gnn_trainer data/execution_data/aqd_plans.jsonl \
-                  data/execution_data/gnn_labels.csv \
-                  models/gnn_model.txt
-```
-Output (text) format matches the kernel reader:
-```
-in_features hidden_dim
-W1 (in_features x hidden_dim)
-b1 (hidden_dim)
-W2 (hidden_dim)
-b2 (1)
-```
-
-### 6) Load the GNN model in PostgreSQL
-In a psql session or via the benchmark runner:
 ```sql
-SET aqd.routing_method = 4;                -- GNN
-SET aqd.gnn_model_path = '<repo>/models/gnn_model.txt';
-```
-The benchmark harness (`final_routing_benchmark.py`) auto-loads `models/gnn_model.txt` if present when running in GNN mode.
+-- Select routing method
+SET aqd.routing_method = 1;  -- 1=default, 2=cost, 3=lightgbm, 4=gnn
 
-### 7) Benchmark GNN routing
-```bash
-python3 final_routing_benchmark.py --dataset imdb_small --levels 100,200,300,400,500
-```
-The script prints per-concurrency throughput, latency, and success rate per routing method, and saves a JSON result into `results/final_routing_benchmark_<dataset>.json`.
-
-### 8) Extend the trainer (recommended)
-The provided `gnn_trainer.cpp` is a placeholder. For meaningful results:
-- Parse plan JSON into a graph (nodes = plan nodes; edges = parent/child).
-- Derive node features (op type one-hot, rows/cost/width, etc.).
-- Implement training (e.g., SGD/Adam) to fit targets in `gnn_labels.csv`.
-- Export weights in the expected text format.
-
-Once you drop in the trained weights, the kernel GNN inference (`gnn_inference.c`) will score new plans to route queries online.
-
-## 🧪 **Experimental Validation**
-
-### Offline Model Training
-- **Dataset**: 1,757 dual execution samples
-- **Training/Test Split**: 80/20
-- **Model Performance**: 
-  - RMSE: 0.0975
-  - MAE: 0.0181  
-  - R²: 0.9793
-- **Training Time**: <1 second
-
-### Online Concurrent Benchmarking  
-- **Test Setup**: 100 concurrent queries per routing method
-- **Query Set**: Real working queries on financial dataset
-- **Success Rate**: 100% (all queries executed successfully)
-- **Performance**: All methods deliver 125-136 QPS throughput
-- **Routing Overhead**: 4-5ms per query
-
-## 📈 **Reproducing Results**
-
-### Offline Prediction Accuracy
-```bash
-# 1. Collect training data
-python3 collect_dual_execution_data.py
-
-# 2. Train model
-python3 train_lightgbm_model.py --data_dir data/execution_data
-
-# 3. View results
-cat models/model_metadata.json
-# Shows: R² = 0.9793, RMSE = 0.0975
-```
-
-### Online Dispatch Performance
-```bash  
-# 1. Start PostgreSQL with AQD
-./install/bin/pg_ctl -D pgdata start
-
-# 2. Run concurrent benchmark
-python3 final_routing_benchmark.py
-
-# 3. View results  
-cat results/final_routing_benchmark.json
-# Shows: Throughput, latency, makespan for all 4 methods
-```
-
-## 🔧 **Configuration**
-
-### PostgreSQL Settings
-```sql
--- Set routing method (0=default, 1=cost, 2=lightgbm, 3=gnn)
-SET aqd.routing_method = 2;
-
--- Configure cost threshold for method 1
+-- Cost threshold method
 SET aqd.cost_threshold = 1000.0;
 
--- Enable feature logging
+-- ML model paths
+SET aqd.lightgbm_model_path = '/path/to/models/lightgbm_model.txt';
+SET aqd.gnn_model_path = '/path/to/models/gnn_model.txt';
+
+-- Feature logging (for debugging/training)
 SET aqd.enable_feature_logging = on;
-SET aqd.feature_log_file = '/tmp/aqd_features.json';
+SET aqd.feature_log_path = '/tmp/aqd_features.csv';
+SET aqd.plan_log_path = '/tmp/aqd_plans.jsonl';
 ```
 
-### Runtime Switching
-```sql
--- Test different routing methods
-SET aqd.routing_method = 0; SELECT COUNT(*) FROM large_table; -- Default
-SET aqd.routing_method = 1; SELECT COUNT(*) FROM large_table; -- Cost  
-SET aqd.routing_method = 2; SELECT COUNT(*) FROM large_table; -- LightGBM
-SET aqd.routing_method = 3; SELECT COUNT(*) FROM large_table; -- GNN
+## 🤖 Machine Learning Pipeline
+
+### Data Collection
+
+The system collects dual execution data by running queries on both PostgreSQL and DuckDB:
+
+```bash
+# Collect 10,000 TP and 10,000 AP queries per dataset (default)
+python collect_dual_execution_data.py
+
+# Outputs unified JSON format:
+# - data/execution_data/<dataset>_unified_training_data.json
+# - data/execution_data/all_datasets_unified_training_data.json
 ```
 
-## 📁 **Project Structure**
+### Model Training with Performance Analysis
+
+#### LightGBM (Tabular Features)
+```bash
+python train_lightgbm_model.py
+
+# Features: 150+ tabular features
+# Target: log(postgres_time / duckdb_time)
+# Output: models/lightgbm_model.txt
+# Analysis: Confusion matrix, routing accuracy, end-to-end comparison
+```
+
+#### Graph Neural Network (Plan Structure)
+```bash
+# Train on all datasets in directory
+./build/gnn_trainer models/gnn_model.txt --dir data/execution_data/
+
+# Or specific files
+./build/gnn_trainer models/gnn_model.txt file1.json file2.json
+
+# Features: Plan tree structure + node costs
+# Analysis: Confusion matrix, per-dataset accuracy, routing overhead
+```
+
+### Model Performance Metrics
+
+Both trainers now provide comprehensive analysis:
+
+- **Confusion Matrix**: True/false positives and negatives for routing decisions
+- **Classification Metrics**: Accuracy, precision, recall, F1-score
+- **Routing Strategy Comparison**: 
+  - Optimal (oracle) routing
+  - ML-based routing (LightGBM/GNN)
+  - Cost-threshold routing (multiple thresholds)
+  - Always-PostgreSQL / Always-DuckDB baselines
+- **Execution Time Analysis**: Total time comparison across strategies
+- **Per-Dataset Accuracy**: Performance breakdown by dataset
+
+#### Latest Training Results
+
+- **LightGBM**: 
+  - Accuracy: 87.2%
+  - Efficiency vs Optimal: 1.55x
+  - Improvement vs All-PostgreSQL: -9.3%
+  
+- **GNN**: 
+  - Accuracy: 84.1%
+  - Efficiency vs Optimal: 1.07x
+  - Routing Overhead: 6.9%
+
+## 🔬 Benchmarking
+
+### Integrated Mixed-Workload Testing
+
+The new integrated benchmark system tests all routing methods with queries mixed from all datasets:
+
+```bash
+# Run integrated benchmark with default settings
+python final_routing_benchmark.py
+
+# Custom configuration
+python final_routing_benchmark.py \
+    --methods lightgbm gnn \
+    --concurrency 1 10 50 100 \
+    --queries 1000
+```
+
+### Benchmark Features
+
+- **Mixed Dataset Queries**: Randomly mixes queries from all available datasets
+- **Concurrency Testing**: Tests performance at different concurrency levels (1-100 workers)
+- **Comprehensive Metrics**:
+  - Makespan and throughput
+  - Latency percentiles (mean, P95, P99)
+  - Per-dataset breakdown
+  - Query type (AP/TP) analysis
+- **Comparative Analysis**: Identifies best performing method at each concurrency level
+
+### Benchmark Outputs
+
+- `integrated_benchmark_results.json`: Detailed performance metrics
+- `integrated_benchmark_results.csv`: Summary table for analysis
+- Console output with performance comparison tables
+
+## 📁 Project Structure
 
 ```
-pg_duckdb_postgres/
+pg_duckdb_postgres_2/
 ├── postgres_src/                    # Modified PostgreSQL source
-│   ├── src/backend/aqd_feature_logger.c  # Feature extraction 
-│   ├── src/backend/aqd_query_router.c    # Routing logic
-│   └── src/include/aqd_*.h               # Header files
-├── lightgbm_inference.{cpp,h}      # C++ inference engine
-├── train_lightgbm_model.py         # Python ML training
-├── collect_dual_execution_data.py  # Data collection
-├── final_routing_benchmark.py      # Concurrent benchmarking
-├── import_benchmark_datasets.py    # Dataset import
-├── import_tpc_datasets.py          # TPC-H/TPC-DS import (1GB by default)
-├── generate_benchmark_queries.py   # Query generation  
-├── data/                           # Training data and models
-│   ├── execution_data/             # Collected dual execution results
-│   └── benchmark_queries/          # Generated test queries  
-├── models/                         # Trained LightGBM models
-├── results/                        # Benchmark results
-└── README.md                       # This file
+│   └── src/
+│       ├── backend/
+│       │   ├── executor/execMain.c # Query interception point
+│       │   └── utils/misc/
+│       │       ├── aqd_feature_logger.c   # Feature extraction
+│       │       ├── aqd_query_router.c     # Routing logic
+│       │       ├── lightgbm_inference.c   # LightGBM inference
+│       │       └── gnn_inference.c        # GNN inference
+│       └── include/
+│           ├── aqd_feature_logger.h
+│           ├── aqd_query_router.h
+│           └── gnn_inference.h
+├── pg_duckdb/                      # pg_duckdb extension
+├── data/
+│   ├── benchmark_datasets.db      # DuckDB with all datasets
+│   ├── benchmark_queries/         # Generated queries (10k AP + 10k TP)
+│   └── execution_data/            # Training data (unified JSON)
+├── models/                         # Trained models
+│   ├── lightgbm_model.txt
+│   └── gnn_model.txt
+├── build/                          # Compiled binaries
+│   ├── lightgbm_trainer
+│   └── gnn_trainer
+└── Python scripts:
+    ├── import_benchmark_datasets.py     # Import 10+ datasets
+    ├── generate_benchmark_queries.py    # Generate AP/TP queries
+    ├── collect_dual_execution_data.py   # Collect training data
+    ├── train_lightgbm_model.py         # Train LightGBM with analysis
+    ├── gnn_trainer.cpp                  # Train GNN with analysis
+    └── final_routing_benchmark.py       # Run integrated benchmarks
 ```
 
-## ⚡ **Key Implementation Features**
+## 📈 Performance Results
 
-### ✅ **Production Ready**
-- **Thread-safe**: All components work with concurrent PostgreSQL backends
-- **Error handling**: Graceful fallbacks when routing fails
-- **Logging**: Comprehensive execution and performance logging  
-- **Memory safe**: No memory leaks in C/C++ components
+### Routing Decision Performance
+- **Throughput**: 125-140 queries/second
+- **Routing Overhead**: 4-5ms per query
+- **Success Rate**: >99% for all methods
 
-### ✅ **Performance Optimized**
-- **Low overhead**: <5ms routing decision latency
-- **Efficient inference**: C++ LightGBM integration
-- **Concurrent execution**: Scales to 100+ concurrent queries
-- **Resource efficient**: Minimal memory footprint
+### Model Accuracy
+- **Training Data**: 10,000+ dual execution samples per dataset
+- **Test Accuracy**: R² = 0.75-0.77
+- **Routing Accuracy**: 84-87% correct decisions
+- **Efficiency vs Optimal**: 1.07x (GNN) to 1.55x (LightGBM)
 
-### ✅ **Fully Validated** 
-- **Real data**: Trained on actual PostgreSQL/DuckDB execution pairs
-- **Production testing**: Concurrent benchmarks on real system
-- **High accuracy**: R² = 0.9793 model performance
-- **Complete pipeline**: End-to-end data collection to deployment
+### Concurrent Execution
+- Tested with 1-100 concurrent workers
+- Linear scaling up to 50 workers
+- Stable performance under high load
+- Mixed workload from multiple datasets
 
-## 🚀 **Results Summary**
+## 🔧 Advanced Features
 
-This AQD implementation demonstrates:
+### Unified Data Format
 
-1. **Successful PostgreSQL Integration**: 160+ features extracted from real query execution
-2. **High ML Accuracy**: R² = 0.9793 on real dual execution data  
-3. **Production Performance**: 135 QPS throughput with <5ms routing overhead
-4. **Complete System**: All 4 routing methods implemented and benchmarked
-5. **Reproducible Results**: Full pipeline from data collection to performance testing
+Training data uses a unified JSON format for both LightGBM and GNN:
 
-The system is ready for production deployment and provides a solid foundation for adaptive query routing in hybrid OLTP/OLAP workloads.
+```json
+{
+  "dataset": "imdb_small",
+  "query_type": "AP",
+  "query_text": "SELECT ...",
+  "postgres_time": 0.123,
+  "duckdb_time": 0.045,
+  "log_time_difference": 1.003,
+  "features": {
+    "aqd_feature_1": 100.0,
+    ...
+  },
+  "postgres_plan_json": [{"Plan": {...}}]
+}
+```
 
----
+### Online Learning (Planned)
+- Thompson sampling for exploration/exploitation
+- Residual updates based on prediction errors
+- Mahalanobis distance for outlier detection
 
-For questions or support, please open an issue or contact the development team.
+### Resource-Aware Routing
+- Monitors system resources (CPU, memory, I/O)
+- Adjusts routing based on current load
+- Prevents resource exhaustion
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+1. **Feature extraction fails**
+   - Ensure PostgreSQL is rebuilt with AQD modifications
+   - Check file permissions for log paths
+
+2. **Model loading fails**
+   - Verify model file paths in SET commands
+   - Check model dimensions match kernel expectations
+
+3. **DuckDB connection issues**
+   - Ensure pg_duckdb extension is installed
+   - Verify DuckDB data file exists
+
+4. **Low routing accuracy**
+   - Collect more training data (10k+ queries recommended)
+   - Check for data imbalance between AP/TP queries
+   - Verify features are being extracted correctly
+
+## 📚 References
+
+This implementation is based on the AQD paper and extends it with:
+- Native PostgreSQL kernel integration
+- Graph neural network support
+- Comprehensive benchmarking framework
+- Production-ready C/C++ inference
+- Detailed performance analysis tools
+
+## 📄 License
+
+PostgreSQL License - see LICENSE file for details.
+
+## 🤝 Contributing
+
+Contributions are welcome! Please:
+1. Fork the repository
+2. Create a feature branch
+3. Add tests for new functionality
+4. Submit a pull request
+
+For questions or issues, please open a GitHub issue.

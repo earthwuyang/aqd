@@ -183,14 +183,19 @@ $(BUILD_DIR)/lightgbm_trainer: lightgbm_trainer.cpp
 	$(CXX) $(CXXFLAGS) $(LIGHTGBM_INCLUDE) -o $@ $< $(LIGHTGBM_LIBS) $(JSON_LIBS)
 	@echo "LightGBM trainer built: $@"
 
-# GNN trainer
-gnn: $(BUILD_DIR)/gnn_trainer
+# GNN trainers
+gnn: $(BUILD_DIR)/gnn_trainer $(BUILD_DIR)/gnn_trainer_real
 
-$(BUILD_DIR)/gnn_trainer: gnn_trainer.cpp | $(BUILD_DIR)
-	@echo "Building GNN trainer..."
-	# nlohmann-json is header-only (installed via nlohmann-json3-dev); no linking needed
-	$(CXX) $(CXXFLAGS) -o $@ $< -I/usr/include
-	@echo "GNN trainer built: $@"
+$(BUILD_DIR)/gnn_trainer: gnn_trainer.cpp rginn.c rginn.h | $(BUILD_DIR)
+	@echo "Building simple GNN trainer..."
+	# nlohmann-json is header-only (installed via nlohmann-json3-dev); link with rginn core
+	$(CXX) $(CXXFLAGS) -o $@ gnn_trainer.cpp rginn.c -I/usr/include
+	@echo "Simple GNN trainer built: $@"
+
+$(BUILD_DIR)/gnn_trainer_real: gnn_trainer_real.cpp rginn.c rginn.h | $(BUILD_DIR)
+	@echo "Building real GNN trainer with backpropagation..."
+	$(CXX) $(CXXFLAGS) -o $@ gnn_trainer_real.cpp rginn.c -I/usr/include
+	@echo "Real GNN trainer built: $@"
 
 gnn-labels:
 	@echo "Generating GNN labels from execution data..."

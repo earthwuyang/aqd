@@ -18,6 +18,7 @@ OBJS = \
 	aqd_feature_logger.o \
 	lightgbm_inference.o \
 	gnn_inference.o \
+	rginn_inference.o \
 	conffiles.o \
 	guc.o \
 	guc-file.o \

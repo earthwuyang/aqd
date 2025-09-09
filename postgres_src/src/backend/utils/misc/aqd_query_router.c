@@ -7,6 +7,7 @@
 
 #include "postgres.h"
 #include "aqd_query_router.h"
+#include "rginn_inference.h"
 
 #include "optimizer/cost.h"
 #include "optimizer/planner.h"
@@ -83,10 +84,15 @@ aqd_init_query_router(void)
         aqd_load_lightgbm_model(aqd_query_router.config.lightgbm_model_path);
     }
     
-    if (aqd_query_router.config.method == AQD_ROUTE_GNN && 
-        strlen(aqd_query_router.config.gnn_model_path) > 0)
+    if (aqd_query_router.config.method == AQD_ROUTE_GNN)
     {
-        aqd_load_gnn_model(aqd_query_router.config.gnn_model_path);
+        if (strlen(aqd_query_router.config.gnn_model_path) > 0) {
+            aqd_load_gnn_model(aqd_query_router.config.gnn_model_path);
+        } else {
+            /* Try default model path */
+            elog(LOG, "AQD: No GNN model path specified, trying default: %s", DEFAULT_RGINN_MODEL_PATH);
+            aqd_load_gnn_model(DEFAULT_RGINN_MODEL_PATH);
+        }
     }
     
     aqd_query_router.initialized = true;
@@ -309,20 +315,18 @@ aqd_route_lightgbm(AQDQueryFeatures *features)
         return AQD_ENGINE_POSTGRES;
 }
 
-/* GNN-based routing */
+/* GNN-based routing using R-GINN */
 AQDExecutionEngine
 aqd_route_gnn(PlannedStmt *planned_stmt, AQDQueryFeatures *features)
 {
-    /* This would require actual GNN implementation
-     * For now, use plan structure complexity as a heuristic */
-    
-    if (!planned_stmt || !features)
+    if (!planned_stmt)
         return AQD_ENGINE_POSTGRES;
     
-    int complexity = features->complexity_score;
+    /* Use R-GINN model for prediction */
+    double prediction = rginn_predict_plan(planned_stmt);
     
-    /* Use complexity score as a simple decision criterion */
-    if (complexity > 20)
+    /* R-GINN returns routing score: positive = DuckDB, negative = PostgreSQL */
+    if (prediction > 0.0)
         return AQD_ENGINE_DUCKDB;
     else
         return AQD_ENGINE_POSTGRES;
@@ -657,10 +661,17 @@ aqd_load_gnn_model(const char *model_path)
     if (!model_path)
         return false;
     
-    /* TODO: Implement actual GNN model loading */
-    elog(LOG, "AQD: GNN model loading from %s (placeholder)", model_path);
+    /* Load R-GINN model */
+    bool success = rginn_load_model(model_path);
     
-    return true;
+    if (success) {
+        elog(LOG, "AQD: R-GINN model loaded successfully from %s", model_path);
+        aqd_query_router.gnn_model = (void *)1; /* Set non-NULL to indicate loaded */
+    } else {
+        elog(WARNING, "AQD: Failed to load R-GINN model from %s", model_path);
+    }
+    
+    return success;
 }
 
 void

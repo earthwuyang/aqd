@@ -250,6 +250,13 @@ class DualExecutionCollector:
                     flags=re.IGNORECASE,
                 )
                 
+                # Get file sizes before execution to know where new data starts
+                csv_path = str(BASE_DIR / 'data' / 'execution_data' / 'aqd_features.csv')
+                plan_path = str(BASE_DIR / 'data' / 'execution_data' / 'aqd_plans.jsonl')
+                
+                csv_size_before = os.path.getsize(csv_path) if os.path.exists(csv_path) else 0
+                plan_size_before = os.path.getsize(plan_path) if os.path.exists(plan_path) else 0
+                
                 # Execute query with timing
                 start_time = time.perf_counter()
                 cursor.execute(modified_query)
@@ -257,11 +264,21 @@ class DualExecutionCollector:
                 end_time = time.perf_counter()
                 
                 execution_time = end_time - start_time
+                
+                # Get the query plan using EXPLAIN (ANALYZE FALSE to avoid re-execution)
+                postgres_plan_json = None
+                try:
+                    cursor.execute(f"EXPLAIN (FORMAT JSON, ANALYZE FALSE, COSTS TRUE, VERBOSE FALSE) {modified_query}")
+                    plan_result = cursor.fetchone()
+                    if plan_result and plan_result[0]:
+                        postgres_plan_json = json.dumps(plan_result[0])
+                except Exception as e:
+                    logger.debug(f"Failed to get EXPLAIN plan: {e}")
+                
                 cursor.close()
                 
                 # Read AQD features from CSV log: take last non-empty line and map feature_* to aqd_feature_*
                 aqd_features = {}
-                csv_path = str(BASE_DIR / 'data' / 'execution_data' / 'aqd_features.csv')
                 if os.path.exists(csv_path):
                     try:
                         with open(csv_path, 'r') as f:
@@ -286,19 +303,42 @@ class DualExecutionCollector:
                     except Exception as e:
                         logger.warning(f"Failed to parse AQD CSV features: {e}")
 
-                # Read last plan JSONL line
+                # Read the new plan JSONL line that was just written
                 plan_json = None
-                plan_path = str(BASE_DIR / 'data' / 'execution_data' / 'aqd_plans.jsonl')
                 if os.path.exists(plan_path):
                     try:
-                        with open(plan_path, 'r') as f:
-                            lines = [ln.strip() for ln in f if ln.strip()]
-                        if len(lines) >= 1:
+                        # Only read the new content added after query execution
+                        with open(plan_path, 'rb') as f:
+                            f.seek(plan_size_before)
+                            new_content = f.read().decode('utf-8', errors='ignore')
+                        
+                        # Find complete JSON lines in the new content
+                        lines = [ln.strip() for ln in new_content.split('\n') if ln.strip()]
+                        
+                        # Take the last complete line (should be our query's plan)
+                        for line in reversed(lines):
+                            try:
+                                # Validate it's a complete JSON
+                                json.loads(line)
+                                plan_json = line
+                                break
+                            except:
+                                continue
+                                
+                        if not plan_json and lines:
+                            # Fallback: just take the last line if we couldn't parse any
                             plan_json = lines[-1]
+                            
                     except Exception as e:
                         logger.warning(f"Failed to read plan JSONL: {e}")
+                
+                # Use the directly obtained plan if available, otherwise fallback to JSONL
+                if postgres_plan_json:
+                    plan_to_return = postgres_plan_json
+                else:
+                    plan_to_return = plan_json
 
-                return execution_time, None, aqd_features, plan_json
+                return execution_time, None, aqd_features, plan_to_return
                 
         except TimeoutError:
             return None, "Query timeout", None, None
@@ -439,7 +479,7 @@ class DualExecutionCollector:
         return results
     
     def save_execution_data(self, results, dataset_name):
-        """Save execution results to JSON files"""
+        """Save execution results to a single unified JSON file"""
         if not results:
             logger.warning(f"No results to save for {dataset_name}")
             return
@@ -447,43 +487,82 @@ class DualExecutionCollector:
         # Create output directory
         os.makedirs(OUTPUT_DIR, exist_ok=True)
         
-        # Convert results to dictionaries
-        data = [result.to_dict() for result in results]
+        # Create unified training data for both LightGBM and GNN
+        unified_data = []
         
-        # Save raw execution data
-        raw_file = os.path.join(OUTPUT_DIR, f'{dataset_name}_execution_data.json')
-        with open(raw_file, 'w') as f:
-            json.dump(data, f, indent=2)
-        
-        # Create training data CSV
-        training_data = []
         for result in results:
-            if result.executed_postgres and result.executed_duckdb and result.aqd_features:
-                row = {
+            if result.executed_postgres and result.executed_duckdb:
+                # Create a single unified record with all information
+                record = {
+                    # Basic info
                     'dataset': result.dataset,
                     'query_type': result.query_type,
+                    'query_index': result.query_index,
+                    'query_text': result.query_text,
+                    
+                    # Execution times
                     'postgres_time': result.postgres_time,
                     'duckdb_time': result.duckdb_time,
-                    'log_time_difference': np.log(result.postgres_time / result.duckdb_time) if result.duckdb_time > 0 else None
+                    'log_time_difference': np.log(result.postgres_time / result.duckdb_time) if result.duckdb_time > 0 else None,
+                    
+                    # Features for LightGBM (flattened)
+                    'features': result.aqd_features,
+                    
+                    # Plan JSON for GNN (parse the JSONL string if available)
+                    'postgres_plan_json': None,
+                    
+                    # Timestamp
+                    'timestamp': datetime.now().isoformat()
                 }
                 
-                # Add AQD features
-                for feature_name, feature_value in result.aqd_features.items():
-                    if isinstance(feature_value, (int, float)):
-                        row[f'feature_{feature_name}'] = feature_value
+                # Parse the plan JSON if available
+                if result.postgres_plan:
+                    try:
+                        # postgres_plan might be a JSON string or JSONL string
+                        plan_data = json.loads(result.postgres_plan)
+                        
+                        # The plan_data should be a list (from EXPLAIN JSON format)
+                        # or a dict with 'plan' key (from JSONL log)
+                        if isinstance(plan_data, list):
+                            # Direct EXPLAIN output - already in correct format
+                            record['postgres_plan_json'] = plan_data
+                        elif isinstance(plan_data, dict) and 'plan' in plan_data:
+                            # From JSONL log with wrapper
+                            record['postgres_plan_json'] = plan_data['plan']
+                        else:
+                            # Unknown format, store as is
+                            record['postgres_plan_json'] = plan_data
+                    except json.JSONDecodeError as e:
+                        # If parsing fails, log warning and skip this record's plan
+                        logger.debug(f"Failed to parse plan JSON: {e}")
+                        record['postgres_plan_json'] = None
                 
-                if row['log_time_difference'] is not None:
-                    training_data.append(row)
+                # Only add if we have valid time difference for training
+                if record['log_time_difference'] is not None:
+                    unified_data.append(record)
         
-        if training_data:
-            df = pd.DataFrame(training_data)
-            csv_file = os.path.join(OUTPUT_DIR, f'{dataset_name}_training_data.csv')
-            df.to_csv(csv_file, index=False)
-            logger.info(f"Saved {len(training_data)} training samples to {csv_file}")
+        # Save unified data to a single JSON file
+        unified_file = os.path.join(OUTPUT_DIR, f'{dataset_name}_unified_training_data.json')
+        with open(unified_file, 'w') as f:
+            json.dump(unified_data, f, indent=2)
         
-        logger.info(f"Saved execution data for {dataset_name} to {raw_file}")
+        logger.info(f"Saved {len(unified_data)} training records to {unified_file}")
+        
+        # Also append to a global unified file for all datasets
+        global_file = os.path.join(OUTPUT_DIR, 'all_datasets_unified_training_data.json')
+        if os.path.exists(global_file):
+            with open(global_file, 'r') as f:
+                existing_data = json.load(f)
+        else:
+            existing_data = []
+        
+        existing_data.extend(unified_data)
+        with open(global_file, 'w') as f:
+            json.dump(existing_data, f, indent=2)
+        
+        logger.info(f"Appended to global file: {global_file} (total: {len(existing_data)} records)")
     
-    def run_collection(self, datasets=None, max_queries_per_type=1000):
+    def run_collection(self, datasets=None, max_queries_per_type=10000):
         """Run complete execution data collection"""
         logger.info("Starting dual execution data collection")
         
@@ -555,8 +634,8 @@ def main():
     parser = argparse.ArgumentParser(description='Collect dual execution data for AQD training')
     parser.add_argument('--datasets', nargs='+', default=None,
                        help='Specific datasets to process (default: all available)')
-    parser.add_argument('--max_queries', type=int, default=1000,
-                       help='Maximum queries per type (AP/TP) per dataset')
+    parser.add_argument('--max_queries', type=int, default=10000,
+                       help='Maximum queries per type (AP/TP) per dataset (default: 10000)')
     parser.add_argument('--timeout', type=int, default=30,
                        help='Query timeout in seconds')
     

@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 """
-Final Routing Benchmark using generated AP/TP workloads
-- Loads queries from data/benchmark_queries/<dataset>/{AP,TP} files
-- Runs concurrent benchmarks at scales: 100, 200, ..., 1000
+Integrated Routing Benchmark - Mixed Workload from All Datasets
+- Loads queries from all datasets in data/benchmark_queries/
+- Mixes queries from different datasets randomly
+- Tests different query counts: 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000
+- Compares routing methods: default, cost_threshold, lightgbm, gnn
+- Uses fixed concurrency level for fair comparison
 """
 
 import os
@@ -15,236 +18,366 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import json
 import logging
 from pathlib import Path
+import pandas as pd
+from typing import List, Dict, Tuple
+import argparse
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-class FinalRoutingBenchmark:
-    def __init__(self, dataset='imdb_small', query_dir=None):
-        self.pg_config = {
-            'host': 'localhost',
-            'port': 5432,
-            'database': dataset,
-            'user': 'wuy'
-        }
-        self.dataset = dataset
-        base_dir = Path(__file__).resolve().parent
-        self.query_base_dir = Path(query_dir) if query_dir else (base_dir / 'data' / 'benchmark_queries' / dataset)
+class IntegratedRoutingBenchmark:
+    def __init__(self):
+        """Initialize benchmark with mixed queries from all datasets"""
+        self.base_dir = Path(__file__).resolve().parent
+        self.queries_dir = self.base_dir / 'data' / 'benchmark_queries'
         
-        # Load AP + TP queries
-        self.generated_queries = self._load_generated_queries()
+        # Load all queries from all datasets
+        self.all_queries = self._load_all_queries()
+        logger.info(f"Loaded {len(self.all_queries)} total queries from all datasets")
 
-    def _load_sql_file(self, path: Path):
+    def _load_sql_file(self, path: Path) -> List[str]:
+        """Load SQL queries from a file"""
         if not path.exists():
             return []
         text = path.read_text(encoding='utf-8', errors='ignore')
         queries = [q.strip() for q in text.split(';') if q.strip()]
         return queries
 
-    def _load_generated_queries(self):
-        ap_path = self.query_base_dir / 'workload_10k_ap_queries.sql'
-        tp_path = self.query_base_dir / 'workload_10k_tp_queries.sql'
-        ap = self._load_sql_file(ap_path)
-        tp = self._load_sql_file(tp_path)
-        queries = ap + tp
-        if not queries:
-            logger.warning(f"No generated queries found under {self.query_base_dir}")
-        else:
-            random.shuffle(queries)
-        return queries
+    def _load_all_queries(self) -> List[Tuple[str, str, str]]:
+        """Load all queries from all datasets and mix them
+        Returns list of tuples: (query, dataset, query_type)"""
+        all_queries = []
         
-    def get_connection(self):
-        return psycopg2.connect(**self.pg_config)
+        if not self.queries_dir.exists():
+            logger.error(f"Queries directory not found: {self.queries_dir}")
+            return []
+        
+        # Iterate through all dataset directories
+        for dataset_dir in self.queries_dir.iterdir():
+            if not dataset_dir.is_dir():
+                continue
+            
+            dataset_name = dataset_dir.name
+            
+            # Load AP queries
+            ap_file = dataset_dir / 'workload_10k_ap_queries.sql'
+            if ap_file.exists():
+                ap_queries = self._load_sql_file(ap_file)
+                for query in ap_queries[:1000]:  # Limit to 1000 per type per dataset
+                    all_queries.append((query, dataset_name, 'AP'))
+                logger.info(f"  Loaded {len(ap_queries[:1000])} AP queries from {dataset_name}")
+            
+            # Load TP queries  
+            tp_file = dataset_dir / 'workload_10k_tp_queries.sql'
+            if tp_file.exists():
+                tp_queries = self._load_sql_file(tp_file)
+                for query in tp_queries[:1000]:  # Limit to 1000 per type per dataset
+                    all_queries.append((query, dataset_name, 'TP'))
+                logger.info(f"  Loaded {len(tp_queries[:1000])} TP queries from {dataset_name}")
+        
+        # Shuffle all queries to mix datasets
+        random.shuffle(all_queries)
+        return all_queries
     
-    def set_routing_method(self, conn, method):
+    def get_connection(self, dataset: str):
+        """Get a connection to the specified dataset"""
+        pg_config = {
+            'host': 'localhost',
+            'port': 5432,
+            'database': dataset,
+            'user': 'wuy'
+        }
+        return psycopg2.connect(**pg_config)
+    
+    def set_routing_method(self, conn, method: str):
+        """Set the routing method for this connection"""
         cursor = conn.cursor()
         try:
             if method == 'default':
-                cursor.execute("SET aqd.routing_method = 1;")
+                cursor.execute("SET aqd.routing_method = 0;")  # AQD_ROUTE_DEFAULT
             elif method == 'cost_threshold':
-                cursor.execute("SET aqd.routing_method = 2;")
+                cursor.execute("SET aqd.routing_method = 1;")  # AQD_ROUTE_COST_THRESHOLD
                 cursor.execute("SET aqd.cost_threshold = 1000.0;")
             elif method == 'lightgbm':
-                cursor.execute("SET aqd.routing_method = 3;")
-                cursor.execute("SET aqd.enable_feature_logging = on;")
-                # Attempt to load a trained LightGBM model if available
-                base = Path(__file__).resolve().parent
-                candidates = [
-                    base / 'models' / 'real_classification_model.txt',
-                    base / 'models' / 'classification_model.txt',
-                    base / 'models' / 'routing_lightgbm.txt',
-                    base / 'models' / 'lightgbm_model.txt'
-                ]
-                for path in candidates:
-                    if path.exists():
-                        cursor.execute(f"SET aqd.lightgbm_model_path = '{str(path)}';")
-                        break
+                cursor.execute("SET aqd.routing_method = 2;")  # AQD_ROUTE_LIGHTGBM
+                # Load trained LightGBM model
+                model_path = self.base_dir / 'models' / 'lightgbm_model.txt'
+                if model_path.exists():
+                    cursor.execute(f"SET aqd.lightgbm_model_path = '{str(model_path)}';")
             elif method == 'gnn':
-                cursor.execute("SET aqd.routing_method = 4;")
-                # Attempt to load a trained GNN model if available
-                base = Path(__file__).resolve().parent
-                gnn_candidates = [
-                    base / 'models' / 'gnn_model.txt',
-                ]
-                for path in gnn_candidates:
-                    if path.exists():
-                        cursor.execute(f"SET aqd.gnn_model_path = '{str(path)}';")
-                        break
+                cursor.execute("SET aqd.routing_method = 3;")  # AQD_ROUTE_GNN
+                # Load trained GNN model - will use default path if not specified
+                model_path = self.base_dir / 'models' / 'rginn_routing_model.txt'
+                if model_path.exists():
+                    cursor.execute(f"SET aqd.gnn_model_path = '{str(model_path)}';")
             conn.commit()
         except Exception as e:
             logger.warning(f"Could not set routing method {method}: {e}")
     
-    def execute_single_query(self, query, routing_method, query_id):
+    def execute_single_query(self, query_info: Tuple[str, str, str], routing_method: str, query_id: int):
+        """Execute a single query with specified routing method"""
+        query, dataset, query_type = query_info
         start_time = time.time()
         
         try:
-            conn = self.get_connection()
-            routing_start = time.time()
-            
+            conn = self.get_connection(dataset)
             self.set_routing_method(conn, routing_method)
-            routing_time = time.time() - routing_start
-            
             cursor = conn.cursor()
-            query_start = time.time()
+            
             cursor.execute(query)
-            results = cursor.fetchall()
-            query_time = time.time() - query_start
+            cursor.fetchall()
             
-            total_time = time.time() - start_time
-            
+            latency = time.time() - start_time
             cursor.close()
             conn.close()
             
             return {
                 'query_id': query_id,
+                'dataset': dataset,
+                'query_type': query_type,
                 'routing_method': routing_method,
-                'routing_time_ms': routing_time * 1000,
-                'query_time_ms': query_time * 1000, 
-                'total_time_ms': total_time * 1000,
+                'latency': latency,
                 'success': True,
-                'result_count': len(results) if results else 0
+                'error': None
             }
-            
         except Exception as e:
-            total_time = time.time() - start_time
             return {
                 'query_id': query_id,
+                'dataset': dataset,
+                'query_type': query_type,
                 'routing_method': routing_method,
-                'routing_time_ms': 0,
-                'query_time_ms': 0,
-                'total_time_ms': total_time * 1000,
+                'latency': time.time() - start_time,
                 'success': False,
                 'error': str(e)
             }
     
-    def run_concurrent_benchmark(self, routing_method, num_queries=100):
-        logger.info(f"Testing {routing_method} on dataset '{self.dataset}' with {num_queries} concurrent queries...")
+    def run_concurrent_benchmark(self, routing_method: str, num_queries: int, max_workers: int = 10):
+        """Run benchmark with specified concurrency"""
+        if not self.all_queries:
+            logger.error("No queries available for benchmarking")
+            return {}
         
-        if not self.generated_queries:
-            logger.error("No queries loaded. Please generate queries first.")
-            return None
-
-        # Select a slice of queries; cycle if needed
-        queries_to_run = []
-        for i in range(num_queries):
-            query = self.generated_queries[i % len(self.generated_queries)]
-            queries_to_run.append((query, i))
+        # Select queries (cycling if needed)
+        if num_queries <= len(self.all_queries):
+            selected_queries = self.all_queries[:num_queries]
+        else:
+            # Cycle through queries if we need more than available
+            selected_queries = []
+            for i in range(num_queries):
+                selected_queries.append(self.all_queries[i % len(self.all_queries)])
         
         results = []
-        start_time = time.time()
         
-        with ThreadPoolExecutor(max_workers=num_queries) as executor:
-            future_to_query = {
-                executor.submit(self.execute_single_query, query, routing_method, qid): (query, qid)
-                for query, qid in queries_to_run
+        logger.info(f"Running {num_queries} queries with {routing_method} routing (concurrency: {max_workers})")
+        
+        start_time = time.time()
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            futures = {
+                executor.submit(self.execute_single_query, query_info, routing_method, i): i 
+                for i, query_info in enumerate(selected_queries)
             }
             
-            for future in as_completed(future_to_query):
-                results.append(future.result())
+            completed = 0
+            for future in as_completed(futures):
+                result = future.result()
+                results.append(result)
+                completed += 1
+                if completed % 100 == 0:
+                    logger.info(f"  Progress: {completed}/{num_queries} queries completed")
         
-        makespan = time.time() - start_time
-        successful = [r for r in results if r['success']]
+        total_time = time.time() - start_time
         
-        if not successful:
-            return None
+        # Calculate statistics
+        successful_results = [r for r in results if r['success']]
+        latencies = [r['latency'] for r in successful_results]
+        
+        if latencies:
+            stats = {
+                'routing_method': routing_method,
+                'concurrency': max_workers,
+                'num_queries': num_queries,
+                'successful': len(successful_results),
+                'failed': len(results) - len(successful_results),
+                'total_time': total_time,
+                'makespan': total_time,
+                'mean_latency': statistics.mean(latencies),
+                'median_latency': statistics.median(latencies),
+                'p95_latency': sorted(latencies)[int(len(latencies) * 0.95)] if len(latencies) > 20 else max(latencies),
+                'p99_latency': sorted(latencies)[int(len(latencies) * 0.99)] if len(latencies) > 100 else max(latencies),
+                'min_latency': min(latencies),
+                'max_latency': max(latencies),
+                'throughput': len(successful_results) / total_time,
+                'queries_per_second': num_queries / total_time
+            }
             
-        return {
-            'routing_method': routing_method,
-            'total_queries': num_queries,
-            'successful_queries': len(successful),
-            'success_rate': len(successful) / num_queries,
-            'makespan_seconds': makespan,
-            'throughput_qps': len(successful) / makespan,
-            'avg_routing_time_ms': statistics.mean([r['routing_time_ms'] for r in successful]),
-            'avg_query_time_ms': statistics.mean([r['query_time_ms'] for r in successful]),
-            'avg_total_time_ms': statistics.mean([r['total_time_ms'] for r in successful]),
-            'p95_total_time_ms': sorted([r['total_time_ms'] for r in successful])[int(0.95 * len(successful))],
-        }
-    
-    def run_full_benchmark(self, conc_levels=None):
-        methods = ['default', 'cost_threshold', 'lightgbm', 'gnn']
-        results = {m: {} for m in methods}
-        conc_levels = conc_levels or [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]
+            # Breakdown by dataset
+            dataset_counts = {}
+            dataset_latencies = {}
+            for r in successful_results:
+                ds = r['dataset']
+                if ds not in dataset_counts:
+                    dataset_counts[ds] = 0
+                    dataset_latencies[ds] = []
+                dataset_counts[ds] += 1
+                dataset_latencies[ds].append(r['latency'])
+            
+            stats['dataset_breakdown'] = {
+                ds: {
+                    'count': dataset_counts[ds],
+                    'mean_latency': statistics.mean(dataset_latencies[ds])
+                }
+                for ds in dataset_counts
+            }
+            
+            # Breakdown by query type
+            type_counts = {'AP': 0, 'TP': 0}
+            type_latencies = {'AP': [], 'TP': []}
+            for r in successful_results:
+                qt = r['query_type']
+                type_counts[qt] += 1
+                type_latencies[qt].append(r['latency'])
+            
+            stats['query_type_breakdown'] = {
+                qt: {
+                    'count': type_counts[qt],
+                    'mean_latency': statistics.mean(type_latencies[qt]) if type_latencies[qt] else 0
+                }
+                for qt in type_counts
+            }
+        else:
+            stats = {
+                'routing_method': routing_method,
+                'concurrency': max_workers,
+                'num_queries': num_queries,
+                'successful': 0,
+                'failed': len(results),
+                'total_time': total_time,
+                'makespan': total_time,
+                'error': 'All queries failed'
+            }
         
-        print("\n" + "="*90)
-        print("🚀 AQD REAL ROUTING PERFORMANCE BENCHMARK")
-        print("="*90)
-        print(f"Dataset: {self.dataset}")
-        print("Testing actual PostgreSQL system with 4 routing methods")
-        print("Concurrent scales: 100..1000 using generated AP+TP workloads")
-        print()
-        for nq in conc_levels:
-            print(f"\n--- Concurrency: {nq} ---")
-            for method in methods:
-                result = self.run_concurrent_benchmark(method, nq)
-                if result:
-                    results[method][str(nq)] = result
-                    logger.info(f"✅ {method}@{nq}: {result['throughput_qps']:.2f} QPS, {result['avg_total_time_ms']:.1f}ms avg")
-                else:
-                    logger.error(f"❌ {method}@{nq}: Failed")
-
-        self.print_final_results(results)
-        return results
-    
-    def print_final_results(self, results):
-        print("\n📊 FINAL PERFORMANCE RESULTS (by concurrency)")
-        print("-" * 90)
-        # Aggregate summary per method across conc levels
-        for method, per_level in results.items():
-            if not per_level:
-                continue
-            print(f"\nMethod: {method}")
-            print(f"{'Conc':<6} {'QPS':>10} {'Makespan(s)':>14} {'Avg(ms)':>10} {'P95(ms)':>10} {'Success%':>10}")
-            for level in sorted(per_level.keys(), key=lambda x: int(x)):
-                d = per_level[level]
-                print(f"{level:<6} "
-                      f"{d['throughput_qps']:>10.2f} "
-                      f"{d['makespan_seconds']:>14.2f} "
-                      f"{d['avg_total_time_ms']:>10.1f} "
-                      f"{d['p95_total_time_ms']:>10.1f} "
-                      f"{(d['success_rate']*100):>9.1f}%")
-
-        # Save results
-        os.makedirs('results', exist_ok=True)
-        out_path = f'results/final_routing_benchmark_{self.dataset}.json'
-        with open(out_path, 'w') as f:
-            json.dump(results, f, indent=2)
-        print(f"\n📁 Results saved to: {out_path}")
-        print("="*90)
+        return stats
 
 def main():
-    import argparse
-    parser = argparse.ArgumentParser(description='Final routing benchmark on generated workloads')
-    parser.add_argument('--dataset', type=str, default='imdb_small', help='Dataset/database name to target')
-    parser.add_argument('--query_dir', type=str, default=None, help='Directory with generated queries for the dataset')
-    parser.add_argument('--levels', type=str, default='100,200,300,400,500,600,700,800,900,1000', help='Comma-separated concurrency levels')
-    args = parser.parse_args()
-
-    levels = [int(x) for x in args.levels.split(',') if x.strip()]
-    benchmark = FinalRoutingBenchmark(dataset=args.dataset, query_dir=args.query_dir)
-    results = benchmark.run_full_benchmark(conc_levels=levels)
+    parser = argparse.ArgumentParser(description='Integrated routing benchmark with mixed workload')
+    parser.add_argument('--methods', nargs='+', 
+                       default=['default', 'cost_threshold', 'lightgbm', 'gnn'],
+                       help='Routing methods to test')
+    parser.add_argument('--query-counts', nargs='+', type=int,
+                       default=[100, 200, 300, 400, 500, 600, 700, 800, 900, 1000],
+                       help='Number of queries to test')
+    parser.add_argument('--concurrency', type=int, default=1000,
+                       help='Fixed concurrency level for all tests')
+    parser.add_argument('--output', default='integrated_benchmark_results.json',
+                       help='Output file for results')
     
-    print("\n✅ Benchmark complete")
+    args = parser.parse_args()
+    
+    # Initialize benchmark
+    benchmark = IntegratedRoutingBenchmark()
+    
+    if len(benchmark.all_queries) == 0:
+        logger.error("No queries loaded! Please ensure benchmark queries exist.")
+        return
+    
+    all_results = []
+    summary_results = []
+    
+    logger.info(f"\n{'='*80}")
+    logger.info("INTEGRATED ROUTING BENCHMARK")
+    logger.info(f"{'='*80}")
+    logger.info(f"Total available queries: {len(benchmark.all_queries)}")
+    logger.info(f"Methods to test: {args.methods}")
+    logger.info(f"Query counts to test: {args.query_counts}")
+    logger.info(f"Fixed concurrency level: {args.concurrency}")
+    
+    # Run benchmarks
+    for num_queries in args.query_counts:
+        logger.info(f"\n{'='*60}")
+        logger.info(f"Testing with {num_queries} queries")
+        logger.info(f"{'='*60}")
+        
+        for method in args.methods:
+            logger.info(f"\nRunning {method} with {num_queries} queries...")
+            
+            stats = benchmark.run_concurrent_benchmark(
+                routing_method=method,
+                num_queries=num_queries,
+                max_workers=args.concurrency
+            )
+            
+            all_results.append(stats)
+            
+            # Print immediate results
+            if 'error' not in stats:
+                logger.info(f"  Successful: {stats['successful']}/{stats['num_queries']}")
+                logger.info(f"  Makespan: {stats['makespan']:.2f}s")
+                logger.info(f"  Mean latency: {stats['mean_latency']:.3f}s")
+                logger.info(f"  P95 latency: {stats['p95_latency']:.3f}s")
+                logger.info(f"  Throughput: {stats['throughput']:.1f} queries/s")
+                
+                # Show query type breakdown
+                if 'query_type_breakdown' in stats:
+                    logger.info(f"  Query types:")
+                    for qt, info in stats['query_type_breakdown'].items():
+                        logger.info(f"    {qt}: {info['count']} queries, {info['mean_latency']:.3f}s mean")
+            else:
+                logger.error(f"  Error: {stats['error']}")
+            
+            # Add to summary
+            summary_results.append({
+                'method': method,
+                'num_queries': num_queries,
+                'concurrency': args.concurrency,
+                'makespan': stats.get('makespan', -1),
+                'mean_latency': stats.get('mean_latency', -1),
+                'p95_latency': stats.get('p95_latency', -1),
+                'throughput': stats.get('throughput', 0),
+                'success_rate': stats['successful'] / stats['num_queries'] if stats.get('num_queries', 0) > 0 else 0
+            })
+    
+    # Save results
+    output_path = Path(args.output)
+    with open(output_path, 'w') as f:
+        json.dump(all_results, f, indent=2)
+    logger.info(f"\nDetailed results saved to {output_path}")
+    
+    # Save summary CSV
+    if summary_results:
+        summary_df = pd.DataFrame(summary_results)
+        summary_csv = output_path.with_suffix('.csv')
+        summary_df.to_csv(summary_csv, index=False)
+        logger.info(f"Summary saved to {summary_csv}")
+        
+        # Print comparison table
+        logger.info("\n" + "="*80)
+        logger.info("PERFORMANCE COMPARISON")
+        logger.info("="*80)
+        
+        # Pivot table for easy comparison
+        pivot = summary_df.pivot_table(
+            values=['makespan', 'throughput'],
+            index='num_queries',
+            columns='method',
+            aggfunc='mean'
+        )
+        
+        print("\nMakespan (seconds) by method and number of queries:")
+        print(pivot['makespan'].to_string())
+        
+        print("\nThroughput (queries/second) by method and number of queries:")
+        print(pivot['throughput'].to_string())
+        
+        # Find best method per query count
+        logger.info("\nBest performing method by number of queries:")
+        for nq in args.query_counts:
+            nq_data = summary_df[summary_df['num_queries'] == nq]
+            if not nq_data.empty:
+                best = nq_data.loc[nq_data['makespan'].idxmin()]
+                logger.info(f"  {nq} queries: {best['method']} (makespan: {best['makespan']:.2f}s, throughput: {best['throughput']:.1f} q/s)")
+    
+    logger.info("\n" + "="*80)
+    logger.info("Benchmark complete!")
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
