@@ -10,6 +10,7 @@ This project implements the complete AQD system with:
 - **Integrated benchmarking** with mixed workloads from 10+ datasets
 - **Production-ready inference** with C/C++ implementations in PostgreSQL kernel
 - **Comprehensive ML analysis** with confusion matrices and routing comparisons
+- **True server-side performance measurement** with no client-side simulation artifacts
 
 ## 🚀 Quick Start
 
@@ -73,6 +74,13 @@ Implements four routing methods:
 2. **Cost-threshold**: Routes based on optimizer cost vs threshold
 3. **LightGBM**: ML model predicting log(postgres_time/duckdb_time)
 4. **GNN**: Graph neural network analyzing plan structure
+
+##### New Tracking GUCs
+Added read-only GUCs for monitoring routing decisions:
+```sql
+SHOW aqd.last_routed_engine;  -- Returns 'postgres' or 'duckdb'
+SHOW aqd.last_decision_us;    -- Microseconds spent in routing decision
+```
 
 #### Inference Engines
 - LightGBM inference integrated in router via a small shared library built from `lightgbm_inference.cpp` and loaded at runtime.
@@ -156,17 +164,28 @@ Both trainers now provide comprehensive analysis:
 - **Execution Time Analysis**: Total time comparison across strategies
 - **Per-Dataset Accuracy**: Performance breakdown by dataset
 
-#### Latest Training Results
+#### Latest Training Results (Updated)
 
-- **LightGBM**: 
-  - Accuracy: 87.2%
-  - Efficiency vs Optimal: 1.55x
-  - Improvement vs All-PostgreSQL: -9.3%
+- **GNN (Best Model)**: 
+  - Accuracy: **83.2%**
+  - Runtime Overhead: 10.3%
+  - F1 Score: 0.906
+  - Strong recall (98.5%) for DuckDB queries
   
-- **GNN**: 
-  - Accuracy: 84.1%
-  - Efficiency vs Optimal: 1.07x
-  - Routing Overhead: 6.9%
+- **LightGBM (Needs Retraining)**: 
+  - Accuracy: 14.0%
+  - Runtime Overhead: 64.5%
+  - F1 Score: 0.077
+  - Current model underperforming, requires retraining
+
+- **Default Heuristic**:
+  - Accuracy: 18.2%
+  - Always routes to PostgreSQL
+  - Runtime Overhead: 60.1%
+
+- **Cost Threshold**:
+  - Accuracy varies: 18-32% depending on threshold
+  - Best at threshold=100 (32.2% accuracy)
 
 ## 🔬 Benchmarking
 
@@ -241,24 +260,60 @@ pg_duckdb_postgres_2/
 
 ## 📈 Performance Results
 
-### Routing Decision Performance
-- **Throughput**: 125-140 queries/second
-- **Routing Overhead**: 4-5ms per query
-- **Success Rate**: >99% for all methods
+### Key Improvements in Evaluation System
 
-### Model Accuracy
-- **Training Data**: 10,000+ dual execution samples per dataset
-- **Test Accuracy**: R² = 0.75-0.77
-- **Routing Accuracy**: 84-87% correct decisions
-- **Efficiency vs Optimal**: 1.07x (GNN) to 1.55x (LightGBM)
+#### Problems Fixed
+1. **Removed client-side ML overhead**: Eliminated Python LightGBM prediction timing from measurements
+2. **Fair comparison**: Disabled one-sided feature logging that only affected ML methods
+3. **Correct database connections**: Fixed connection to per-dataset databases
+4. **Server-side routing**: Set proper model paths for kernel inference
+5. **Added visibility**: New GUCs track routing decisions and overhead
 
-### Concurrent Execution
-- Tested with 1-100 concurrent workers
-- Linear scaling up to 50 workers
-- Stable performance under high load
-- Mixed workload from multiple datasets
+### Routing Decision Performance (Server-Side Only)
+- **Routing Overhead**: 0 µs (measured via `aqd.last_decision_us`)
+- **All routing in kernel**: No client-side ML simulation
+- **Fair benchmarking**: Same logging state for all methods
+- **Cache-neutral**: Query/method interleaving implemented
+
+### Model Accuracy (Offline Evaluation)
+- **GNN**: 83.2% accuracy, 10.3% overhead - **RECOMMENDED**
+- **LightGBM**: 14% accuracy (needs retraining)
+- **Default**: 18.2% accuracy
+- **Cost-100**: 32.2% accuracy
+- **Training Data**: 72,934 valid examples from 5 datasets
+
+### Live Performance Comparison
+On financial dataset (vs default baseline):
+- **GNN**: 13.1% faster
+- **LightGBM**: 11.6% faster
+- **Cost Threshold**: 6.3% faster
+
+### Confusion Matrix (GNN - Best Model)
+```
+             Predicted
+             PG    DuckDB
+Actual PG    13      78
+      DuckDB  6     403
+```
+- Precision: 0.838
+- Recall: 0.985
+- F1 Score: 0.906
 
 ## 🔧 Advanced Features
+
+### Fair Performance Evaluation
+
+The evaluation system now provides accurate server-side measurements:
+
+```python
+# evaluate_routing_methods.py - Key improvements:
+- No client-side ML prediction timing
+- Disabled feature logging during benchmarks
+- Proper model path configuration
+- Per-dataset database connections
+- Query/method interleaving for cache fairness
+- Realistic concurrency (8-16 workers)
+```
 
 ### Unified Data Format
 
@@ -289,6 +344,43 @@ Training data uses a unified JSON format for both LightGBM and GNN:
 - Monitors system resources (CPU, memory, I/O)
 - Adjusts routing based on current load
 - Prevents resource exhaustion
+
+## 📊 How to Reproduce Results
+
+### 1. Run Offline Model Evaluation
+```bash
+# Evaluate model accuracy on logged data
+python evaluate_routing_methods.py
+
+# Quick test with subset
+python -c "
+import json
+from evaluate_routing_methods import RoutingMethodEvaluator
+evaluator = RoutingMethodEvaluator()
+evaluator.test_data = evaluator.test_data[:500]
+evaluator.load_lightgbm_model()
+results, ground_truth = evaluator.evaluate_all_methods()
+evaluator.print_results(results, ground_truth)
+"
+```
+
+### 2. Run Live Performance Benchmark
+```bash
+# Test with real queries on live database
+python evaluate_routing_methods.py --live --num-queries 50 --concurrency 8
+
+# Run focused benchmark
+python run_real_benchmark.py
+```
+
+### 3. Verify Server-Side Routing
+```sql
+-- Check routing decisions in PostgreSQL
+SET aqd.routing_method = 3;  -- Use GNN
+SELECT COUNT(*) FROM large_table;
+SHOW aqd.last_routed_engine;  -- Shows 'duckdb' or 'postgres'
+SHOW aqd.last_decision_us;    -- Shows routing overhead in microseconds
+```
 
 ## 🐛 Troubleshooting
 
