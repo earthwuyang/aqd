@@ -25,6 +25,9 @@ from pathlib import Path
 import time
 from typing import Dict, List, Tuple, Any
 import psycopg2
+import argparse
+import statistics
+import random
 
 PG_DEFAULTS = {
     'host': os.environ.get('AQD_PG_HOST', 'localhost'),
@@ -557,21 +560,203 @@ class RoutingMethodEvaluator:
         plt.tight_layout()
         plt.savefig('routing_method_comparison.png', dpi=150, bbox_inches='tight')
         print("\nComparison plot saved to routing_method_comparison.png")
+
+    # =========================
+    # Live execution comparison
+    # =========================
+
+    def _pg_conn_live(self, database: str):
+        if database in self._pg_connections and self._pg_connections[database] is not None:
+            return self._pg_connections[database]
+        cfg = dict(PG_DEFAULTS)
+        cfg['database'] = database
+        cfg['connect_timeout'] = 3
+        try:
+            conn = psycopg2.connect(**cfg)
+            conn.autocommit = True
+            with conn.cursor() as cur:
+                cur.execute("SET statement_timeout = '5000ms';")
+                cur.execute("SET lock_timeout = '2000ms';")
+            self._pg_connections[database] = conn
+            return conn
+        except Exception as e:
+            print(f"Note: cannot connect to DB '{database}': {e}")
+            self._pg_connections[database] = None
+            return None
+
+    def _set_method_gucs(self, cur, method: str, base_dir: Path):
+        code = {'default': 0, 'cost_threshold': 1, 'lightgbm': 2, 'gnn': 3}[method]
+        try:
+            cur.execute(f"SET aqd.routing_method = {code};")
+        except Exception:
+            pass
+        if method == 'cost_threshold':
+            try:
+                cur.execute("SET aqd.cost_threshold = 1000.0;")
+            except Exception:
+                pass
+        elif method == 'lightgbm':
+            # Set model and optional library path if present
+            lgb_path = str((base_dir / 'models' / 'lightgbm_model.txt').resolve())
+            try:
+                cur.execute(f"SET aqd.lightgbm_model_path = '{lgb_path}';")
+            except Exception:
+                pass
+            lib_path = os.environ.get('AQD_LGBM_LIB')
+            if lib_path:
+                try:
+                    cur.execute(f"SET aqd.lightgbm_library_path = '{lib_path}';")
+                except Exception:
+                    pass
+        elif method == 'gnn':
+            gnn_path = str((base_dir / 'models' / 'rginn_routing_model.txt').resolve())
+            if os.path.exists(gnn_path):
+                try:
+                    cur.execute(f"SET aqd.gnn_model_path = '{gnn_path}';")
+                except Exception:
+                    pass
+
+    def run_live_methods(self, num_queries: int = 100, methods: List[str] = None, interleave: bool = True, concurrency: int = 8):
+        """Execute num_queries examples against live DBs, comparing requested methods."""
+        if methods is None:
+            methods = ['default', 'cost_threshold', 'lightgbm', 'gnn']
+
+        if not self.test_data:
+            print("No test data loaded")
+            return {}
+
+        # Choose examples with valid dataset/query_text
+        pool = [ex for ex in self.test_data if ex.get('dataset') and ex.get('query_text')]
+        if not pool:
+            print("No executable examples with dataset/query_text available")
+            return {}
+
+        random.seed(42)
+        sample = random.sample(pool, min(num_queries, len(pool)))
+
+        base_dir = Path(__file__).resolve().parent
+
+        # Prepare tasks (query, dataset, method)
+        tasks = []
+        for ex in sample:
+            for m in methods:
+                tasks.append((ex['query_text'], ex['dataset'], m))
+        if interleave:
+            random.shuffle(tasks)
+
+        results = []
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+        start = time.time()
+        with ThreadPoolExecutor(max_workers=concurrency) as executor:
+            futs = []
+            for q, db, m in tasks:
+                futs.append(executor.submit(self._exec_one, q, db, m, base_dir))
+            for i, fut in enumerate(as_completed(futs), 1):
+                res = fut.result()
+                results.append(res)
+                if i % 50 == 0:
+                    ok = sum(1 for r in results if r['success'])
+                    print(f"Completed {i}/{len(tasks)} (success={ok})")
+        makespan = time.time() - start
+
+        # Aggregate per method
+        by_m = {m: [] for m in methods}
+        for r in results:
+            by_m[r['method']].append(r)
+
+        summary = {}
+        for m, arr in by_m.items():
+            succ = [r for r in arr if r['success']]
+            if not succ:
+                continue
+            total_ms = [r['total_time_ms'] for r in succ]
+            query_ms = [r['query_time_ms'] for r in succ]
+            summary[m] = {
+                'method': m,
+                'pairs': len(arr),
+                'successful': len(succ),
+                'success_rate': len(succ)/len(arr),
+                'makespan_seconds': sum(total_ms)/1000.0,  # sum across items
+                'throughput_qps': len(succ)/makespan,
+                'avg_query_time_ms': statistics.mean(query_ms),
+                'avg_total_time_ms': statistics.mean(total_ms),
+                'p95_total_time_ms': float(np.percentile(total_ms, 95)),
+                'p99_total_time_ms': float(np.percentile(total_ms, 99)),
+            }
+
+        # Print concise comparison
+        print("\n=== Live Routing Comparison ===")
+        print(f"Executed {len(sample)} queries x {len(methods)} methods (interleave={interleave}, workers={concurrency})")
+        for m in methods:
+            s = summary.get(m)
+            if not s:
+                print(f"- {m}: no successes")
+                continue
+            print(f"- {m:14s} | success {s['successful']}/{s['pairs']} ({s['success_rate']*100:.1f}%)"
+                  f" | avg {s['avg_total_time_ms']:.2f} ms | p95 {s['p95_total_time_ms']:.2f} ms"
+                  f" | thr {s['throughput_qps']:.2f} q/s")
+
+        return summary
+
+    def _exec_one(self, query_text: str, database: str, method: str, base_dir: Path):
+        start = time.time()
+        try:
+            conn = self._pg_conn_live(database)
+            if conn is None:
+                raise RuntimeError("DB unavailable")
+            with conn.cursor() as cur:
+                try:
+                    cur.execute("SET pg_duckdb.force_execution = 'auto';")
+                except Exception:
+                    pass
+                self._set_method_gucs(cur, method, base_dir)
+                qstart = time.time()
+                cur.execute(query_text)
+                try:
+                    _ = cur.fetchall()
+                except Exception:
+                    pass
+                qtime = (time.time() - qstart) * 1000.0
+            total = (time.time() - start) * 1000.0
+            return {
+                'method': method,
+                'database': database,
+                'success': True,
+                'query_time_ms': qtime,
+                'total_time_ms': total,
+                'error': None,
+            }
+        except Exception as e:
+            total = (time.time() - start) * 1000.0
+            return {
+                'method': method,
+                'database': database,
+                'success': False,
+                'query_time_ms': 0.0,
+                'total_time_ms': total,
+                'error': str(e),
+            }
         
 def main():
+    parser = argparse.ArgumentParser(description='Evaluate AQD routing methods (offline and live modes)')
+    parser.add_argument('--live', action='store_true', help='Run live DB comparison instead of offline logged evaluation')
+    parser.add_argument('--num-queries', type=int, default=100, help='Number of queries to execute in live mode')
+    parser.add_argument('--methods', nargs='+', default=['default','cost_threshold','lightgbm','gnn'], help='Methods to compare in live mode')
+    parser.add_argument('--no-interleave', action='store_true', help='Disable interleaving in live mode')
+    parser.add_argument('--concurrency', type=int, default=8, help='Concurrency level in live mode')
+    args = parser.parse_args()
+
     evaluator = RoutingMethodEvaluator()
-    
-    # Load LightGBM model if available
+
+    if args.live:
+        evaluator.run_live_methods(num_queries=args.num_queries, methods=args.methods, interleave=(not args.no_interleave), concurrency=args.concurrency)
+        return
+
+    # Offline evaluation using logged times
     evaluator.load_lightgbm_model()
-    
-    # Evaluate all methods
     results, ground_truth = evaluator.evaluate_all_methods()
-    
-    # Print results
     evaluator.print_results(results, ground_truth)
-    
-    # Create plots
     evaluator.create_comparison_plot(results, ground_truth)
-    
+
 if __name__ == "__main__":
     main()

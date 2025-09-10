@@ -75,14 +75,15 @@ Implements four routing methods:
 4. **GNN**: Graph neural network analyzing plan structure
 
 #### Inference Engines
-- `lightgbm_inference.c`: Native C implementation for LightGBM
-- `gnn_inference.c`: Graph neural network inference in kernel
+- LightGBM inference integrated in router via a small shared library built from `lightgbm_inference.cpp` and loaded at runtime.
+- GNN routing is available via external trainer and evaluation tooling; kernel integration is experimental.
 
 ### Configuration
 
 ```sql
 -- Select routing method
-SET aqd.routing_method = 1;  -- 1=default, 2=cost, 3=lightgbm, 4=gnn
+-- 0=default, 1=cost, 2=lightgbm, 3=gnn
+SET aqd.routing_method = 0;  -- default
 
 -- Cost threshold method
 SET aqd.cost_threshold = 1000.0;
@@ -90,6 +91,11 @@ SET aqd.cost_threshold = 1000.0;
 -- ML model paths
 SET aqd.lightgbm_model_path = '/path/to/models/lightgbm_model.txt';
 SET aqd.gnn_model_path = '/path/to/models/gnn_model.txt';
+
+-- Optional: explicit path to LightGBM inference shared library
+-- (by default the router tries ./lib, ../lib, /usr/local/lib, /opt/aqd/lib)
+SET aqd.lightgbm_library_path = '/absolute/path/to/install/lib/libaqd_lgbm.so';
+SET aqd.gnn_library_path      = '/absolute/path/to/install/lib/libaqd_gnn.so';
 
 -- Feature logging (for debugging/training)
 SET aqd.enable_feature_logging = on;
@@ -206,9 +212,7 @@ pg_duckdb_postgres_2/
 │       │   ├── executor/execMain.c # Query interception point
 │       │   └── utils/misc/
 │       │       ├── aqd_feature_logger.c   # Feature extraction
-│       │       ├── aqd_query_router.c     # Routing logic
-│       │       ├── lightgbm_inference.c   # LightGBM inference
-│       │       └── gnn_inference.c        # GNN inference
+│       │       ├── aqd_query_router.c     # Routing logic (loads LightGBM lib at runtime)
 │       └── include/
 │           ├── aqd_feature_logger.h
 │           ├── aqd_query_router.h
@@ -220,10 +224,12 @@ pg_duckdb_postgres_2/
 │   └── execution_data/            # Training data (unified JSON)
 ├── models/                         # Trained models
 │   ├── lightgbm_model.txt
-│   └── gnn_model.txt
+│   └── rginn_routing_model.txt
 ├── build/                          # Compiled binaries
 │   ├── lightgbm_trainer
 │   └── gnn_trainer
+├── lib/                            # Shared libraries
+│   └── libaqd_lgbm.so              # LightGBM inference (dlopen)
 └── Python scripts:
     ├── import_benchmark_datasets.py     # Import 10+ datasets
     ├── generate_benchmark_queries.py    # Generate AP/TP queries

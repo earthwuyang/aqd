@@ -176,15 +176,15 @@ $(BUILD_DIR)/aqd_integrated: aqd_feature_logger.h aqd_feature_logger.c aqd_query
 	touch $@
 
 # LightGBM trainer
-lightgbm: $(BUILD_DIR)/lightgbm_trainer
+lightgbm: $(BUILD_DIR)/lightgbm_trainer install-libs
 
 $(BUILD_DIR)/lightgbm_trainer: lightgbm_trainer.cpp
 	@echo "Building LightGBM trainer..."
 	$(CXX) $(CXXFLAGS) $(LIGHTGBM_INCLUDE) -o $@ $< $(LIGHTGBM_LIBS) $(JSON_LIBS)
 	@echo "LightGBM trainer built: $@"
 
-# GNN trainers
-gnn: $(BUILD_DIR)/gnn_trainer $(BUILD_DIR)/gnn_trainer_real
+# GNN trainers (also build and install shared inference lib)
+gnn: gnn-lib install-gnn-libs $(BUILD_DIR)/gnn_trainer $(BUILD_DIR)/gnn_trainer_real
 
 $(BUILD_DIR)/gnn_trainer: gnn_trainer.cpp rginn.c rginn.h | $(BUILD_DIR)
 	@echo "Building simple GNN trainer..."
@@ -198,8 +198,32 @@ $(BUILD_DIR)/gnn_trainer_real: gnn_trainer_real.cpp rginn.c rginn.h | $(BUILD_DI
 	@echo "Real GNN trainer built: $@"
 
 gnn-labels:
-	@echo "Generating GNN labels from execution data..."
-	$(VENV_DIR)/bin/python make_gnn_labels.py
+
+# Build shared GNN inference library (for kernel dlopen)
+.PHONY: gnn-lib
+gnn-lib: lib/libaqd_gnn.so
+
+lib/libaqd_gnn.so: gnn_c_api.cpp gnn_c_api.h rginn.c rginn.h | lib
+	@echo "Building GNN inference shared library..."
+	$(CXX) $(CXXFLAGS) -fPIC -shared -o $@ gnn_c_api.cpp rginn.c
+	@echo "Shared library built: $@"
+
+lib:
+	mkdir -p lib
+
+.PHONY: install-libs
+install-libs: lib/libaqd_lgbm.so
+	@echo "Installing shared libraries to $(INSTALL_DIR)/lib ..."
+	mkdir -p $(INSTALL_DIR)/lib
+	cp lib/libaqd_lgbm.so $(INSTALL_DIR)/lib/
+	@echo "Installed libaqd_lgbm.so"
+
+.PHONY: install-gnn-libs
+install-gnn-libs: lib/libaqd_gnn.so
+	@echo "Installing GNN shared library to $(INSTALL_DIR)/lib ..."
+	mkdir -p $(INSTALL_DIR)/lib
+	cp lib/libaqd_gnn.so $(INSTALL_DIR)/lib/
+	@echo "Installed libaqd_gnn.so"
 
 # Data collection pipeline
 data-collection: $(VENV_DIR) data_collector.py generate_benchmark_queries.py import_benchmark_datasets.py
@@ -354,3 +378,21 @@ distclean: clean
 	@echo "Deep clean completed"
 
 .SECONDARY: # Don't delete intermediate files
+# Build shared LightGBM inference library (for kernel dlopen)
+.PHONY: lgbm-lib
+lgbm-lib: lib/libaqd_lgbm.so
+
+lib/libaqd_lgbm.so: lightgbm_inference.cpp lightgbm_inference.h lightgbm_c_api.cpp lightgbm_c_api.h | lib
+	@echo "Building LightGBM inference shared library..."
+	$(CXX) $(CXXFLAGS) -fPIC -shared -o $@ lightgbm_inference.cpp lightgbm_c_api.cpp
+	@echo "Shared library built: $@"
+
+lib:
+	mkdir -p lib
+
+.PHONY: install-libs
+install-libs: lib/libaqd_lgbm.so
+	@echo "Installing shared libraries to $(INSTALL_DIR)/lib ..."
+	mkdir -p $(INSTALL_DIR)/lib
+	cp lib/libaqd_lgbm.so $(INSTALL_DIR)/lib/
+	@echo "Installed libaqd_lgbm.so"

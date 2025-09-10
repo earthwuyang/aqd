@@ -29,71 +29,46 @@ logger = logging.getLogger(__name__)
 
 class AQDRoutingBenchmark:
     def __init__(self):
-        self.pg_config = {
-            'host': 'localhost',
-            'port': 5432,
-            'database': 'postgres',
-            'user': 'wuy'
-        }
+        self.pg_host = os.environ.get('AQD_PG_HOST', 'localhost')
+        self.pg_port = int(os.environ.get('AQD_PG_PORT', '5432'))
+        self.pg_user = os.environ.get('AQD_PG_USER', 'wuy')
         
         # Load trained LightGBM model
-        self.model_path = '/home/wuy/DB/pg_duckdb_postgres/models/lightgbm_model.txt'
-        self.load_lightgbm_model()
+        base = Path(__file__).resolve().parent
+        self.model_path = str(base / 'models' / 'lightgbm_model.txt')
+        # Client-side LightGBM inference is not used; kernel performs inference
+        self.lgb_model = None
+        self.feature_names = []
         
         # Query directories
-        self.query_base_dir = '/home/wuy/DB/pg_duckdb_postgres/data/benchmark_queries'
-        self.results_dir = '/home/wuy/DB/pg_duckdb_postgres/results'
+        self.query_base_dir = str(base / 'data' / 'benchmark_queries')
+        self.results_dir = str(base / 'results')
         os.makedirs(self.results_dir, exist_ok=True)
         
         # Routing methods to test
         self.routing_methods = ['default', 'cost_threshold', 'lightgbm', 'gnn']
         
     def load_lightgbm_model(self):
-        """Load the trained LightGBM model"""
-        try:
-            import lightgbm as lgb
-            self.lgb_model = lgb.Booster(model_file=self.model_path)
-            logger.info(f"Loaded LightGBM model from {self.model_path}")
-            
-            # Load feature names
-            with open('/home/wuy/DB/pg_duckdb_postgres/models/model_metadata.json', 'r') as f:
-                metadata = json.load(f)
-                self.feature_names = metadata['feature_names']
-                logger.info(f"Model expects {len(self.feature_names)} features")
-                
-        except Exception as e:
-            logger.warning(f"Could not load LightGBM model: {e}")
-            self.lgb_model = None
-            self.feature_names = []
+        """Deprecated: kernel performs inference; keep for compatibility."""
+        self.lgb_model = None
+        self.feature_names = []
     
-    def get_connection(self):
-        """Get PostgreSQL connection"""
-        return psycopg2.connect(**self.pg_config)
+    def get_connection(self, database: str):
+        """Get PostgreSQL connection to a dataset database"""
+        return psycopg2.connect(host=self.pg_host, port=self.pg_port, user=self.pg_user, database=database)
     
     def set_routing_method(self, conn, method):
         """Set the routing method in PostgreSQL"""
         cursor = conn.cursor()
         
-        if method == 'default':
-            # Use pg_duckdb default heuristic
-            cursor.execute("SET aqd.routing_method = 'default';")
-            cursor.execute("SET pg_duckdb.force_execution = 'auto';")
-            
-        elif method == 'cost_threshold':
-            # Use cost threshold method
-            cursor.execute("SET aqd.routing_method = 'cost_threshold';")
-            cursor.execute("SET aqd.cost_threshold = 1000.0;")  # Configurable threshold
-            
+        # Kernel mapping: 0=default, 1=cost, 2=lightgbm, 3=gnn
+        code = {'default': 0, 'cost_threshold': 1, 'lightgbm': 2, 'gnn': 3}[method]
+        cursor.execute(f"SET aqd.routing_method = {code};")
+        if method == 'cost_threshold':
+            cursor.execute("SET aqd.cost_threshold = 1000.0;")
         elif method == 'lightgbm':
-            # Use LightGBM-based routing
-            cursor.execute("SET aqd.routing_method = 'lightgbm';")
-            cursor.execute("SET aqd.enable_feature_logging = on;")
-            
-        elif method == 'gnn':
-            # Use GNN-based routing (placeholder - uses enhanced heuristics for now)
-            cursor.execute("SET aqd.routing_method = 'gnn';")
-            cursor.execute("SET aqd.enable_plan_analysis = on;")
-            
+            cursor.execute(f"SET aqd.lightgbm_model_path = '{self.model_path}';")
+        
         conn.commit()
         logger.info(f"Set routing method to: {method}")
     
@@ -140,21 +115,13 @@ class AQDRoutingBenchmark:
             logger.warning(f"LightGBM prediction failed: {e}")
             return 'postgres'
     
-    def execute_query(self, query_text, routing_method, query_id):
+    def execute_query(self, query_text, routing_method, query_id, database):
         """Execute a single query and measure performance"""
         start_time = time.time()
-        routing_start = time.time()
         
         try:
-            conn = self.get_connection()
+            conn = self.get_connection(database)
             self.set_routing_method(conn, routing_method)
-            
-            # Routing decision time
-            if routing_method == 'lightgbm':
-                predicted_engine = self.predict_routing(query_text)
-                routing_time = time.time() - routing_start
-            else:
-                routing_time = time.time() - routing_start
             
             # Execute query
             cursor = conn.cursor()
@@ -170,7 +137,7 @@ class AQDRoutingBenchmark:
             return {
                 'query_id': query_id,
                 'routing_method': routing_method,
-                'routing_time_ms': routing_time * 1000,
+                'routing_time_ms': 0.0,
                 'query_time_ms': query_time * 1000,
                 'total_time_ms': total_time * 1000,
                 'success': True,

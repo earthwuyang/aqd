@@ -7,7 +7,6 @@
 
 #include "postgres.h"
 #include "aqd_query_router.h"
-#include "rginn_inference.h"
 
 #include "optimizer/cost.h"
 #include "optimizer/planner.h"
@@ -19,6 +18,7 @@
 #include <math.h>
 #include <sys/time.h>
 #include <sys/resource.h>
+#include <dlfcn.h>
 
 /* Global router instance */
 AQDQueryRouter aqd_query_router = {
@@ -26,11 +26,22 @@ AQDQueryRouter aqd_query_router = {
     .total_queries = 0
 };
 
+/* LightGBM dynamic API */
+typedef int (*aqd_lgb_load_model_fn)(const char*);
+typedef double (*aqd_lgb_predict_named_fn)(const char**, const double*, int);
+typedef void (*aqd_lgb_unload_fn)(void);
+static void *lgb_lib_handle = NULL;
+static aqd_lgb_load_model_fn lgb_load_fp = NULL;
+static aqd_lgb_predict_named_fn lgb_predict_fp = NULL;
+static aqd_lgb_unload_fn lgb_unload_fp = NULL;
+
 /* Configuration variables */
 int aqd_routing_method = AQD_ROUTE_DEFAULT;
 double aqd_cost_threshold = 10000.0;
 char *aqd_lightgbm_model_path = NULL;
+char *aqd_lightgbm_library_path = NULL;
 char *aqd_gnn_model_path = NULL;
+char *aqd_gnn_library_path = NULL;
 bool aqd_enable_thompson_sampling = false;
 bool aqd_enable_resource_regulation = false;
 double aqd_resource_balance_factor = 0.5;
@@ -84,15 +95,10 @@ aqd_init_query_router(void)
         aqd_load_lightgbm_model(aqd_query_router.config.lightgbm_model_path);
     }
     
-    if (aqd_query_router.config.method == AQD_ROUTE_GNN)
+    if (aqd_query_router.config.method == AQD_ROUTE_GNN && 
+        strlen(aqd_query_router.config.gnn_model_path) > 0)
     {
-        if (strlen(aqd_query_router.config.gnn_model_path) > 0) {
-            aqd_load_gnn_model(aqd_query_router.config.gnn_model_path);
-        } else {
-            /* Try default model path */
-            elog(LOG, "AQD: No GNN model path specified, trying default: %s", DEFAULT_RGINN_MODEL_PATH);
-            aqd_load_gnn_model(DEFAULT_RGINN_MODEL_PATH);
-        }
+        aqd_load_gnn_model(aqd_query_router.config.gnn_model_path);
     }
     
     aqd_query_router.initialized = true;
@@ -286,47 +292,42 @@ aqd_route_cost_threshold(PlannedStmt *planned_stmt, double threshold)
 AQDExecutionEngine
 aqd_route_lightgbm(AQDQueryFeatures *features)
 {
-    /* This would require actual LightGBM integration
-     * For now, use a simplified heuristic based on features */
-    
     if (!features || features->num_features == 0)
         return AQD_ENGINE_POSTGRES;
-    
-    /* Calculate a simple score based on available features */
-    double score = 0.0;
-    int valid_features = 0;
-    
-    for (int i = 0; i < features->num_features; i++)
-    {
-        if (features->features[i].is_valid)
-        {
-            score += features->features[i].value;
-            valid_features++;
+    if (!lgb_predict_fp)
+        return AQD_ENGINE_POSTGRES;
+    int n = features->num_features;
+    if (n > AQD_MAX_FEATURES) n = AQD_MAX_FEATURES;
+    const char *names[AQD_MAX_FEATURES];
+    double values[AQD_MAX_FEATURES];
+    int m = 0;
+    for (int i = 0; i < n; i++) {
+        if (features->features[i].is_valid) {
+            names[m] = features->features[i].name;
+            values[m] = features->features[i].value;
+            m++;
         }
     }
-    
-    if (valid_features > 0)
-        score /= valid_features;
-    
-    /* Simplified decision boundary */
-    if (score > 100.0) /* Arbitrary threshold for demonstration */
-        return AQD_ENGINE_DUCKDB;
-    else
+    if (m == 0)
         return AQD_ENGINE_POSTGRES;
+    double pred = lgb_predict_fp(names, values, m);
+    return (pred < 0.0) ? AQD_ENGINE_DUCKDB : AQD_ENGINE_POSTGRES;
 }
 
-/* GNN-based routing using R-GINN */
+/* GNN-based routing */
 AQDExecutionEngine
 aqd_route_gnn(PlannedStmt *planned_stmt, AQDQueryFeatures *features)
 {
-    if (!planned_stmt)
+    /* This would require actual GNN implementation
+     * For now, use plan structure complexity as a heuristic */
+    
+    if (!planned_stmt || !features)
         return AQD_ENGINE_POSTGRES;
     
-    /* Use R-GINN model for prediction */
-    double prediction = rginn_predict_plan(planned_stmt);
+    int complexity = features->complexity_score;
     
-    /* R-GINN returns routing score: positive = DuckDB, negative = PostgreSQL */
-    if (prediction > 0.0)
+    /* Use complexity score as a simple decision criterion */
+    if (complexity > 20)
         return AQD_ENGINE_DUCKDB;
     else
         return AQD_ENGINE_POSTGRES;
@@ -648,11 +649,46 @@ aqd_load_lightgbm_model(const char *model_path)
 {
     if (!model_path)
         return false;
-    
-    /* TODO: Implement actual LightGBM model loading */
-    elog(LOG, "AQD: LightGBM model loading from %s (placeholder)", model_path);
-    
-    return true;
+    if (!lgb_lib_handle) {
+        /* Try GUC-provided library path first */
+        if (aqd_lightgbm_library_path && aqd_lightgbm_library_path[0]) {
+            lgb_lib_handle = dlopen(aqd_lightgbm_library_path, RTLD_NOW);
+            if (!lgb_lib_handle) {
+                elog(WARNING, "AQD: Failed to load LightGBM library from %s: %s",
+                     aqd_lightgbm_library_path, dlerror());
+            }
+        }
+        const char *candidates[] = {
+            "./lib/libaqd_lgbm.so",
+            "../lib/libaqd_lgbm.so",
+            "/usr/local/lib/libaqd_lgbm.so",
+            "/opt/aqd/lib/libaqd_lgbm.so",
+            NULL
+        };
+        if (!lgb_lib_handle) {
+            for (int i=0; candidates[i]; ++i) {
+                lgb_lib_handle = dlopen(candidates[i], RTLD_NOW);
+                if (lgb_lib_handle) break;
+            }
+        }
+        if (!lgb_lib_handle) {
+            elog(WARNING, "AQD: Could not load libaqd_lgbm.so: %s", dlerror());
+            return false;
+        }
+        lgb_load_fp = (aqd_lgb_load_model_fn)dlsym(lgb_lib_handle, "aqd_lgb_load_model");
+        lgb_predict_fp = (aqd_lgb_predict_named_fn)dlsym(lgb_lib_handle, "aqd_lgb_predict_named");
+        lgb_unload_fp = (aqd_lgb_unload_fn)dlsym(lgb_lib_handle, "aqd_lgb_unload");
+        if (!lgb_load_fp || !lgb_predict_fp || !lgb_unload_fp) {
+            elog(WARNING, "AQD: Missing LightGBM symbols in libaqd_lgbm.so");
+            dlclose(lgb_lib_handle); lgb_lib_handle = NULL;
+            lgb_load_fp = NULL; lgb_predict_fp = NULL; lgb_unload_fp = NULL;
+            return false;
+        }
+    }
+    int ok = lgb_load_fp(model_path);
+    if (!ok) elog(WARNING, "AQD: Failed to load LightGBM model from %s", model_path);
+    else elog(LOG, "AQD: LightGBM model loaded from %s", model_path);
+    return ok != 0;
 }
 
 bool
@@ -660,24 +696,67 @@ aqd_load_gnn_model(const char *model_path)
 {
     if (!model_path)
         return false;
-    
-    /* Load R-GINN model */
-    bool success = rginn_load_model(model_path);
-    
-    if (success) {
-        elog(LOG, "AQD: R-GINN model loaded successfully from %s", model_path);
-        aqd_query_router.gnn_model = (void *)1; /* Set non-NULL to indicate loaded */
-    } else {
-        elog(WARNING, "AQD: Failed to load R-GINN model from %s", model_path);
+    if (!gnn_lib_handle) {
+        /* Try GUC-provided library path first */
+        if (aqd_gnn_library_path && aqd_gnn_library_path[0]) {
+            gnn_lib_handle = dlopen(aqd_gnn_library_path, RTLD_NOW);
+            if (!gnn_lib_handle) {
+                elog(WARNING, "AQD: Failed to load GNN library from %s: %s",
+                     aqd_gnn_library_path, dlerror());
+            }
+        }
+        const char *candidates[] = {
+            "./lib/libaqd_gnn.so",
+            "../lib/libaqd_gnn.so",
+            "/usr/local/lib/libaqd_gnn.so",
+            "/opt/aqd/lib/libaqd_gnn.so",
+            NULL
+        };
+        if (!gnn_lib_handle) {
+            for (int i=0; candidates[i]; ++i) {
+                gnn_lib_handle = dlopen(candidates[i], RTLD_NOW);
+                if (gnn_lib_handle) break;
+            }
+        }
+        if (!gnn_lib_handle) {
+            elog(WARNING, "AQD: Could not load libaqd_gnn.so: %s", dlerror());
+            return false;
+        }
+        gnn_load_fp = (aqd_gnn_load_model_fn)dlsym(gnn_lib_handle, "aqd_gnn_load_model");
+        gnn_is_loaded_fp = (aqd_gnn_is_loaded_fn)dlsym(gnn_lib_handle, "aqd_gnn_is_loaded");
+        gnn_unload_fp = (aqd_gnn_unload_fn)dlsym(gnn_lib_handle, "aqd_gnn_unload");
+        if (!gnn_load_fp || !gnn_is_loaded_fp || !gnn_unload_fp) {
+            elog(WARNING, "AQD: Missing GNN symbols in libaqd_gnn.so");
+            dlclose(gnn_lib_handle); gnn_lib_handle = NULL;
+            gnn_load_fp = NULL; gnn_is_loaded_fp = NULL; gnn_unload_fp = NULL;
+            return false;
+        }
     }
-    
-    return success;
+    int ok = gnn_load_fp(model_path);
+    if (!ok) elog(WARNING, "AQD: Failed to load GNN model from %s", model_path);
+    else elog(LOG, "AQD: GNN model loaded from %s", model_path);
+    return ok != 0;
 }
 
 void
 aqd_unload_models(void)
 {
-    /* TODO: Implement model cleanup */
+    if (lgb_unload_fp) {
+        lgb_unload_fp();
+    }
+    if (lgb_lib_handle) {
+        dlclose(lgb_lib_handle);
+        lgb_lib_handle = NULL;
+    }
+    lgb_load_fp = NULL; lgb_predict_fp = NULL; lgb_unload_fp = NULL;
+    if (gnn_unload_fp) {
+        gnn_unload_fp();
+    }
+    if (gnn_lib_handle) {
+        dlclose(gnn_lib_handle);
+        gnn_lib_handle = NULL;
+    }
+    gnn_load_fp = NULL; gnn_is_loaded_fp = NULL; gnn_unload_fp = NULL;
     aqd_query_router.lightgbm_model = NULL;
     aqd_query_router.gnn_model = NULL;
 }
@@ -738,12 +817,37 @@ aqd_define_routing_guc_variables(void)
                               PGC_SUSET,
                               0,
                               NULL, NULL, NULL);
+
+    DefineCustomStringVariable("aqd.lightgbm_library_path",
+                              "Path to LightGBM inference shared library",
+                              "Optional path to libaqd_lgbm.so (dlopen). If unset, common locations are tried.",
+                              &aqd_lightgbm_library_path,
+                              "",
+                              PGC_SUSET,
+                              0,
+                              NULL, NULL, NULL);
                               
     DefineCustomStringVariable("aqd.gnn_model_path",
                               "Path to GNN model file",
                               "File path for the trained GNN routing model",
                               &aqd_gnn_model_path,
                               "",
+                              PGC_SUSET,
+                              0,
+                              NULL, NULL, NULL);
+    DefineCustomStringVariable("aqd.gnn_library_path",
+                              "Path to GNN inference shared library",
+                              "Optional path to libaqd_gnn.so (dlopen). If unset, common locations are tried.",
+                              &aqd_gnn_library_path,
+                              "",
+/* GNN dynamic API */
+typedef int (*aqd_gnn_load_model_fn)(const char*);
+typedef int (*aqd_gnn_is_loaded_fn)(void);
+typedef void (*aqd_gnn_unload_fn)(void);
+static void *gnn_lib_handle = NULL;
+static aqd_gnn_load_model_fn gnn_load_fp = NULL;
+static aqd_gnn_is_loaded_fn gnn_is_loaded_fp = NULL;
+static aqd_gnn_unload_fn gnn_unload_fp = NULL;
                               PGC_SUSET,
                               0,
                               NULL, NULL, NULL);
