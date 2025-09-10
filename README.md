@@ -433,16 +433,38 @@ This implementation is based on the AQD paper and extends it with:
 - Production-ready C/C++ inference
 - Detailed performance analysis tools
 
-## 📄 License
+=== Evaluation on Test Set ===
 
-PostgreSQL License - see LICENSE file for details.
+=== Confusion Matrix ===
+                 Predicted
+                 PG    DuckDB
+Actual PG      [ 1058   422]
+      DuckDB   [  341  5142]
 
-## 🤝 Contributing
+=== Classification Metrics ===
+Test RMSE: 0.3789
+Accuracy: 89.0421%
+Precision: 0.9242
+Recall: 0.9378
+F1 Score: 0.9309
 
-Contributions are welcome! Please:
-1. Fork the repository
-2. Create a feature branch
-3. Add tests for new functionality
-4. Submit a pull request
+=== Routing Strategy Comparison ===
+Strategy               | Total Time (s) | Relative to Optimal
+-----------------------|----------------|-------------------
+Optimal                |          19.33 | 1.00x
+GNN Routing            |          20.03 | 1.04x
+Cost Threshold (100)   |          22.26 | 1.15x
+Cost Threshold (1000)  |          23.11 | 1.20x
+Cost Threshold (10000) |          23.11 | 1.20x
+Always PostgreSQL      |          26.77 | 1.38x
+Always DuckDB          |          23.11 | 1.20x
 
-For questions or issues, please open a GitHub issue.
+GNN Routing Overhead: 0.69s (3.6%)
+
+=== Per-Dataset Accuracy ===
+imdb_small: 89.0% (6200/6963)
+
+=== Model Saved ===
+Trained R-GINN on 27849 examples
+Model saved to: models/rginn_routing_model.txt
+Final test accuracy: 89.0%

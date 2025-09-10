@@ -3,9 +3,9 @@
 Real Concurrent Query Execution Benchmark for AQD Routing Methods
 Tests actual PostgreSQL system with all four routing methods:
 1. Default (pg_duckdb heuristic)
-2. Cost-threshold 
-3. LightGBM-based
-4. GNN-based (placeholder for now)
+2. Cost-threshold
+3. LightGBM-based (kernel inference)
+4. GNN-based (kernel inference)
 """
 
 import os
@@ -40,8 +40,9 @@ class AQDRoutingBenchmark:
         self.lgb_model = None
         self.feature_names = []
         
-        # Query directories
+        # Query sources
         self.query_base_dir = str(base / 'data' / 'benchmark_queries')
+        self.exec_data_dir = str(base / 'data' / 'execution_data')
         self.results_dir = str(base / 'results')
         os.makedirs(self.results_dir, exist_ok=True)
         
@@ -58,28 +59,35 @@ class AQDRoutingBenchmark:
         return psycopg2.connect(host=self.pg_host, port=self.pg_port, user=self.pg_user, database=database)
     
     def set_routing_method(self, conn, method):
-        """Set the routing method in PostgreSQL with proper model paths"""
+        """Set the routing method in PostgreSQL with proper model paths and logging controls"""
         cursor = conn.cursor()
-        
-        # Disable feature logging for all methods (fair benchmarking)
-        try:
-            cursor.execute("SET aqd.enable_feature_logging = off;")
-        except Exception:
-            pass
-            
+
         # Kernel mapping: 0=default, 1=cost, 2=lightgbm, 3=gnn
         code = {'default': 0, 'cost_threshold': 1, 'lightgbm': 2, 'gnn': 3}[method]
         cursor.execute(f"SET aqd.routing_method = {code};")
-        
-        if method == 'cost_threshold':
-            cursor.execute("SET aqd.cost_threshold = 1000.0;")
-        elif method == 'lightgbm':
+
+        # Do not enable feature or plan logging in benchmark runs
+        try:
+            cursor.execute("SET aqd.enable_feature_logging = off;")
+            cursor.execute("SET aqd.enable_plan_logging = off;")
+        except Exception:
+            pass
+
+        # LightGBM: enable feature extraction so in-kernel predictor gets features
+        if method == 'lightgbm':
+            # Model path for LightGBM inference in kernel (features are extracted internally)
             cursor.execute(f"SET aqd.lightgbm_model_path = '{self.model_path}';")
-        elif method == 'gnn':
+
+        # GNN: enable plan JSON logging for this session
+        if method == 'gnn':
             gnn_path = str(Path(__file__).resolve().parent / 'models' / 'rginn_routing_model.txt')
             if os.path.exists(gnn_path):
                 cursor.execute(f"SET aqd.gnn_model_path = '{gnn_path}';")
-        
+
+        # Fine-tune cost threshold used for the baseline method
+        if method == 'cost_threshold':
+            cursor.execute("SET aqd.cost_threshold = 1000.0;")
+
         conn.commit()
         logger.info(f"Set routing method to: {method}")
     
@@ -159,7 +167,7 @@ class AQDRoutingBenchmark:
             }
     
     def load_test_queries(self, dataset, query_type, limit=100):
-        """Load queries for testing"""
+        """Load queries from static generated SQL files (legacy path)"""
         query_file = Path(self.query_base_dir) / dataset / f'workload_10k_{query_type}_queries.sql'
         
         if not query_file.exists():
@@ -183,6 +191,47 @@ class AQDRoutingBenchmark:
                     })
                     
         logger.info(f"Loaded {len(queries)} queries from {dataset}/{query_type}")
+        return queries
+
+    def load_executed_queries(self, dataset: str = None, limit: int = 200):
+        """Load queries that have been executed successfully by both PostgreSQL and DuckDB.
+        Reads unified training data under data/execution_data/*_unified_training_data.json.
+        """
+        queries = []
+        exec_dir = Path(self.exec_data_dir)
+        if not exec_dir.exists():
+            logger.error(f"Execution data directory not found: {exec_dir}")
+            return []
+        files = []
+        if dataset:
+            files = [exec_dir / f"{dataset}_unified_training_data.json"]
+        else:
+            files = sorted(exec_dir.glob("*_unified_training_data.json"))
+
+        for fpath in files:
+            if not fpath.exists():
+                continue
+            try:
+                data = json.load(open(fpath, 'r'))
+            except Exception as e:
+                logger.warning(f"Failed to read {fpath}: {e}")
+                continue
+            for i, rec in enumerate(data):
+                # Select only queries that succeeded on both engines
+                ok_pg = rec.get('executed_postgres', rec.get('postgres_time') is not None)
+                ok_duck = rec.get('executed_duckdb', rec.get('duckdb_time') is not None)
+                if not (ok_pg and ok_duck):
+                    continue
+                qtxt = rec.get('query_text')
+                dset = rec.get('dataset')
+                if not qtxt or not dset:
+                    continue
+                queries.append({'id': len(queries), 'text': qtxt.strip().rstrip(';') + ';', 'dataset': dset, 'type': rec.get('query_type', 'ap')})
+                if len(queries) >= limit:
+                    break
+            if len(queries) >= limit:
+                break
+        logger.info(f"Loaded {len(queries)} executed queries for benchmarking")
         return queries
     
     def run_concurrent_benchmark(self, queries, routing_method, max_workers=10):
@@ -242,13 +291,16 @@ class AQDRoutingBenchmark:
         
         return metrics
     
-    def run_full_benchmark(self, dataset='financial', query_type='ap', num_queries=100):
+    def run_full_benchmark(self, dataset='financial', query_type='ap', num_queries=100, use_executed=True):
         """Run full benchmark comparing all routing methods"""
         logger.info(f"Starting full routing benchmark")
         logger.info(f"Dataset: {dataset}, Query type: {query_type}, Queries: {num_queries}")
         
-        # Load test queries
-        queries = self.load_test_queries(dataset, query_type, num_queries)
+        # Load queries from executed training data (preferred), or fallback to static files
+        if use_executed:
+            queries = self.load_executed_queries(dataset if dataset else None, num_queries)
+        else:
+            queries = self.load_test_queries(dataset, query_type, num_queries)
         if not queries:
             logger.error("No queries loaded for benchmark")
             return
@@ -329,14 +381,14 @@ Query Type: {query_type}
 - Simple decision logic
 
 ### LightGBM
-- ML-based routing using trained model
-- Extracts {len(self.feature_names)} query features
-- Predicts optimal execution engine
+- ML-based routing using trained LightGBM model
+- Features are extracted internally in the kernel; no client inference
+- Predicts optimal execution engine in-kernel via libaqd_lgbm.so
 
-### GNN (Placeholder)
-- Currently uses enhanced heuristics
-- Future: Graph neural network on query plans
-- Plan structure analysis
+### GNN
+- Graph neural network operating on the optimizer plan graph
+- In-kernel inference via libaqd_gnn.so; no client JSON logging required
+- Leverages plan structure and cost annotations
 """
         
         # Save report
@@ -351,14 +403,15 @@ def main():
     import argparse
     
     parser = argparse.ArgumentParser(description='AQD Routing Methods Benchmark')
-    parser.add_argument('--dataset', default='financial', help='Dataset to test')
-    parser.add_argument('--query_type', default='ap', choices=['ap', 'tp'], help='Query type')
+    parser.add_argument('--dataset', default='imdb_small', help='Dataset to test (use executed queries from this dataset)')
+    parser.add_argument('--query_type', default='ap', choices=['ap', 'tp'], help='Query type (used only for static files)')
     parser.add_argument('--num_queries', type=int, default=100, help='Number of queries to test')
+    parser.add_argument('--use-executed', action='store_true', default=True, help='Use executed queries from data/execution_data (both engines successful)')
     
     args = parser.parse_args()
     
     benchmark = AQDRoutingBenchmark()
-    results = benchmark.run_full_benchmark(args.dataset, args.query_type, args.num_queries)
+    results = benchmark.run_full_benchmark(args.dataset, args.query_type, args.num_queries, use_executed=args.use_executed)
     
     if results:
         logger.info("Benchmark completed successfully!")

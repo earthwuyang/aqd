@@ -208,7 +208,8 @@ aqd_route_query(const char *query_text,
             break;
             
         case AQD_ROUTE_LIGHTGBM:
-            if (features && aqd_query_router.lightgbm_model)
+            /* Use function-pointer presence as readiness signal; features must be extracted */
+            if (features && lgb_predict_fp)
             {
                 preferred_engine = aqd_route_lightgbm(features);
                 strcpy(decision.reason, "LightGBM ML prediction");
@@ -223,11 +224,14 @@ aqd_route_query(const char *query_text,
             break;
             
         case AQD_ROUTE_GNN:
-            if (features && aqd_query_router.gnn_model)
+            /* Route via GNN if inference symbol is available; otherwise fallback */
+            if (gnn_predict_fp)
             {
                 preferred_engine = aqd_route_gnn(planned_stmt, features);
                 strcpy(decision.reason, "Graph Neural Network prediction");
-                decision.confidence = aqd_compute_routing_confidence(features, preferred_engine);
+                /* Confidence may use features; compute if available */
+                if (features)
+                    decision.confidence = aqd_compute_routing_confidence(features, preferred_engine);
             }
             else
             {
