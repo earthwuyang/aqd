@@ -578,7 +578,8 @@ class DualExecutionCollector:
                            if os.path.isdir(os.path.join(QUERIES_BASE_DIR, d))]
         
         if not datasets:
-            logger.error("No datasets found for processing")
+            logger.error("No datasets found for processing, expected query workloads under %s", QUERIES_BASE_DIR)
+            logger.error("Tip: Generate workloads with: python generate_benchmark_queries.py")
             return False
         
         logger.info(f"Processing {len(datasets)} datasets: {datasets}")

@@ -365,3 +365,142 @@ Next checks for Claude-code
 - Verify that `aqd_route_gnn()` is now exercising rginn inference by toggling `aqd.routing_method=3` and confirming different decisions vs default on a known dataset.
 - Use `SHOW aqd.last_decision_engine_code, aqd.last_decision_latency_us;` after queries to validate routing and measure kernel overhead.
 - Ensure your dataset DBs exist (e.g., `financial`, `imdb_small`) so that live evaluation success rates reflect actual query execution rather than missing schemas.
+
+---
+
+## Follow-up: Addressing Verification Findings (Routing Integration)
+**Date**: September 10, 2025  
+**Agent**: Codex CLI
+
+### Summary
+Claude correctly identified that routing decisions were not invoked in the execution path and that a `duckdb_execute` function was missing. I integrated the router invocation in the PostgreSQL executor so every query now produces a routing decision and updates tracking GUCs. A pg_duckdb execution path remains to be implemented; a skeleton and API plan are added.
+
+### Changes
+- `postgres_src/src/backend/executor/execMain.c`
+  - Include `aqd_query_router.h`.
+  - In `ExecutorRun`, call `aqd_route_query(sourceText, plannedstmt, features)` before executing the plan.
+  - Effect: `aqd.last_decision_engine_code` and `aqd.last_decision_latency_us` now reflect actual decisions per query.
+
+- `pg_duckdb/README.md`
+  - Added skeleton plan for a minimal pg_duckdb extension exposing `duckdb_execute(text)` and `duckdb_execute_copy(text)`.
+  - Two implementation paths outlined: link to `libduckdb` or subprocess fallback using `duckdb/duckdb` binary.
+
+### What’s Still Pending
+- Implement actual DuckDB execution and short-circuit execution when AQD selects DuckDB (currently we only record the decision and proceed with PostgreSQL execution).
+- Wire the router decision to conditionally route eligible SELECTs to DuckDB once `duckdb_execute` exists.
+
+### Quick Validation
+```sql
+-- Decisions are now produced on each execution
+SHOW aqd.routing_method;                   -- e.g., 1 (cost-threshold)
+SELECT 1;                                  -- run a trivial query
+SHOW aqd.last_decision_engine_code;        -- 0=Postgres, 1=DuckDB
+SHOW aqd.last_decision_latency_us;         -- routing latency in μs
+```
+
+---
+
+## Session: Datasets, Relationships, and Constraints
+**Date**: September 10, 2025  
+**Agent**: Codex CLI
+
+### Problems
+- `collect_dual_execution_data.py` reported “No datasets found” because `generate_benchmark_queries.py` discovers datasets from a single DuckDB connection using schemas; we only had per‑dataset `.db` files.
+- Query generator inferred joins heuristically, lacking ground‑truth foreign keys from the MySQL source.
+- Post‑import schemas had no PK/FK constraints in PostgreSQL or DuckDB, making join generation and validation weaker.
+
+### Changes Implemented
+
+1) Centralized DuckDB mirror (without removing per‑dataset DBs)
+- Importer now also populates `data/benchmark_datasets.db` with one schema per dataset, each table created under `"<dataset>"."<table>"`.
+- Existence checks updated to consider this central DB for presence of datasets.
+- Per‑dataset DB files under `data/duckdb_databases/` are still created for parity/testing.
+
+2) Relationships imported from MySQL
+- Extracted real FK relationships and PKs from `INFORMATION_SCHEMA.KEY_COLUMN_USAGE`:
+  - Multi‑column keys are grouped per constraint.
+  - Saved to `data/benchmark_data/<dataset>/relationships.json`.
+  - Also written to a DuckDB metadata table `"<dataset>"."__relationships"` for introspection.
+
+3) PK/FK creation in PostgreSQL and DuckDB
+- PostgreSQL:
+  - Adds PRIMARY KEY constraints (`<table>_pkey`) based on MySQL PKs.
+  - Adds FOREIGN KEY constraints (NOT VALID) based on MySQL FKs, after PKs.
+- DuckDB (best‑effort):
+  - Adds PRIMARY KEY and FOREIGN KEY constraints in both per‑dataset DB and central DB (schema‑qualified).
+  - Warnings logged if the DuckDB binary rejects certain constraint DDL (does not abort import).
+
+4) Generator integration
+- `generate_benchmark_queries.py` now loads relationships from `relationships.json` when available; falls back to heuristic inference otherwise.
+
+5) Collector UX
+- Improved no‑workload error message with a hint to run `generate_benchmark_queries.py`.
+
+### Files Touched
+- `import_benchmark_datasets.py`
+  - Added central DB population, existence checks, `--force` drop of central schema.
+  - New: `get_mysql_relationships`, `get_mysql_primary_keys`.
+  - New: `save_relationships_metadata`, `write_relationships_to_central_duckdb`.
+  - New: PK/FK creation functions for PostgreSQL and DuckDB; invoked after data load per dataset.
+- `generate_benchmark_queries.py`
+  - Loads relationships metadata to drive join generation; retains heuristic fallback.
+- `collect_dual_execution_data.py`
+  - Clear guidance when `data/benchmark_queries` is missing.
+
+### How To Verify
+- Central DuckDB contains dataset schemas:
+```bash
+./duckdb/duckdb data/benchmark_datasets.db -c \
+  "SELECT schema_name FROM information_schema.schemata \n \
+   WHERE schema_name NOT IN ('information_schema','main','temp','pg_catalog') ORDER BY 1;"
+```
+
+- Tables exist per schema:
+```bash
+./duckdb/duckdb data/benchmark_datasets.db -c \
+  "SELECT table_schema, table_name FROM information_schema.tables \n \
+   WHERE table_schema IN ('financial','imdb_small','Basketball_men') ORDER BY 1,2;"
+```
+
+- Relationships metadata exists:
+```bash
+ls data/benchmark_data/financial/relationships.json | xargs -I{} head -n 20 {}
+./duckdb/duckdb data/benchmark_datasets.db -c \
+  "SELECT COUNT(*) FROM \"financial\".\"__relationships\";"
+```
+
+- PostgreSQL constraints present (example: financial):
+```bash
+psql -d financial -c "\d+ loan"           # shows primary key if added
+psql -d financial -c "\d+ order"          # shows FKs if present
+# Or via information_schema:
+psql -d financial -c \
+  "SELECT table_name, constraint_name, constraint_type \n \
+     FROM information_schema.table_constraints \n \
+    WHERE table_schema='public' AND table_name IN ('loan','order') \n \
+    ORDER BY 1,2;"
+```
+
+- DuckDB constraints present (example: central DB):
+```bash
+./duckdb/duckdb data/benchmark_datasets.db -c \
+  "SELECT table_schema, table_name, constraint_name, constraint_type \n \
+     FROM information_schema.table_constraints \n \
+    WHERE table_schema='financial' ORDER BY 1,2,3;"
+```
+
+### Usage Recap
+```bash
+# Rebuild central/per-dataset DuckDBs + Postgres, with PK/FKs and relationships
+python import_benchmark_datasets.py --force
+
+# Generate workloads that the collector consumes
+python generate_benchmark_queries.py
+
+# Run dual execution collection
+python collect_dual_execution_data.py
+```
+
+### Notes
+- PostgreSQL FKs are created with NOT VALID to keep import fast; validate later if desired.
+- DuckDB constraint support depends on your binary; failures are logged and do not halt import.

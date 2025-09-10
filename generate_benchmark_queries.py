@@ -23,6 +23,7 @@ import psycopg2
 from tqdm import tqdm
 import sqlite3
 from pathlib import Path
+import json as _json
 
 # Import DuckDB for schema introspection
 import duckdb
@@ -449,18 +450,34 @@ class DatabaseIntrospector:
                 if stats:
                     column_stats[table][col_name] = stats
         
-        # Try to infer relationships based on column names and types
-        # Simple heuristic: columns named 'id' are primary keys, columns ending with '_id' are foreign keys
-        for table in tables:
-            for col_name, data_type, is_nullable in schema_info['columns'][table]:
-                if col_name.endswith('_id') and col_name != 'id':
-                    # Look for potential referenced table
-                    ref_table = col_name[:-3]  # Remove '_id' suffix
-                    if ref_table in tables:
-                        # Check if referenced table has 'id' column
-                        ref_cols = [c[0] for c in schema_info['columns'][ref_table]]
-                        if 'id' in ref_cols:
-                            schema_info['relationships'].append((table, [col_name], ref_table, ['id']))
+        # Load relationships metadata if available; otherwise infer heuristically
+        rel_path = Path(BASE_DIR) / 'data' / 'benchmark_data' / schema_name / 'relationships.json'
+        if rel_path.exists():
+            try:
+                with open(rel_path, 'r', encoding='utf-8') as f:
+                    rel_obj = _json.load(f)
+                    rels = rel_obj.get('relationships', [])
+                    for r in rels:
+                        schema_info['relationships'].append(
+                            (r['child_table'], r['child_columns'], r['parent_table'], r['parent_columns'])
+                        )
+                print(f"Loaded {len(schema_info['relationships'])} relationships from metadata")
+            except Exception as e:
+                print(f"Warning: failed to load relationships metadata for {schema_name}: {e}")
+
+        # If none loaded, try to infer relationships based on column names and types
+        if not schema_info['relationships']:
+            # Simple heuristic: columns named 'id' are primary keys, columns ending with '_id' are foreign keys
+            for table in tables:
+                for col_name, data_type, is_nullable in schema_info['columns'][table]:
+                    if col_name.endswith('_id') and col_name != 'id':
+                        # Look for potential referenced table
+                        ref_table = col_name[:-3]  # Remove '_id' suffix
+                        if ref_table in tables:
+                            # Check if referenced table has 'id' column
+                            ref_cols = [c[0] for c in schema_info['columns'][ref_table]]
+                            if 'id' in ref_cols:
+                                schema_info['relationships'].append((table, [col_name], ref_table, ['id']))
         
         return schema_info, column_stats
 

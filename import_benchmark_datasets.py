@@ -40,7 +40,8 @@ BASE_DIR = Path(__file__).resolve().parent
 
 DUCKDB_CONFIG = {
     'binary': str(BASE_DIR / 'duckdb' / 'duckdb'),
-    'databases_dir': str(BASE_DIR / 'data' / 'duckdb_databases')
+    'databases_dir': str(BASE_DIR / 'data' / 'duckdb_databases'),
+    'central_db': str(BASE_DIR / 'data' / 'benchmark_datasets.db')
 }
 
 # Test with a few datasets first
@@ -90,6 +91,12 @@ class BenchmarkDatasetImporter:
         # Setup DuckDB
         os.makedirs(DUCKDB_CONFIG['databases_dir'], exist_ok=True)
         print("  ✓ DuckDB directory ready")
+        # Ensure central DuckDB file exists
+        try:
+            open(DUCKDB_CONFIG['central_db'], 'ab').close()
+            print("  ✓ Central DuckDB database ready")
+        except Exception as e:
+            print(f"  ⚠ Could not precreate central DuckDB DB: {e}")
         
         print("✅ All database connections established")
     
@@ -226,6 +233,179 @@ class BenchmarkDatasetImporter:
         
         cursor.close()
         return row_count, columns, column_types
+
+    def get_mysql_relationships(self, database):
+        """Fetch foreign key relationships from MySQL INFORMATION_SCHEMA and group multi-column keys"""
+        cursor = self.mysql_conn.cursor()
+        cursor.execute(f"USE `{database}`")
+        sql = (
+            "SELECT CONSTRAINT_NAME, TABLE_NAME AS child_table, COLUMN_NAME AS child_column, "
+            "REFERENCED_TABLE_NAME AS parent_table, REFERENCED_COLUMN_NAME AS parent_column, ORDINAL_POSITION "
+            "FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE "
+            f"WHERE TABLE_SCHEMA = '{database}' AND REFERENCED_TABLE_NAME IS NOT NULL "
+            "ORDER BY CONSTRAINT_NAME, ORDINAL_POSITION"
+        )
+        cursor.execute(sql)
+        rows = cursor.fetchall()
+        cursor.close()
+
+        rels = {}
+        for constraint_name, child_table, child_col, parent_table, parent_col, ord_pos in rows:
+            key = (constraint_name, child_table, parent_table)
+            if key not in rels:
+                rels[key] = {
+                    'constraint_name': constraint_name,
+                    'child_table': child_table,
+                    'child_columns': [],
+                    'parent_table': parent_table,
+                    'parent_columns': []
+                }
+            rels[key]['child_columns'].append(child_col)
+            rels[key]['parent_columns'].append(parent_col)
+
+        # Convert to list
+        relationships = list(rels.values())
+        return relationships
+
+    def get_mysql_primary_keys(self, database):
+        """Fetch primary keys (possibly multi-column) from MySQL"""
+        cursor = self.mysql_conn.cursor()
+        cursor.execute(f"USE `{database}`")
+        sql = (
+            "SELECT TABLE_NAME, CONSTRAINT_NAME, COLUMN_NAME, ORDINAL_POSITION "
+            "FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE "
+            f"WHERE TABLE_SCHEMA = '{database}' AND CONSTRAINT_NAME = 'PRIMARY' "
+            "ORDER BY TABLE_NAME, ORDINAL_POSITION"
+        )
+        cursor.execute(sql)
+        rows = cursor.fetchall()
+        cursor.close()
+
+        pks = {}
+        for table_name, constraint_name, column_name, ord_pos in rows:
+            pks.setdefault(table_name, []).append(column_name)
+        return pks
+
+    def create_postgresql_primary_keys(self, database, primary_keys, existing_tables):
+        """Create primary keys in PostgreSQL using MySQL PK metadata"""
+        if not primary_keys:
+            return True
+        db_config = POSTGRESQL_CONFIG.copy()
+        db_config['database'] = database
+        try:
+            db_conn = psycopg2.connect(**db_config)
+            db_conn.autocommit = True
+            cursor = db_conn.cursor()
+            for table, cols in primary_keys.items():
+                if table not in existing_tables or not cols:
+                    continue
+                cols_quoted = ', '.join([f'"{c}"' for c in cols])
+                constraint_name = f'{table}_pkey'
+                sql = f'ALTER TABLE "{table}" ADD CONSTRAINT "{constraint_name}" PRIMARY KEY ({cols_quoted});'
+                try:
+                    cursor.execute(sql)
+                    print(f"    ✓ Added PRIMARY KEY on {database}.{table} ({', '.join(cols)})")
+                except Exception as e:
+                    print(f"    ⚠ Skipping PK for {database}.{table}: {e}")
+            return True
+        except Exception as e:
+            print(f"    ✗ Failed to add primary keys in {database}: {e}")
+            return False
+        finally:
+            if 'cursor' in locals():
+                cursor.close()
+            if 'db_conn' in locals():
+                db_conn.close()
+
+    def create_postgresql_foreign_keys(self, database, relationships, existing_tables):
+        """Create foreign keys in PostgreSQL using MySQL FK metadata. Uses NOT VALID to avoid heavy validation."""
+        if not relationships:
+            return True
+        db_config = POSTGRESQL_CONFIG.copy()
+        db_config['database'] = database
+        try:
+            db_conn = psycopg2.connect(**db_config)
+            db_conn.autocommit = True
+            cursor = db_conn.cursor()
+            fk_count = 0
+            for idx, rel in enumerate(relationships):
+                child = rel['child_table']
+                parent = rel['parent_table']
+                child_cols = rel['child_columns']
+                parent_cols = rel['parent_columns']
+                if child not in existing_tables or parent not in existing_tables:
+                    continue
+                if not child_cols or not parent_cols or len(child_cols) != len(parent_cols):
+                    continue
+                child_cols_quoted = ', '.join([f'"{c}"' for c in child_cols])
+                parent_cols_quoted = ', '.join([f'"{c}"' for c in parent_cols])
+                cname = rel.get('constraint_name') or f'fk_{child}_{parent}_{idx}'
+                cname = cname.replace('"', '')
+                sql = f'ALTER TABLE "{child}" ADD CONSTRAINT "{cname}" FOREIGN KEY ({child_cols_quoted}) REFERENCES "{parent}" ({parent_cols_quoted}) NOT VALID;'
+                try:
+                    cursor.execute(sql)
+                    fk_count += 1
+                except Exception as e:
+                    print(f"    ⚠ Skipping FK {child}->{parent} on {database}: {e}")
+            if fk_count:
+                print(f"    ✓ Added {fk_count} foreign keys in {database} (NOT VALID)")
+            return True
+        except Exception as e:
+            print(f"    ✗ Failed to add foreign keys in {database}: {e}")
+            return False
+        finally:
+            if 'cursor' in locals():
+                cursor.close()
+            if 'db_conn' in locals():
+                db_conn.close()
+
+    def save_relationships_metadata(self, database, relationships):
+        """Write relationships to JSON under data/benchmark_data/<database>/relationships.json"""
+        out_dir = os.path.join(DATA_DIR, database)
+        os.makedirs(out_dir, exist_ok=True)
+        path = os.path.join(out_dir, 'relationships.json')
+        with open(path, 'w', encoding='utf-8') as f:
+            json.dump({'database': database, 'relationships': relationships}, f, indent=2)
+        print(f"  ✓ Saved relationships metadata: {path}")
+
+    def write_relationships_to_central_duckdb(self, database, relationships):
+        """Store relationships in central DuckDB as a metadata table per schema for convenience"""
+        if not relationships:
+            return True
+        db_file = DUCKDB_CONFIG['central_db']
+        # Create schema if not exists and relationships table
+        create_sql = f'''
+            CREATE SCHEMA IF NOT EXISTS "{database}";
+            CREATE TABLE IF NOT EXISTS "{database}"."__relationships" (
+                constraint_name VARCHAR,
+                child_table VARCHAR,
+                child_columns JSON,
+                parent_table VARCHAR,
+                parent_columns JSON
+            );
+            DELETE FROM "{database}"."__relationships";
+        '''
+        result = subprocess.run([DUCKDB_CONFIG['binary'], db_file, '-c', create_sql], capture_output=True, text=True)
+        if result.returncode != 0:
+            print(f"    ✗ Failed to prepare relationships table in central DuckDB: {result.stderr}")
+            return False
+        # Build INSERT statements
+        values = []
+        for r in relationships:
+            cn = r['constraint_name'].replace("'", "''") if r.get('constraint_name') else ''
+            ct = r['child_table'].replace("'", "''")
+            pt = r['parent_table'].replace("'", "''")
+            cc_json = json.dumps(r['child_columns'])
+            pc_json = json.dumps(r['parent_columns'])
+            values.append(f"('{cn}','{ct}', '{cc_json}', '{pt}', '{pc_json}')")
+        if values:
+            insert_sql = f"INSERT INTO \"{database}\".\"__relationships\" VALUES " + ",".join(values) + ";"
+            ins_res = subprocess.run([DUCKDB_CONFIG['binary'], db_file, '-c', insert_sql], capture_output=True, text=True)
+            if ins_res.returncode != 0:
+                print(f"    ✗ Failed to insert relationships in central DuckDB: {ins_res.stderr}")
+                return False
+        print(f"    ✓ Wrote {len(relationships)} relationships to central DuckDB metadata table")
+        return True
     
     def create_postgresql_database(self, database):
         """Create PostgreSQL database"""
@@ -348,6 +528,104 @@ class BenchmarkDatasetImporter:
             print(f"    ✗ DuckDB failed for {database}.{table}: {result.stderr}")
             return False
 
+    def create_duckdb_table_central(self, database, table, csv_path):
+        """Create table in central DuckDB DB under schema = dataset name"""
+        db_file = DUCKDB_CONFIG['central_db']
+        load_sql = f'''
+            CREATE SCHEMA IF NOT EXISTS "{database}";
+            DROP TABLE IF EXISTS "{database}"."{table}";
+            CREATE TABLE "{database}"."{table}" AS 
+            SELECT * FROM read_csv_auto('{csv_path}', header=true, nullstr='');
+        '''
+        result = subprocess.run(
+            [DUCKDB_CONFIG['binary'], db_file, '-c', load_sql],
+            capture_output=True, text=True
+        )
+        if result.returncode != 0:
+            print(f"    ✗ Central DuckDB failed for {database}.{table}: {result.stderr}")
+            return False
+        # Optionally report row count
+        count_sql = f'SELECT COUNT(*) FROM "{database}"."{table}"'
+        count_result = subprocess.run(
+            [DUCKDB_CONFIG['binary'], db_file, '-c', count_sql],
+            capture_output=True, text=True
+        )
+        if count_result.returncode == 0:
+            row_count = count_result.stdout.strip().split('\n')[-1].strip()
+            print(f"    ✓ Central DuckDB: {database}.{table} ({row_count} rows)")
+        return True
+
+    def create_duckdb_primary_keys(self, database, primary_keys, existing_tables):
+        """Create PK constraints in DuckDB (per-dataset DB and central schema)."""
+        if not primary_keys:
+            return True
+        # Per-dataset DB
+        per_db = os.path.join(DUCKDB_CONFIG['databases_dir'], f'{database}.db')
+        for table, cols in primary_keys.items():
+            if table not in existing_tables or not cols:
+                continue
+            cols_quoted = ', '.join([f'"{c}"' for c in cols])
+            cname = f'{table}_pkey'
+            sql = f'ALTER TABLE "{table}" ADD CONSTRAINT "{cname}" PRIMARY KEY ({cols_quoted});'
+            if os.path.exists(per_db):
+                res = subprocess.run([DUCKDB_CONFIG['binary'], per_db, '-c', sql], capture_output=True, text=True)
+                if res.returncode != 0:
+                    print(f"    ⚠ DuckDB(per-db) PK {database}.{table} skipped: {res.stderr.strip()}")
+        # Central DB
+        central_db = DUCKDB_CONFIG['central_db']
+        for table, cols in primary_keys.items():
+            if table not in existing_tables or not cols:
+                continue
+            cols_quoted = ', '.join([f'"{c}"' for c in cols])
+            cname = f'{table}_pkey'
+            sql = f'ALTER TABLE "{database}"."{table}" ADD CONSTRAINT "{cname}" PRIMARY KEY ({cols_quoted});'
+            res = subprocess.run([DUCKDB_CONFIG['binary'], central_db, '-c', sql], capture_output=True, text=True)
+            if res.returncode != 0:
+                print(f"    ⚠ DuckDB(central) PK {database}.{table} skipped: {res.stderr.strip()}")
+        return True
+
+    def create_duckdb_foreign_keys(self, database, relationships, existing_tables):
+        """Create FK constraints in DuckDB (per-dataset DB and central schema)."""
+        if not relationships:
+            return True
+        per_db = os.path.join(DUCKDB_CONFIG['databases_dir'], f'{database}.db')
+        central_db = DUCKDB_CONFIG['central_db']
+        fk_count_per = 0
+        fk_count_central = 0
+        for idx, rel in enumerate(relationships):
+            child = rel['child_table']
+            parent = rel['parent_table']
+            ccols = rel['child_columns']
+            pcols = rel['parent_columns']
+            if child not in existing_tables or parent not in existing_tables:
+                continue
+            if not ccols or not pcols or len(ccols) != len(pcols):
+                continue
+            ccols_q = ', '.join([f'"{c}"' for c in ccols])
+            pcols_q = ', '.join([f'"{c}"' for c in pcols])
+            cname = rel.get('constraint_name') or f'fk_{child}_{parent}_{idx}'
+            cname = cname.replace('"', '')
+            # Per-dataset
+            if os.path.exists(per_db):
+                sql_per = f'ALTER TABLE "{child}" ADD CONSTRAINT "{cname}" FOREIGN KEY ({ccols_q}) REFERENCES "{parent}" ({pcols_q});'
+                res1 = subprocess.run([DUCKDB_CONFIG['binary'], per_db, '-c', sql_per], capture_output=True, text=True)
+                if res1.returncode != 0:
+                    print(f"    ⚠ DuckDB(per-db) FK {child}->{parent} skipped: {res1.stderr.strip()}")
+                else:
+                    fk_count_per += 1
+            # Central (schema-qualified)
+            sql_cent = f'ALTER TABLE "{database}"."{child}" ADD CONSTRAINT "{cname}" FOREIGN KEY ({ccols_q}) REFERENCES "{database}"."{parent}" ({pcols_q});'
+            res2 = subprocess.run([DUCKDB_CONFIG['binary'], central_db, '-c', sql_cent], capture_output=True, text=True)
+            if res2.returncode != 0:
+                print(f"    ⚠ DuckDB(central) FK {database}.{child}->{parent} skipped: {res2.stderr.strip()}")
+            else:
+                fk_count_central += 1
+        if fk_count_per:
+            print(f"    ✓ Added {fk_count_per} DuckDB per-db FKs in {database}")
+        if fk_count_central:
+            print(f"    ✓ Added {fk_count_central} DuckDB central FKs in {database}")
+        return True
+
     def drop_duckdb_database(self, database):
         """Drop DuckDB database (remove file)"""
         db_file = os.path.join(DUCKDB_CONFIG['databases_dir'], f'{database}.db')
@@ -359,6 +637,20 @@ class BenchmarkDatasetImporter:
         except Exception as e:
             print(f"    ✗ Failed to drop DuckDB database {database}: {e}")
             return False
+
+    def drop_duckdb_schema_central(self, database):
+        """Drop schema for dataset in central DuckDB DB"""
+        db_file = DUCKDB_CONFIG['central_db']
+        drop_sql = f'DROP SCHEMA IF EXISTS "{database}" CASCADE;'
+        result = subprocess.run(
+            [DUCKDB_CONFIG['binary'], db_file, '-c', drop_sql],
+            capture_output=True, text=True
+        )
+        if result.returncode != 0:
+            print(f"    ✗ Failed to drop central DuckDB schema {database}: {result.stderr}")
+            return False
+        print(f"    ✓ Dropped central DuckDB schema: {database}")
+        return True
 
     def postgres_dataset_exists(self, database: str, expected_tables: list) -> bool:
         """Check if PostgreSQL database exists and has all expected tables"""
@@ -386,25 +678,32 @@ class BenchmarkDatasetImporter:
             return False
 
     def duckdb_dataset_exists(self, database: str, expected_tables: list) -> bool:
-        """Check if DuckDB database exists and has all expected tables"""
-        db_file = os.path.join(DUCKDB_CONFIG['databases_dir'], f'{database}.db')
+        """Check if dataset schema exists in central DuckDB and includes expected tables"""
+        db_file = DUCKDB_CONFIG['central_db']
         if not os.path.exists(db_file):
             return False
+        # Check schema exists
+        schema_sql = f"SELECT COUNT(*) FROM information_schema.schemata WHERE schema_name='{database}'"
+        res_schema = subprocess.run([DUCKDB_CONFIG['binary'], db_file, '-c', schema_sql], capture_output=True, text=True)
+        if res_schema.returncode != 0:
+            return False
+        try:
+            lines = [l.strip() for l in res_schema.stdout.splitlines() if l.strip()]
+            if int(lines[-1]) == 0:
+                return False
+        except Exception:
+            return False
+        # Check each table exists in that schema
         for t in expected_tables:
-            check_sql = f"SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='main' AND table_name='{t}'"
-            res = subprocess.run(
-                [DUCKDB_CONFIG['binary'], db_file, '-c', check_sql],
-                capture_output=True, text=True
-            )
+            check_sql = f"SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='{database}' AND table_name='{t}'"
+            res = subprocess.run([DUCKDB_CONFIG['binary'], db_file, '-c', check_sql], capture_output=True, text=True)
             if res.returncode != 0:
                 return False
-            # Expect last non-empty line to be the count
             try:
                 lines = [l.strip() for l in res.stdout.splitlines() if l.strip()]
-                count_val = int(lines[-1]) if lines else 0
+                if int(lines[-1]) == 0:
+                    return False
             except Exception:
-                count_val = 0
-            if count_val == 0:
                 return False
         return True
     
@@ -477,6 +776,7 @@ class BenchmarkDatasetImporter:
             print("  🔁 --force specified: dropping existing datasets before import")
             self.drop_postgresql_database(database)
             self.drop_duckdb_database(database)
+            self.drop_duckdb_schema_central(database)
 
         # Import to PostgreSQL if needed
         if not pg_exists or self.force:
@@ -496,7 +796,37 @@ class BenchmarkDatasetImporter:
                 csv_path = os.path.join(DATA_DIR, database, f"{table}.csv")
                 if not os.path.exists(csv_path):
                     continue
+                # Per-dataset DB (optional)
                 self.create_duckdb_table(database, table, csv_path)
+                # Central consolidated DB with schema=dataset
+                self.create_duckdb_table_central(database, table, csv_path)
+
+        # After imports, fetch PK/FK metadata and add constraints to PostgreSQL
+        existing_tables = set(tables)
+        try:
+            pks = self.get_mysql_primary_keys(database)
+        except Exception as e:
+            print(f"  ⚠ Failed to fetch primary keys for {database}: {e}")
+            pks = {}
+        try:
+            relationships = self.get_mysql_relationships(database)
+        except Exception as e:
+            print(f"  ⚠ Failed to fetch relationships for {database}: {e}")
+            relationships = []
+
+        # Create PKs first, then FKs (FKs require unique/PK on parent)
+        self.create_postgresql_primary_keys(database, pks, existing_tables)
+        self.create_postgresql_foreign_keys(database, relationships, existing_tables)
+        # Also add constraints in DuckDB (best-effort, may be skipped if unsupported)
+        self.create_duckdb_primary_keys(database, pks, existing_tables)
+        self.create_duckdb_foreign_keys(database, relationships, existing_tables)
+
+        # Persist relationships metadata
+        try:
+            self.save_relationships_metadata(database, relationships)
+            self.write_relationships_to_central_duckdb(database, relationships)
+        except Exception as e:
+            print(f"  ⚠ Failed to persist relationships metadata: {e}")
 
         # Update stats (roughly counted by CSVs we handled)
         self.stats['tables_imported'] += len([t for t in tables if os.path.exists(os.path.join(DATA_DIR, database, f"{t}.csv"))])

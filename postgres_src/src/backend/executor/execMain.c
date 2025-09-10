@@ -38,6 +38,7 @@
 #include "postgres.h"
 
 #include "../../../aqd_feature_logger.h"
+#include "../../../aqd_query_router.h"
 #include "access/heapam.h"
 #include "access/htup_details.h"
 #include "access/sysattr.h"
@@ -307,12 +308,13 @@ standard_ExecutorStart(QueryDesc *queryDesc, int eflags)
  */
 void
 ExecutorRun(QueryDesc *queryDesc,
-			ScanDirection direction, uint64 count,
-			bool execute_once)
+            ScanDirection direction, uint64 count,
+            bool execute_once)
 {
     bool do_aqd = aqd_enable_feature_logging;
     TimestampTz aqd_start = 0, aqd_end = 0;
     AQDQueryFeatures aqd_features_local;
+    bool aqd_features_ready = false;
 
     if (do_aqd)
     {
@@ -323,6 +325,24 @@ ExecutorRun(QueryDesc *queryDesc,
                                    queryDesc->plannedstmt,
                                    queryDesc);
         aqd_start = GetCurrentTimestamp();
+        aqd_features_ready = true;
+    }
+
+    /* Run AQD router to record a decision and update tracking GUCs. */
+    if (queryDesc && queryDesc->plannedstmt)
+    {
+        AQDQueryFeatures *feat_ptr = NULL;
+        if (aqd_features_ready)
+            feat_ptr = &aqd_features_local;
+        else
+        {
+            /* Prepare a minimal, zero-initialized features struct */
+            memset(&aqd_features_local, 0, sizeof(AQDQueryFeatures));
+            feat_ptr = &aqd_features_local;
+        }
+        (void) aqd_route_query(queryDesc->sourceText ? queryDesc->sourceText : "",
+                               queryDesc->plannedstmt,
+                               feat_ptr);
     }
 
     if (ExecutorRun_hook)
