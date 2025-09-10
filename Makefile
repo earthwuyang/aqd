@@ -1,7 +1,7 @@
 # Makefile for AQD (Adaptive Query Dispatcher) System
 # Builds PostgreSQL with AQD extensions and supporting tools
 
-.PHONY: all clean postgres lightgbm gnn data-collection test help setup env-info venv-check venv-deps
+.PHONY: all clean postgres lightgbm gnn data-collection test help setup env-info venv-check venv-deps init-db init_db
 
 # Configuration
 POSTGRES_SRC = postgres_src
@@ -299,6 +299,9 @@ init-db: postgres
 		echo "aqd.cost_threshold = 10000" >> $(PGDATA_DIR)/postgresql.conf
 	
 	@echo "Database initialized in $(PGDATA_DIR)"
+
+# Backwards-compatible alias (README may reference init_db)
+init_db: init-db
 
 start-db: init-db
 	@echo "Starting PostgreSQL server (idempotent)..."

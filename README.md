@@ -36,13 +36,19 @@ pip install -r requirements.txt
 make -j$(nproc)
 
 # 2. Initialize database
-make init_db
+make init_db   # alias of 'make init-db'
 
 # 3. Import benchmark datasets
 python import_benchmark_datasets.py
 
-# 4. Generate 10k AP + 10k TP queries per dataset
-python generate_benchmark_queries.py --num_queries 10000
+# Optional:
+# - Full reimport (drop DBs/schemas, redownload CSVs, reapply PK/FKs)
+# python import_benchmark_datasets.py --force
+# - Refresh relationships only (re-extract PK/FKs, reapply constraints, no redownload)
+# python import_benchmark_datasets.py --force-relationships
+
+# 4. Generate queries (defaults: 10k AP + 10k TP per dataset)
+python generate_benchmark_queries.py
 
 # 5. Collect training data
 python collect_dual_execution_data.py --max_queries 10000
@@ -238,7 +244,9 @@ pg_duckdb_postgres_2/
 │           └── gnn_inference.h
 ├── pg_duckdb/                      # pg_duckdb extension
 ├── data/
-│   ├── benchmark_datasets.db      # DuckDB with all datasets
+│   ├── benchmark_datasets.db      # Central DuckDB: one schema per dataset (for discovery/generation)
+│   ├── duckdb_databases/          # Per‑dataset DuckDB .db files (optional parity)
+│   ├── benchmark_data/            # Cached CSVs and relationships.json per dataset
 │   ├── benchmark_queries/         # Generated queries (10k AP + 10k TP)
 │   └── execution_data/            # Training data (unified JSON)
 ├── models/                         # Trained models
@@ -257,6 +265,19 @@ pg_duckdb_postgres_2/
     ├── gnn_trainer.cpp                  # Train GNN with analysis
     └── final_routing_benchmark.py       # Run integrated benchmarks
 ```
+
+## 📦 Data Import Behavior
+
+- CSV caching: `import_benchmark_datasets.py` exports MySQL tables to CSV under `data/benchmark_data/<dataset>/<table>.csv`. Existing CSVs are reused; pass `--force` to redownload.
+- Idempotency:
+  - Skips re-import if dataset already exists in both PostgreSQL and DuckDB.
+  - `--force` drops Postgres DBs and DuckDB schemas/files and reimports.
+  - `--force-relationships` re-extracts PK/FKs and reapplies constraints without re-downloading CSVs or dropping data.
+- Central DuckDB: Populates `data/benchmark_datasets.db` with one schema per dataset (for discovery by the generator). Per‑dataset `.db` files are also created under `data/duckdb_databases/`.
+- Relationships: Extracts PK/FK metadata from MySQL and saves to `data/benchmark_data/<dataset>/relationships.json`. Also mirrored to `"<dataset>"."__relationships"` in the central DuckDB.
+- Constraints:
+  - PostgreSQL: Creates PRIMARY KEY and FOREIGN KEY constraints (FKs as `NOT VALID` for fast import).
+  - DuckDB: Current binary does not support `ALTER TABLE ... ADD PRIMARY/FOREIGN KEY`; importer logs a note and skips. Relationships are still available via metadata for query generation.
 
 ## 📈 Performance Results
 

@@ -422,13 +422,13 @@ SHOW aqd.last_decision_latency_us;         -- routing latency in μs
   - Saved to `data/benchmark_data/<dataset>/relationships.json`.
   - Also written to a DuckDB metadata table `"<dataset>"."__relationships"` for introspection.
 
-3) PK/FK creation in PostgreSQL and DuckDB
+3) PK/FK creation in PostgreSQL (and best‑effort in DuckDB)
 - PostgreSQL:
   - Adds PRIMARY KEY constraints (`<table>_pkey`) based on MySQL PKs.
   - Adds FOREIGN KEY constraints (NOT VALID) based on MySQL FKs, after PKs.
-- DuckDB (best‑effort):
-  - Adds PRIMARY KEY and FOREIGN KEY constraints in both per‑dataset DB and central DB (schema‑qualified).
-  - Warnings logged if the DuckDB binary rejects certain constraint DDL (does not abort import).
+- DuckDB:
+  - Current environment’s DuckDB binary does not support `ALTER TABLE ... ADD PRIMARY/FOREIGN KEY` (errors with “Not implemented”).
+  - Importer now explicitly skips PK/FK DDL in DuckDB and logs a single informational note, relying on the saved relationships metadata instead.
 
 4) Generator integration
 - `generate_benchmark_queries.py` now loads relationships from `relationships.json` when available; falls back to heuristic inference otherwise.
@@ -493,6 +493,9 @@ psql -d financial -c \
 ```bash
 # Rebuild central/per-dataset DuckDBs + Postgres, with PK/FKs and relationships
 python import_benchmark_datasets.py --force
+
+# Re-extract relationships and (re)apply constraints without redownloading/dropping
+python import_benchmark_datasets.py --force-relationships
 
 # Generate workloads that the collector consumes
 python generate_benchmark_queries.py

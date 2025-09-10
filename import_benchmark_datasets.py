@@ -59,7 +59,7 @@ SELECTED_DATABASES = [
 DATA_DIR = str(BASE_DIR / 'data' / 'benchmark_data')
 
 class BenchmarkDatasetImporter:
-    def __init__(self, force: bool = False):
+    def __init__(self, force: bool = False, force_relationships: bool = False):
         self.mysql_conn = None
         self.pg_conn = None
         self.stats = {
@@ -70,6 +70,7 @@ class BenchmarkDatasetImporter:
         }
         self.imported_datasets = []
         self.force = force
+        self.force_relationships = force_relationships
 
     def connect(self):
         """Connect to all databases"""
@@ -556,74 +557,15 @@ class BenchmarkDatasetImporter:
         return True
 
     def create_duckdb_primary_keys(self, database, primary_keys, existing_tables):
-        """Create PK constraints in DuckDB (per-dataset DB and central schema)."""
-        if not primary_keys:
-            return True
-        # Per-dataset DB
-        per_db = os.path.join(DUCKDB_CONFIG['databases_dir'], f'{database}.db')
-        for table, cols in primary_keys.items():
-            if table not in existing_tables or not cols:
-                continue
-            cols_quoted = ', '.join([f'"{c}"' for c in cols])
-            cname = f'{table}_pkey'
-            sql = f'ALTER TABLE "{table}" ADD CONSTRAINT "{cname}" PRIMARY KEY ({cols_quoted});'
-            if os.path.exists(per_db):
-                res = subprocess.run([DUCKDB_CONFIG['binary'], per_db, '-c', sql], capture_output=True, text=True)
-                if res.returncode != 0:
-                    print(f"    ⚠ DuckDB(per-db) PK {database}.{table} skipped: {res.stderr.strip()}")
-        # Central DB
-        central_db = DUCKDB_CONFIG['central_db']
-        for table, cols in primary_keys.items():
-            if table not in existing_tables or not cols:
-                continue
-            cols_quoted = ', '.join([f'"{c}"' for c in cols])
-            cname = f'{table}_pkey'
-            sql = f'ALTER TABLE "{database}"."{table}" ADD CONSTRAINT "{cname}" PRIMARY KEY ({cols_quoted});'
-            res = subprocess.run([DUCKDB_CONFIG['binary'], central_db, '-c', sql], capture_output=True, text=True)
-            if res.returncode != 0:
-                print(f"    ⚠ DuckDB(central) PK {database}.{table} skipped: {res.stderr.strip()}")
+        """DuckDB in this environment does not support ALTER TABLE ADD PRIMARY KEY; skip with a note."""
+        if primary_keys:
+            print("    ℹ DuckDB PK creation skipped (ALTER TABLE PRIMARY KEY not supported by this binary)")
         return True
 
     def create_duckdb_foreign_keys(self, database, relationships, existing_tables):
-        """Create FK constraints in DuckDB (per-dataset DB and central schema)."""
-        if not relationships:
-            return True
-        per_db = os.path.join(DUCKDB_CONFIG['databases_dir'], f'{database}.db')
-        central_db = DUCKDB_CONFIG['central_db']
-        fk_count_per = 0
-        fk_count_central = 0
-        for idx, rel in enumerate(relationships):
-            child = rel['child_table']
-            parent = rel['parent_table']
-            ccols = rel['child_columns']
-            pcols = rel['parent_columns']
-            if child not in existing_tables or parent not in existing_tables:
-                continue
-            if not ccols or not pcols or len(ccols) != len(pcols):
-                continue
-            ccols_q = ', '.join([f'"{c}"' for c in ccols])
-            pcols_q = ', '.join([f'"{c}"' for c in pcols])
-            cname = rel.get('constraint_name') or f'fk_{child}_{parent}_{idx}'
-            cname = cname.replace('"', '')
-            # Per-dataset
-            if os.path.exists(per_db):
-                sql_per = f'ALTER TABLE "{child}" ADD CONSTRAINT "{cname}" FOREIGN KEY ({ccols_q}) REFERENCES "{parent}" ({pcols_q});'
-                res1 = subprocess.run([DUCKDB_CONFIG['binary'], per_db, '-c', sql_per], capture_output=True, text=True)
-                if res1.returncode != 0:
-                    print(f"    ⚠ DuckDB(per-db) FK {child}->{parent} skipped: {res1.stderr.strip()}")
-                else:
-                    fk_count_per += 1
-            # Central (schema-qualified)
-            sql_cent = f'ALTER TABLE "{database}"."{child}" ADD CONSTRAINT "{cname}" FOREIGN KEY ({ccols_q}) REFERENCES "{database}"."{parent}" ({pcols_q});'
-            res2 = subprocess.run([DUCKDB_CONFIG['binary'], central_db, '-c', sql_cent], capture_output=True, text=True)
-            if res2.returncode != 0:
-                print(f"    ⚠ DuckDB(central) FK {database}.{child}->{parent} skipped: {res2.stderr.strip()}")
-            else:
-                fk_count_central += 1
-        if fk_count_per:
-            print(f"    ✓ Added {fk_count_per} DuckDB per-db FKs in {database}")
-        if fk_count_central:
-            print(f"    ✓ Added {fk_count_central} DuckDB central FKs in {database}")
+        """DuckDB in this environment does not support ALTER TABLE ADD FOREIGN KEY; skip with a note."""
+        if relationships:
+            print("    ℹ DuckDB FK creation skipped (ALTER TABLE FOREIGN KEY not supported by this binary)")
         return True
 
     def drop_duckdb_database(self, database):
@@ -767,11 +709,11 @@ class BenchmarkDatasetImporter:
         pg_exists = self.postgres_dataset_exists(database, tables)
         duck_exists = self.duckdb_dataset_exists(database, tables)
 
-        if pg_exists and duck_exists and not self.force:
+        if pg_exists and duck_exists and not self.force and not self.force_relationships:
             print("  ✅ Dataset already present in PostgreSQL and DuckDB. Skipping import.")
             return True
 
-        # Drop datasets if forcing
+        # Drop datasets if forcing full reimport
         if self.force:
             print("  🔁 --force specified: dropping existing datasets before import")
             self.drop_postgresql_database(database)
@@ -801,7 +743,7 @@ class BenchmarkDatasetImporter:
                 # Central consolidated DB with schema=dataset
                 self.create_duckdb_table_central(database, table, csv_path)
 
-        # After imports, fetch PK/FK metadata and add constraints to PostgreSQL
+        # After imports (or when --force-relationships), fetch PK/FK metadata and add constraints
         existing_tables = set(tables)
         try:
             pks = self.get_mysql_primary_keys(database)
@@ -881,8 +823,9 @@ class BenchmarkDatasetImporter:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Import benchmark datasets from MySQL to PostgreSQL and DuckDB")
-    parser.add_argument('--force', action='store_true', help='Redownload CSVs and reimport: drop and recreate datasets')
+    parser.add_argument('--force', action='store_true', help='Full reimport: drop datasets and reimport tables from CSVs')
+    parser.add_argument('--force-relationships', action='store_true', help='Re-extract PK/FK metadata and (re)apply constraints without redownloading CSVs or dropping data')
     args = parser.parse_args()
 
-    importer = BenchmarkDatasetImporter(force=args.force)
+    importer = BenchmarkDatasetImporter(force=args.force, force_relationships=args.force_relationships)
     importer.run()
