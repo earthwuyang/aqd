@@ -585,18 +585,26 @@ class RoutingMethodEvaluator:
             return None
 
     def _set_method_gucs(self, cur, method: str, base_dir: Path):
+        """Set appropriate GUCs for server-side routing"""
         code = {'default': 0, 'cost_threshold': 1, 'lightgbm': 2, 'gnn': 3}[method]
         try:
             cur.execute(f"SET aqd.routing_method = {code};")
         except Exception:
             pass
+        
+        # Disable feature logging for all methods during benchmarking for fairness
+        try:
+            cur.execute("SET aqd.enable_feature_logging = off;")
+        except Exception:
+            pass
+            
         if method == 'cost_threshold':
             try:
                 cur.execute("SET aqd.cost_threshold = 1000.0;")
             except Exception:
                 pass
         elif method == 'lightgbm':
-            # Set model and optional library path if present
+            # Set model path for server-side inference
             lgb_path = str((base_dir / 'models' / 'lightgbm_model.txt').resolve())
             try:
                 cur.execute(f"SET aqd.lightgbm_model_path = '{lgb_path}';")
@@ -636,12 +644,13 @@ class RoutingMethodEvaluator:
 
         base_dir = Path(__file__).resolve().parent
 
-        # Prepare tasks (query, dataset, method)
+        # Prepare tasks (query, dataset, method) - interleave by default for fairness
         tasks = []
         for ex in sample:
             for m in methods:
                 tasks.append((ex['query_text'], ex['dataset'], m))
         if interleave:
+            # Interleave methods to avoid cache bias
             random.shuffle(tasks)
 
         results = []
@@ -671,6 +680,9 @@ class RoutingMethodEvaluator:
                 continue
             total_ms = [r['total_time_ms'] for r in succ]
             query_ms = [r['query_time_ms'] for r in succ]
+            route_us = [r['routing_time_us'] for r in succ if r.get('routing_time_us') is not None]
+            engines = [r['last_engine'] for r in succ if r.get('last_engine')]
+            
             summary[m] = {
                 'method': m,
                 'pairs': len(arr),
@@ -683,33 +695,60 @@ class RoutingMethodEvaluator:
                 'p95_total_time_ms': float(np.percentile(total_ms, 95)),
                 'p99_total_time_ms': float(np.percentile(total_ms, 99)),
             }
+            
+            # Add routing overhead if available
+            if route_us:
+                summary[m]['avg_routing_us'] = statistics.mean(route_us)
+                summary[m]['p95_routing_us'] = float(np.percentile(route_us, 95))
+            
+            # Add engine distribution if available
+            if engines:
+                pg_count = engines.count('postgres')
+                duck_count = engines.count('duckdb')
+                summary[m]['postgres_pct'] = pg_count / len(engines) * 100
+                summary[m]['duckdb_pct'] = duck_count / len(engines) * 100
 
         # Print concise comparison
-        print("\n=== Live Routing Comparison ===")
+        print("\n=== Live Routing Comparison (Server-Side Only) ===")
         print(f"Executed {len(sample)} queries x {len(methods)} methods (interleave={interleave}, workers={concurrency})")
         for m in methods:
             s = summary.get(m)
             if not s:
                 print(f"- {m}: no successes")
                 continue
-            print(f"- {m:14s} | success {s['successful']}/{s['pairs']} ({s['success_rate']*100:.1f}%)"
-                  f" | avg {s['avg_total_time_ms']:.2f} ms | p95 {s['p95_total_time_ms']:.2f} ms"
-                  f" | thr {s['throughput_qps']:.2f} q/s")
+            line = (f"- {m:14s} | success {s['successful']}/{s['pairs']} ({s['success_rate']*100:.1f}%)"
+                   f" | avg {s['avg_total_time_ms']:.2f} ms | p95 {s['p95_total_time_ms']:.2f} ms"
+                   f" | thr {s['throughput_qps']:.2f} q/s")
+            
+            # Add routing overhead if available
+            if 'avg_routing_us' in s:
+                line += f" | route {s['avg_routing_us']:.1f} µs"
+            
+            # Add engine distribution if available  
+            if 'postgres_pct' in s:
+                line += f" | PG {s['postgres_pct']:.0f}% DK {s['duckdb_pct']:.0f}%"
+                
+            print(line)
 
         return summary
 
     def _exec_one(self, query_text: str, database: str, method: str, base_dir: Path):
+        """Execute a single query with server-side routing"""
         start = time.time()
         try:
             conn = self._pg_conn_live(database)
             if conn is None:
                 raise RuntimeError("DB unavailable")
             with conn.cursor() as cur:
+                # Use transaction for clean state
+                cur.execute("BEGIN;")
                 try:
-                    cur.execute("SET pg_duckdb.force_execution = 'auto';")
+                    cur.execute("SET LOCAL pg_duckdb.force_execution = 'auto';")
                 except Exception:
                     pass
                 self._set_method_gucs(cur, method, base_dir)
+                cur.execute("SET LOCAL statement_timeout = '0';")
+                
                 qstart = time.time()
                 cur.execute(query_text)
                 try:
@@ -717,6 +756,22 @@ class RoutingMethodEvaluator:
                 except Exception:
                     pass
                 qtime = (time.time() - qstart) * 1000.0
+                
+                # Get routing info if available
+                last_engine = None
+                route_us = None
+                try:
+                    cur.execute("SHOW aqd.last_routed_engine")
+                    last_engine = cur.fetchone()[0]
+                except Exception:
+                    pass
+                try:
+                    cur.execute("SHOW aqd.last_decision_us")
+                    route_us = int(cur.fetchone()[0])
+                except Exception:
+                    pass
+                    
+                cur.execute("COMMIT;")
             total = (time.time() - start) * 1000.0
             return {
                 'method': method,
@@ -724,6 +779,8 @@ class RoutingMethodEvaluator:
                 'success': True,
                 'query_time_ms': qtime,
                 'total_time_ms': total,
+                'last_engine': last_engine,
+                'routing_time_us': route_us,
                 'error': None,
             }
         except Exception as e:
@@ -743,7 +800,7 @@ def main():
     parser.add_argument('--num-queries', type=int, default=100, help='Number of queries to execute in live mode')
     parser.add_argument('--methods', nargs='+', default=['default','cost_threshold','lightgbm','gnn'], help='Methods to compare in live mode')
     parser.add_argument('--no-interleave', action='store_true', help='Disable interleaving in live mode')
-    parser.add_argument('--concurrency', type=int, default=8, help='Concurrency level in live mode')
+    parser.add_argument('--concurrency', type=int, default=16, help='Concurrency level in live mode (default: 16 for realistic load)')
     args = parser.parse_args()
 
     evaluator = RoutingMethodEvaluator()

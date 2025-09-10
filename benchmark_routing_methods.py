@@ -58,16 +58,27 @@ class AQDRoutingBenchmark:
         return psycopg2.connect(host=self.pg_host, port=self.pg_port, user=self.pg_user, database=database)
     
     def set_routing_method(self, conn, method):
-        """Set the routing method in PostgreSQL"""
+        """Set the routing method in PostgreSQL with proper model paths"""
         cursor = conn.cursor()
         
+        # Disable feature logging for all methods (fair benchmarking)
+        try:
+            cursor.execute("SET aqd.enable_feature_logging = off;")
+        except Exception:
+            pass
+            
         # Kernel mapping: 0=default, 1=cost, 2=lightgbm, 3=gnn
         code = {'default': 0, 'cost_threshold': 1, 'lightgbm': 2, 'gnn': 3}[method]
         cursor.execute(f"SET aqd.routing_method = {code};")
+        
         if method == 'cost_threshold':
             cursor.execute("SET aqd.cost_threshold = 1000.0;")
         elif method == 'lightgbm':
             cursor.execute(f"SET aqd.lightgbm_model_path = '{self.model_path}';")
+        elif method == 'gnn':
+            gnn_path = str(Path(__file__).resolve().parent / 'models' / 'rginn_routing_model.txt')
+            if os.path.exists(gnn_path):
+                cursor.execute(f"SET aqd.gnn_model_path = '{gnn_path}';")
         
         conn.commit()
         logger.info(f"Set routing method to: {method}")
@@ -100,20 +111,9 @@ class AQDRoutingBenchmark:
         return features
     
     def predict_routing(self, query_text):
-        """Predict query routing using LightGBM"""
-        if not self.lgb_model:
-            return 'postgres'  # Default fallback
-            
-        features = self.extract_query_features(query_text)
-        feature_vector = [features.get(fname, 0.0) for fname in self.feature_names]
-        
-        try:
-            prediction = self.lgb_model.predict([feature_vector])[0]
-            # If prediction > 0, prefer DuckDB; otherwise PostgreSQL
-            return 'duckdb' if prediction > 0 else 'postgres'
-        except Exception as e:
-            logger.warning(f"LightGBM prediction failed: {e}")
-            return 'postgres'
+        """Deprecated - kernel performs routing"""
+        # Routing is now done server-side, not client-side
+        return 'postgres'
     
     def execute_query(self, query_text, routing_method, query_id, database):
         """Execute a single query and measure performance"""
@@ -193,9 +193,9 @@ class AQDRoutingBenchmark:
         start_time = time.time()
         
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            # Submit all queries
+            # Submit all queries with proper database parameter
             future_to_query = {
-                executor.submit(self.execute_query, q['text'], routing_method, q['id']): q 
+                executor.submit(self.execute_query, q['text'], routing_method, q['id'], q['dataset']): q 
                 for q in queries
             }
             

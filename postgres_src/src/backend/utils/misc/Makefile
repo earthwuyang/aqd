@@ -16,6 +16,7 @@ override CPPFLAGS := -I. -I$(srcdir) $(CPPFLAGS)
 
 OBJS = \
 	aqd_feature_logger.o \
+	aqd_query_router.o \
 	lightgbm_inference.o \
 	gnn_inference.o \
 	rginn_core.o \

@@ -50,6 +50,7 @@
 #include "utils/memutils.h"
 #include "utils/timestamp.h"
 #include "aqd_feature_logger.h"
+#include "aqd_query_router.h"
 
 
 #define CONFIG_FILENAME "postgresql.conf"
@@ -1513,6 +1514,7 @@ InitializeGUCOptions(void)
 
     /* AQD: Define custom GUC variables */
     aqd_define_guc_variables();
+    aqd_define_routing_guc_variables();
 
 	/*
 	 * Load all variables with their compiled-in defaults, and initialize

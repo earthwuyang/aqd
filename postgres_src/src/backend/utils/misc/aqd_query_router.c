@@ -19,6 +19,7 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <dlfcn.h>
+#include <limits.h>
 
 AQDQueryRouter aqd_query_router = {
     .initialized = false,
@@ -89,6 +90,10 @@ char *aqd_gnn_library_path = NULL;
 bool aqd_enable_thompson_sampling = false;
 bool aqd_enable_resource_regulation = false;
 double aqd_resource_balance_factor = 0.5;
+
+/* Tracking variables for last routing decision */
+char *aqd_last_routed_engine = "unknown";
+int aqd_last_decision_us = 0;
 
 /* Initialize the query router */
 void
@@ -276,6 +281,10 @@ aqd_route_query(const char *query_text,
     /* Calculate decision latency */
     end_time = GetCurrentTimestamp();
     decision.decision_latency_us = (double)(end_time - start_time);
+    
+    /* Update tracking variables for last routing decision */
+    aqd_last_routed_engine = (decision.engine == AQD_ENGINE_DUCKDB) ? "duckdb" : "postgres";
+    aqd_last_decision_us = (int)decision.decision_latency_us;
     
     /* Update statistics */
     aqd_query_router.total_queries++;
@@ -933,6 +942,26 @@ aqd_define_routing_guc_variables(void)
                             PGC_SUSET,
                             0,
                             NULL, NULL, NULL);
+                            
+    /* Read-only GUCs for tracking last routing decision */
+    DefineCustomStringVariable("aqd.last_routed_engine",
+                              "Last engine chosen by AQD router",
+                              "Shows which engine (postgres/duckdb) was chosen for the last query",
+                              &aqd_last_routed_engine,
+                              "unknown",
+                              PGC_USERSET,
+                              GUC_REPORT | GUC_NOT_IN_SAMPLE | GUC_DISALLOW_IN_FILE,
+                              NULL, NULL, NULL);
+                              
+    DefineCustomIntVariable("aqd.last_decision_us",
+                           "Time spent in AQD routing (microseconds)",
+                           "Microseconds spent making the last routing decision",
+                           &aqd_last_decision_us,
+                           0,
+                           0, INT_MAX,
+                           PGC_USERSET,
+                           GUC_REPORT | GUC_NOT_IN_SAMPLE | GUC_DISALLOW_IN_FILE,
+                           NULL, NULL, NULL);
 }
 
 /* Configuration functions */
