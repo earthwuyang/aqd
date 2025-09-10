@@ -11,6 +11,10 @@ int aqd_gnn_load_model(const char *model_path);
 /* Returns 1 if a model is loaded, 0 otherwise. */
 int aqd_gnn_is_loaded(void);
 
+/* Predict using already loaded model on a compact RG graph */
+double aqd_gnn_predict(int N, int in_dim, const double *X,
+                       int num_rel, const int *indptr, const int *indices);
+
 /* Unload model and free resources. */
 void aqd_gnn_unload(void);
 
@@ -19,4 +23,3 @@ void aqd_gnn_unload(void);
 #endif
 
 #endif /* AQD_GNN_C_API_H */
-

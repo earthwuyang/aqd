@@ -20,7 +20,6 @@
 #include <sys/resource.h>
 #include <dlfcn.h>
 
-/* Global router instance */
 AQDQueryRouter aqd_query_router = {
     .initialized = false,
     .total_queries = 0
@@ -34,6 +33,51 @@ static void *lgb_lib_handle = NULL;
 static aqd_lgb_load_model_fn lgb_load_fp = NULL;
 static aqd_lgb_predict_named_fn lgb_predict_fp = NULL;
 static aqd_lgb_unload_fn lgb_unload_fp = NULL;
+
+/* GNN dynamic API */
+typedef int (*aqd_gnn_load_model_fn)(const char*);
+typedef int (*aqd_gnn_is_loaded_fn)(void);
+typedef void (*aqd_gnn_unload_fn)(void);
+typedef double (*aqd_gnn_predict_fn)(int, int, const double*, int, const int*, const int*);
+static void *gnn_lib_handle = NULL;
+static aqd_gnn_load_model_fn gnn_load_fp = NULL;
+static aqd_gnn_is_loaded_fn gnn_is_loaded_fp = NULL;
+static aqd_gnn_unload_fn gnn_unload_fp = NULL;
+static aqd_gnn_predict_fn gnn_predict_fp = NULL;
+
+/* ----------- Helpers for GNN plan graph construction ----------- */
+static void aqd_collect_plans(Plan *p, Plan **arr, int *pi) {
+    if (!p) return;
+    arr[*pi] = p; (*pi)++;
+    if (p->lefttree) aqd_collect_plans(p->lefttree, arr, pi);
+    if (p->righttree) aqd_collect_plans(p->righttree, arr, pi);
+}
+
+static int aqd_idx_of_plan(Plan **arr, int N, Plan *p) {
+    for (int i = 0; i < N; i++) if (arr[i] == p) return i;
+    return -1;
+}
+
+static int aqd_plan_op_id(Plan *p) {
+    if (!p) return 0;
+    if (IsA(p, SeqScan)) return 1;
+    if (IsA(p, IndexScan)) return 2;
+    if (IsA(p, BitmapHeapScan)) return 3;
+    if (IsA(p, NestLoop)) return 4;
+    if (IsA(p, MergeJoin)) return 5;
+    if (IsA(p, HashJoin)) return 6;
+    if (IsA(p, Sort)) return 7;
+    if (IsA(p, Agg)) return 8;
+    if (IsA(p, Group)) return 9;
+    return 0;
+}
+
+static int aqd_rel_for_child(Plan *p) {
+    int id = aqd_plan_op_id(p);
+    if (id == 1 || id == 2 || id == 3) return 0; /* scans */
+    if (id == 4 || id == 5 || id == 6) return 1; /* joins */
+    return 2; /* others */
+}
 
 /* Configuration variables */
 int aqd_routing_method = AQD_ROUTE_DEFAULT;
@@ -318,19 +362,36 @@ aqd_route_lightgbm(AQDQueryFeatures *features)
 AQDExecutionEngine
 aqd_route_gnn(PlannedStmt *planned_stmt, AQDQueryFeatures *features)
 {
-    /* This would require actual GNN implementation
-     * For now, use plan structure complexity as a heuristic */
-    
-    if (!planned_stmt || !features)
+    if (!planned_stmt)
         return AQD_ENGINE_POSTGRES;
-    
-    int complexity = features->complexity_score;
-    
-    /* Use complexity score as a simple decision criterion */
-    if (complexity > 20)
-        return AQD_ENGINE_DUCKDB;
-    else
+    if (!gnn_predict_fp)
+    {
+        int complexity = features ? features->complexity_score : 0;
+        return (complexity > 20) ? AQD_ENGINE_DUCKDB : AQD_ENGINE_POSTGRES;
+    }
+    Plan *root = planned_stmt->planTree;
+    if (!root)
         return AQD_ENGINE_POSTGRES;
+    int N = aqd_count_plan_nodes(root);
+    if (N <= 0) return AQD_ENGINE_POSTGRES;
+    const int in_dim = 16; const int R = 3;
+    double *X = (double*) palloc0((size_t)N * in_dim * sizeof(double));
+    int *indptr = (int*) palloc0((size_t)R * (N + 1) * sizeof(int));
+    Plan **nodes = (Plan**) palloc0(sizeof(Plan*) * (size_t)N);
+    int idx = 0;
+    aqd_collect_plans(root, nodes, &idx);
+    if (idx != N) N = idx;
+    for (int i=0;i<N;++i){ Plan *p = nodes[i]; int id = aqd_plan_op_id(p); if (id>=0 && id<10) X[(size_t)i*in_dim + id] = 1.0; int ix=10; double rows=p->plan_rows, width=p->plan_width, tc=p->total_cost; if (ix<in_dim) X[(size_t)i*in_dim + ix++] = log(rows+1.0)/10.0; if (ix<in_dim) X[(size_t)i*in_dim + ix++] = width/100.0; if (ix<in_dim) X[(size_t)i*in_dim + ix++] = log(tc+1.0)/10.0; }
+    int *counts = (int*) palloc0((size_t)R * N * sizeof(int));
+    for (int i=0;i<N;++i){ Plan *p = nodes[i]; if (p->lefttree){ int r=aqd_rel_for_child(p->lefttree); counts[r*N+i]++; } if (p->righttree){ int r=aqd_rel_for_child(p->righttree); counts[r*N+i]++; } }
+    int total_edges = 0; for (int r=0;r<R;++r){ int *ip=&indptr[r*(N+1)]; ip[0]=total_edges; for (int i=0;i<N;++i){ total_edges += counts[r*N+i]; ip[i+1]=total_edges; } }
+    int *indices = (int*) palloc0((size_t)total_edges * sizeof(int));
+    int *cursor = (int*) palloc0((size_t)R * (N+1) * sizeof(int));
+    for (int r=0;r<R;++r){ for (int i=0;i<=N;++i) cursor[r*(N+1)+i]=indptr[r*(N+1)+i]; }
+    for (int i=0;i<N;++i){ Plan *p=nodes[i]; if (p->lefttree){ int r=aqd_rel_for_child(p->lefttree); int u=aqd_idx_of_plan(nodes, N, p->lefttree); if (u>=0) indices[cursor[r*(N+1)+i]++]=u; } if (p->righttree){ int r=aqd_rel_for_child(p->righttree); int u=aqd_idx_of_plan(nodes, N, p->righttree); if (u>=0) indices[cursor[r*(N+1)+i]++]=u; } }
+    double y = gnn_predict_fp(N, in_dim, X, R, indptr, indices);
+    pfree(X); pfree(indptr); pfree(indices); pfree(cursor); pfree(nodes); pfree(counts);
+    return (y > 0.0) ? AQD_ENGINE_DUCKDB : AQD_ENGINE_POSTGRES;
 }
 
 /* Initialize Thompson sampling bandit */
@@ -725,10 +786,11 @@ aqd_load_gnn_model(const char *model_path)
         gnn_load_fp = (aqd_gnn_load_model_fn)dlsym(gnn_lib_handle, "aqd_gnn_load_model");
         gnn_is_loaded_fp = (aqd_gnn_is_loaded_fn)dlsym(gnn_lib_handle, "aqd_gnn_is_loaded");
         gnn_unload_fp = (aqd_gnn_unload_fn)dlsym(gnn_lib_handle, "aqd_gnn_unload");
-        if (!gnn_load_fp || !gnn_is_loaded_fp || !gnn_unload_fp) {
+        gnn_predict_fp = (aqd_gnn_predict_fn)dlsym(gnn_lib_handle, "aqd_gnn_predict");
+        if (!gnn_load_fp || !gnn_is_loaded_fp || !gnn_unload_fp || !gnn_predict_fp) {
             elog(WARNING, "AQD: Missing GNN symbols in libaqd_gnn.so");
             dlclose(gnn_lib_handle); gnn_lib_handle = NULL;
-            gnn_load_fp = NULL; gnn_is_loaded_fp = NULL; gnn_unload_fp = NULL;
+            gnn_load_fp = NULL; gnn_is_loaded_fp = NULL; gnn_unload_fp = NULL; gnn_predict_fp = NULL;
             return false;
         }
     }
@@ -756,7 +818,7 @@ aqd_unload_models(void)
         dlclose(gnn_lib_handle);
         gnn_lib_handle = NULL;
     }
-    gnn_load_fp = NULL; gnn_is_loaded_fp = NULL; gnn_unload_fp = NULL;
+    gnn_load_fp = NULL; gnn_is_loaded_fp = NULL; gnn_unload_fp = NULL; gnn_predict_fp = NULL;
     aqd_query_router.lightgbm_model = NULL;
     aqd_query_router.gnn_model = NULL;
 }
@@ -840,14 +902,6 @@ aqd_define_routing_guc_variables(void)
                               "Optional path to libaqd_gnn.so (dlopen). If unset, common locations are tried.",
                               &aqd_gnn_library_path,
                               "",
-/* GNN dynamic API */
-typedef int (*aqd_gnn_load_model_fn)(const char*);
-typedef int (*aqd_gnn_is_loaded_fn)(void);
-typedef void (*aqd_gnn_unload_fn)(void);
-static void *gnn_lib_handle = NULL;
-static aqd_gnn_load_model_fn gnn_load_fp = NULL;
-static aqd_gnn_is_loaded_fn gnn_is_loaded_fp = NULL;
-static aqd_gnn_unload_fn gnn_unload_fp = NULL;
                               PGC_SUSET,
                               0,
                               NULL, NULL, NULL);

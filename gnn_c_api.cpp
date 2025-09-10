@@ -1,6 +1,7 @@
 #include "gnn_c_api.h"
 #include "rginn.h"
 #include <mutex>
+#include <vector>
 
 static std::mutex g_mutex;
 static RGINNModel g_model;
@@ -34,3 +35,18 @@ extern "C" void aqd_gnn_unload(void) {
     }
 }
 
+extern "C" double aqd_gnn_predict(int N, int in_dim, const double *X,
+                                  int num_rel, const int *indptr, const int *indices) {
+    std::lock_guard<std::mutex> lock(g_mutex);
+    if (!g_loaded) return 0.0;
+    if (in_dim != g_model.in_dim || num_rel != g_model.num_rel) {
+        // Basic dim check; return neutral
+        return 0.0;
+    }
+    RGGraph g;
+    g.N = N; g.in_dim = in_dim; g.X = X; g.num_rel = num_rel; g.indptr = indptr; g.indices = indices;
+    const int H = g_model.hidden_dim;
+    std::vector<double> h0((size_t)N*H), m1((size_t)N*H), h1((size_t)N*H), gr(H);
+    double y = rginn_forward(&g_model, &g, h0.data(), m1.data(), h1.data(), gr.data());
+    return y;
+}
