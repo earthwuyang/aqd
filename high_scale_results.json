@@ -1,0 +1,458 @@
+[
+  {
+    "routing_method": "default",
+    "concurrency": 100,
+    "num_queries": 2000,
+    "successful": 204,
+    "failed": 1796,
+    "total_time": 1.3780035972595215,
+    "makespan": 1.3780035972595215,
+    "mean_latency": 0.05647046659507003,
+    "median_latency": 0.04966437816619873,
+    "p95_latency": 0.11198282241821289,
+    "p99_latency": 0.15094757080078125,
+    "min_latency": 0.007462263107299805,
+    "max_latency": 0.8831384181976318,
+    "throughput": 148.0402521486164,
+    "queries_per_second": 1451.3750210648666,
+    "dataset_breakdown": {
+      "imdb_small": {
+        "count": 44,
+        "mean_latency": 0.0482428182255138
+      },
+      "tpch_sf1": {
+        "count": 38,
+        "mean_latency": 0.08044185763911198
+      },
+      "tpcds_sf1": {
+        "count": 34,
+        "mean_latency": 0.05249090755687041
+      },
+      "sakila": {
+        "count": 46,
+        "mean_latency": 0.054480153581370476
+      },
+      "Credit": {
+        "count": 35,
+        "mean_latency": 0.04722945349557059
+      },
+      "financial": {
+        "count": 4,
+        "mean_latency": 0.06033182144165039
+      },
+      "Basketball_men": {
+        "count": 3,
+        "mean_latency": 0.0517881711324056
+      }
+    },
+    "query_type_breakdown": {
+      "AP": {
+        "count": 41,
+        "mean_latency": 0.05226143395028463
+      },
+      "TP": {
+        "count": 163,
+        "mean_latency": 0.05752918032780747
+      }
+    }
+  },
+  {
+    "routing_method": "cost_threshold",
+    "concurrency": 100,
+    "num_queries": 2000,
+    "successful": 204,
+    "failed": 1796,
+    "total_time": 1.334712266921997,
+    "makespan": 1.334712266921997,
+    "mean_latency": 0.058148051009458655,
+    "median_latency": 0.05204176902770996,
+    "p95_latency": 0.11385369300842285,
+    "p99_latency": 0.1379079818725586,
+    "min_latency": 0.008489608764648438,
+    "max_latency": 0.7497985363006592,
+    "throughput": 152.84193084585033,
+    "queries_per_second": 1498.4503024102974,
+    "dataset_breakdown": {
+      "Credit": {
+        "count": 35,
+        "mean_latency": 0.04634777477809361
+      },
+      "imdb_small": {
+        "count": 44,
+        "mean_latency": 0.054148077964782715
+      },
+      "sakila": {
+        "count": 46,
+        "mean_latency": 0.061598917712336
+      },
+      "tpch_sf1": {
+        "count": 38,
+        "mean_latency": 0.07621776430230391
+      },
+      "tpcds_sf1": {
+        "count": 34,
+        "mean_latency": 0.05013998115763945
+      },
+      "financial": {
+        "count": 4,
+        "mean_latency": 0.06038689613342285
+      },
+      "Basketball_men": {
+        "count": 3,
+        "mean_latency": 0.06046088536580404
+      }
+    },
+    "query_type_breakdown": {
+      "AP": {
+        "count": 41,
+        "mean_latency": 0.05123831004631228
+      },
+      "TP": {
+        "count": 163,
+        "mean_latency": 0.05988608401245866
+      }
+    }
+  },
+  {
+    "routing_method": "lightgbm",
+    "concurrency": 100,
+    "num_queries": 2000,
+    "successful": 204,
+    "failed": 1796,
+    "total_time": 1.4827234745025635,
+    "makespan": 1.4827234745025635,
+    "mean_latency": 0.05792864046844782,
+    "median_latency": 0.05279815196990967,
+    "p95_latency": 0.10712504386901855,
+    "p99_latency": 0.14946722984313965,
+    "min_latency": 0.00868535041809082,
+    "max_latency": 0.754713773727417,
+    "throughput": 137.58465655130985,
+    "queries_per_second": 1348.8691818755867,
+    "dataset_breakdown": {
+      "sakila": {
+        "count": 46,
+        "mean_latency": 0.05819088998048202
+      },
+      "tpcds_sf1": {
+        "count": 34,
+        "mean_latency": 0.05610741587246165
+      },
+      "imdb_small": {
+        "count": 44,
+        "mean_latency": 0.05407570708881725
+      },
+      "Credit": {
+        "count": 35,
+        "mean_latency": 0.04610738754272461
+      },
+      "tpch_sf1": {
+        "count": 38,
+        "mean_latency": 0.07666487442819696
+      },
+      "financial": {
+        "count": 4,
+        "mean_latency": 0.03696662187576294
+      },
+      "Basketball_men": {
+        "count": 3,
+        "mean_latency": 0.05959606170654297
+      }
+    },
+    "query_type_breakdown": {
+      "AP": {
+        "count": 41,
+        "mean_latency": 0.04738848383833722
+      },
+      "TP": {
+        "count": 163,
+        "mean_latency": 0.06057984551037748
+      }
+    }
+  },
+  {
+    "routing_method": "gnn",
+    "concurrency": 100,
+    "num_queries": 2000,
+    "successful": 204,
+    "failed": 1796,
+    "total_time": 1.3594741821289062,
+    "makespan": 1.3594741821289062,
+    "mean_latency": 0.05781504336525412,
+    "median_latency": 0.05071902275085449,
+    "p95_latency": 0.1054835319519043,
+    "p99_latency": 0.1489396095275879,
+    "min_latency": 0.008122682571411133,
+    "max_latency": 0.7504074573516846,
+    "throughput": 150.0580170493128,
+    "queries_per_second": 1471.1570298952236,
+    "dataset_breakdown": {
+      "sakila": {
+        "count": 46,
+        "mean_latency": 0.05933055152063784
+      },
+      "Credit": {
+        "count": 35,
+        "mean_latency": 0.04882520266941615
+      },
+      "imdb_small": {
+        "count": 44,
+        "mean_latency": 0.05071764100681652
+      },
+      "tpcds_sf1": {
+        "count": 34,
+        "mean_latency": 0.0555343838299022
+      },
+      "tpch_sf1": {
+        "count": 38,
+        "mean_latency": 0.07565798884943913
+      },
+      "financial": {
+        "count": 4,
+        "mean_latency": 0.05642205476760864
+      },
+      "Basketball_men": {
+        "count": 3,
+        "mean_latency": 0.04524811108907064
+      }
+    },
+    "query_type_breakdown": {
+      "AP": {
+        "count": 41,
+        "mean_latency": 0.05082676468825922
+      },
+      "TP": {
+        "count": 163,
+        "mean_latency": 0.0595728312533326
+      }
+    }
+  },
+  {
+    "routing_method": "default",
+    "concurrency": 100,
+    "num_queries": 3000,
+    "successful": 330,
+    "failed": 2670,
+    "total_time": 4.883992433547974,
+    "makespan": 4.883992433547974,
+    "mean_latency": 0.0804735956770001,
+    "median_latency": 0.061260104179382324,
+    "p95_latency": 0.14308786392211914,
+    "p99_latency": 0.34621167182922363,
+    "min_latency": 0.006579160690307617,
+    "max_latency": 3.4825050830841064,
+    "throughput": 67.56767224560822,
+    "queries_per_second": 614.2515658691657,
+    "dataset_breakdown": {
+      "tpch_sf1": {
+        "count": 66,
+        "mean_latency": 0.15570386250813803
+      },
+      "sakila": {
+        "count": 68,
+        "mean_latency": 0.0650239481645472
+      },
+      "imdb_small": {
+        "count": 70,
+        "mean_latency": 0.058088881628853936
+      },
+      "Credit": {
+        "count": 60,
+        "mean_latency": 0.06029205719629924
+      },
+      "tpcds_sf1": {
+        "count": 55,
+        "mean_latency": 0.06329659548672763
+      },
+      "financial": {
+        "count": 7,
+        "mean_latency": 0.06520911625453404
+      },
+      "Basketball_men": {
+        "count": 4,
+        "mean_latency": 0.05917036533355713
+      }
+    },
+    "query_type_breakdown": {
+      "AP": {
+        "count": 79,
+        "mean_latency": 0.12410262868374208
+      },
+      "TP": {
+        "count": 251,
+        "mean_latency": 0.06674174863503748
+      }
+    }
+  },
+  {
+    "routing_method": "cost_threshold",
+    "concurrency": 100,
+    "num_queries": 3000,
+    "successful": 330,
+    "failed": 2670,
+    "total_time": 4.844327926635742,
+    "makespan": 4.844327926635742,
+    "mean_latency": 0.08441132704416911,
+    "median_latency": 0.0649634599685669,
+    "p95_latency": 0.1379084587097168,
+    "p99_latency": 0.3401792049407959,
+    "min_latency": 0.007071256637573242,
+    "max_latency": 3.4265618324279785,
+    "throughput": 68.12090448822615,
+    "queries_per_second": 619.2809498929649,
+    "dataset_breakdown": {
+      "imdb_small": {
+        "count": 70,
+        "mean_latency": 0.06683409554617746
+      },
+      "sakila": {
+        "count": 68,
+        "mean_latency": 0.06700874777401195
+      },
+      "tpcds_sf1": {
+        "count": 55,
+        "mean_latency": 0.06558018597689542
+      },
+      "Credit": {
+        "count": 60,
+        "mean_latency": 0.0687946875890096
+      },
+      "tpch_sf1": {
+        "count": 66,
+        "mean_latency": 0.1543335300503355
+      },
+      "financial": {
+        "count": 7,
+        "mean_latency": 0.07088027681623187
+      },
+      "Basketball_men": {
+        "count": 4,
+        "mean_latency": 0.05099749565124512
+      }
+    },
+    "query_type_breakdown": {
+      "AP": {
+        "count": 79,
+        "mean_latency": 0.125112702574911
+      },
+      "TP": {
+        "count": 251,
+        "mean_latency": 0.071600933948836
+      }
+    }
+  },
+  {
+    "routing_method": "lightgbm",
+    "concurrency": 100,
+    "num_queries": 3000,
+    "successful": 330,
+    "failed": 2670,
+    "total_time": 5.106340169906616,
+    "makespan": 5.106340169906616,
+    "mean_latency": 0.08818397449724602,
+    "median_latency": 0.06744265556335449,
+    "p95_latency": 0.15243268013000488,
+    "p99_latency": 0.29045701026916504,
+    "min_latency": 0.007918119430541992,
+    "max_latency": 3.6024484634399414,
+    "throughput": 64.62554178133318,
+    "queries_per_second": 587.5049252848471,
+    "dataset_breakdown": {
+      "Credit": {
+        "count": 60,
+        "mean_latency": 0.06537489891052246
+      },
+      "imdb_small": {
+        "count": 70,
+        "mean_latency": 0.07344508511679514
+      },
+      "sakila": {
+        "count": 68,
+        "mean_latency": 0.07253566910238828
+      },
+      "tpcds_sf1": {
+        "count": 55,
+        "mean_latency": 0.0667281064120206
+      },
+      "tpch_sf1": {
+        "count": 66,
+        "mean_latency": 0.15930515708345355
+      },
+      "financial": {
+        "count": 7,
+        "mean_latency": 0.09426522254943848
+      },
+      "Basketball_men": {
+        "count": 4,
+        "mean_latency": 0.06514835357666016
+      }
+    },
+    "query_type_breakdown": {
+      "AP": {
+        "count": 79,
+        "mean_latency": 0.12703977657269827
+      },
+      "TP": {
+        "count": 251,
+        "mean_latency": 0.07595445910298017
+      }
+    }
+  },
+  {
+    "routing_method": "gnn",
+    "concurrency": 100,
+    "num_queries": 3000,
+    "successful": 330,
+    "failed": 2670,
+    "total_time": 4.95943808555603,
+    "makespan": 4.95943808555603,
+    "mean_latency": 0.08612638748053349,
+    "median_latency": 0.06607961654663086,
+    "p95_latency": 0.1499166488647461,
+    "p99_latency": 0.40141773223876953,
+    "min_latency": 0.00823211669921875,
+    "max_latency": 3.4856605529785156,
+    "throughput": 66.53979630496826,
+    "queries_per_second": 604.9072391360751,
+    "dataset_breakdown": {
+      "Credit": {
+        "count": 60,
+        "mean_latency": 0.06332868337631226
+      },
+      "sakila": {
+        "count": 68,
+        "mean_latency": 0.07179106333676506
+      },
+      "imdb_small": {
+        "count": 70,
+        "mean_latency": 0.06369425228663854
+      },
+      "tpcds_sf1": {
+        "count": 55,
+        "mean_latency": 0.06843667463822799
+      },
+      "tpch_sf1": {
+        "count": 66,
+        "mean_latency": 0.16369199391567346
+      },
+      "financial": {
+        "count": 7,
+        "mean_latency": 0.063084534236363
+      },
+      "Basketball_men": {
+        "count": 4,
+        "mean_latency": 0.06807911396026611
+      }
+    },
+    "query_type_breakdown": {
+      "AP": {
+        "count": 79,
+        "mean_latency": 0.12436160558386694
+      },
+      "TP": {
+        "count": 251,
+        "mean_latency": 0.07409219532848829
+      }
+    }
+  }
+]

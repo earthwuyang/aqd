@@ -43,9 +43,16 @@ static void build_graph_from_plan(const json& plan, int in_dim, GraphBuild& gb){
     std::vector<json> nodes;
     std::vector<std::vector<int>> children;
     std::vector<std::string> types;
-    nodes.push_back(plan);
+    
+    // Check if we need to unwrap Plan key
+    json root_plan = plan;
+    if (plan.contains("Plan") && plan["Plan"].is_object()) {
+        root_plan = plan["Plan"];
+    }
+    
+    nodes.push_back(root_plan);
     children.emplace_back();
-    types.push_back(plan.value("Node Type",""));
+    types.push_back(root_plan.value("Node Type",""));
     for (size_t i=0; i<nodes.size(); ++i){
         const json& n = nodes[i];
         if (n.contains("Plans") && n["Plans"].is_array()){
@@ -180,7 +187,90 @@ std::vector<Example> load_examples_from_file(const std::string& filepath) {
 // Default model path for kernel integration
 const char* DEFAULT_RGINN_MODEL_PATH = "models/rginn_routing_model.txt";
 
+static std::string psql_explain_json(const std::string& host, const std::string& port,
+                                     const std::string& user, const std::string& db,
+                                     const std::string& sql){
+    // Build a safe-ish psql command. Escape single quotes in SQL for -c '...'
+    std::string esc_sql;
+    esc_sql.reserve(sql.size() * 2);
+    for (char c : sql) { esc_sql += (c == '\'' ? "''" : std::string(1, c)); }
+    std::string cmd = "psql -h '" + host + "' -p '" + port + "' -U '" + user + "' -d '" + db + "' -At -c 'EXPLAIN (FORMAT JSON) " + esc_sql + "'";
+    std::string out;
+    FILE* pipe = popen(cmd.c_str(), "r");
+    if (!pipe) return out;
+    char buffer[8192];
+    while (fgets(buffer, sizeof(buffer), pipe) != nullptr) { out += buffer; }
+    pclose(pipe);
+    return out;
+}
+
 int main(int argc, char** argv){
+    // Prediction-only modes: --predict <model_path> (stdin JSON)
+    //                        --test <model_path> [--query SQL --db DBNAME [--host H --port P --user U]]
+    if (argc >= 2 && (std::string(argv[1]) == std::string("--predict") || std::string(argv[1]) == std::string("--test"))) {
+        const char* model_path = (argc >= 3) ? argv[2] : DEFAULT_RGINN_MODEL_PATH;
+        RGINNModel model;
+        // Model dims are unknown before load; initialize with defaults, then load
+        rginn_init(&model, 16, 32, 1, 3, 1e-3);
+        if (rginn_load(&model, model_path) != 0) {
+            // Failed to load model; default to PostgreSQL (0)
+            std::cout << "0\n";
+            return 0;
+        }
+        json plan;
+        // Two sources for plan: (1) --query ... use psql EXPLAIN; (2) stdin JSON
+        bool used_query = false;
+        if (argc >= 4) {
+            std::string query; std::string db; std::string host="localhost"; std::string port="5432"; std::string user = getenv("USER")?getenv("USER"):"postgres";
+            for (int i=3;i<argc;++i){
+                std::string arg = argv[i];
+                if (arg == "--query" && i+1 < argc){ query = argv[++i]; }
+                else if (arg == "--db" && i+1 < argc){ db = argv[++i]; }
+                else if (arg == "--host" && i+1 < argc){ host = argv[++i]; }
+                else if (arg == "--port" && i+1 < argc){ port = argv[++i]; }
+                else if (arg == "--user" && i+1 < argc){ user = argv[++i]; }
+            }
+            if (!query.empty() && !db.empty()){
+                std::string json_text = psql_explain_json(host, port, user, db, query);
+                if (!json_text.empty()){
+                    try{
+                        auto arr = json::parse(json_text);
+                        if (arr.is_array() && !arr.empty()){
+                            plan = arr[0];
+                            used_query = true;
+                        }
+                    } catch(...){}
+                }
+            }
+        }
+        if (!used_query){
+            // Read plan JSON from stdin
+            std::string input; std::string line;
+            while (std::getline(std::cin, line)) { input += line; }
+            if (input.empty()) { std::cout << "0\n"; return 0; }
+            try { 
+                json parsed = json::parse(input); 
+                // Handle both array and object formats
+                if (parsed.is_array() && !parsed.empty()) {
+                    plan = parsed[0];
+                } else {
+                    plan = parsed;
+                }
+            } catch (...) { std::cout << "0\n"; return 0; }
+        }
+        // build_graph_from_plan already handles Plan key unwrapping
+        GraphBuild gb;
+        const int in_dim_pred = 16; // must match training dims
+        build_graph_from_plan(plan, in_dim_pred, gb);
+        if (gb.N == 0) { std::cout << "0\n"; return 0; }
+        RGGraph g; g.N = gb.N; g.in_dim = in_dim_pred; g.X = gb.X.data(); g.num_rel = gb.R; g.indptr = gb.indptr.data(); g.indices = gb.indices.data();
+        const int hidden_pred = 32;
+        std::vector<double> h0((size_t)g.N * hidden_pred), m1((size_t)g.N * hidden_pred), h1((size_t)g.N * hidden_pred), gr(hidden_pred);
+        double y = rginn_forward(&model, &g, h0.data(), m1.data(), h1.data(), gr.data());
+        // Output decision: 1 if DuckDB faster (y>0), else 0
+        std::cout << (y > 0 ? "1\n" : "0\n");
+        return 0;
+    }
     std::string out_path;
     std::vector<std::string> data_files;
     
@@ -420,7 +510,10 @@ int main(int argc, char** argv){
             std::cerr << "Best validation loss: " << best_val_loss 
                      << " (RMSE: " << std::sqrt(best_val_loss) << ") at epoch " << best_epoch << "\n";
             // Restore best model from file
-            rginn_load(&model, temp_best_model_path.c_str());
+            std::cerr << "DEBUG: Loading best model from " << temp_best_model_path << "\n";
+            if (rginn_load(&model, temp_best_model_path.c_str()) != 0) {
+                std::cerr << "ERROR: Failed to load best model, keeping current model\n";
+            }
             break;
         }
     }
@@ -449,27 +542,30 @@ int main(int argc, char** argv){
     std::unordered_map<std::string, int> dataset_total;
     
     for (size_t idx = train_size; idx < all_examples.size(); ++idx) {
+        
         const auto& ex = all_examples[idx];
+        
+        
+        // Debug: Check if plan_json is valid
+        if (!ex.plan_json.is_object()) {
+            std::cerr << "WARNING: Invalid plan_json at test index " << (idx - train_size) << ", skipping\n";
+            continue;
+        }
         
         GraphBuild gb; 
         build_graph_from_plan(ex.plan_json, in_dim, gb);
-        if (gb.N == 0) continue;
+        if (gb.N == 0) {
+            continue;
+        }
         
         RGGraph g; 
         g.N = gb.N; 
         g.in_dim = in_dim; 
         g.X = gb.X.data(); 
         g.num_rel = gb.R;
-        
-        std::vector<int> ind((size_t)g.num_rel * (g.N + 1));
-        int base = 0;
-        for (int r = 0; r < g.num_rel; ++r){
-            int total_r = gb.indptr[(size_t)r * (g.N + 1) + g.N];
-            for (int i = 0; i <= g.N; ++i) 
-                ind[(size_t)r * (g.N + 1) + i] = base + gb.indptr[(size_t)r * (g.N + 1) + i];
-            base += total_r;
-        }
-        g.indptr = ind.data(); 
+        // Use the indptr exactly as constructed in build_graph_from_plan.
+        // It already encodes concatenated CSR offsets across relations.
+        g.indptr = gb.indptr.data();
         g.indices = gb.indices.data();
         
         std::vector<double> h0((size_t)g.N * hidden), m1((size_t)g.N * hidden), 
@@ -504,7 +600,12 @@ int main(int argc, char** argv){
             
             // Estimate cost-based routing (using total cost from plan)
             // Extract the root node's total cost
-            double total_cost = ex.plan_json.value("Total Cost", 1000.0);
+            double total_cost = 1000.0;
+            if (ex.plan_json.contains("Plan") && ex.plan_json["Plan"].contains("Total Cost")) {
+                total_cost = ex.plan_json["Plan"]["Total Cost"];
+            } else if (ex.plan_json.contains("Total Cost")) {
+                total_cost = ex.plan_json["Total Cost"];
+            }
             
             // Cost threshold routing decisions
             cost_threshold_100_time += (total_cost < 100) ? ex.duckdb_time : ex.postgres_time;
