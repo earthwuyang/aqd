@@ -19,6 +19,7 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <dlfcn.h>
+#include <stdio.h>
 
 AQDQueryRouter aqd_query_router = {
     .initialized = false,
@@ -136,15 +137,12 @@ aqd_init_query_router(void)
         aqd_init_resource_regulator(&aqd_query_router.regulator);
     }
     
-    /* Load models if specified */
-    if (aqd_query_router.config.method == AQD_ROUTE_LIGHTGBM && 
-        strlen(aqd_query_router.config.lightgbm_model_path) > 0)
+    /* Preload both models if paths are configured, independent of active method */
+    if (strlen(aqd_query_router.config.lightgbm_model_path) > 0)
     {
         aqd_load_lightgbm_model(aqd_query_router.config.lightgbm_model_path);
     }
-    
-    if (aqd_query_router.config.method == AQD_ROUTE_GNN && 
-        strlen(aqd_query_router.config.gnn_model_path) > 0)
+    if (strlen(aqd_query_router.config.gnn_model_path) > 0)
     {
         aqd_load_gnn_model(aqd_query_router.config.gnn_model_path);
     }
@@ -283,7 +281,13 @@ aqd_route_query(const char *query_text,
     
     /* Calculate decision latency */
     end_time = GetCurrentTimestamp();
-    decision.decision_latency_us = (double)(end_time - start_time);
+    {
+        long secs = 0; int usecs = 0;
+        TimestampDifference(start_time, end_time, &secs, &usecs);
+        decision.decision_latency_us = (double)secs * 1000000.0 + (double)usecs;
+        if (decision.decision_latency_us < 0.0)
+            decision.decision_latency_us = 0.0;
+    }
     
     /* Update statistics */
     aqd_query_router.total_queries++;
@@ -354,15 +358,22 @@ aqd_route_lightgbm(AQDQueryFeatures *features)
         return AQD_ENGINE_POSTGRES;
     int n = features->num_features;
     if (n > AQD_MAX_FEATURES) n = AQD_MAX_FEATURES;
-    const char *names[AQD_MAX_FEATURES];
-    double values[AQD_MAX_FEATURES];
+    /* Provide both descriptive names and generic aqd_feature_{i} names for alignment */
+    const char *names[AQD_MAX_FEATURES * 2];
+    double values[AQD_MAX_FEATURES * 2];
     int m = 0;
     for (int i = 0; i < n; i++) {
-        if (features->features[i].is_valid) {
-            names[m] = features->features[i].name;
-            values[m] = features->features[i].value;
-            m++;
-        }
+        if (!features->features[i].is_valid) continue;
+        /* descriptive name */
+        names[m] = features->features[i].name;
+        values[m] = features->features[i].value;
+        m++;
+        /* generic aqd_feature_{i+1} */
+        static char buf[ AQD_MAX_FEATURES ][32];
+        snprintf(buf[i], sizeof(buf[i]), "aqd_feature_%d", i + 1);
+        names[m] = buf[i];
+        values[m] = features->features[i].value;
+        m++;
     }
     if (m == 0)
         return AQD_ENGINE_POSTGRES;

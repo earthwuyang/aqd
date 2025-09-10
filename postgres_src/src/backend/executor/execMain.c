@@ -69,6 +69,7 @@
 #include "utils/rls.h"
 #include "utils/ruleutils.h"
 #include "utils/snapmgr.h"
+#include "utils/guc.h"
 
 
 /* Hooks for plugins to get control in ExecutorStart/Run/Finish/End */
@@ -315,6 +316,7 @@ ExecutorRun(QueryDesc *queryDesc,
     TimestampTz aqd_start = 0, aqd_end = 0;
     AQDQueryFeatures aqd_features_local;
     bool aqd_features_ready = false;
+    int aqd_guc_nestlevel = -1;
 
     /* Extract features when needed for routing (LightGBM) regardless of logging */
     {
@@ -332,7 +334,7 @@ ExecutorRun(QueryDesc *queryDesc,
         }
     }
 
-    /* Run AQD router to record a decision and update tracking GUCs. */
+    /* Run AQD router to record a decision and, if possible, enforce engine selection. */
     if (queryDesc && queryDesc->plannedstmt)
     {
         AQDQueryFeatures *feat_ptr = NULL;
@@ -344,9 +346,20 @@ ExecutorRun(QueryDesc *queryDesc,
             memset(&aqd_features_local, 0, sizeof(AQDQueryFeatures));
             feat_ptr = &aqd_features_local;
         }
-        (void) aqd_route_query(queryDesc->sourceText ? queryDesc->sourceText : "",
-                               queryDesc->plannedstmt,
-                               feat_ptr);
+        AQDRoutingDecision decision = aqd_route_query(queryDesc->sourceText ? queryDesc->sourceText : "",
+                                                     queryDesc->plannedstmt,
+                                                     feat_ptr);
+        /* Enforce engine selection for this query via pg_duckdb GUC when available. */
+        const char *force_val = (decision.engine == AQD_ENGINE_DUCKDB) ? "true" : "false";
+        aqd_guc_nestlevel = NewGUCNestLevel();
+        (void) set_config_option("pg_duckdb.force_execution",
+                                 force_val,
+                                 PGC_USERSET,
+                                 PGC_S_SESSION,
+                                 GUC_ACTION_SAVE,
+                                 true,
+                                 0,
+                                 false);
     }
 
     if (ExecutorRun_hook)
@@ -364,6 +377,10 @@ ExecutorRun(QueryDesc *queryDesc,
         /* Plan JSON is logged only when plan logging is enabled via GUC elsewhere */
         aqd_log_plan_json(queryDesc, &aqd_features_local);
     }
+
+    /* Pop the local GUC nest level if we set one */
+    if (aqd_guc_nestlevel >= 0)
+        AtEOXact_GUC(true, aqd_guc_nestlevel);
 }
 
 void

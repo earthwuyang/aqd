@@ -26,7 +26,12 @@ CXXFLAGS = -O2 -g -Wall -Wextra -std=c++17
 
 # Library paths - using local dependencies
 LIGHTGBM_INCLUDE = -I$(PWD)/include
-LIGHTGBM_LIBS = $(PWD)/lib/lib_lightgbm.a -lgomp -lpthread
+# Prefer dynamic lib from Python site-packages if available; fallback to local static archive
+LIGHTGBM_SO := $(wildcard $(VENV_DIR)/lib/python*/site-packages/lightgbm/lib/lib_lightgbm.so)
+ifeq ($(strip $(LIGHTGBM_SO)),)
+LIGHTGBM_SO := $(shell python3 -c "import lightgbm, os; print(os.path.join(os.path.dirname(lightgbm.__file__), 'lib', 'lib_lightgbm.so'))")
+endif
+LIGHTGBM_LIBS = $(if $(wildcard $(LIGHTGBM_SO)),$(LIGHTGBM_SO),$(PWD)/lib/lib_lightgbm.a) -lgomp -lpthread
 JSON_LIBS = 
 OPENSSL_LIBS = -lssl -lcrypto
 
@@ -385,9 +390,9 @@ distclean: clean
 .PHONY: lgbm-lib
 lgbm-lib: lib/libaqd_lgbm.so
 
-lib/libaqd_lgbm.so: lightgbm_inference.cpp lightgbm_inference.h lightgbm_c_api.cpp lightgbm_c_api.h | lib
-	@echo "Building LightGBM inference shared library..."
-	$(CXX) $(CXXFLAGS) -fPIC -shared -o $@ lightgbm_inference.cpp lightgbm_c_api.cpp
+lib/libaqd_lgbm.so: lightgbm_c_api.cpp lightgbm_c_api.h | lib
+	@echo "Building LightGBM inference shared library (official C API)..."
+	$(CXX) $(CXXFLAGS) -fPIC -shared -o $@ $(LIGHTGBM_INCLUDE) lightgbm_c_api.cpp $(LIGHTGBM_LIBS)
 	@echo "Shared library built: $@"
 
 lib:

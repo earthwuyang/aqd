@@ -77,12 +77,30 @@ class AQDRoutingBenchmark:
         if method == 'lightgbm':
             # Model path for LightGBM inference in kernel (features are extracted internally)
             cursor.execute(f"SET aqd.lightgbm_model_path = '{self.model_path}';")
+            # Provide explicit library path to avoid dlopen search failures
+            lgb_lib_candidates = [
+                str(Path(__file__).resolve().parent / 'install' / 'lib' / 'libaqd_lgbm.so'),
+                str(Path(__file__).resolve().parent / 'lib' / 'libaqd_lgbm.so'),
+            ]
+            for p in lgb_lib_candidates:
+                if os.path.exists(p):
+                    cursor.execute(f"SET aqd.lightgbm_library_path = '{p}';")
+                    break
 
         # GNN: enable plan JSON logging for this session
         if method == 'gnn':
             gnn_path = str(Path(__file__).resolve().parent / 'models' / 'rginn_routing_model.txt')
             if os.path.exists(gnn_path):
                 cursor.execute(f"SET aqd.gnn_model_path = '{gnn_path}';")
+            # Provide explicit GNN library path
+            gnn_lib_candidates = [
+                str(Path(__file__).resolve().parent / 'install' / 'lib' / 'libaqd_gnn.so'),
+                str(Path(__file__).resolve().parent / 'lib' / 'libaqd_gnn.so'),
+            ]
+            for p in gnn_lib_candidates:
+                if os.path.exists(p):
+                    cursor.execute(f"SET aqd.gnn_library_path = '{p}';")
+                    break
 
         # Fine-tune cost threshold used for the baseline method
         if method == 'cost_threshold':
@@ -123,48 +141,68 @@ class AQDRoutingBenchmark:
         # Routing is now done server-side, not client-side
         return 'postgres'
     
-    def execute_query(self, query_text, routing_method, query_id, database):
-        """Execute a single query and measure performance"""
-        start_time = time.time()
-        
+    def _make_worker(self, database: str, routing_method: str):
+        """Create one persistent connection per worker for a given method and DB."""
+        conn = self.get_connection(database)
+        self.set_routing_method(conn, routing_method)
+        cur = conn.cursor()
+        # Warm-up to ensure router/model initialization is done once per session
         try:
-            conn = self.get_connection(database)
-            self.set_routing_method(conn, routing_method)
-            
-            # Execute query
-            cursor = conn.cursor()
-            query_start = time.time()
-            cursor.execute(query_text)
-            results = cursor.fetchall()
-            query_time = time.time() - query_start
-            
-            total_time = time.time() - start_time
-            
-            conn.close()
-            
-            return {
-                'query_id': query_id,
-                'routing_method': routing_method,
-                'routing_time_ms': 0.0,
-                'query_time_ms': query_time * 1000,
-                'total_time_ms': total_time * 1000,
-                'success': True,
-                'error': None,
-                'result_count': len(results) if results else 0
-            }
-            
-        except Exception as e:
-            total_time = time.time() - start_time
-            return {
-                'query_id': query_id,
-                'routing_method': routing_method,
-                'routing_time_ms': 0,
-                'query_time_ms': 0,
-                'total_time_ms': total_time * 1000,
-                'success': False,
-                'error': str(e),
-                'result_count': 0
-            }
+            cur.execute("SELECT 1;")
+            conn.commit()
+        except Exception:
+            try:
+                conn.rollback()
+            except Exception:
+                pass
+
+        def run_one(query_text: str, query_id: int):
+            t0 = time.time()
+            try:
+                cur.execute(query_text)
+                rows = cur.fetchall()
+                exec_ms = (time.time() - t0) * 1000.0
+                # Fetch server-side routing telemetry if available (robust via current_setting)
+                engine_code = None
+                route_us = None
+                try:
+                    cur.execute("SELECT current_setting('aqd.last_decision_engine_code', true)")
+                    v = cur.fetchone()
+                    if v and v[0] is not None and v[0] != '':
+                        engine_code = int(v[0])
+                    cur.execute("SELECT current_setting('aqd.last_decision_latency_us', true)")
+                    v = cur.fetchone()
+                    if v and v[0] is not None and v[0] != '':
+                        route_us = float(v[0])
+                except Exception:
+                    pass
+                return {
+                    'query_id': query_id,
+                    'routing_method': routing_method,
+                    'routing_time_ms': (route_us / 1000.0) if route_us is not None else 0.0,
+                    'query_time_ms': exec_ms,
+                    'total_time_ms': exec_ms,
+                    'engine_code': engine_code,  # 0=PostgreSQL, 1=DuckDB
+                    'success': True,
+                    'error': None,
+                    'result_count': len(rows) if rows else 0
+                }
+            except Exception as e:
+                try:
+                    conn.rollback()
+                except Exception:
+                    pass
+                return {
+                    'query_id': query_id,
+                    'routing_method': routing_method,
+                    'routing_time_ms': 0.0,
+                    'query_time_ms': 0.0,
+                    'total_time_ms': (time.time() - t0) * 1000.0,
+                    'success': False,
+                    'error': str(e),
+                    'result_count': 0
+                }
+        return run_one, conn
     
     def load_test_queries(self, dataset, query_type, limit=100):
         """Load queries from static generated SQL files (legacy path)"""
@@ -235,27 +273,39 @@ class AQDRoutingBenchmark:
         return queries
     
     def run_concurrent_benchmark(self, queries, routing_method, max_workers=10):
-        """Run concurrent queries for a specific routing method"""
+        """Run concurrent queries for a specific routing method using persistent per-thread sessions."""
         logger.info(f"Running concurrent benchmark for {routing_method} with {len(queries)} queries")
-        
         results = []
         start_time = time.time()
-        
-        with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            # Submit all queries with proper database parameter
-            future_to_query = {
-                executor.submit(self.execute_query, q['text'], routing_method, q['id'], q['dataset']): q 
-                for q in queries
-            }
-            
-            # Collect results as they complete
-            for future in as_completed(future_to_query):
-                result = future.result()
-                results.append(result)
-                
-                if len(results) % 10 == 0:
-                    logger.info(f"Completed {len(results)}/{len(queries)} queries for {routing_method}")
-        
+
+        # Build workers and persistent connections (assign DBs round-robin by dataset)
+        datasets = list({q['dataset'] for q in queries}) or ['postgres']
+        worker_funcs = []
+        conns = []
+        for i in range(max_workers):
+            db = datasets[i % len(datasets)]
+            fn, cn = self._make_worker(db, routing_method)
+            worker_funcs.append(fn)
+            conns.append(cn)
+
+        try:
+            with ThreadPoolExecutor(max_workers=max_workers) as executor:
+                futures = []
+                for i, q in enumerate(queries):
+                    run_one = worker_funcs[i % max_workers]
+                    futures.append(executor.submit(run_one, q['text'], q['id']))
+                for future in as_completed(futures):
+                    results.append(future.result())
+                    if len(results) % 25 == 0:
+                        logger.info(f"Completed {len(results)}/{len(queries)} for {routing_method}")
+        finally:
+            # Cleanly close persistent connections
+            for cn in conns:
+                try:
+                    cn.close()
+                except Exception:
+                    pass
+
         total_makespan = time.time() - start_time
         
         # Calculate metrics
