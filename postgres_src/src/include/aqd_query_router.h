@@ -136,6 +136,10 @@ extern bool aqd_enable_thompson_sampling;
 extern bool aqd_enable_resource_regulation;
 extern double aqd_resource_balance_factor;
 
+/* Tracking (read-only) GUC variables for observability */
+extern int aqd_last_decision_engine_code;     /* 0=PostgreSQL, 1=DuckDB */
+extern double aqd_last_decision_latency_us;   /* microseconds */
+
 /* Function declarations */
 
 /* Router initialization and cleanup */

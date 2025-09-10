@@ -53,18 +53,18 @@ class SimpleRoutingBenchmark:
         
         try:
             if method == 'default':
-                cursor.execute("SET aqd.routing_method = 1;")  # Default value
+                cursor.execute("SET aqd.routing_method = 0;")  # AQD_ROUTE_DEFAULT
                 
             elif method == 'cost_threshold':
-                cursor.execute("SET aqd.routing_method = 2;")  # Cost threshold
+                cursor.execute("SET aqd.routing_method = 1;")  # AQD_ROUTE_COST_THRESHOLD
                 cursor.execute("SET aqd.cost_threshold = 1000.0;")
                 
             elif method == 'lightgbm':
-                cursor.execute("SET aqd.routing_method = 3;")  # LightGBM
-                cursor.execute("SET aqd.enable_feature_logging = on;")
+                cursor.execute("SET aqd.routing_method = 2;")  # AQD_ROUTE_LIGHTGBM
+                cursor.execute("SET aqd.enable_feature_logging = off;")  # Fair comparison
                 
             elif method == 'gnn':
-                cursor.execute("SET aqd.routing_method = 4;")  # GNN placeholder
+                cursor.execute("SET aqd.routing_method = 3;")  # AQD_ROUTE_GNN
                 
             conn.commit()
             

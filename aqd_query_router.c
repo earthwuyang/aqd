@@ -90,6 +90,10 @@ bool aqd_enable_thompson_sampling = false;
 bool aqd_enable_resource_regulation = false;
 double aqd_resource_balance_factor = 0.5;
 
+/* Tracking GUCs */
+int aqd_last_decision_engine_code = -1;
+double aqd_last_decision_latency_us = 0.0;
+
 /* Initialize the query router */
 void
 aqd_init_query_router(void)
@@ -288,7 +292,11 @@ aqd_route_query(const char *query_text,
     
     /* Log decision */
     aqd_log_routing_decision(&decision);
-    
+
+    /* Update tracking GUC variables */
+    aqd_last_decision_engine_code = (decision.engine == AQD_ENGINE_DUCKDB) ? 1 : 0;
+    aqd_last_decision_latency_us = decision.decision_latency_us;
+
     return decision;
 }
 
@@ -933,6 +941,27 @@ aqd_define_routing_guc_variables(void)
                             PGC_SUSET,
                             0,
                             NULL, NULL, NULL);
+
+    /* Tracking (read-only) variables */
+    DefineCustomIntVariable("aqd.last_decision_engine_code",
+                           "Last routing decision engine (0=PostgreSQL,1=DuckDB)",
+                           "Read-only tracker of the engine selected for the last routed query",
+                           &aqd_last_decision_engine_code,
+                           -1,
+                           -1, 1,
+                           PGC_SUSET,
+                           GUC_REPORT,
+                           NULL, NULL, NULL);
+
+    DefineCustomRealVariable("aqd.last_decision_latency_us",
+                             "Last routing decision latency (microseconds)",
+                             "Read-only tracker of the time spent making the last routing decision",
+                             &aqd_last_decision_latency_us,
+                             0.0,
+                             0.0, 1.0e12,
+                             PGC_SUSET,
+                             GUC_REPORT,
+                             NULL, NULL, NULL);
 }
 
 /* Configuration functions */
