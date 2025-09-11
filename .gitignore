@@ -1,0 +1,68 @@
+# PostgreSQL build artifacts (but NOT source code)
+pgsql/
+
+# PostgreSQL data directory
+ctu_data/
+data/
+logfile
+
+# pg_duckdb build artifacts
+pg_duckdb/third_party/duckdb/build/
+pg_duckdb/*.o
+pg_duckdb/*.so
+pg_duckdb/*.a
+pg_duckdb/.deps/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Temporary files
+*.tmp
+*.log
+*.pid
+
+# Core dumps
+core
+core.*
+
+# Backup files
+*.backup
+*.bak
+
+# Build directories
+build/
+cmake-build-*/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Documentation build
+docs/_build/
+
+# Benchmark data and generated queries
+tpch-kit/
+tpcds-kit/
+tpch_data/
+tpcds_data/
+benchmark_queries/
+benchmark_queries_*.json
+import_log.txt
+
+# PostgreSQL object files and build artifacts in source tree
+postgres/**/*.o
+postgres/**/*.a
+postgres/**/*.so
+postgres/**/objfiles.txt
+postgres/**/gram.c
+postgres/**/gram.h
+postgres/**/scan.c
+postgres/**/pl_gram.c
+postgres/**/pl_gram.h
+postgres/**/preproc.c
+postgres/**/preproc.h
