@@ -4,6 +4,7 @@ pgsql/
 # PostgreSQL data directory
 ctu_data/
 data/
+dual_execution_data
 logfile
 
 # pg_duckdb build artifacts
