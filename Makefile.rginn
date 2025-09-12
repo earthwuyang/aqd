@@ -1,0 +1,83 @@
+# Makefile for R-GIN training and kernel integration
+# Usage:
+#   make -f Makefile.rginn train     - Build standalone training program
+#   make -f Makefile.rginn kernel    - Build kernel module  
+#   make -f Makefile.rginn all       - Build everything
+#   make -f Makefile.rginn clean     - Clean build artifacts
+
+CXX = g++
+CC = gcc
+CXXFLAGS = -std=c++17 -O3 -march=native -Wall -Wextra
+CFLAGS = -O3 -march=native -Wall -Wextra -fPIC
+LDFLAGS = -lm
+
+# PostgreSQL configuration
+PG_CONFIG = $(shell which pg_config 2>/dev/null || echo /home/wuy/DB/pg_duckdb_postgres/pgsql/bin/pg_config)
+PG_INCLUDEDIR = $(shell $(PG_CONFIG) --includedir-server)
+PG_LIBDIR = $(shell $(PG_CONFIG) --libdir)
+PG_PKGLIBDIR = $(shell $(PG_CONFIG) --pkglibdir)
+
+# Source files
+TRAIN_SRC = train_rginn.cpp
+KERNEL_SRC = postgres/src/backend/utils/misc/rginn.c
+
+# Output files
+TRAIN_BIN = train_rginn
+KERNEL_OBJ = rginn.o
+KERNEL_SO = rginn.so
+
+# Targets
+.PHONY: all train kernel clean install
+
+all: train kernel
+
+# Build standalone training program
+train: $(TRAIN_BIN)
+
+$(TRAIN_BIN): $(TRAIN_SRC)
+	$(CXX) $(CXXFLAGS) -o $@ $< $(LDFLAGS)
+	@echo "Built training program: $(TRAIN_BIN)"
+
+# Build kernel module
+kernel: $(KERNEL_SO)
+
+$(KERNEL_OBJ): $(KERNEL_SRC)
+	$(CC) $(CFLAGS) -I$(PG_INCLUDEDIR) -c -o $@ $<
+
+$(KERNEL_SO): $(KERNEL_OBJ)
+	$(CC) -shared -o $@ $< $(LDFLAGS)
+	@echo "Built kernel module: $(KERNEL_SO)"
+
+# Install kernel module
+install: $(KERNEL_SO)
+	cp $(KERNEL_SO) $(PG_PKGLIBDIR)/
+	@echo "Installed $(KERNEL_SO) to $(PG_PKGLIBDIR)"
+
+# Run training
+run-train: $(TRAIN_BIN)
+	./$(TRAIN_BIN) dual_execution_data 100 0.001
+
+# Clean build artifacts
+clean:
+	rm -f $(TRAIN_BIN) $(KERNEL_OBJ) $(KERNEL_SO)
+	rm -f *.o *.so test_json
+	@echo "Cleaned build artifacts"
+
+# Help
+help:
+	@echo "R-GIN Build System"
+	@echo "=================="
+	@echo "Available targets:"
+	@echo "  make -f Makefile.rginn train        - Build training program"
+	@echo "  make -f Makefile.rginn kernel       - Build kernel module"
+	@echo "  make -f Makefile.rginn all          - Build everything"
+	@echo "  make -f Makefile.rginn install      - Install kernel module"
+	@echo "  make -f Makefile.rginn run-train    - Run training with real JSON parsing"
+	@echo "  make -f Makefile.rginn clean        - Clean build artifacts"
+	@echo "  make -f Makefile.rginn help         - Show this help message"
+	@echo ""
+	@echo "Training usage:"
+	@echo "  ./train_rginn <data_dir> <epochs> <learning_rate>"
+	@echo ""
+	@echo "Model output:"
+	@echo "  models/rginn_model_cpp.txt - Trained model for kernel loading"

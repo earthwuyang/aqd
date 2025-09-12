@@ -1,0 +1,1165 @@
+[
+  {
+    "timestamp": "2025-09-11T21:58:56.251489",
+    "dataset": "Carcinogenesis",
+    "query_type": "AP",
+    "query_index": 0,
+    "query_text": "SELECT AVG(\"sbond_7\".\"id\"), SUM(\"sbond_7\".\"id\"), SUM(\"sbond_1\".\"id\"), SUM(\"sbond_2\".\"id\") FROM \"sbond_2\" LEFT JOIN \"atom\" ON \"sbond_2\".\"atomid\" = \"atom\".\"atomid\" LEFT JOIN \"sbond_1\" ON \"atom\".\"atomid\" = \"sbond_1\".\"atomid\" LEFT JOIN \"sbond_7\" ON \"atom\".\"atomid\" = \"sbond_7\".\"atomid\" WHERE \"atom\".\"atomtype\" = '15                                                                                                  ' AND \"sbond_2\".\"atomid\" = 'd67_23                                                                                              ';",
+    "postgres_time_ms": 1.9165590056218207,
+    "duckdb_time_ms": 81.84300496941432,
+    "log_time_difference": -3.754271444998304,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Aggregate",
+        "Strategy": "Plain",
+        "Partial Mode": "Simple",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 1049.33,
+        "Total Cost": 1049.34,
+        "Plan Rows": 1,
+        "Plan Width": 56,
+        "Plans": [
+          {
+            "Node Type": "Nested Loop",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Join Type": "Left",
+            "Startup Cost": 0.41,
+            "Total Cost": 1049.29,
+            "Plan Rows": 4,
+            "Plan Width": 12,
+            "Inner Unique": false,
+            "Plans": [
+              {
+                "Node Type": "Nested Loop",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Join Type": "Left",
+                "Startup Cost": 0.41,
+                "Total Cost": 824.56,
+                "Plan Rows": 2,
+                "Plan Width": 109,
+                "Inner Unique": false,
+                "Plans": [
+                  {
+                    "Node Type": "Nested Loop",
+                    "Parent Relationship": "Outer",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Join Type": "Inner",
+                    "Startup Cost": 0.41,
+                    "Total Cost": 59.01,
+                    "Plan Rows": 1,
+                    "Plan Width": 105,
+                    "Inner Unique": false,
+                    "Plans": [
+                      {
+                        "Node Type": "Seq Scan",
+                        "Parent Relationship": "Outer",
+                        "Parallel Aware": false,
+                        "Async Capable": false,
+                        "Relation Name": "sbond_2",
+                        "Alias": "sbond_2",
+                        "Startup Cost": 0.0,
+                        "Total Cost": 50.58,
+                        "Plan Rows": 1,
+                        "Plan Width": 105,
+                        "Filter": "(atomid = 'd67_23                                                                                              '::bpchar)"
+                      },
+                      {
+                        "Node Type": "Index Scan",
+                        "Parent Relationship": "Inner",
+                        "Parallel Aware": false,
+                        "Async Capable": false,
+                        "Scan Direction": "Forward",
+                        "Index Name": "atom_pkey",
+                        "Relation Name": "atom",
+                        "Alias": "atom",
+                        "Startup Cost": 0.41,
+                        "Total Cost": 8.43,
+                        "Plan Rows": 1,
+                        "Plan Width": 101,
+                        "Index Cond": "(atomid = 'd67_23                                                                                              '::bpchar)",
+                        "Filter": "(atomtype = '15                                                                                                  '::bpchar)"
+                      }
+                    ]
+                  },
+                  {
+                    "Node Type": "Seq Scan",
+                    "Parent Relationship": "Inner",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Relation Name": "sbond_1",
+                    "Alias": "sbond_1",
+                    "Startup Cost": 0.0,
+                    "Total Cost": 765.52,
+                    "Plan Rows": 2,
+                    "Plan Width": 105,
+                    "Filter": "(atomid = 'd67_23                                                                                              '::bpchar)"
+                  }
+                ]
+              },
+              {
+                "Node Type": "Materialize",
+                "Parent Relationship": "Inner",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Startup Cost": 0.0,
+                "Total Cost": 224.69,
+                "Plan Rows": 2,
+                "Plan Width": 105,
+                "Plans": [
+                  {
+                    "Node Type": "Seq Scan",
+                    "Parent Relationship": "Outer",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Relation Name": "sbond_7",
+                    "Alias": "sbond_7",
+                    "Startup Cost": 0.0,
+                    "Total Cost": 224.68,
+                    "Plan Rows": 2,
+                    "Plan Width": 105,
+                    "Filter": "(atomid = 'd67_23                                                                                              '::bpchar)"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 42.703096919711406
+  },
+  {
+    "timestamp": "2025-09-11T21:58:56.278652",
+    "dataset": "Carcinogenesis",
+    "query_type": "AP",
+    "query_index": 2,
+    "query_text": "SELECT COUNT(*) FROM \"atom\" WHERE \"atom\".\"atomtype\" LIKE '%u%' AND \"atom\".\"atomtype\" IS NULL AND \"atom\".\"charge\" LIKE '%u%' AND \"atom\".\"name\" = 'h ' AND \"atom\".\"charge\" = 'a0=-0_0175<x<=0_0615                                                                                ' AND \"atom\".\"charge\" IS NULL AND \"atom\".\"drug\" = 'd244                                                                                                ' GROUP BY \"atom\".\"charge\";",
+    "postgres_time_ms": 5.73972100391984,
+    "duckdb_time_ms": 14.466930006165057,
+    "log_time_difference": -0.9244547519023993,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Aggregate",
+        "Strategy": "Sorted",
+        "Partial Mode": "Simple",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 0.0,
+        "Total Cost": 707.95,
+        "Plan Rows": 1,
+        "Plan Width": 109,
+        "Plans": [
+          {
+            "Node Type": "Seq Scan",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Relation Name": "atom",
+            "Alias": "atom",
+            "Startup Cost": 0.0,
+            "Total Cost": 707.94,
+            "Plan Rows": 1,
+            "Plan Width": 101,
+            "Filter": "((atomtype IS NULL) AND (charge IS NULL) AND (atomtype ~~ '%u%'::text) AND (charge ~~ '%u%'::text) AND (name = 'h '::bpchar) AND (charge = 'a0=-0_0175<x<=0_0615                                                                                '::bpchar) AND (drug = 'd244                                                                                                '::bpchar))"
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 2.5204935912886928
+  },
+  {
+    "timestamp": "2025-09-11T21:58:56.304473",
+    "dataset": "Carcinogenesis",
+    "query_type": "AP",
+    "query_index": 3,
+    "query_text": "SELECT AVG(\"sbond_7\".\"id\"), STDDEV(\"sbond_3\".\"id\") FROM \"sbond_3\" CROSS JOIN \"sbond_7\" WHERE \"sbond_7\".\"drug\" != 'd114                                                                                                ' AND \"sbond_7\".\"atomid_2\" LIKE '%e%' AND \"sbond_3\".\"atomid_2\" LIKE '%a%' AND \"sbond_3\".\"atomid_2\" IS NULL;",
+    "postgres_time_ms": 0.4675840027630329,
+    "duckdb_time_ms": 23.57327804202214,
+    "log_time_difference": -3.9202900454962784,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Aggregate",
+        "Strategy": "Plain",
+        "Partial Mode": "Simple",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 245.78,
+        "Total Cost": 245.79,
+        "Plan Rows": 1,
+        "Plan Width": 64,
+        "Plans": [
+          {
+            "Node Type": "Nested Loop",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Join Type": "Inner",
+            "Startup Cost": 0.0,
+            "Total Cost": 245.77,
+            "Plan Rows": 1,
+            "Plan Width": 8,
+            "Inner Unique": false,
+            "Plans": [
+              {
+                "Node Type": "Seq Scan",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Relation Name": "sbond_3",
+                "Alias": "sbond_3",
+                "Startup Cost": 0.0,
+                "Total Cost": 10.75,
+                "Plan Rows": 1,
+                "Plan Width": 4,
+                "Filter": "((atomid_2 IS NULL) AND (atomid_2 ~~ '%a%'::text))"
+              },
+              {
+                "Node Type": "Seq Scan",
+                "Parent Relationship": "Inner",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Relation Name": "sbond_7",
+                "Alias": "sbond_7",
+                "Startup Cost": 0.0,
+                "Total Cost": 235.01,
+                "Plan Rows": 1,
+                "Plan Width": 4,
+                "Filter": "((drug <> 'd114                                                                                                '::bpchar) AND (atomid_2 ~~ '%e%'::text))"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 50.41506532029251
+  },
+  {
+    "timestamp": "2025-09-11T21:58:59.491779",
+    "dataset": "Carcinogenesis",
+    "query_type": "AP",
+    "query_index": 5,
+    "query_text": "SELECT AVG(\"sbond_7\".\"id\") FROM \"sbond_1\" CROSS JOIN \"sbond_7\" INNER JOIN \"atom\" ON \"sbond_1\".\"atomid\" = \"atom\".\"atomid\" JOIN \"canc\" ON \"atom\".\"drug\" = \"canc\".\"drug_id\" JOIN \"sbond_2\" ON \"atom\".\"atomid\" = \"sbond_2\".\"atomid\" WHERE \"sbond_2\".\"id\" > 235 AND \"atom\".\"drug\" LIKE '%o%' AND \"atom\".\"drug\" IS NULL OR \"sbond_7\".\"atomid_2\" = 'd188a_4                                                                                             ' ORDER BY COUNT(*) ASC LIMIT 1000;",
+    "postgres_time_ms": 3115.282176004257,
+    "duckdb_time_ms": 62.305058003403246,
+    "log_time_difference": 3.9120324029626232,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 60029.43,
+        "Total Cost": 60029.44,
+        "Plan Rows": 1,
+        "Plan Width": 40,
+        "Plans": [
+          {
+            "Node Type": "Sort",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 60029.43,
+            "Total Cost": 60029.44,
+            "Plan Rows": 1,
+            "Plan Width": 40,
+            "Sort Key": [
+              "(count(*))"
+            ],
+            "Plans": [
+              {
+                "Node Type": "Aggregate",
+                "Strategy": "Plain",
+                "Partial Mode": "Simple",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Startup Cost": 60029.41,
+                "Total Cost": 60029.42,
+                "Plan Rows": 1,
+                "Plan Width": 40,
+                "Plans": [
+                  {
+                    "Node Type": "Nested Loop",
+                    "Parent Relationship": "Outer",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Join Type": "Inner",
+                    "Startup Cost": 1609.37,
+                    "Total Cost": 60015.55,
+                    "Plan Rows": 2771,
+                    "Plan Width": 4,
+                    "Inner Unique": true,
+                    "Plans": [
+                      {
+                        "Node Type": "Hash Join",
+                        "Parent Relationship": "Outer",
+                        "Parallel Aware": false,
+                        "Async Capable": false,
+                        "Join Type": "Inner",
+                        "Startup Cost": 1609.09,
+                        "Total Cost": 59845.47,
+                        "Plan Rows": 2771,
+                        "Plan Width": 105,
+                        "Inner Unique": false,
+                        "Hash Cond": "(atom.atomid = sbond_1.atomid)",
+                        "Plans": [
+                          {
+                            "Node Type": "Hash Join",
+                            "Parent Relationship": "Outer",
+                            "Parallel Aware": false,
+                            "Async Capable": false,
+                            "Join Type": "Inner",
+                            "Startup Cost": 707.94,
+                            "Total Cost": 58872.63,
+                            "Plan Rows": 1852,
+                            "Plan Width": 307,
+                            "Inner Unique": true,
+                            "Hash Cond": "(sbond_2.atomid = atom.atomid)",
+                            "Join Filter": "(((sbond_2.id > 235) AND (atom.drug ~~ '%o%'::text) AND (atom.drug IS NULL)) OR (sbond_7.atomid_2 = 'd188a_4                                                                                             '::bpchar))",
+                            "Plans": [
+                              {
+                                "Node Type": "Nested Loop",
+                                "Parent Relationship": "Outer",
+                                "Parallel Aware": false,
+                                "Async Capable": false,
+                                "Join Type": "Inner",
+                                "Startup Cost": 0.0,
+                                "Total Cost": 48115.97,
+                                "Plan Rows": 3828084,
+                                "Plan Width": 210,
+                                "Inner Unique": false,
+                                "Plans": [
+                                  {
+                                    "Node Type": "Seq Scan",
+                                    "Parent Relationship": "Outer",
+                                    "Parallel Aware": false,
+                                    "Async Capable": false,
+                                    "Relation Name": "sbond_7",
+                                    "Alias": "sbond_7",
+                                    "Startup Cost": 0.0,
+                                    "Total Cost": 214.34,
+                                    "Plan Rows": 4134,
+                                    "Plan Width": 105
+                                  },
+                                  {
+                                    "Node Type": "Materialize",
+                                    "Parent Relationship": "Inner",
+                                    "Parallel Aware": false,
+                                    "Async Capable": false,
+                                    "Startup Cost": 0.0,
+                                    "Total Cost": 52.89,
+                                    "Plan Rows": 926,
+                                    "Plan Width": 105,
+                                    "Plans": [
+                                      {
+                                        "Node Type": "Seq Scan",
+                                        "Parent Relationship": "Outer",
+                                        "Parallel Aware": false,
+                                        "Async Capable": false,
+                                        "Relation Name": "sbond_2",
+                                        "Alias": "sbond_2",
+                                        "Startup Cost": 0.0,
+                                        "Total Cost": 48.26,
+                                        "Plan Rows": 926,
+                                        "Plan Width": 105
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "Node Type": "Hash",
+                                "Parent Relationship": "Inner",
+                                "Parallel Aware": false,
+                                "Async Capable": false,
+                                "Startup Cost": 594.64,
+                                "Total Cost": 594.64,
+                                "Plan Rows": 9064,
+                                "Plan Width": 202,
+                                "Plans": [
+                                  {
+                                    "Node Type": "Seq Scan",
+                                    "Parent Relationship": "Outer",
+                                    "Parallel Aware": false,
+                                    "Async Capable": false,
+                                    "Relation Name": "atom",
+                                    "Alias": "atom",
+                                    "Startup Cost": 0.0,
+                                    "Total Cost": 594.64,
+                                    "Plan Rows": 9064,
+                                    "Plan Width": 202
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "Node Type": "Hash",
+                            "Parent Relationship": "Inner",
+                            "Parallel Aware": false,
+                            "Async Capable": false,
+                            "Startup Cost": 731.62,
+                            "Total Cost": 731.62,
+                            "Plan Rows": 13562,
+                            "Plan Width": 101,
+                            "Plans": [
+                              {
+                                "Node Type": "Seq Scan",
+                                "Parent Relationship": "Outer",
+                                "Parallel Aware": false,
+                                "Async Capable": false,
+                                "Relation Name": "sbond_1",
+                                "Alias": "sbond_1",
+                                "Startup Cost": 0.0,
+                                "Total Cost": 731.62,
+                                "Plan Rows": 13562,
+                                "Plan Width": 101
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "Node Type": "Memoize",
+                        "Parent Relationship": "Inner",
+                        "Parallel Aware": false,
+                        "Async Capable": false,
+                        "Startup Cost": 0.28,
+                        "Total Cost": 0.31,
+                        "Plan Rows": 1,
+                        "Plan Width": 101,
+                        "Cache Key": "atom.drug",
+                        "Cache Mode": "logical",
+                        "Plans": [
+                          {
+                            "Node Type": "Index Only Scan",
+                            "Parent Relationship": "Outer",
+                            "Parallel Aware": false,
+                            "Async Capable": false,
+                            "Scan Direction": "Forward",
+                            "Index Name": "canc_pkey",
+                            "Relation Name": "canc",
+                            "Alias": "canc",
+                            "Startup Cost": 0.27,
+                            "Total Cost": 0.3,
+                            "Plan Rows": 1,
+                            "Plan Width": 101,
+                            "Index Cond": "(drug_id = atom.drug)"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "duckdb",
+    "speedup_ratio": 50.00046987893171
+  },
+  {
+    "timestamp": "2025-09-11T21:58:59.568032",
+    "dataset": "Carcinogenesis",
+    "query_type": "AP",
+    "query_index": 6,
+    "query_text": "SELECT AVG(\"sbond_2\".\"id\"), AVG(\"sbond_3\".\"id\"), VARIANCE(\"sbond_1\".\"id\") FROM \"atom\" JOIN \"sbond_2\" ON \"atom\".\"atomid\" = \"sbond_2\".\"atomid\" INNER JOIN \"sbond_1\" ON \"atom\".\"atomid\" = \"sbond_1\".\"atomid\" INNER JOIN \"sbond_7\" ON \"atom\".\"atomid\" = \"sbond_7\".\"atomid\" LEFT JOIN \"sbond_3\" ON \"atom\".\"atomid\" = \"sbond_3\".\"atomid\" WHERE \"sbond_3\".\"id\" != 8 AND \"atom\".\"charge\" = 'a0=-0_1355<x<=-0_0175                                                                               ' AND \"sbond_1\".\"atomid_2\" LIKE '%e%' ORDER BY COUNT(*) ASC;",
+    "postgres_time_ms": 11.898192053195089,
+    "duckdb_time_ms": 55.928312009200454,
+    "log_time_difference": -1.5476842676874103,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Sort",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 1070.52,
+        "Total Cost": 1070.53,
+        "Plan Rows": 1,
+        "Plan Width": 104,
+        "Sort Key": [
+          "(count(*))"
+        ],
+        "Plans": [
+          {
+            "Node Type": "Aggregate",
+            "Strategy": "Plain",
+            "Partial Mode": "Simple",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 1070.5,
+            "Total Cost": 1070.51,
+            "Plan Rows": 1,
+            "Plan Width": 104,
+            "Plans": [
+              {
+                "Node Type": "Nested Loop",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Join Type": "Inner",
+                "Startup Cost": 11.9,
+                "Total Cost": 1070.49,
+                "Plan Rows": 1,
+                "Plan Width": 12,
+                "Inner Unique": false,
+                "Join Filter": "(atom.atomid = sbond_2.atomid)",
+                "Plans": [
+                  {
+                    "Node Type": "Nested Loop",
+                    "Parent Relationship": "Outer",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Join Type": "Inner",
+                    "Startup Cost": 11.9,
+                    "Total Cost": 1010.65,
+                    "Plan Rows": 1,
+                    "Plan Width": 715,
+                    "Inner Unique": true,
+                    "Join Filter": "(atom.atomid = sbond_1.atomid)",
+                    "Plans": [
+                      {
+                        "Node Type": "Nested Loop",
+                        "Parent Relationship": "Outer",
+                        "Parallel Aware": false,
+                        "Async Capable": false,
+                        "Join Type": "Inner",
+                        "Startup Cost": 11.49,
+                        "Total Cost": 1009.55,
+                        "Plan Rows": 1,
+                        "Plan Width": 614,
+                        "Inner Unique": false,
+                        "Join Filter": "(sbond_1.atomid = sbond_7.atomid)",
+                        "Plans": [
+                          {
+                            "Node Type": "Seq Scan",
+                            "Parent Relationship": "Outer",
+                            "Parallel Aware": false,
+                            "Async Capable": false,
+                            "Relation Name": "sbond_1",
+                            "Alias": "sbond_1",
+                            "Startup Cost": 0.0,
+                            "Total Cost": 765.52,
+                            "Plan Rows": 1,
+                            "Plan Width": 105,
+                            "Filter": "(atomid_2 ~~ '%e%'::text)"
+                          },
+                          {
+                            "Node Type": "Hash Join",
+                            "Parent Relationship": "Inner",
+                            "Parallel Aware": false,
+                            "Async Capable": false,
+                            "Join Type": "Inner",
+                            "Startup Cost": 11.49,
+                            "Total Cost": 242.53,
+                            "Plan Rows": 120,
+                            "Plan Width": 509,
+                            "Inner Unique": false,
+                            "Hash Cond": "(sbond_7.atomid = sbond_3.atomid)",
+                            "Plans": [
+                              {
+                                "Node Type": "Seq Scan",
+                                "Parent Relationship": "Outer",
+                                "Parallel Aware": false,
+                                "Async Capable": false,
+                                "Relation Name": "sbond_7",
+                                "Alias": "sbond_7",
+                                "Startup Cost": 0.0,
+                                "Total Cost": 214.34,
+                                "Plan Rows": 4134,
+                                "Plan Width": 101
+                              },
+                              {
+                                "Node Type": "Hash",
+                                "Parent Relationship": "Inner",
+                                "Parallel Aware": false,
+                                "Async Capable": false,
+                                "Startup Cost": 10.75,
+                                "Total Cost": 10.75,
+                                "Plan Rows": 59,
+                                "Plan Width": 408,
+                                "Plans": [
+                                  {
+                                    "Node Type": "Seq Scan",
+                                    "Parent Relationship": "Outer",
+                                    "Parallel Aware": false,
+                                    "Async Capable": false,
+                                    "Relation Name": "sbond_3",
+                                    "Alias": "sbond_3",
+                                    "Startup Cost": 0.0,
+                                    "Total Cost": 10.75,
+                                    "Plan Rows": 59,
+                                    "Plan Width": 408,
+                                    "Filter": "(id <> 8)"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "Node Type": "Index Scan",
+                        "Parent Relationship": "Inner",
+                        "Parallel Aware": false,
+                        "Async Capable": false,
+                        "Scan Direction": "Forward",
+                        "Index Name": "atom_pkey",
+                        "Relation Name": "atom",
+                        "Alias": "atom",
+                        "Startup Cost": 0.41,
+                        "Total Cost": 1.08,
+                        "Plan Rows": 1,
+                        "Plan Width": 101,
+                        "Index Cond": "(atomid = sbond_7.atomid)",
+                        "Filter": "(charge = 'a0=-0_1355<x<=-0_0175                                                                               '::bpchar)"
+                      }
+                    ]
+                  },
+                  {
+                    "Node Type": "Seq Scan",
+                    "Parent Relationship": "Inner",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Relation Name": "sbond_2",
+                    "Alias": "sbond_2",
+                    "Startup Cost": 0.0,
+                    "Total Cost": 48.26,
+                    "Plan Rows": 926,
+                    "Plan Width": 105
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 4.700572302006313
+  },
+  {
+    "timestamp": "2025-09-11T21:58:59.607785",
+    "dataset": "Carcinogenesis",
+    "query_type": "AP",
+    "query_index": 7,
+    "query_text": "SELECT AVG(\"sbond_2\".\"id\") FROM \"canc\" JOIN \"sbond_2\" ON \"canc\".\"drug_id\" = \"sbond_2\".\"drug\" INNER JOIN \"atom\" ON \"canc\".\"drug_id\" = \"atom\".\"drug\" WHERE \"canc\".\"drug_id\" = 'd273                                                                                                ' AND \"canc\".\"drug_id\" IS NOT NULL GROUP BY \"atom\".\"name\", \"canc\".\"class\", \"canc\".\"drug_id\" HAVING COUNT(*) < 54 ORDER BY \"atom\".\"name\", \"canc\".\"class\", \"canc\".\"drug_id\" DESC;",
+    "postgres_time_ms": 3.872614004649222,
+    "duckdb_time_ms": 34.35826097847894,
+    "log_time_difference": -2.1829127516096616,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Incremental Sort",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 678.63,
+        "Total Cost": 679.35,
+        "Plan Rows": 4,
+        "Plan Width": 138,
+        "Sort Key": [
+          "atom.name",
+          "canc.class"
+        ],
+        "Presorted Key": [
+          "atom.name"
+        ],
+        "Plans": [
+          {
+            "Node Type": "Aggregate",
+            "Strategy": "Sorted",
+            "Partial Mode": "Simple",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 678.43,
+            "Total Cost": 679.17,
+            "Plan Rows": 4,
+            "Plan Width": 138,
+            "Group Key": [
+              "atom.name"
+            ],
+            "Filter": "(count(*) < 54)",
+            "Plans": [
+              {
+                "Node Type": "Sort",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Startup Cost": 678.43,
+                "Total Cost": 678.57,
+                "Plan Rows": 54,
+                "Plan Width": 110,
+                "Sort Key": [
+                  "atom.name"
+                ],
+                "Plans": [
+                  {
+                    "Node Type": "Nested Loop",
+                    "Parent Relationship": "Outer",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Join Type": "Inner",
+                    "Startup Cost": 0.27,
+                    "Total Cost": 676.88,
+                    "Plan Rows": 54,
+                    "Plan Width": 110,
+                    "Inner Unique": false,
+                    "Plans": [
+                      {
+                        "Node Type": "Seq Scan",
+                        "Parent Relationship": "Outer",
+                        "Parallel Aware": false,
+                        "Async Capable": false,
+                        "Relation Name": "atom",
+                        "Alias": "atom",
+                        "Startup Cost": 0.0,
+                        "Total Cost": 617.3,
+                        "Plan Rows": 18,
+                        "Plan Width": 104,
+                        "Filter": "(drug = 'd273                                                                                                '::bpchar)"
+                      },
+                      {
+                        "Node Type": "Materialize",
+                        "Parent Relationship": "Inner",
+                        "Parallel Aware": false,
+                        "Async Capable": false,
+                        "Startup Cost": 0.27,
+                        "Total Cost": 58.91,
+                        "Plan Rows": 3,
+                        "Plan Width": 107,
+                        "Plans": [
+                          {
+                            "Node Type": "Nested Loop",
+                            "Parent Relationship": "Outer",
+                            "Parallel Aware": false,
+                            "Async Capable": false,
+                            "Join Type": "Inner",
+                            "Startup Cost": 0.27,
+                            "Total Cost": 58.9,
+                            "Plan Rows": 3,
+                            "Plan Width": 107,
+                            "Inner Unique": false,
+                            "Plans": [
+                              {
+                                "Node Type": "Index Scan",
+                                "Parent Relationship": "Outer",
+                                "Parallel Aware": false,
+                                "Async Capable": false,
+                                "Scan Direction": "Forward",
+                                "Index Name": "canc_pkey",
+                                "Relation Name": "canc",
+                                "Alias": "canc",
+                                "Startup Cost": 0.27,
+                                "Total Cost": 8.29,
+                                "Plan Rows": 1,
+                                "Plan Width": 103,
+                                "Index Cond": "(drug_id = 'd273                                                                                                '::bpchar)"
+                              },
+                              {
+                                "Node Type": "Seq Scan",
+                                "Parent Relationship": "Inner",
+                                "Parallel Aware": false,
+                                "Async Capable": false,
+                                "Relation Name": "sbond_2",
+                                "Alias": "sbond_2",
+                                "Startup Cost": 0.0,
+                                "Total Cost": 50.58,
+                                "Plan Rows": 3,
+                                "Plan Width": 105,
+                                "Filter": "(drug = 'd273                                                                                                '::bpchar)"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 8.872110914547777
+  },
+  {
+    "timestamp": "2025-09-11T21:58:59.640331",
+    "dataset": "Carcinogenesis",
+    "query_type": "TP",
+    "query_index": 0,
+    "query_text": "SELECT \"atom\".\"atomid\", \"atom\".\"drug\", \"atom\".\"charge\", \"sbond_2\".\"atomid\", \"sbond_2\".\"atomid_2\", \"sbond_3\".\"id\" FROM \"atom\" INNER JOIN \"sbond_2\" ON \"atom\".\"atomid\" = \"sbond_2\".\"atomid\" INNER JOIN \"sbond_3\" ON \"atom\".\"atomid\" = \"sbond_3\".\"atomid\" WHERE \"atom\".\"atomid\" = 'd101_2                                                                                              ' AND \"sbond_2\".\"id\" = 473 LIMIT 10;",
+    "postgres_time_ms": 0.48022199189290404,
+    "duckdb_time_ms": 28.83807400939986,
+    "log_time_difference": -4.095203327148123,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 0.69,
+        "Total Cost": 27.49,
+        "Plan Rows": 1,
+        "Plan Width": 509,
+        "Plans": [
+          {
+            "Node Type": "Nested Loop",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Join Type": "Inner",
+            "Startup Cost": 0.69,
+            "Total Cost": 27.49,
+            "Plan Rows": 1,
+            "Plan Width": 509,
+            "Inner Unique": false,
+            "Plans": [
+              {
+                "Node Type": "Nested Loop",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Join Type": "Inner",
+                "Startup Cost": 0.69,
+                "Total Cost": 16.73,
+                "Plan Rows": 1,
+                "Plan Width": 505,
+                "Inner Unique": false,
+                "Plans": [
+                  {
+                    "Node Type": "Index Scan",
+                    "Parent Relationship": "Outer",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Scan Direction": "Forward",
+                    "Index Name": "atom_pkey",
+                    "Relation Name": "atom",
+                    "Alias": "atom",
+                    "Startup Cost": 0.41,
+                    "Total Cost": 8.43,
+                    "Plan Rows": 1,
+                    "Plan Width": 303,
+                    "Index Cond": "(atomid = 'd101_2                                                                                              '::bpchar)"
+                  },
+                  {
+                    "Node Type": "Index Scan",
+                    "Parent Relationship": "Inner",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Scan Direction": "Forward",
+                    "Index Name": "sbond_2_pkey",
+                    "Relation Name": "sbond_2",
+                    "Alias": "sbond_2",
+                    "Startup Cost": 0.28,
+                    "Total Cost": 8.29,
+                    "Plan Rows": 1,
+                    "Plan Width": 202,
+                    "Index Cond": "(id = 473)",
+                    "Filter": "(atomid = 'd101_2                                                                                              '::bpchar)"
+                  }
+                ]
+              },
+              {
+                "Node Type": "Seq Scan",
+                "Parent Relationship": "Inner",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Relation Name": "sbond_3",
+                "Alias": "sbond_3",
+                "Startup Cost": 0.0,
+                "Total Cost": 10.75,
+                "Plan Rows": 1,
+                "Plan Width": 408,
+                "Filter": "(atomid = 'd101_2                                                                                              '::bpchar)"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 60.05154802621188
+  },
+  {
+    "timestamp": "2025-09-11T21:58:59.662922",
+    "dataset": "Carcinogenesis",
+    "query_type": "TP",
+    "query_index": 3,
+    "query_text": "SELECT \"sbond_1\".\"drug\", \"sbond_1\".\"atomid\", \"sbond_1\".\"id\", \"canc\".\"drug_id\" FROM \"sbond_1\" INNER JOIN \"canc\" ON \"sbond_1\".\"drug\" = \"canc\".\"drug_id\" WHERE \"sbond_1\".\"id\" = 5915 AND \"canc\".\"drug_id\" = 'd309                                                                                                ' LIMIT 1;",
+    "postgres_time_ms": 0.3718470106832683,
+    "duckdb_time_ms": 20.2061629970558,
+    "log_time_difference": -3.9952604276424686,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 0.56,
+        "Total Cost": 16.61,
+        "Plan Rows": 1,
+        "Plan Width": 307,
+        "Plans": [
+          {
+            "Node Type": "Nested Loop",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Join Type": "Inner",
+            "Startup Cost": 0.56,
+            "Total Cost": 16.61,
+            "Plan Rows": 1,
+            "Plan Width": 307,
+            "Inner Unique": false,
+            "Plans": [
+              {
+                "Node Type": "Index Scan",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Scan Direction": "Forward",
+                "Index Name": "sbond_1_pkey",
+                "Relation Name": "sbond_1",
+                "Alias": "sbond_1",
+                "Startup Cost": 0.29,
+                "Total Cost": 8.3,
+                "Plan Rows": 1,
+                "Plan Width": 206,
+                "Index Cond": "(id = 5915)",
+                "Filter": "(drug = 'd309                                                                                                '::bpchar)"
+              },
+              {
+                "Node Type": "Index Only Scan",
+                "Parent Relationship": "Inner",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Scan Direction": "Forward",
+                "Index Name": "canc_pkey",
+                "Relation Name": "canc",
+                "Alias": "canc",
+                "Startup Cost": 0.27,
+                "Total Cost": 8.29,
+                "Plan Rows": 1,
+                "Plan Width": 101,
+                "Index Cond": "(drug_id = 'd309                                                                                                '::bpchar)"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 54.33999041683031
+  },
+  {
+    "timestamp": "2025-09-11T21:58:59.674779",
+    "dataset": "Carcinogenesis",
+    "query_type": "TP",
+    "query_index": 4,
+    "query_text": "SELECT \"sbond_3\".\"drug\", \"sbond_3\".\"atomid_2\", \"sbond_3\".\"atomid\" FROM \"sbond_3\" WHERE \"sbond_3\".\"id\" = 2 LIMIT 10;",
+    "postgres_time_ms": 0.9455400286242366,
+    "duckdb_time_ms": 9.823172993492335,
+    "log_time_difference": -2.3407432414499487,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 0.14,
+        "Total Cost": 8.16,
+        "Plan Rows": 1,
+        "Plan Width": 1212,
+        "Plans": [
+          {
+            "Node Type": "Index Scan",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Scan Direction": "Forward",
+            "Index Name": "sbond_3_pkey",
+            "Relation Name": "sbond_3",
+            "Alias": "sbond_3",
+            "Startup Cost": 0.14,
+            "Total Cost": 8.16,
+            "Plan Rows": 1,
+            "Plan Width": 1212,
+            "Index Cond": "(id = 2)"
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 10.3889551960958
+  },
+  {
+    "timestamp": "2025-09-11T21:58:59.687769",
+    "dataset": "Carcinogenesis",
+    "query_type": "TP",
+    "query_index": 5,
+    "query_text": "SELECT \"atom\".\"atomid\", \"atom\".\"drug\", \"atom\".\"name\" FROM \"atom\" WHERE \"atom\".\"atomid\" = 'd105_4                                                                                              ' ORDER BY \"atom\".\"atomtype\" DESC LIMIT 10;",
+    "postgres_time_ms": 0.31630502780899405,
+    "duckdb_time_ms": 11.670513020362705,
+    "log_time_difference": -3.6081136590457605,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 8.44,
+        "Total Cost": 8.44,
+        "Plan Rows": 1,
+        "Plan Width": 306,
+        "Plans": [
+          {
+            "Node Type": "Sort",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 8.44,
+            "Total Cost": 8.44,
+            "Plan Rows": 1,
+            "Plan Width": 306,
+            "Sort Key": [
+              "atomtype DESC"
+            ],
+            "Plans": [
+              {
+                "Node Type": "Index Scan",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Scan Direction": "Forward",
+                "Index Name": "atom_pkey",
+                "Relation Name": "atom",
+                "Alias": "atom",
+                "Startup Cost": 0.41,
+                "Total Cost": 8.43,
+                "Plan Rows": 1,
+                "Plan Width": 306,
+                "Index Cond": "(atomid = 'd105_4                                                                                              '::bpchar)"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 36.89638796197111
+  },
+  {
+    "timestamp": "2025-09-11T21:58:59.700451",
+    "dataset": "Carcinogenesis",
+    "query_type": "TP",
+    "query_index": 8,
+    "query_text": "SELECT \"atom\".\"charge\", \"atom\".\"atomtype\", \"atom\".\"atomid\" FROM \"atom\" WHERE \"atom\".\"atomid\" = 'd102_6                                                                                              ' ORDER BY \"atom\".\"charge\" DESC LIMIT 1;",
+    "postgres_time_ms": 0.2822140231728554,
+    "duckdb_time_ms": 10.462070989888161,
+    "log_time_difference": -3.6128459789016802,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 8.44,
+        "Total Cost": 8.44,
+        "Plan Rows": 1,
+        "Plan Width": 303,
+        "Plans": [
+          {
+            "Node Type": "Sort",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 8.44,
+            "Total Cost": 8.44,
+            "Plan Rows": 1,
+            "Plan Width": 303,
+            "Sort Key": [
+              "charge DESC"
+            ],
+            "Plans": [
+              {
+                "Node Type": "Index Scan",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Scan Direction": "Forward",
+                "Index Name": "atom_pkey",
+                "Relation Name": "atom",
+                "Alias": "atom",
+                "Startup Cost": 0.41,
+                "Total Cost": 8.43,
+                "Plan Rows": 1,
+                "Plan Width": 303,
+                "Index Cond": "(atomid = 'd102_6                                                                                              '::bpchar)"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 37.07140726837719
+  },
+  {
+    "timestamp": "2025-09-11T21:58:59.704045",
+    "dataset": "Carcinogenesis",
+    "query_type": "TP",
+    "query_index": 9,
+    "query_text": "SELECT \"atom\".\"drug\", \"atom\".\"charge\", \"atom\".\"name\", \"sbond_3\".\"atomid\", \"sbond_3\".\"atomid_2\", \"sbond_3\".\"id\", \"sbond_7\".\"atomid\", \"sbond_7\".\"id\", \"sbond_7\".\"drug\" FROM \"atom\" INNER JOIN \"sbond_3\" ON \"atom\".\"atomid\" = \"sbond_3\".\"atomid\" INNER JOIN \"sbond_7\" ON \"atom\".\"atomid\" = \"sbond_7\".\"atomid\" WHERE \"atom\".\"atomid\" = 'd101_14                                                                                             ' AND \"sbond_7\".\"atomid\" = 'd180_2                                                                                              ' ORDER BY \"atom\".\"drug\" ASC LIMIT 100;",
+    "postgres_time_ms": 0.39749499410390854,
+    "duckdb_time_ms": 2.154937945306301,
+    "log_time_difference": -1.6903348658759119,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 0.01,
+        "Total Cost": 0.02,
+        "Plan Rows": 1,
+        "Plan Width": 1223,
+        "Plans": [
+          {
+            "Node Type": "Sort",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 0.01,
+            "Total Cost": 0.02,
+            "Plan Rows": 0,
+            "Plan Width": 1223,
+            "Sort Key": [
+              "atom.drug"
+            ],
+            "Plans": [
+              {
+                "Node Type": "Result",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Startup Cost": 0.0,
+                "Total Cost": 0.0,
+                "Plan Rows": 0,
+                "Plan Width": 1223,
+                "One-Time Filter": "false"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 5.421295808175592
+  }
+]

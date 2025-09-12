@@ -1,0 +1,367 @@
+[
+  {
+    "timestamp": "2025-09-11T21:59:00.298504",
+    "dataset": "Credit",
+    "query_type": "AP",
+    "query_index": 2,
+    "query_text": "SELECT AVG(\"charge\".\"member_no\") FROM \"charge\" WHERE \"charge\".\"provider_no\" <= 498 OR \"charge\".\"charge_code\" LIKE '%a%' AND \"charge\".\"charge_code\" LIKE '%o%' OR \"charge\".\"provider_no\" != 412 GROUP BY \"charge\".\"charge_code\", \"charge\".\"category_no\", \"charge\".\"provider_no\" ORDER BY COUNT(*) ASC;",
+    "postgres_time_ms": 204.55156604293734,
+    "duckdb_time_ms": 369.0167799941264,
+    "log_time_difference": -0.5900220168595484,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Sort",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 173058.53,
+        "Total Cost": 173458.53,
+        "Plan Rows": 160000,
+        "Plan Width": 60,
+        "Sort Key": [
+          "(count(*))"
+        ],
+        "Plans": [
+          {
+            "Node Type": "Aggregate",
+            "Strategy": "Sorted",
+            "Partial Mode": "Finalize",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 109875.92,
+            "Total Cost": 153211.86,
+            "Plan Rows": 160000,
+            "Plan Width": 60,
+            "Group Key": [
+              "charge_code",
+              "category_no",
+              "provider_no"
+            ],
+            "Plans": [
+              {
+                "Node Type": "Gather Merge",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Startup Cost": 109875.92,
+                "Total Cost": 147211.86,
+                "Plan Rows": 320000,
+                "Plan Width": 60,
+                "Workers Planned": 2,
+                "Plans": [
+                  {
+                    "Node Type": "Sort",
+                    "Parent Relationship": "Outer",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Startup Cost": 108875.89,
+                    "Total Cost": 109275.89,
+                    "Plan Rows": 160000,
+                    "Plan Width": 60,
+                    "Sort Key": [
+                      "charge_code",
+                      "category_no",
+                      "provider_no"
+                    ],
+                    "Plans": [
+                      {
+                        "Node Type": "Aggregate",
+                        "Strategy": "Hashed",
+                        "Partial Mode": "Partial",
+                        "Parent Relationship": "Outer",
+                        "Parallel Aware": false,
+                        "Async Capable": false,
+                        "Startup Cost": 79618.95,
+                        "Total Cost": 89029.22,
+                        "Plan Rows": 160000,
+                        "Plan Width": 60,
+                        "Group Key": [
+                          "charge_code",
+                          "category_no",
+                          "provider_no"
+                        ],
+                        "Planned Partitions": 8,
+                        "Plans": [
+                          {
+                            "Node Type": "Seq Scan",
+                            "Parent Relationship": "Outer",
+                            "Parallel Aware": true,
+                            "Async Capable": false,
+                            "Relation Name": "charge",
+                            "Alias": "charge",
+                            "Startup Cost": 0.0,
+                            "Total Cost": 26717.33,
+                            "Plan Rows": 666477,
+                            "Plan Width": 24,
+                            "Filter": "((provider_no <= 498) OR ((charge_code ~~ '%a%'::text) AND (charge_code ~~ '%o%'::text)) OR (provider_no <> 412))"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 1.8040281339946636
+  },
+  {
+    "timestamp": "2025-09-11T21:59:00.336690",
+    "dataset": "Credit",
+    "query_type": "TP",
+    "query_index": 1,
+    "query_text": "SELECT \"charge\".\"charge_no\", \"member\".\"prev_balance\", \"corporation\".\"country\", \"corporation\".\"corp_code\", \"corporation\".\"corp_no\" FROM \"charge\" INNER JOIN \"member\" ON \"charge\".\"member_no\" = \"member\".\"member_no\" INNER JOIN \"corporation\" ON \"member\".\"corp_no\" = \"corporation\".\"corp_no\" WHERE \"charge\".\"charge_no\" = 1091930 AND \"member\".\"member_no\" = 483 AND \"corporation\".\"corp_no\" = 333 ORDER BY \"member\".\"photograph\" ASC LIMIT 10;",
+    "postgres_time_ms": 1.1210149968974292,
+    "duckdb_time_ms": 32.871939009055495,
+    "log_time_difference": -3.37838485402946,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 25.07,
+        "Total Cost": 25.08,
+        "Plan Rows": 1,
+        "Plan Width": 67,
+        "Plans": [
+          {
+            "Node Type": "Sort",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 25.07,
+            "Total Cost": 25.08,
+            "Plan Rows": 1,
+            "Plan Width": 67,
+            "Sort Key": [
+              "member.photograph"
+            ],
+            "Plans": [
+              {
+                "Node Type": "Nested Loop",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Join Type": "Inner",
+                "Startup Cost": 0.99,
+                "Total Cost": 25.06,
+                "Plan Rows": 1,
+                "Plan Width": 67,
+                "Inner Unique": false,
+                "Plans": [
+                  {
+                    "Node Type": "Nested Loop",
+                    "Parent Relationship": "Outer",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Join Type": "Inner",
+                    "Startup Cost": 0.71,
+                    "Total Cost": 16.76,
+                    "Plan Rows": 1,
+                    "Plan Width": 43,
+                    "Inner Unique": false,
+                    "Plans": [
+                      {
+                        "Node Type": "Index Scan",
+                        "Parent Relationship": "Outer",
+                        "Parallel Aware": false,
+                        "Async Capable": false,
+                        "Scan Direction": "Forward",
+                        "Index Name": "charge_pkey",
+                        "Relation Name": "charge",
+                        "Alias": "charge",
+                        "Startup Cost": 0.43,
+                        "Total Cost": 8.45,
+                        "Plan Rows": 1,
+                        "Plan Width": 8,
+                        "Index Cond": "(charge_no = 1091930)",
+                        "Filter": "(member_no = 483)"
+                      },
+                      {
+                        "Node Type": "Index Scan",
+                        "Parent Relationship": "Inner",
+                        "Parallel Aware": false,
+                        "Async Capable": false,
+                        "Scan Direction": "Forward",
+                        "Index Name": "member_pkey",
+                        "Relation Name": "member",
+                        "Alias": "member",
+                        "Startup Cost": 0.29,
+                        "Total Cost": 8.3,
+                        "Plan Rows": 1,
+                        "Plan Width": 43,
+                        "Index Cond": "(member_no = 483)",
+                        "Filter": "(corp_no = 333)"
+                      }
+                    ]
+                  },
+                  {
+                    "Node Type": "Index Scan",
+                    "Parent Relationship": "Inner",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Scan Direction": "Forward",
+                    "Index Name": "corporation_pkey",
+                    "Relation Name": "corporation",
+                    "Alias": "corporation",
+                    "Startup Cost": 0.27,
+                    "Total Cost": 8.29,
+                    "Plan Rows": 1,
+                    "Plan Width": 28,
+                    "Index Cond": "(corp_no = 333)"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 29.323371319771216
+  },
+  {
+    "timestamp": "2025-09-11T21:59:00.361044",
+    "dataset": "Credit",
+    "query_type": "TP",
+    "query_index": 2,
+    "query_text": "SELECT \"corporation\".\"corp_no\", \"corporation\".\"corp_name\", \"corporation\".\"expr_dt\", \"member\".\"issue_dt\" FROM \"corporation\" INNER JOIN \"member\" ON \"corporation\".\"corp_no\" = \"member\".\"corp_no\" WHERE \"corporation\".\"corp_no\" = 130 AND \"member\".\"member_no\" = 602 ORDER BY \"corporation\".\"city\" ASC LIMIT 100;",
+    "postgres_time_ms": 0.4595560021698475,
+    "duckdb_time_ms": 22.43998897029087,
+    "log_time_difference": -3.8883390574253136,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 16.62,
+        "Total Cost": 16.62,
+        "Plan Rows": 1,
+        "Plan Width": 48,
+        "Plans": [
+          {
+            "Node Type": "Sort",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 16.62,
+            "Total Cost": 16.62,
+            "Plan Rows": 1,
+            "Plan Width": 48,
+            "Sort Key": [
+              "corporation.city"
+            ],
+            "Plans": [
+              {
+                "Node Type": "Nested Loop",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Join Type": "Inner",
+                "Startup Cost": 0.56,
+                "Total Cost": 16.61,
+                "Plan Rows": 1,
+                "Plan Width": 48,
+                "Inner Unique": false,
+                "Plans": [
+                  {
+                    "Node Type": "Index Scan",
+                    "Parent Relationship": "Outer",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Scan Direction": "Forward",
+                    "Index Name": "corporation_pkey",
+                    "Relation Name": "corporation",
+                    "Alias": "corporation",
+                    "Startup Cost": 0.27,
+                    "Total Cost": 8.29,
+                    "Plan Rows": 1,
+                    "Plan Width": 40,
+                    "Index Cond": "(corp_no = 130)"
+                  },
+                  {
+                    "Node Type": "Index Scan",
+                    "Parent Relationship": "Inner",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Scan Direction": "Forward",
+                    "Index Name": "member_pkey",
+                    "Relation Name": "member",
+                    "Alias": "member",
+                    "Startup Cost": 0.29,
+                    "Total Cost": 8.3,
+                    "Plan Rows": 1,
+                    "Plan Width": 12,
+                    "Index Cond": "(member_no = 602)",
+                    "Filter": "(corp_no = 130)"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 48.82971577857287
+  },
+  {
+    "timestamp": "2025-09-11T21:59:00.372886",
+    "dataset": "Credit",
+    "query_type": "TP",
+    "query_index": 3,
+    "query_text": "SELECT \"provider\".\"street\", \"provider\".\"city\" FROM \"provider\" WHERE \"provider\".\"provider_no\" = 156 ORDER BY \"provider\".\"phone_no\" DESC LIMIT 10;",
+    "postgres_time_ms": 0.31536503229290247,
+    "duckdb_time_ms": 10.253224987536669,
+    "log_time_difference": -3.4816167674371927,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 8.3,
+        "Total Cost": 8.31,
+        "Plan Rows": 1,
+        "Plan Width": 60,
+        "Plans": [
+          {
+            "Node Type": "Sort",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 8.3,
+            "Total Cost": 8.31,
+            "Plan Rows": 1,
+            "Plan Width": 60,
+            "Sort Key": [
+              "phone_no DESC"
+            ],
+            "Plans": [
+              {
+                "Node Type": "Index Scan",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Scan Direction": "Forward",
+                "Index Name": "provider_pkey",
+                "Relation Name": "provider",
+                "Alias": "provider",
+                "Startup Cost": 0.27,
+                "Total Cost": 8.29,
+                "Plan Rows": 1,
+                "Plan Width": 60,
+                "Index Cond": "(provider_no = 156)"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 32.51224434424218
+  }
+]

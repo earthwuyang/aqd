@@ -1,0 +1,19 @@
+{
+  "accuracy": 0.22727272727272727,
+  "precision": 0.0,
+  "recall": 0.0,
+  "f1": 0.0,
+  "mse": NaN,
+  "mae": NaN,
+  "confusion_matrix": [
+    [
+      5,
+      0
+    ],
+    [
+      17,
+      0
+    ]
+  ],
+  "threshold": 0.0
+}

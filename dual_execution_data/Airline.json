@@ -1,0 +1,363 @@
+[
+  {
+    "timestamp": "2025-09-11T21:53:41.640824",
+    "dataset": "Airline",
+    "query_type": "AP",
+    "query_index": 0,
+    "query_text": "SELECT VARIANCE(\"L_DIVERSIONS\".\"Code\"), MIN(\"L_DIVERSIONS\".\"Code\"), MAX(\"L_STATE_FIPS\".\"Code\"), MAX(\"L_STATE_FIPS\".\"Code\"), \"L_DIVERSIONS\".\"Code\" FROM \"L_STATE_FIPS\" CROSS JOIN \"L_AIRPORT\" CROSS JOIN \"L_DIVERSIONS\" CROSS JOIN \"L_WEEKDAYS\" WHERE \"L_STATE_FIPS\".\"Code\" >= 51 AND \"L_STATE_FIPS\".\"Code\" IS NOT NULL AND \"L_DIVERSIONS\".\"Code\" > 6 GROUP BY \"L_STATE_FIPS\".\"Description\", \"L_DIVERSIONS\".\"Code\" LIMIT 1000;",
+    "postgres_time_ms": 348.8154939841479,
+    "duckdb_time_ms": 92.19193202443421,
+    "log_time_difference": 1.3306704902985929,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 27310961.08,
+        "Total Cost": 27310973.58,
+        "Plan Rows": 1000,
+        "Plan Width": 62,
+        "Plans": [
+          {
+            "Node Type": "Aggregate",
+            "Strategy": "Hashed",
+            "Partial Mode": "Simple",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 27310961.08,
+            "Total Cost": 27310976.35,
+            "Plan Rows": 1222,
+            "Plan Width": 62,
+            "Group Key": [
+              "\"L_STATE_FIPS\".\"Description\"",
+              "\"L_DIVERSIONS\".\"Code\""
+            ],
+            "Planned Partitions": 0,
+            "Plans": [
+              {
+                "Node Type": "Nested Loop",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Join Type": "Inner",
+                "Startup Cost": 0.0,
+                "Total Cost": 13656638.58,
+                "Plan Rows": 1092345800,
+                "Plan Width": 22,
+                "Inner Unique": false,
+                "Plans": [
+                  {
+                    "Node Type": "Nested Loop",
+                    "Parent Relationship": "Outer",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Join Type": "Inner",
+                    "Startup Cost": 0.0,
+                    "Total Cost": 2179.26,
+                    "Plan Rows": 171080,
+                    "Plan Width": 22,
+                    "Inner Unique": false,
+                    "Plans": [
+                      {
+                        "Node Type": "Nested Loop",
+                        "Parent Relationship": "Outer",
+                        "Parallel Aware": false,
+                        "Async Capable": false,
+                        "Join Type": "Inner",
+                        "Startup Cost": 0.0,
+                        "Total Cost": 29.02,
+                        "Plan Rows": 1222,
+                        "Plan Width": 22,
+                        "Inner Unique": false,
+                        "Plans": [
+                          {
+                            "Node Type": "Seq Scan",
+                            "Parent Relationship": "Outer",
+                            "Parallel Aware": false,
+                            "Async Capable": false,
+                            "Relation Name": "L_DIVERSIONS",
+                            "Alias": "L_DIVERSIONS",
+                            "Startup Cost": 0.0,
+                            "Total Cost": 11.75,
+                            "Plan Rows": 47,
+                            "Plan Width": 4,
+                            "Filter": "(\"Code\" > 6)"
+                          },
+                          {
+                            "Node Type": "Materialize",
+                            "Parent Relationship": "Inner",
+                            "Parallel Aware": false,
+                            "Async Capable": false,
+                            "Startup Cost": 0.0,
+                            "Total Cost": 2.06,
+                            "Plan Rows": 26,
+                            "Plan Width": 18,
+                            "Plans": [
+                              {
+                                "Node Type": "Seq Scan",
+                                "Parent Relationship": "Outer",
+                                "Parallel Aware": false,
+                                "Async Capable": false,
+                                "Relation Name": "L_STATE_FIPS",
+                                "Alias": "L_STATE_FIPS",
+                                "Startup Cost": 0.0,
+                                "Total Cost": 1.93,
+                                "Plan Rows": 26,
+                                "Plan Width": 18,
+                                "Filter": "(\"Code\" >= 51)"
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "Node Type": "Materialize",
+                        "Parent Relationship": "Inner",
+                        "Parallel Aware": false,
+                        "Async Capable": false,
+                        "Startup Cost": 0.0,
+                        "Total Cost": 12.1,
+                        "Plan Rows": 140,
+                        "Plan Width": 0,
+                        "Plans": [
+                          {
+                            "Node Type": "Seq Scan",
+                            "Parent Relationship": "Outer",
+                            "Parallel Aware": false,
+                            "Async Capable": false,
+                            "Relation Name": "L_WEEKDAYS",
+                            "Alias": "L_WEEKDAYS",
+                            "Startup Cost": 0.0,
+                            "Total Cost": 11.4,
+                            "Plan Rows": 140,
+                            "Plan Width": 0
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "Node Type": "Materialize",
+                    "Parent Relationship": "Inner",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Startup Cost": 0.0,
+                    "Total Cost": 152.78,
+                    "Plan Rows": 6385,
+                    "Plan Width": 0,
+                    "Plans": [
+                      {
+                        "Node Type": "Seq Scan",
+                        "Parent Relationship": "Outer",
+                        "Parallel Aware": false,
+                        "Async Capable": false,
+                        "Relation Name": "L_AIRPORT",
+                        "Alias": "L_AIRPORT",
+                        "Startup Cost": 0.0,
+                        "Total Cost": 120.85,
+                        "Plan Rows": 6385,
+                        "Plan Width": 0
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "duckdb",
+    "speedup_ratio": 3.7835793905664015
+  },
+  {
+    "timestamp": "2025-09-11T21:53:41.658615",
+    "dataset": "Airline",
+    "query_type": "AP",
+    "query_index": 2,
+    "query_text": "SELECT AVG(\"L_AIRPORT_ID\".\"Code\") FROM \"L_AIRPORT_ID\" WHERE \"L_AIRPORT_ID\".\"Description\" LIKE '%u%' AND \"L_AIRPORT_ID\".\"Description\" IS NULL AND \"L_AIRPORT_ID\".\"Description\" LIKE '%u%' AND \"L_AIRPORT_ID\".\"Description\" LIKE '%a%' AND \"L_AIRPORT_ID\".\"Description\" = 'Curuzu Cuatia, Argentina: Curuzu Cuatia Airport' AND \"L_AIRPORT_ID\".\"Description\" IS NULL AND \"L_AIRPORT_ID\".\"Code\" < 11885 GROUP BY \"L_AIRPORT_ID\".\"Description\";",
+    "postgres_time_ms": 1.0657869861461222,
+    "duckdb_time_ms": 12.425480992533267,
+    "log_time_difference": -2.456035802509083,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Aggregate",
+        "Strategy": "Sorted",
+        "Partial Mode": "Simple",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 0.28,
+        "Total Cost": 94.09,
+        "Plan Rows": 1,
+        "Plan Width": 69,
+        "Plans": [
+          {
+            "Node Type": "Index Scan",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Scan Direction": "Forward",
+            "Index Name": "L_AIRPORT_ID_pkey",
+            "Relation Name": "L_AIRPORT_ID",
+            "Alias": "L_AIRPORT_ID",
+            "Startup Cost": 0.28,
+            "Total Cost": 94.07,
+            "Plan Rows": 1,
+            "Plan Width": 41,
+            "Index Cond": "(\"Code\" < 11885)",
+            "Filter": "((\"Description\" IS NULL) AND (\"Description\" IS NULL) AND ((\"Description\")::text ~~ '%u%'::text) AND ((\"Description\")::text ~~ '%u%'::text) AND ((\"Description\")::text ~~ '%a%'::text) AND ((\"Description\")::text = 'Curuzu Cuatia, Argentina: Curuzu Cuatia Airport'::text))"
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 11.658503203781567
+  },
+  {
+    "timestamp": "2025-09-11T21:53:41.939289",
+    "dataset": "Airline",
+    "query_type": "AP",
+    "query_index": 3,
+    "query_text": "SELECT MAX(\"On_Time_On_Time_Performance_2016_1\".\"Div2AirportID\"), STDDEV(\"On_Time_On_Time_Performance_2016_1\".\"OriginAirportSeqID\"), MAX(\"On_Time_On_Time_Performance_2016_1\".\"Quarter\") FROM \"On_Time_On_Time_Performance_2016_1\" JOIN \"L_YESNO_RESP\" ON \"On_Time_On_Time_Performance_2016_1\".\"ArrDel15\" = \"L_YESNO_RESP\".\"Code\" WHERE \"L_YESNO_RESP\".\"Code\" != 0 AND \"L_YESNO_RESP\".\"Code\" != 0 AND \"On_Time_On_Time_Performance_2016_1\".\"Carrier\" = 'EV';",
+    "postgres_time_ms": 49.57187204854563,
+    "duckdb_time_ms": 228.89795200899243,
+    "log_time_difference": -1.5298527027435005,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Aggregate",
+        "Strategy": "Plain",
+        "Partial Mode": "Finalize",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 22138.85,
+        "Total Cost": 22138.86,
+        "Plan Rows": 1,
+        "Plan Width": 40,
+        "Plans": [
+          {
+            "Node Type": "Gather",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 22138.61,
+            "Total Cost": 22138.82,
+            "Plan Rows": 2,
+            "Plan Width": 40,
+            "Workers Planned": 2,
+            "Single Copy": false,
+            "Plans": [
+              {
+                "Node Type": "Aggregate",
+                "Strategy": "Plain",
+                "Partial Mode": "Partial",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Startup Cost": 21138.61,
+                "Total Cost": 21138.62,
+                "Plan Rows": 1,
+                "Plan Width": 40,
+                "Plans": [
+                  {
+                    "Node Type": "Hash Join",
+                    "Parent Relationship": "Outer",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Join Type": "Inner",
+                    "Startup Cost": 13.82,
+                    "Total Cost": 21013.55,
+                    "Plan Rows": 16675,
+                    "Plan Width": 12,
+                    "Inner Unique": true,
+                    "Hash Cond": "(\"On_Time_On_Time_Performance_2016_1\".\"ArrDel15\" = \"L_YESNO_RESP\".\"Code\")",
+                    "Plans": [
+                      {
+                        "Node Type": "Seq Scan",
+                        "Parent Relationship": "Outer",
+                        "Parallel Aware": true,
+                        "Async Capable": false,
+                        "Relation Name": "On_Time_On_Time_Performance_2016_1",
+                        "Alias": "On_Time_On_Time_Performance_2016_1",
+                        "Startup Cost": 0.0,
+                        "Total Cost": 20954.02,
+                        "Plan Rows": 16917,
+                        "Plan Width": 16,
+                        "Filter": "(\"Carrier\" = 'EV'::bpchar)"
+                      },
+                      {
+                        "Node Type": "Hash",
+                        "Parent Relationship": "Inner",
+                        "Parallel Aware": false,
+                        "Async Capable": false,
+                        "Startup Cost": 12.1,
+                        "Total Cost": 12.1,
+                        "Plan Rows": 138,
+                        "Plan Width": 4,
+                        "Plans": [
+                          {
+                            "Node Type": "Seq Scan",
+                            "Parent Relationship": "Outer",
+                            "Parallel Aware": false,
+                            "Async Capable": false,
+                            "Relation Name": "L_YESNO_RESP",
+                            "Alias": "L_YESNO_RESP",
+                            "Startup Cost": 0.0,
+                            "Total Cost": 12.1,
+                            "Plan Rows": 138,
+                            "Plan Width": 4,
+                            "Filter": "((\"Code\" <> 0) AND (\"Code\" <> 0))"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 4.617496627620461
+  },
+  {
+    "timestamp": "2025-09-11T21:53:41.954409",
+    "dataset": "Airline",
+    "query_type": "TP",
+    "query_index": 3,
+    "query_text": "SELECT \"L_QUARTERS\".\"Code\", \"L_QUARTERS\".\"Description\" FROM \"L_QUARTERS\" WHERE \"L_QUARTERS\".\"Code\" >= 1 LIMIT 10;",
+    "postgres_time_ms": 0.29223394813016057,
+    "duckdb_time_ms": 10.410563030745834,
+    "log_time_difference": -3.5730215720011107,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 0.0,
+        "Total Cost": 2.5,
+        "Plan Rows": 10,
+        "Plan Width": 520,
+        "Plans": [
+          {
+            "Node Type": "Seq Scan",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Relation Name": "L_QUARTERS",
+            "Alias": "L_QUARTERS",
+            "Startup Cost": 0.0,
+            "Total Cost": 11.75,
+            "Plan Rows": 47,
+            "Plan Width": 520,
+            "Filter": "(\"Code\" >= 1)"
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 35.62407138991595
+  }
+]

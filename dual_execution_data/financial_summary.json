@@ -1,0 +1,31 @@
+{
+  "total_queries": 47,
+  "postgres_preferred": 41,
+  "duckdb_preferred": 6,
+  "postgres_stats": {
+    "mean_ms": 1667.5314981468082,
+    "median_ms": 1.0030459961853921,
+    "std_ms": 6521.646407184322,
+    "min_ms": 0.23819395573809743,
+    "max_ms": 30000.0
+  },
+  "duckdb_stats": {
+    "mean_ms": 1119.8043797407893,
+    "median_ms": 19.402892037760466,
+    "std_ms": 4689.4926953057075,
+    "min_ms": 1.7638500430621207,
+    "max_ms": 26925.74010201497
+  },
+  "speedup_stats": {
+    "mean": 21.584276971208748,
+    "median": 14.894514980347607,
+    "max": 77.53709563792088
+  },
+  "collection_stats": {
+    "total_attempts": 100,
+    "successful": 47,
+    "failed": 53,
+    "postgres_timeouts": 5,
+    "duckdb_timeouts": 0
+  }
+}

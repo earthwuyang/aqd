@@ -1,0 +1,3526 @@
+[
+  {
+    "timestamp": "2025-09-11T21:54:38.947460",
+    "dataset": "financial",
+    "query_type": "AP",
+    "query_index": 0,
+    "query_text": "SELECT STDDEV(\"trans\".\"account_id\"), COUNT(*), SUM(\"order\".\"account_id\"), MIN(\"trans\".\"amount\"), \"account\".\"frequency\", \"loan\".\"account_id\" FROM \"trans\" CROSS JOIN \"loan\" JOIN \"account\" ON \"loan\".\"account_id\" = \"account\".\"account_id\" JOIN \"order\" ON \"account\".\"account_id\" = \"order\".\"account_id\" GROUP BY \"loan\".\"account_id\", \"account\".\"frequency\" LIMIT 100;",
+    "postgres_time_ms": 30000,
+    "duckdb_time_ms": 26925.74010201497,
+    "log_time_difference": 0.10811467145746108,
+    "postgres_plan": null,
+    "optimal_engine": "duckdb",
+    "speedup_ratio": 1.1141755021900017
+  },
+  {
+    "timestamp": "2025-09-11T21:55:41.910555",
+    "dataset": "financial",
+    "query_type": "AP",
+    "query_index": 3,
+    "query_text": "SELECT AVG(\"district\".\"district_id\"), AVG(\"order\".\"account_to\"), MIN(\"district\".\"district_id\") FROM \"district\" CROSS JOIN \"order\" WHERE \"district\".\"A10\" != 80.38771593536148 AND \"order\".\"k_symbol\" LIKE '%a%' GROUP BY \"order\".\"bank_to\";",
+    "postgres_time_ms": 24.15582403773442,
+    "duckdb_time_ms": 20.57619602419436,
+    "log_time_difference": 0.16039063716009147,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Custom Scan",
+        "Custom Plan Provider": "DuckDBScan",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 0.0,
+        "Total Cost": 0.0,
+        "Plan Rows": 0,
+        "Plan Width": 0,
+        "DuckDB Execution Plan": [
+          {
+            "name": "PROJECTION",
+            "children": [
+              {
+                "name": "HASH_GROUP_BY",
+                "children": [
+                  {
+                    "name": "PROJECTION",
+                    "children": [
+                      {
+                        "name": "CROSS_PRODUCT",
+                        "children": [
+                          {
+                            "name": "PGDUCKDB_POSTGRES_SCAN ",
+                            "children": [],
+                            "extra_info": {
+                              "Table": "order",
+                              "Projections": [
+                                "bank_to",
+                                "account_to"
+                              ],
+                              "Filters": "like_escape(k_symbol, '%a%', '\\')",
+                              "Estimated Cardinality": "1294"
+                            }
+                          },
+                          {
+                            "name": "PROJECTION",
+                            "children": [
+                              {
+                                "name": "FILTER",
+                                "children": [
+                                  {
+                                    "name": "PGDUCKDB_POSTGRES_SCAN ",
+                                    "children": [],
+                                    "extra_info": {
+                                      "Table": "district",
+                                      "Projections": [
+                                        "A10",
+                                        "district_id"
+                                      ],
+                                      "Estimated Cardinality": "77"
+                                    }
+                                  }
+                                ],
+                                "extra_info": {
+                                  "Expression": "(CAST(A10 AS DECIMAL(17,14)) != 80.38771593536148)",
+                                  "Estimated Cardinality": "15"
+                                }
+                              }
+                            ],
+                            "extra_info": {
+                              "Projections": "#1",
+                              "Estimated Cardinality": "15"
+                            }
+                          }
+                        ],
+                        "extra_info": {}
+                      }
+                    ],
+                    "extra_info": {
+                      "Projections": [
+                        "bank_to",
+                        "district_id",
+                        "account_to",
+                        "district_id"
+                      ],
+                      "Estimated Cardinality": "19410"
+                    }
+                  }
+                ],
+                "extra_info": {
+                  "Groups": "#0",
+                  "Aggregates": [
+                    "avg(#1)",
+                    "avg(#2)",
+                    "min(#3)"
+                  ],
+                  "Estimated Cardinality": "77"
+                }
+              }
+            ],
+            "extra_info": {
+              "Projections": [
+                "avg",
+                "avg",
+                "min"
+              ],
+              "Estimated Cardinality": "77"
+            }
+          }
+        ]
+      }
+    },
+    "optimal_engine": "duckdb",
+    "speedup_ratio": 1.1739693774947995
+  },
+  {
+    "timestamp": "2025-09-11T21:55:41.951512",
+    "dataset": "financial",
+    "query_type": "AP",
+    "query_index": 6,
+    "query_text": "SELECT AVG(\"account\".\"district_id\") FROM \"disp\" CROSS JOIN \"order\" INNER JOIN \"account\" ON \"disp\".\"account_id\" = \"account\".\"account_id\" WHERE \"account\".\"frequency\" LIKE '%o%' AND \"account\".\"frequency\" IS NULL AND \"disp\".\"disp_id\" < 2789 AND \"account\".\"district_id\" != 34 AND \"disp\".\"type\" = 'OWNER' AND \"account\".\"frequency\" LIKE '%e%' GROUP BY \"disp\".\"type\", \"account\".\"frequency\", \"disp\".\"type\";",
+    "postgres_time_ms": 0.973705027718097,
+    "duckdb_time_ms": 36.52689699083567,
+    "log_time_difference": -3.6246957605587418,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Aggregate",
+        "Strategy": "Hashed",
+        "Partial Mode": "Simple",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 437.34,
+        "Total Cost": 437.35,
+        "Plan Rows": 1,
+        "Plan Width": 54,
+        "Group Key": [
+          "account.frequency"
+        ],
+        "Planned Partitions": 0,
+        "Plans": [
+          {
+            "Node Type": "Nested Loop",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Join Type": "Inner",
+            "Startup Cost": 113.05,
+            "Total Cost": 404.99,
+            "Plan Rows": 6471,
+            "Plan Width": 26,
+            "Inner Unique": false,
+            "Plans": [
+              {
+                "Node Type": "Hash Join",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Join Type": "Inner",
+                "Startup Cost": 113.05,
+                "Total Cost": 228.57,
+                "Plan Rows": 1,
+                "Plan Width": 26,
+                "Inner Unique": true,
+                "Hash Cond": "(disp.account_id = account.account_id)",
+                "Plans": [
+                  {
+                    "Node Type": "Index Scan",
+                    "Parent Relationship": "Outer",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Scan Direction": "Forward",
+                    "Index Name": "disp_pkey",
+                    "Relation Name": "disp",
+                    "Alias": "disp",
+                    "Startup Cost": 0.28,
+                    "Total Cost": 110.0,
+                    "Plan Rows": 2210,
+                    "Plan Width": 10,
+                    "Index Cond": "(disp_id < 2789)",
+                    "Filter": "((type)::text = 'OWNER'::text)"
+                  },
+                  {
+                    "Node Type": "Hash",
+                    "Parent Relationship": "Inner",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Startup Cost": 112.75,
+                    "Total Cost": 112.75,
+                    "Plan Rows": 1,
+                    "Plan Width": 24,
+                    "Plans": [
+                      {
+                        "Node Type": "Seq Scan",
+                        "Parent Relationship": "Outer",
+                        "Parallel Aware": false,
+                        "Async Capable": false,
+                        "Relation Name": "account",
+                        "Alias": "account",
+                        "Startup Cost": 0.0,
+                        "Total Cost": 112.75,
+                        "Plan Rows": 1,
+                        "Plan Width": 24,
+                        "Filter": "((frequency IS NULL) AND ((frequency)::text ~~ '%o%'::text) AND (district_id <> 34) AND ((frequency)::text ~~ '%e%'::text))"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "Node Type": "Seq Scan",
+                "Parent Relationship": "Inner",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Relation Name": "order",
+                "Alias": "order",
+                "Startup Cost": 0.0,
+                "Total Cost": 111.71,
+                "Plan Rows": 6471,
+                "Plan Width": 0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 37.51330839529236
+  },
+  {
+    "timestamp": "2025-09-11T21:55:41.978452",
+    "dataset": "financial",
+    "query_type": "AP",
+    "query_index": 7,
+    "query_text": "SELECT MIN(\"disp\".\"account_id\"), SUM(\"card\".\"disp_id\"), VARIANCE(\"disp\".\"disp_id\"), VARIANCE(\"card\".\"card_id\"), SUM(\"disp\".\"client_id\") FROM \"card\" INNER JOIN \"disp\" ON \"card\".\"disp_id\" = \"disp\".\"disp_id\" WHERE \"card\".\"type\" LIKE '%e%' AND \"card\".\"card_id\" = 105 AND \"card\".\"card_id\" IS NOT NULL AND \"card\".\"type\" LIKE '%o%' ORDER BY COUNT(*) DESC;",
+    "postgres_time_ms": 1.985488983336836,
+    "duckdb_time_ms": 23.347886046394706,
+    "log_time_difference": -2.4646412236563915,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Sort",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 16.64,
+        "Total Cost": 16.65,
+        "Plan Rows": 1,
+        "Plan Width": 92,
+        "Sort Key": [
+          "(count(*)) DESC"
+        ],
+        "Plans": [
+          {
+            "Node Type": "Aggregate",
+            "Strategy": "Plain",
+            "Partial Mode": "Simple",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 16.62,
+            "Total Cost": 16.63,
+            "Plan Rows": 1,
+            "Plan Width": 92,
+            "Plans": [
+              {
+                "Node Type": "Nested Loop",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Join Type": "Inner",
+                "Startup Cost": 0.56,
+                "Total Cost": 16.6,
+                "Plan Rows": 1,
+                "Plan Width": 20,
+                "Inner Unique": true,
+                "Plans": [
+                  {
+                    "Node Type": "Index Scan",
+                    "Parent Relationship": "Outer",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Scan Direction": "Forward",
+                    "Index Name": "card_pkey",
+                    "Relation Name": "card",
+                    "Alias": "card",
+                    "Startup Cost": 0.28,
+                    "Total Cost": 8.3,
+                    "Plan Rows": 1,
+                    "Plan Width": 8,
+                    "Index Cond": "(card_id = 105)",
+                    "Filter": "(((type)::text ~~ '%e%'::text) AND ((type)::text ~~ '%o%'::text))"
+                  },
+                  {
+                    "Node Type": "Index Scan",
+                    "Parent Relationship": "Inner",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Scan Direction": "Forward",
+                    "Index Name": "disp_pkey",
+                    "Relation Name": "disp",
+                    "Alias": "disp",
+                    "Startup Cost": 0.28,
+                    "Total Cost": 8.3,
+                    "Plan Rows": 1,
+                    "Plan Width": 12,
+                    "Index Cond": "(disp_id = card.disp_id)"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 11.759262449875685
+  },
+  {
+    "timestamp": "2025-09-11T21:55:41.992385",
+    "dataset": "financial",
+    "query_type": "AP",
+    "query_index": 9,
+    "query_text": "SELECT VARIANCE(\"account\".\"district_id\") FROM \"account\" WHERE \"account\".\"frequency\" LIKE '%a%' GROUP BY \"account\".\"frequency\" HAVING AVG(1) > 58 ORDER BY COUNT(*) ASC;",
+    "postgres_time_ms": 0.9671259904280305,
+    "duckdb_time_ms": 11.158379027619958,
+    "log_time_difference": -2.4456172000003247,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Sort",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 90.3,
+        "Total Cost": 90.31,
+        "Plan Rows": 1,
+        "Plan Width": 56,
+        "Sort Key": [
+          "(count(*))"
+        ],
+        "Plans": [
+          {
+            "Node Type": "Aggregate",
+            "Strategy": "Sorted",
+            "Partial Mode": "Simple",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 90.26,
+            "Total Cost": 90.29,
+            "Plan Rows": 1,
+            "Plan Width": 56,
+            "Group Key": [
+              "frequency"
+            ],
+            "Filter": "(avg(1) > '58'::numeric)",
+            "Plans": [
+              {
+                "Node Type": "Sort",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Startup Cost": 90.26,
+                "Total Cost": 90.27,
+                "Plan Rows": 1,
+                "Plan Width": 20,
+                "Sort Key": [
+                  "frequency"
+                ],
+                "Plans": [
+                  {
+                    "Node Type": "Seq Scan",
+                    "Parent Relationship": "Outer",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Relation Name": "account",
+                    "Alias": "account",
+                    "Startup Cost": 0.0,
+                    "Total Cost": 90.25,
+                    "Plan Rows": 1,
+                    "Plan Width": 20,
+                    "Filter": "((frequency)::text ~~ '%a%'::text)"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 11.5376684507067
+  },
+  {
+    "timestamp": "2025-09-11T21:55:42.038574",
+    "dataset": "financial",
+    "query_type": "AP",
+    "query_index": 10,
+    "query_text": "SELECT STDDEV(\"trans\".\"account_id\"), AVG(\"account\".\"account_id\") FROM \"disp\" INNER JOIN \"card\" ON \"disp\".\"disp_id\" = \"card\".\"disp_id\" INNER JOIN \"account\" ON \"disp\".\"account_id\" = \"account\".\"account_id\" LEFT JOIN \"trans\" ON \"account\".\"account_id\" = \"trans\".\"account_id\" WHERE \"disp\".\"type\" != 'DISPONENT' AND \"disp\".\"type\" IS NULL AND \"card\".\"disp_id\" >= 4382 AND \"disp\".\"client_id\" <= 9371 AND \"account\".\"district_id\" > 20 AND \"account\".\"district_id\" = 73 AND \"account\".\"district_id\" IS NOT NULL GROUP BY \"disp\".\"type\";",
+    "postgres_time_ms": 2.282848989125341,
+    "duckdb_time_ms": 42.08864097017795,
+    "log_time_difference": -2.9143536740441545,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Aggregate",
+        "Strategy": "Sorted",
+        "Partial Mode": "Simple",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 23996.08,
+        "Total Cost": 23998.44,
+        "Plan Rows": 1,
+        "Plan Width": 70,
+        "Group Key": [
+          "disp.type"
+        ],
+        "Plans": [
+          {
+            "Node Type": "Sort",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 23996.08,
+            "Total Cost": 23996.67,
+            "Plan Rows": 235,
+            "Plan Width": 14,
+            "Sort Key": [
+              "disp.type"
+            ],
+            "Plans": [
+              {
+                "Node Type": "Hash Join",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Join Type": "Inner",
+                "Startup Cost": 122.31,
+                "Total Cost": 23986.82,
+                "Plan Rows": 235,
+                "Plan Width": 14,
+                "Inner Unique": false,
+                "Hash Cond": "(disp.disp_id = card.disp_id)",
+                "Plans": [
+                  {
+                    "Node Type": "Nested Loop",
+                    "Parent Relationship": "Outer",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Join Type": "Inner",
+                    "Startup Cost": 102.26,
+                    "Total Cost": 23965.79,
+                    "Plan Rows": 235,
+                    "Plan Width": 18,
+                    "Inner Unique": false,
+                    "Join Filter": "(account.account_id = disp.account_id)",
+                    "Plans": [
+                      {
+                        "Node Type": "Index Scan",
+                        "Parent Relationship": "Outer",
+                        "Parallel Aware": false,
+                        "Async Capable": false,
+                        "Scan Direction": "Forward",
+                        "Index Name": "disp_pkey",
+                        "Relation Name": "disp",
+                        "Alias": "disp",
+                        "Startup Cost": 0.28,
+                        "Total Cost": 213.66,
+                        "Plan Rows": 1,
+                        "Plan Width": 14,
+                        "Filter": "((type IS NULL) AND ((type)::text <> 'DISPONENT'::text) AND (client_id <= 9371))"
+                      },
+                      {
+                        "Node Type": "Hash Join",
+                        "Parent Relationship": "Inner",
+                        "Parallel Aware": false,
+                        "Async Capable": false,
+                        "Join Type": "Right",
+                        "Startup Cost": 101.97,
+                        "Total Cost": 23640.63,
+                        "Plan Rows": 8920,
+                        "Plan Width": 8,
+                        "Inner Unique": true,
+                        "Hash Cond": "(trans.account_id = account.account_id)",
+                        "Plans": [
+                          {
+                            "Node Type": "Seq Scan",
+                            "Parent Relationship": "Outer",
+                            "Parallel Aware": false,
+                            "Async Capable": false,
+                            "Relation Name": "trans",
+                            "Alias": "trans",
+                            "Startup Cost": 0.0,
+                            "Total Cost": 20763.2,
+                            "Plan Rows": 1056320,
+                            "Plan Width": 4
+                          },
+                          {
+                            "Node Type": "Hash",
+                            "Parent Relationship": "Inner",
+                            "Parallel Aware": false,
+                            "Async Capable": false,
+                            "Startup Cost": 101.5,
+                            "Total Cost": 101.5,
+                            "Plan Rows": 38,
+                            "Plan Width": 4,
+                            "Plans": [
+                              {
+                                "Node Type": "Seq Scan",
+                                "Parent Relationship": "Outer",
+                                "Parallel Aware": false,
+                                "Async Capable": false,
+                                "Relation Name": "account",
+                                "Alias": "account",
+                                "Startup Cost": 0.0,
+                                "Total Cost": 101.5,
+                                "Plan Rows": 38,
+                                "Plan Width": 4,
+                                "Filter": "((district_id IS NOT NULL) AND (district_id > 20) AND (district_id = 73))"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "Node Type": "Hash",
+                    "Parent Relationship": "Inner",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Startup Cost": 17.15,
+                    "Total Cost": 17.15,
+                    "Plan Rows": 232,
+                    "Plan Width": 4,
+                    "Plans": [
+                      {
+                        "Node Type": "Seq Scan",
+                        "Parent Relationship": "Outer",
+                        "Parallel Aware": false,
+                        "Async Capable": false,
+                        "Relation Name": "card",
+                        "Alias": "card",
+                        "Startup Cost": 0.0,
+                        "Total Cost": 17.15,
+                        "Plan Rows": 232,
+                        "Plan Width": 4,
+                        "Filter": "(disp_id >= 4382)"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 18.436892308984458
+  },
+  {
+    "timestamp": "2025-09-11T21:55:42.059723",
+    "dataset": "financial",
+    "query_type": "AP",
+    "query_index": 15,
+    "query_text": "SELECT MIN(\"disp\".\"client_id\"), COUNT(*) FROM \"disp\" GROUP BY \"disp\".\"type\" HAVING SUM(1) < 83 ORDER BY \"disp\".\"type\" DESC;",
+    "postgres_time_ms": 1.6599290538579226,
+    "duckdb_time_ms": 16.652947990223765,
+    "log_time_difference": -2.3058123944083775,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Sort",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 142.41,
+        "Total Cost": 142.42,
+        "Plan Rows": 1,
+        "Plan Width": 18,
+        "Sort Key": [
+          "type DESC"
+        ],
+        "Plans": [
+          {
+            "Node Type": "Aggregate",
+            "Strategy": "Hashed",
+            "Partial Mode": "Simple",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 142.38,
+            "Total Cost": 142.41,
+            "Plan Rows": 1,
+            "Plan Width": 18,
+            "Group Key": [
+              "type"
+            ],
+            "Filter": "(sum(1) < 83)",
+            "Planned Partitions": 0,
+            "Plans": [
+              {
+                "Node Type": "Seq Scan",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Relation Name": "disp",
+                "Alias": "disp",
+                "Startup Cost": 0.0,
+                "Total Cost": 88.69,
+                "Plan Rows": 5369,
+                "Plan Width": 10
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 10.032325147583768
+  },
+  {
+    "timestamp": "2025-09-11T21:55:42.089961",
+    "dataset": "financial",
+    "query_type": "AP",
+    "query_index": 19,
+    "query_text": "SELECT SUM(\"order\".\"account_id\"), SUM(\"client\".\"client_id\"), COUNT(*), MAX(\"order\".\"order_id\"), COUNT(*) FROM \"client\" CROSS JOIN \"order\" WHERE \"order\".\"k_symbol\" != 'LEASING' AND \"order\".\"k_symbol\" LIKE '%o%' AND \"order\".\"k_symbol\" IS NOT NULL AND \"client\".\"client_id\" > 2595 AND \"client\".\"gender\" LIKE '%i%' AND \"client\".\"gender\" IS NULL AND \"client\".\"client_id\" <= 11615 AND \"client\".\"client_id\" IS NOT NULL GROUP BY \"client\".\"gender\", \"client\".\"district_id\" HAVING COUNT(*) > 94;",
+    "postgres_time_ms": 4.097471013665199,
+    "duckdb_time_ms": 23.261608963366598,
+    "log_time_difference": -1.7364343602122443,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Aggregate",
+        "Strategy": "Sorted",
+        "Partial Mode": "Simple",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 260.75,
+        "Total Cost": 260.78,
+        "Plan Rows": 1,
+        "Plan Width": 42,
+        "Group Key": [
+          "client.gender",
+          "client.district_id"
+        ],
+        "Filter": "(count(*) > 94)",
+        "Plans": [
+          {
+            "Node Type": "Sort",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 260.75,
+            "Total Cost": 260.75,
+            "Plan Rows": 1,
+            "Plan Width": 18,
+            "Sort Key": [
+              "client.gender",
+              "client.district_id"
+            ],
+            "Plans": [
+              {
+                "Node Type": "Nested Loop",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Join Type": "Inner",
+                "Startup Cost": 0.28,
+                "Total Cost": 260.74,
+                "Plan Rows": 1,
+                "Plan Width": 18,
+                "Inner Unique": false,
+                "Plans": [
+                  {
+                    "Node Type": "Index Scan",
+                    "Parent Relationship": "Outer",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Scan Direction": "Forward",
+                    "Index Name": "client_pkey",
+                    "Relation Name": "client",
+                    "Alias": "client",
+                    "Startup Cost": 0.28,
+                    "Total Cost": 116.66,
+                    "Plan Rows": 1,
+                    "Plan Width": 10,
+                    "Index Cond": "((client_id > 2595) AND (client_id <= 11615))",
+                    "Filter": "((gender IS NULL) AND ((gender)::text ~~ '%i%'::text))"
+                  },
+                  {
+                    "Node Type": "Seq Scan",
+                    "Parent Relationship": "Inner",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Relation Name": "order",
+                    "Alias": "order",
+                    "Startup Cost": 0.0,
+                    "Total Cost": 144.06,
+                    "Plan Rows": 1,
+                    "Plan Width": 8,
+                    "Filter": "((k_symbol IS NOT NULL) AND ((k_symbol)::text <> 'LEASING'::text) AND ((k_symbol)::text ~~ '%o%'::text))"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 5.677064922677518
+  },
+  {
+    "timestamp": "2025-09-11T21:55:42.134052",
+    "dataset": "financial",
+    "query_type": "AP",
+    "query_index": 21,
+    "query_text": "SELECT AVG(\"district\".\"A8\"), AVG(\"loan\".\"duration\"), VARIANCE(\"account\".\"account_id\"), AVG(\"district\".\"district_id\"), COUNT(*) FROM \"disp\" INNER JOIN \"account\" ON \"disp\".\"account_id\" = \"account\".\"account_id\" LEFT JOIN \"district\" ON \"account\".\"district_id\" = \"district\".\"district_id\" LEFT JOIN \"loan\" ON \"account\".\"account_id\" = \"loan\".\"account_id\" INNER JOIN \"client\" ON \"disp\".\"client_id\" = \"client\".\"client_id\" WHERE \"loan\".\"duration\" != 23 AND \"loan\".\"account_id\" = 8151 AND \"loan\".\"account_id\" IS NULL;",
+    "postgres_time_ms": 1.242761965841055,
+    "duckdb_time_ms": 38.378727971576154,
+    "log_time_difference": -3.430167052563587,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Aggregate",
+        "Strategy": "Plain",
+        "Partial Mode": "Simple",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 134.72,
+        "Total Cost": 134.73,
+        "Plan Rows": 1,
+        "Plan Width": 136,
+        "Plans": [
+          {
+            "Node Type": "Nested Loop",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Join Type": "Inner",
+            "Startup Cost": 0.56,
+            "Total Cost": 134.7,
+            "Plan Rows": 1,
+            "Plan Width": 16,
+            "Inner Unique": true,
+            "Plans": [
+              {
+                "Node Type": "Nested Loop",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Join Type": "Inner",
+                "Startup Cost": 0.28,
+                "Total Cost": 130.39,
+                "Plan Rows": 1,
+                "Plan Width": 20,
+                "Inner Unique": false,
+                "Plans": [
+                  {
+                    "Node Type": "Nested Loop",
+                    "Parent Relationship": "Outer",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Join Type": "Left",
+                    "Startup Cost": 0.28,
+                    "Total Cost": 114.16,
+                    "Plan Rows": 1,
+                    "Plan Width": 16,
+                    "Inner Unique": true,
+                    "Join Filter": "(account.district_id = district.district_id)",
+                    "Plans": [
+                      {
+                        "Node Type": "Nested Loop",
+                        "Parent Relationship": "Outer",
+                        "Parallel Aware": false,
+                        "Async Capable": false,
+                        "Join Type": "Inner",
+                        "Startup Cost": 0.28,
+                        "Total Cost": 110.42,
+                        "Plan Rows": 1,
+                        "Plan Width": 12,
+                        "Inner Unique": false,
+                        "Plans": [
+                          {
+                            "Node Type": "Seq Scan",
+                            "Parent Relationship": "Outer",
+                            "Parallel Aware": false,
+                            "Async Capable": false,
+                            "Relation Name": "disp",
+                            "Alias": "disp",
+                            "Startup Cost": 0.0,
+                            "Total Cost": 102.11,
+                            "Plan Rows": 1,
+                            "Plan Width": 8,
+                            "Filter": "(account_id = 8151)"
+                          },
+                          {
+                            "Node Type": "Index Scan",
+                            "Parent Relationship": "Inner",
+                            "Parallel Aware": false,
+                            "Async Capable": false,
+                            "Scan Direction": "Forward",
+                            "Index Name": "account_pkey",
+                            "Relation Name": "account",
+                            "Alias": "account",
+                            "Startup Cost": 0.28,
+                            "Total Cost": 8.3,
+                            "Plan Rows": 1,
+                            "Plan Width": 8,
+                            "Index Cond": "(account_id = 8151)"
+                          }
+                        ]
+                      },
+                      {
+                        "Node Type": "Seq Scan",
+                        "Parent Relationship": "Inner",
+                        "Parallel Aware": false,
+                        "Async Capable": false,
+                        "Relation Name": "district",
+                        "Alias": "district",
+                        "Startup Cost": 0.0,
+                        "Total Cost": 2.77,
+                        "Plan Rows": 77,
+                        "Plan Width": 8
+                      }
+                    ]
+                  },
+                  {
+                    "Node Type": "Seq Scan",
+                    "Parent Relationship": "Inner",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Relation Name": "loan",
+                    "Alias": "loan",
+                    "Startup Cost": 0.0,
+                    "Total Cost": 16.23,
+                    "Plan Rows": 1,
+                    "Plan Width": 8,
+                    "Filter": "((account_id IS NULL) AND (duration <> 23) AND (account_id = 8151))"
+                  }
+                ]
+              },
+              {
+                "Node Type": "Index Only Scan",
+                "Parent Relationship": "Inner",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Scan Direction": "Forward",
+                "Index Name": "client_pkey",
+                "Relation Name": "client",
+                "Alias": "client",
+                "Startup Cost": 0.28,
+                "Total Cost": 4.3,
+                "Plan Rows": 1,
+                "Plan Width": 4,
+                "Index Cond": "(client_id = disp.client_id)"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 30.88180120285775
+  },
+  {
+    "timestamp": "2025-09-11T21:55:42.149431",
+    "dataset": "financial",
+    "query_type": "AP",
+    "query_index": 23,
+    "query_text": "SELECT STDDEV(\"account\".\"district_id\"), VARIANCE(\"account\".\"district_id\"), VARIANCE(\"account\".\"account_id\"), COUNT(*), AVG(\"account\".\"district_id\"), \"account\".\"district_id\" FROM \"account\" WHERE \"account\".\"frequency\" = 'POPLATEK PO OBRATU' AND \"account\".\"account_id\" > 7038 AND \"account\".\"account_id\" IS NOT NULL GROUP BY \"account\".\"district_id\", \"account\".\"district_id\", \"account\".\"district_id\" HAVING SUM(1) > 28 ORDER BY COUNT(*) ASC;",
+    "postgres_time_ms": 0.5738629843108356,
+    "duckdb_time_ms": 12.947212962899357,
+    "log_time_difference": -3.116245164211264,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Sort",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 21.41,
+        "Total Cost": 21.42,
+        "Plan Rows": 2,
+        "Plan Width": 140,
+        "Sort Key": [
+          "(count(*))"
+        ],
+        "Plans": [
+          {
+            "Node Type": "Aggregate",
+            "Strategy": "Sorted",
+            "Partial Mode": "Simple",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 21.12,
+            "Total Cost": 21.4,
+            "Plan Rows": 2,
+            "Plan Width": 140,
+            "Group Key": [
+              "district_id"
+            ],
+            "Filter": "(sum(1) > 28)",
+            "Plans": [
+              {
+                "Node Type": "Sort",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Startup Cost": 21.12,
+                "Total Cost": 21.14,
+                "Plan Rows": 7,
+                "Plan Width": 8,
+                "Sort Key": [
+                  "district_id"
+                ],
+                "Plans": [
+                  {
+                    "Node Type": "Index Scan",
+                    "Parent Relationship": "Outer",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Scan Direction": "Forward",
+                    "Index Name": "account_pkey",
+                    "Relation Name": "account",
+                    "Alias": "account",
+                    "Startup Cost": 0.28,
+                    "Total Cost": 21.02,
+                    "Plan Rows": 7,
+                    "Plan Width": 8,
+                    "Index Cond": "(account_id > 7038)",
+                    "Filter": "((frequency)::text = 'POPLATEK PO OBRATU'::text)"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 22.56150565007768
+  },
+  {
+    "timestamp": "2025-09-11T21:55:42.272449",
+    "dataset": "financial",
+    "query_type": "AP",
+    "query_index": 24,
+    "query_text": "SELECT SUM(\"loan\".\"payments\"), AVG(\"loan\".\"payments\"), MIN(\"loan\".\"payments\"), VARIANCE(\"loan\".\"account_id\") FROM \"loan\" WHERE \"loan\".\"loan_id\" != 5226 AND \"loan\".\"amount\" < 192486 GROUP BY \"loan\".\"account_id\";",
+    "postgres_time_ms": 4.5165399787947536,
+    "duckdb_time_ms": 116.59405200043693,
+    "log_time_difference": -3.2509520513232326,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Aggregate",
+        "Strategy": "Hashed",
+        "Partial Mode": "Simple",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 21.02,
+        "Total Cost": 29.4,
+        "Plan Rows": 479,
+        "Plan Width": 132,
+        "Group Key": [
+          "account_id"
+        ],
+        "Planned Partitions": 0,
+        "Plans": [
+          {
+            "Node Type": "Seq Scan",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Relation Name": "loan",
+            "Alias": "loan",
+            "Startup Cost": 0.0,
+            "Total Cost": 16.23,
+            "Plan Rows": 479,
+            "Plan Width": 9,
+            "Filter": "((loan_id <> 5226) AND (amount < 192486))"
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 25.814905336352243
+  },
+  {
+    "timestamp": "2025-09-11T21:55:42.291352",
+    "dataset": "financial",
+    "query_type": "AP",
+    "query_index": 27,
+    "query_text": "SELECT AVG(\"card\".\"card_id\"), VARIANCE(\"card\".\"card_id\") FROM \"card\" GROUP BY \"card\".\"card_id\";",
+    "postgres_time_ms": 2.8116650064475834,
+    "duckdb_time_ms": 13.88041500467807,
+    "log_time_difference": -1.596702017249588,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Aggregate",
+        "Strategy": "Hashed",
+        "Partial Mode": "Simple",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 21.61,
+        "Total Cost": 34.99,
+        "Plan Rows": 892,
+        "Plan Width": 68,
+        "Group Key": [
+          "card_id"
+        ],
+        "Planned Partitions": 0,
+        "Plans": [
+          {
+            "Node Type": "Seq Scan",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Relation Name": "card",
+            "Alias": "card",
+            "Startup Cost": 0.0,
+            "Total Cost": 14.92,
+            "Plan Rows": 892,
+            "Plan Width": 4
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 4.93672431560948
+  },
+  {
+    "timestamp": "2025-09-11T21:55:42.351373",
+    "dataset": "financial",
+    "query_type": "AP",
+    "query_index": 28,
+    "query_text": "SELECT STDDEV(\"client\".\"district_id\"), SUM(\"loan\".\"loan_id\"), VARIANCE(\"client\".\"district_id\"), COUNT(*), MAX(\"client\".\"district_id\") FROM \"client\" CROSS JOIN \"loan\" WHERE \"loan\".\"duration\" != 30 AND \"loan\".\"amount\" >= 96407 AND \"loan\".\"payments\" < 3021.228929484181;",
+    "postgres_time_ms": 34.36462895479053,
+    "duckdb_time_ms": 24.1262000054121,
+    "log_time_difference": 0.35372942018684483,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Aggregate",
+        "Strategy": "Plain",
+        "Partial Mode": "Simple",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 16289.5,
+        "Total Cost": 16289.51,
+        "Plan Rows": 1,
+        "Plan Width": 84,
+        "Plans": [
+          {
+            "Node Type": "Nested Loop",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Join Type": "Inner",
+            "Startup Cost": 0.0,
+            "Total Cost": 9095.03,
+            "Plan Rows": 719446,
+            "Plan Width": 8,
+            "Inner Unique": false,
+            "Plans": [
+              {
+                "Node Type": "Seq Scan",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Relation Name": "client",
+                "Alias": "client",
+                "Startup Cost": 0.0,
+                "Total Cost": 83.69,
+                "Plan Rows": 5369,
+                "Plan Width": 4
+              },
+              {
+                "Node Type": "Materialize",
+                "Parent Relationship": "Inner",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Startup Cost": 0.0,
+                "Total Cost": 18.61,
+                "Plan Rows": 134,
+                "Plan Width": 4,
+                "Plans": [
+                  {
+                    "Node Type": "Seq Scan",
+                    "Parent Relationship": "Outer",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Relation Name": "loan",
+                    "Alias": "loan",
+                    "Startup Cost": 0.0,
+                    "Total Cost": 17.94,
+                    "Plan Rows": 134,
+                    "Plan Width": 4,
+                    "Filter": "((duration <> 30) AND (amount >= 96407) AND (payments < 3021.228929484181))"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "duckdb",
+    "speedup_ratio": 1.4243697286386459
+  },
+  {
+    "timestamp": "2025-09-11T21:56:42.481676",
+    "dataset": "financial",
+    "query_type": "AP",
+    "query_index": 30,
+    "query_text": "SELECT MIN(\"disp\".\"disp_id\"), COUNT(*) FROM \"order\" CROSS JOIN \"disp\" WHERE \"disp\".\"type\" LIKE '%u%' AND \"disp\".\"disp_id\" <= 10993 ORDER BY COUNT(*) ASC;",
+    "postgres_time_ms": 22.77152898022905,
+    "duckdb_time_ms": 21.56953001394868,
+    "log_time_difference": 0.05422935542355774,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Custom Scan",
+        "Custom Plan Provider": "DuckDBScan",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 0.0,
+        "Total Cost": 0.0,
+        "Plan Rows": 0,
+        "Plan Width": 0,
+        "DuckDB Execution Plan": [
+          {
+            "name": "ORDER_BY",
+            "children": [
+              {
+                "name": "UNGROUPED_AGGREGATE",
+                "children": [
+                  {
+                    "name": "PROJECTION",
+                    "children": [
+                      {
+                        "name": "CROSS_PRODUCT",
+                        "children": [
+                          {
+                            "name": "PGDUCKDB_POSTGRES_SCAN ",
+                            "children": [],
+                            "extra_info": {
+                              "Table": "order",
+                              "Projections": "",
+                              "Estimated Cardinality": "6471"
+                            }
+                          },
+                          {
+                            "name": "PGDUCKDB_POSTGRES_SCAN ",
+                            "children": [],
+                            "extra_info": {
+                              "Table": "disp",
+                              "Projections": "disp_id",
+                              "Filters": [
+                                "like_escape(type, '%u%', '\\')",
+                                "disp_id<=10993"
+                              ],
+                              "Estimated Cardinality": "1073"
+                            }
+                          }
+                        ],
+                        "extra_info": {}
+                      }
+                    ],
+                    "extra_info": {
+                      "Projections": "disp_id",
+                      "Estimated Cardinality": "6943383"
+                    }
+                  }
+                ],
+                "extra_info": {
+                  "Aggregates": [
+                    "min(#0)",
+                    "count_star()"
+                  ]
+                }
+              }
+            ],
+            "extra_info": {
+              "Order By": "count_star() ASC"
+            }
+          }
+        ]
+      }
+    },
+    "optimal_engine": "duckdb",
+    "speedup_ratio": 1.0557267110364972
+  },
+  {
+    "timestamp": "2025-09-11T21:56:42.513193",
+    "dataset": "financial",
+    "query_type": "AP",
+    "query_index": 32,
+    "query_text": "SELECT MAX(\"loan\".\"loan_id\"), SUM(\"district\".\"A6\"), SUM(\"district\".\"A15\"), MAX(\"loan\".\"account_id\") FROM \"loan\" CROSS JOIN \"order\" CROSS JOIN \"district\" WHERE \"order\".\"account_to\" = 15780667 AND \"district\".\"A15\" = 1492 AND \"loan\".\"status\" LIKE '%a%' GROUP BY \"loan\".\"amount\", \"order\".\"k_symbol\", \"district\".\"A11\" HAVING AVG(1) >= 45;",
+    "postgres_time_ms": 0.7444460061378777,
+    "duckdb_time_ms": 28.08540198020637,
+    "log_time_difference": -3.6303648920121225,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Aggregate",
+        "Strategy": "Sorted",
+        "Partial Mode": "Simple",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 145.4,
+        "Total Cost": 145.44,
+        "Plan Rows": 1,
+        "Plan Width": 37,
+        "Group Key": [
+          "loan.amount",
+          "\"order\".k_symbol",
+          "district.\"A11\""
+        ],
+        "Filter": "(avg(1) >= '45'::numeric)",
+        "Plans": [
+          {
+            "Node Type": "Sort",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 145.4,
+            "Total Cost": 145.41,
+            "Plan Rows": 1,
+            "Plan Width": 29,
+            "Sort Key": [
+              "loan.amount",
+              "\"order\".k_symbol",
+              "district.\"A11\""
+            ],
+            "Plans": [
+              {
+                "Node Type": "Nested Loop",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Join Type": "Inner",
+                "Startup Cost": 0.0,
+                "Total Cost": 145.39,
+                "Plan Rows": 1,
+                "Plan Width": 29,
+                "Inner Unique": false,
+                "Plans": [
+                  {
+                    "Node Type": "Nested Loop",
+                    "Parent Relationship": "Outer",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Join Type": "Inner",
+                    "Startup Cost": 0.0,
+                    "Total Cost": 142.42,
+                    "Plan Rows": 1,
+                    "Plan Width": 17,
+                    "Inner Unique": false,
+                    "Plans": [
+                      {
+                        "Node Type": "Seq Scan",
+                        "Parent Relationship": "Outer",
+                        "Parallel Aware": false,
+                        "Async Capable": false,
+                        "Relation Name": "loan",
+                        "Alias": "loan",
+                        "Startup Cost": 0.0,
+                        "Total Cost": 14.53,
+                        "Plan Rows": 1,
+                        "Plan Width": 12,
+                        "Filter": "((status)::text ~~ '%a%'::text)"
+                      },
+                      {
+                        "Node Type": "Seq Scan",
+                        "Parent Relationship": "Inner",
+                        "Parallel Aware": false,
+                        "Async Capable": false,
+                        "Relation Name": "order",
+                        "Alias": "order",
+                        "Startup Cost": 0.0,
+                        "Total Cost": 127.89,
+                        "Plan Rows": 1,
+                        "Plan Width": 5,
+                        "Filter": "(account_to = 15780667)"
+                      }
+                    ]
+                  },
+                  {
+                    "Node Type": "Seq Scan",
+                    "Parent Relationship": "Inner",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Relation Name": "district",
+                    "Alias": "district",
+                    "Startup Cost": 0.0,
+                    "Total Cost": 2.96,
+                    "Plan Rows": 1,
+                    "Plan Width": 12,
+                    "Filter": "(\"A15\" = 1492)"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 37.72658023368415
+  },
+  {
+    "timestamp": "2025-09-11T21:56:42.530025",
+    "dataset": "financial",
+    "query_type": "AP",
+    "query_index": 33,
+    "query_text": "SELECT COUNT(*), COUNT(*), SUM(\"card\".\"disp_id\"), SUM(\"card\".\"card_id\") FROM \"card\" WHERE \"card\".\"disp_id\" >= 1029 AND \"card\".\"card_id\" != 175 AND \"card\".\"type\" LIKE '%o%' AND \"card\".\"disp_id\" >= 1008 GROUP BY \"card\".\"card_id\" ORDER BY \"card\".\"card_id\" ASC;",
+    "postgres_time_ms": 1.1045989813283086,
+    "duckdb_time_ms": 14.369493001140654,
+    "log_time_difference": -2.5656250614348743,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Aggregate",
+        "Strategy": "Sorted",
+        "Partial Mode": "Simple",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 30.99,
+        "Total Cost": 35.24,
+        "Plan Rows": 189,
+        "Plan Width": 36,
+        "Group Key": [
+          "card_id"
+        ],
+        "Plans": [
+          {
+            "Node Type": "Sort",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 30.99,
+            "Total Cost": 31.46,
+            "Plan Rows": 189,
+            "Plan Width": 8,
+            "Sort Key": [
+              "card_id"
+            ],
+            "Plans": [
+              {
+                "Node Type": "Seq Scan",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Relation Name": "card",
+                "Alias": "card",
+                "Startup Cost": 0.0,
+                "Total Cost": 23.84,
+                "Plan Rows": 189,
+                "Plan Width": 8,
+                "Filter": "((disp_id >= 1029) AND (card_id <> 175) AND ((type)::text ~~ '%o%'::text) AND (disp_id >= 1008))"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 13.008787120065032
+  },
+  {
+    "timestamp": "2025-09-11T21:56:42.558603",
+    "dataset": "financial",
+    "query_type": "AP",
+    "query_index": 34,
+    "query_text": "SELECT MAX(\"card\".\"card_id\"), VARIANCE(\"disp\".\"client_id\"), VARIANCE(\"disp\".\"disp_id\"), VARIANCE(\"card\".\"disp_id\"), SUM(\"disp\".\"account_id\") FROM \"disp\" LEFT JOIN \"card\" ON \"disp\".\"disp_id\" = \"card\".\"disp_id\" WHERE \"card\".\"type\" LIKE '%i%' OR \"card\".\"disp_id\" > 788 OR \"card\".\"type\" LIKE '%e%' OR \"card\".\"type\" = 'classic' ORDER BY COUNT(*) ASC LIMIT 100;",
+    "postgres_time_ms": 1.711105986032635,
+    "duckdb_time_ms": 25.150363973807544,
+    "log_time_difference": -2.6877324316574667,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 166.03,
+        "Total Cost": 166.03,
+        "Plan Rows": 1,
+        "Plan Width": 116,
+        "Plans": [
+          {
+            "Node Type": "Sort",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 166.03,
+            "Total Cost": 166.03,
+            "Plan Rows": 1,
+            "Plan Width": 116,
+            "Sort Key": [
+              "(count(*))"
+            ],
+            "Plans": [
+              {
+                "Node Type": "Aggregate",
+                "Strategy": "Plain",
+                "Partial Mode": "Simple",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Startup Cost": 166.01,
+                "Total Cost": 166.02,
+                "Plan Rows": 1,
+                "Plan Width": 116,
+                "Plans": [
+                  {
+                    "Node Type": "Hash Join",
+                    "Parent Relationship": "Outer",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Join Type": "Inner",
+                    "Startup Cost": 34.95,
+                    "Total Cost": 152.67,
+                    "Plan Rows": 889,
+                    "Plan Width": 20,
+                    "Inner Unique": false,
+                    "Hash Cond": "(disp.disp_id = card.disp_id)",
+                    "Plans": [
+                      {
+                        "Node Type": "Seq Scan",
+                        "Parent Relationship": "Outer",
+                        "Parallel Aware": false,
+                        "Async Capable": false,
+                        "Relation Name": "disp",
+                        "Alias": "disp",
+                        "Startup Cost": 0.0,
+                        "Total Cost": 88.69,
+                        "Plan Rows": 5369,
+                        "Plan Width": 12
+                      },
+                      {
+                        "Node Type": "Hash",
+                        "Parent Relationship": "Inner",
+                        "Parallel Aware": false,
+                        "Async Capable": false,
+                        "Startup Cost": 23.84,
+                        "Total Cost": 23.84,
+                        "Plan Rows": 889,
+                        "Plan Width": 8,
+                        "Plans": [
+                          {
+                            "Node Type": "Seq Scan",
+                            "Parent Relationship": "Outer",
+                            "Parallel Aware": false,
+                            "Async Capable": false,
+                            "Relation Name": "card",
+                            "Alias": "card",
+                            "Startup Cost": 0.0,
+                            "Total Cost": 23.84,
+                            "Plan Rows": 889,
+                            "Plan Width": 8,
+                            "Filter": "(((type)::text ~~ '%i%'::text) OR (disp_id > 788) OR ((type)::text ~~ '%e%'::text) OR ((type)::text = 'classic'::text))"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 14.69830868403488
+  },
+  {
+    "timestamp": "2025-09-11T21:56:42.585871",
+    "dataset": "financial",
+    "query_type": "AP",
+    "query_index": 35,
+    "query_text": "SELECT VARIANCE(\"disp\".\"account_id\"), AVG(\"client\".\"district_id\"), MIN(\"disp\".\"disp_id\") FROM \"client\" LEFT JOIN \"disp\" ON \"client\".\"client_id\" = \"disp\".\"client_id\" WHERE \"disp\".\"account_id\" != 1835 AND \"disp\".\"account_id\" IS NULL AND \"disp\".\"client_id\" >= 4404 AND \"disp\".\"type\" LIKE '%a%' GROUP BY \"disp\".\"type\", \"client\".\"district_id\", \"client\".\"district_id\" ORDER BY \"disp\".\"type\", \"client\".\"district_id\", \"client\".\"district_id\" LIMIT 100;",
+    "postgres_time_ms": 1.0030459961853921,
+    "duckdb_time_ms": 24.736241961363703,
+    "log_time_difference": -3.205228087569109,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 137.27,
+        "Total Cost": 137.3,
+        "Plan Rows": 1,
+        "Plan Width": 78,
+        "Plans": [
+          {
+            "Node Type": "Aggregate",
+            "Strategy": "Sorted",
+            "Partial Mode": "Simple",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 137.27,
+            "Total Cost": 137.3,
+            "Plan Rows": 1,
+            "Plan Width": 78,
+            "Group Key": [
+              "disp.type",
+              "client.district_id"
+            ],
+            "Plans": [
+              {
+                "Node Type": "Sort",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Startup Cost": 137.27,
+                "Total Cost": 137.28,
+                "Plan Rows": 1,
+                "Plan Width": 18,
+                "Sort Key": [
+                  "disp.type",
+                  "client.district_id"
+                ],
+                "Plans": [
+                  {
+                    "Node Type": "Nested Loop",
+                    "Parent Relationship": "Outer",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Join Type": "Inner",
+                    "Startup Cost": 0.28,
+                    "Total Cost": 137.26,
+                    "Plan Rows": 1,
+                    "Plan Width": 18,
+                    "Inner Unique": true,
+                    "Plans": [
+                      {
+                        "Node Type": "Seq Scan",
+                        "Parent Relationship": "Outer",
+                        "Parallel Aware": false,
+                        "Async Capable": false,
+                        "Relation Name": "disp",
+                        "Alias": "disp",
+                        "Startup Cost": 0.0,
+                        "Total Cost": 128.96,
+                        "Plan Rows": 1,
+                        "Plan Width": 18,
+                        "Filter": "((account_id IS NULL) AND (account_id <> 1835) AND (client_id >= 4404) AND ((type)::text ~~ '%a%'::text))"
+                      },
+                      {
+                        "Node Type": "Index Scan",
+                        "Parent Relationship": "Inner",
+                        "Parallel Aware": false,
+                        "Async Capable": false,
+                        "Scan Direction": "Forward",
+                        "Index Name": "client_pkey",
+                        "Relation Name": "client",
+                        "Alias": "client",
+                        "Startup Cost": 0.28,
+                        "Total Cost": 8.3,
+                        "Plan Rows": 1,
+                        "Plan Width": 8,
+                        "Index Cond": "(client_id = disp.client_id)"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 24.661124270907038
+  },
+  {
+    "timestamp": "2025-09-11T21:56:42.633825",
+    "dataset": "financial",
+    "query_type": "AP",
+    "query_index": 36,
+    "query_text": "SELECT SUM(\"account\".\"account_id\"), STDDEV(\"loan\".\"loan_id\"), COUNT(*) FROM \"account\" JOIN \"loan\" ON \"account\".\"account_id\" = \"loan\".\"account_id\" INNER JOIN \"order\" ON \"account\".\"account_id\" = \"order\".\"account_id\" JOIN \"disp\" ON \"account\".\"account_id\" = \"disp\".\"account_id\" WHERE \"account\".\"account_id\" <= 1959 AND \"order\".\"amount\" = 351.4528533117308 AND \"order\".\"order_id\" < 29967 AND \"order\".\"order_id\" IS NOT NULL ORDER BY COUNT(*) ASC LIMIT 1000;",
+    "postgres_time_ms": 2.86977703217417,
+    "duckdb_time_ms": 42.74393699597567,
+    "log_time_difference": -2.7009930230535093,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 150.32,
+        "Total Cost": 150.33,
+        "Plan Rows": 1,
+        "Plan Width": 48,
+        "Plans": [
+          {
+            "Node Type": "Sort",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 150.32,
+            "Total Cost": 150.33,
+            "Plan Rows": 1,
+            "Plan Width": 48,
+            "Sort Key": [
+              "(count(*))"
+            ],
+            "Plans": [
+              {
+                "Node Type": "Aggregate",
+                "Strategy": "Plain",
+                "Partial Mode": "Simple",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Startup Cost": 150.3,
+                "Total Cost": 150.31,
+                "Plan Rows": 1,
+                "Plan Width": 48,
+                "Plans": [
+                  {
+                    "Node Type": "Nested Loop",
+                    "Parent Relationship": "Outer",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Join Type": "Inner",
+                    "Startup Cost": 41.42,
+                    "Total Cost": 150.29,
+                    "Plan Rows": 1,
+                    "Plan Width": 8,
+                    "Inner Unique": true,
+                    "Join Filter": "(account.account_id = loan.account_id)",
+                    "Plans": [
+                      {
+                        "Node Type": "Hash Join",
+                        "Parent Relationship": "Outer",
+                        "Parallel Aware": false,
+                        "Async Capable": false,
+                        "Join Type": "Inner",
+                        "Startup Cost": 41.13,
+                        "Total Cost": 149.97,
+                        "Plan Rows": 1,
+                        "Plan Width": 16,
+                        "Inner Unique": false,
+                        "Hash Cond": "(disp.account_id = loan.account_id)",
+                        "Plans": [
+                          {
+                            "Node Type": "Seq Scan",
+                            "Parent Relationship": "Outer",
+                            "Parallel Aware": false,
+                            "Async Capable": false,
+                            "Relation Name": "disp",
+                            "Alias": "disp",
+                            "Startup Cost": 0.0,
+                            "Total Cost": 88.69,
+                            "Plan Rows": 5369,
+                            "Plan Width": 4
+                          },
+                          {
+                            "Node Type": "Hash",
+                            "Parent Relationship": "Inner",
+                            "Parallel Aware": false,
+                            "Async Capable": false,
+                            "Startup Cost": 41.12,
+                            "Total Cost": 41.12,
+                            "Plan Rows": 1,
+                            "Plan Width": 12,
+                            "Plans": [
+                              {
+                                "Node Type": "Hash Join",
+                                "Parent Relationship": "Outer",
+                                "Parallel Aware": false,
+                                "Async Capable": false,
+                                "Join Type": "Inner",
+                                "Startup Cost": 25.73,
+                                "Total Cost": 41.12,
+                                "Plan Rows": 1,
+                                "Plan Width": 12,
+                                "Inner Unique": false,
+                                "Hash Cond": "(loan.account_id = \"order\".account_id)",
+                                "Plans": [
+                                  {
+                                    "Node Type": "Seq Scan",
+                                    "Parent Relationship": "Outer",
+                                    "Parallel Aware": false,
+                                    "Async Capable": false,
+                                    "Relation Name": "loan",
+                                    "Alias": "loan",
+                                    "Startup Cost": 0.0,
+                                    "Total Cost": 12.82,
+                                    "Plan Rows": 682,
+                                    "Plan Width": 8
+                                  },
+                                  {
+                                    "Node Type": "Hash",
+                                    "Parent Relationship": "Inner",
+                                    "Parallel Aware": false,
+                                    "Async Capable": false,
+                                    "Startup Cost": 25.72,
+                                    "Total Cost": 25.72,
+                                    "Plan Rows": 1,
+                                    "Plan Width": 4,
+                                    "Plans": [
+                                      {
+                                        "Node Type": "Index Scan",
+                                        "Parent Relationship": "Outer",
+                                        "Parallel Aware": false,
+                                        "Async Capable": false,
+                                        "Scan Direction": "Forward",
+                                        "Index Name": "order_pkey",
+                                        "Relation Name": "order",
+                                        "Alias": "order",
+                                        "Startup Cost": 0.28,
+                                        "Total Cost": 25.72,
+                                        "Plan Rows": 1,
+                                        "Plan Width": 4,
+                                        "Index Cond": "(order_id < 29967)",
+                                        "Filter": "(amount = 351.4528533117308)"
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "Node Type": "Index Only Scan",
+                        "Parent Relationship": "Inner",
+                        "Parallel Aware": false,
+                        "Async Capable": false,
+                        "Scan Direction": "Forward",
+                        "Index Name": "account_pkey",
+                        "Relation Name": "account",
+                        "Alias": "account",
+                        "Startup Cost": 0.28,
+                        "Total Cost": 0.31,
+                        "Plan Rows": 1,
+                        "Plan Width": 4,
+                        "Index Cond": "((account_id = disp.account_id) AND (account_id <= 1959))"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 14.894514980347607
+  },
+  {
+    "timestamp": "2025-09-11T21:57:19.235345",
+    "dataset": "financial",
+    "query_type": "AP",
+    "query_index": 37,
+    "query_text": "SELECT MIN(\"trans\".\"account_id\"), AVG(\"card\".\"disp_id\"), MIN(\"trans\".\"trans_id\"), VARIANCE(\"card\".\"disp_id\"), AVG(\"trans\".\"amount\") FROM \"trans\" CROSS JOIN \"card\";",
+    "postgres_time_ms": 30000,
+    "duckdb_time_ms": 6597.047192044556,
+    "log_time_difference": 1.5145752278856082,
+    "postgres_plan": null,
+    "optimal_engine": "duckdb",
+    "speedup_ratio": 4.547489069985326
+  },
+  {
+    "timestamp": "2025-09-11T21:57:19.257291",
+    "dataset": "financial",
+    "query_type": "AP",
+    "query_index": 40,
+    "query_text": "SELECT STDDEV(\"client\".\"district_id\"), COUNT(*), COUNT(*), VARIANCE(\"client\".\"client_id\") FROM \"client\" WHERE \"client\".\"district_id\" != 23 GROUP BY \"client\".\"district_id\", \"client\".\"district_id\", \"client\".\"district_id\" ORDER BY COUNT(*) DESC;",
+    "postgres_time_ms": 2.1228590048849583,
+    "duckdb_time_ms": 17.337136960122734,
+    "log_time_difference": -2.100087078480159,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Sort",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 153.84,
+        "Total Cost": 154.03,
+        "Plan Rows": 77,
+        "Plan Width": 84,
+        "Sort Key": [
+          "(count(*)) DESC"
+        ],
+        "Plans": [
+          {
+            "Node Type": "Aggregate",
+            "Strategy": "Hashed",
+            "Partial Mode": "Simple",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 150.27,
+            "Total Cost": 151.43,
+            "Plan Rows": 77,
+            "Plan Width": 84,
+            "Group Key": [
+              "district_id"
+            ],
+            "Planned Partitions": 0,
+            "Plans": [
+              {
+                "Node Type": "Seq Scan",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Relation Name": "client",
+                "Alias": "client",
+                "Startup Cost": 0.0,
+                "Total Cost": 97.11,
+                "Plan Rows": 5316,
+                "Plan Width": 8,
+                "Filter": "(district_id <> 23)"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 8.166881041193909
+  },
+  {
+    "timestamp": "2025-09-11T21:57:19.554841",
+    "dataset": "financial",
+    "query_type": "AP",
+    "query_index": 41,
+    "query_text": "SELECT AVG(\"trans\".\"account\"), SUM(\"district\".\"district_id\") FROM \"trans\" CROSS JOIN \"district\" CROSS JOIN \"card\" JOIN \"disp\" ON \"card\".\"disp_id\" = \"disp\".\"disp_id\" LEFT JOIN \"client\" ON \"disp\".\"client_id\" = \"client\".\"client_id\" WHERE \"trans\".\"amount\" != 130 AND \"trans\".\"k_symbol\" LIKE '%u%' AND \"disp\".\"client_id\" < 2402 AND \"district\".\"A6\" > 10 ORDER BY COUNT(*) ASC;",
+    "postgres_time_ms": 87.94258401030675,
+    "duckdb_time_ms": 207.2962039965205,
+    "log_time_difference": -0.8574645605227699,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Sort",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 18478.72,
+        "Total Cost": 18478.72,
+        "Plan Rows": 1,
+        "Plan Width": 48,
+        "Sort Key": [
+          "(count(*))"
+        ],
+        "Plans": [
+          {
+            "Node Type": "Aggregate",
+            "Strategy": "Plain",
+            "Partial Mode": "Simple",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 18478.7,
+            "Total Cost": 18478.71,
+            "Plan Rows": 1,
+            "Plan Width": 48,
+            "Plans": [
+              {
+                "Node Type": "Nested Loop",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Join Type": "Inner",
+                "Startup Cost": 1026.07,
+                "Total Cost": 18280.26,
+                "Plan Rows": 26458,
+                "Plan Width": 12,
+                "Inner Unique": false,
+                "Plans": [
+                  {
+                    "Node Type": "Nested Loop",
+                    "Parent Relationship": "Outer",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Join Type": "Inner",
+                    "Startup Cost": 1026.07,
+                    "Total Cost": 17946.37,
+                    "Plan Rows": 378,
+                    "Plan Width": 8,
+                    "Inner Unique": false,
+                    "Plans": [
+                      {
+                        "Node Type": "Gather",
+                        "Parent Relationship": "Outer",
+                        "Parallel Aware": false,
+                        "Async Capable": false,
+                        "Startup Cost": 1000.0,
+                        "Total Cost": 17802.1,
+                        "Plan Rows": 1,
+                        "Plan Width": 8,
+                        "Workers Planned": 2,
+                        "Single Copy": false,
+                        "Plans": [
+                          {
+                            "Node Type": "Seq Scan",
+                            "Parent Relationship": "Outer",
+                            "Parallel Aware": true,
+                            "Async Capable": false,
+                            "Relation Name": "trans",
+                            "Alias": "trans",
+                            "Startup Cost": 0.0,
+                            "Total Cost": 16802.0,
+                            "Plan Rows": 1,
+                            "Plan Width": 8,
+                            "Filter": "((amount <> 130) AND ((k_symbol)::text ~~ '%u%'::text))"
+                          }
+                        ]
+                      },
+                      {
+                        "Node Type": "Hash Join",
+                        "Parent Relationship": "Inner",
+                        "Parallel Aware": false,
+                        "Async Capable": false,
+                        "Join Type": "Inner",
+                        "Startup Cost": 26.07,
+                        "Total Cost": 140.49,
+                        "Plan Rows": 378,
+                        "Plan Width": 0,
+                        "Inner Unique": false,
+                        "Hash Cond": "(disp.disp_id = card.disp_id)",
+                        "Plans": [
+                          {
+                            "Node Type": "Seq Scan",
+                            "Parent Relationship": "Outer",
+                            "Parallel Aware": false,
+                            "Async Capable": false,
+                            "Relation Name": "disp",
+                            "Alias": "disp",
+                            "Startup Cost": 0.0,
+                            "Total Cost": 102.11,
+                            "Plan Rows": 2275,
+                            "Plan Width": 8,
+                            "Filter": "(client_id < 2402)"
+                          },
+                          {
+                            "Node Type": "Hash",
+                            "Parent Relationship": "Inner",
+                            "Parallel Aware": false,
+                            "Async Capable": false,
+                            "Startup Cost": 14.92,
+                            "Total Cost": 14.92,
+                            "Plan Rows": 892,
+                            "Plan Width": 4,
+                            "Plans": [
+                              {
+                                "Node Type": "Seq Scan",
+                                "Parent Relationship": "Outer",
+                                "Parallel Aware": false,
+                                "Async Capable": false,
+                                "Relation Name": "card",
+                                "Alias": "card",
+                                "Startup Cost": 0.0,
+                                "Total Cost": 14.92,
+                                "Plan Rows": 892,
+                                "Plan Width": 4
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "Node Type": "Materialize",
+                    "Parent Relationship": "Inner",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Startup Cost": 0.0,
+                    "Total Cost": 3.31,
+                    "Plan Rows": 70,
+                    "Plan Width": 4,
+                    "Plans": [
+                      {
+                        "Node Type": "Seq Scan",
+                        "Parent Relationship": "Outer",
+                        "Parallel Aware": false,
+                        "Async Capable": false,
+                        "Relation Name": "district",
+                        "Alias": "district",
+                        "Startup Cost": 0.0,
+                        "Total Cost": 2.96,
+                        "Plan Rows": 70,
+                        "Plan Width": 4,
+                        "Filter": "(\"A6\" > 10)"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 2.3571766321106242
+  },
+  {
+    "timestamp": "2025-09-11T21:57:19.570666",
+    "dataset": "financial",
+    "query_type": "AP",
+    "query_index": 44,
+    "query_text": "SELECT AVG(\"card\".\"disp_id\") FROM \"card\" GROUP BY \"card\".\"type\" ORDER BY \"card\".\"type\";",
+    "postgres_time_ms": 0.6009800126776099,
+    "duckdb_time_ms": 13.096810958813876,
+    "log_time_difference": -3.081562364088692,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Sort",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 19.44,
+        "Total Cost": 19.45,
+        "Plan Rows": 3,
+        "Plan Width": 39,
+        "Sort Key": [
+          "type"
+        ],
+        "Plans": [
+          {
+            "Node Type": "Aggregate",
+            "Strategy": "Hashed",
+            "Partial Mode": "Simple",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 19.38,
+            "Total Cost": 19.42,
+            "Plan Rows": 3,
+            "Plan Width": 39,
+            "Group Key": [
+              "type"
+            ],
+            "Planned Partitions": 0,
+            "Plans": [
+              {
+                "Node Type": "Seq Scan",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Relation Name": "card",
+                "Alias": "card",
+                "Startup Cost": 0.0,
+                "Total Cost": 14.92,
+                "Plan Rows": 892,
+                "Plan Width": 11
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 21.79242351249298
+  },
+  {
+    "timestamp": "2025-09-11T21:57:19.585444",
+    "dataset": "financial",
+    "query_type": "AP",
+    "query_index": 45,
+    "query_text": "SELECT MIN(\"disp\".\"disp_id\"), MIN(\"disp\".\"disp_id\") FROM \"disp\" WHERE \"disp\".\"account_id\" < 3336 AND \"disp\".\"account_id\" IS NULL AND \"disp\".\"disp_id\" = 1798 AND \"disp\".\"type\" LIKE '%o%' GROUP BY \"disp\".\"type\" ORDER BY \"disp\".\"type\" DESC;",
+    "postgres_time_ms": 0.3679280052892864,
+    "duckdb_time_ms": 13.15505598904565,
+    "log_time_difference": -3.5766741683406402,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Aggregate",
+        "Strategy": "Sorted",
+        "Partial Mode": "Simple",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 8.32,
+        "Total Cost": 8.34,
+        "Plan Rows": 1,
+        "Plan Width": 14,
+        "Group Key": [
+          "type"
+        ],
+        "Plans": [
+          {
+            "Node Type": "Sort",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 8.32,
+            "Total Cost": 8.32,
+            "Plan Rows": 1,
+            "Plan Width": 10,
+            "Sort Key": [
+              "type DESC"
+            ],
+            "Plans": [
+              {
+                "Node Type": "Index Scan",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Scan Direction": "Forward",
+                "Index Name": "disp_pkey",
+                "Relation Name": "disp",
+                "Alias": "disp",
+                "Startup Cost": 0.28,
+                "Total Cost": 8.31,
+                "Plan Rows": 1,
+                "Plan Width": 10,
+                "Index Cond": "(disp_id = 1798)",
+                "Filter": "((account_id IS NULL) AND (account_id < 3336) AND ((type)::text ~~ '%o%'::text))"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 35.75442967083297
+  },
+  {
+    "timestamp": "2025-09-11T21:58:55.764794",
+    "dataset": "financial",
+    "query_type": "AP",
+    "query_index": 49,
+    "query_text": "SELECT VARIANCE(\"account\".\"account_id\"), AVG(\"order\".\"account_to\") FROM \"loan\" CROSS JOIN \"client\" LEFT JOIN \"account\" ON \"loan\".\"account_id\" = \"account\".\"account_id\" CROSS JOIN \"card\" INNER JOIN \"order\" ON \"account\".\"account_id\" = \"order\".\"account_id\" WHERE \"card\".\"type\" = 'junior' AND \"client\".\"gender\" != 'M' AND \"loan\".\"loan_id\" != 7289 GROUP BY \"loan\".\"loan_id\", \"order\".\"k_symbol\" LIMIT 10;",
+    "postgres_time_ms": 18157.063211023342,
+    "duckdb_time_ms": 17998.265528003685,
+    "log_time_difference": 0.00878424894287438,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Custom Scan",
+        "Custom Plan Provider": "DuckDBScan",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 0.0,
+        "Total Cost": 0.0,
+        "Plan Rows": 0,
+        "Plan Width": 0,
+        "DuckDB Execution Plan": [
+          {
+            "name": "PROJECTION",
+            "children": [
+              {
+                "name": "STREAMING_LIMIT",
+                "children": [
+                  {
+                    "name": "HASH_GROUP_BY",
+                    "children": [
+                      {
+                        "name": "PROJECTION",
+                        "children": [
+                          {
+                            "name": "HASH_JOIN",
+                            "children": [
+                              {
+                                "name": "CROSS_PRODUCT",
+                                "children": [
+                                  {
+                                    "name": "PGDUCKDB_POSTGRES_SCAN ",
+                                    "children": [],
+                                    "extra_info": {
+                                      "Table": "order",
+                                      "Projections": [
+                                        "account_id",
+                                        "k_symbol",
+                                        "account_to"
+                                      ],
+                                      "Estimated Cardinality": "6471"
+                                    }
+                                  },
+                                  {
+                                    "name": "PGDUCKDB_POSTGRES_SCAN ",
+                                    "children": [],
+                                    "extra_info": {
+                                      "Table": "card",
+                                      "Projections": "",
+                                      "Filters": "type='junior'",
+                                      "Estimated Cardinality": "178"
+                                    }
+                                  }
+                                ],
+                                "extra_info": {}
+                              },
+                              {
+                                "name": "HASH_JOIN",
+                                "children": [
+                                  {
+                                    "name": "CROSS_PRODUCT",
+                                    "children": [
+                                      {
+                                        "name": "PGDUCKDB_POSTGRES_SCAN ",
+                                        "children": [],
+                                        "extra_info": {
+                                          "Table": "client",
+                                          "Projections": "",
+                                          "Filters": "gender!='M'",
+                                          "Estimated Cardinality": "1073"
+                                        }
+                                      },
+                                      {
+                                        "name": "PGDUCKDB_POSTGRES_SCAN ",
+                                        "children": [],
+                                        "extra_info": {
+                                          "Table": "loan",
+                                          "Projections": [
+                                            "account_id",
+                                            "loan_id"
+                                          ],
+                                          "Filters": "loan_id!=7289",
+                                          "Estimated Cardinality": "136"
+                                        }
+                                      }
+                                    ],
+                                    "extra_info": {}
+                                  },
+                                  {
+                                    "name": "PGDUCKDB_POSTGRES_SCAN ",
+                                    "children": [],
+                                    "extra_info": {
+                                      "Table": "account",
+                                      "Projections": "account_id",
+                                      "Estimated Cardinality": "4500"
+                                    }
+                                  }
+                                ],
+                                "extra_info": {
+                                  "Join Type": "LEFT",
+                                  "Conditions": "account_id = account_id",
+                                  "Estimated Cardinality": "145928"
+                                }
+                              }
+                            ],
+                            "extra_info": {
+                              "Join Type": "INNER",
+                              "Conditions": "account_id = account_id",
+                              "Estimated Cardinality": "1384604"
+                            }
+                          }
+                        ],
+                        "extra_info": {
+                          "Projections": [
+                            "loan_id",
+                            "k_symbol",
+                            "CAST(account_id AS DOUBLE)",
+                            "account_to"
+                          ],
+                          "Estimated Cardinality": "1384604"
+                        }
+                      }
+                    ],
+                    "extra_info": {
+                      "Groups": [
+                        "#0",
+                        "#1"
+                      ],
+                      "Aggregates": [
+                        "variance(#2)",
+                        "avg(#3)"
+                      ],
+                      "Estimated Cardinality": "422618"
+                    }
+                  }
+                ],
+                "extra_info": {}
+              }
+            ],
+            "extra_info": {
+              "Projections": [
+                "variance",
+                "avg"
+              ],
+              "Estimated Cardinality": "0"
+            }
+          }
+        ]
+      }
+    },
+    "optimal_engine": "duckdb",
+    "speedup_ratio": 1.0088229436760217
+  },
+  {
+    "timestamp": "2025-09-11T21:58:55.769691",
+    "dataset": "financial",
+    "query_type": "TP",
+    "query_index": 0,
+    "query_text": "SELECT \"account\".\"frequency\", \"trans\".\"k_symbol\" FROM \"account\" INNER JOIN \"trans\" ON \"account\".\"account_id\" = \"trans\".\"account_id\" WHERE \"account\".\"account_id\" = 8427 AND \"trans\".\"trans_id\" = 2113866 AND \"trans\".\"account_id\" <= 2056 LIMIT 100;",
+    "postgres_time_ms": 0.4179980023764074,
+    "duckdb_time_ms": 1.7638500430621207,
+    "log_time_difference": -1.4397775698417163,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 0.71,
+        "Total Cost": 16.76,
+        "Plan Rows": 1,
+        "Plan Width": 21,
+        "Plans": [
+          {
+            "Node Type": "Nested Loop",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Join Type": "Inner",
+            "Startup Cost": 0.71,
+            "Total Cost": 16.76,
+            "Plan Rows": 1,
+            "Plan Width": 21,
+            "Inner Unique": false,
+            "Plans": [
+              {
+                "Node Type": "Index Scan",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Scan Direction": "Forward",
+                "Index Name": "account_pkey",
+                "Relation Name": "account",
+                "Alias": "account",
+                "Startup Cost": 0.28,
+                "Total Cost": 8.3,
+                "Plan Rows": 1,
+                "Plan Width": 20,
+                "Index Cond": "(account_id = 8427)"
+              },
+              {
+                "Node Type": "Index Scan",
+                "Parent Relationship": "Inner",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Scan Direction": "Forward",
+                "Index Name": "trans_pkey",
+                "Relation Name": "trans",
+                "Alias": "trans",
+                "Startup Cost": 0.43,
+                "Total Cost": 8.45,
+                "Plan Rows": 1,
+                "Plan Width": 9,
+                "Index Cond": "(trans_id = 2113866)",
+                "Filter": "((account_id <= 2056) AND (account_id = 8427))"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 4.219757111360003
+  },
+  {
+    "timestamp": "2025-09-11T21:58:55.783917",
+    "dataset": "financial",
+    "query_type": "TP",
+    "query_index": 1,
+    "query_text": "SELECT \"trans\".\"type\", \"trans\".\"account\" FROM \"trans\" WHERE \"trans\".\"trans_id\" = 281025 AND \"trans\".\"account_id\" >= 3896 LIMIT 1;",
+    "postgres_time_ms": 1.9876949954777956,
+    "duckdb_time_ms": 11.248063994571567,
+    "log_time_difference": -1.7332203508039266,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 0.43,
+        "Total Cost": 8.45,
+        "Plan Rows": 1,
+        "Plan Width": 14,
+        "Plans": [
+          {
+            "Node Type": "Index Scan",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Scan Direction": "Forward",
+            "Index Name": "trans_pkey",
+            "Relation Name": "trans",
+            "Alias": "trans",
+            "Startup Cost": 0.43,
+            "Total Cost": 8.45,
+            "Plan Rows": 1,
+            "Plan Width": 14,
+            "Index Cond": "(trans_id = 281025)",
+            "Filter": "(account_id >= 3896)"
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 5.658848072849222
+  },
+  {
+    "timestamp": "2025-09-11T21:58:55.807333",
+    "dataset": "financial",
+    "query_type": "TP",
+    "query_index": 4,
+    "query_text": "SELECT \"account\".\"account_id\", \"account\".\"district_id\", \"loan\".\"duration\", \"loan\".\"status\", \"loan\".\"account_id\" FROM \"account\" INNER JOIN \"loan\" ON \"account\".\"account_id\" = \"loan\".\"account_id\" WHERE \"account\".\"account_id\" = 3001 AND \"loan\".\"loan_id\" = 6247 LIMIT 1;",
+    "postgres_time_ms": 1.4890989987179637,
+    "duckdb_time_ms": 19.9400779674761,
+    "log_time_difference": -2.5945604364238877,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 0.56,
+        "Total Cost": 16.61,
+        "Plan Rows": 1,
+        "Plan Width": 18,
+        "Plans": [
+          {
+            "Node Type": "Nested Loop",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Join Type": "Inner",
+            "Startup Cost": 0.56,
+            "Total Cost": 16.61,
+            "Plan Rows": 1,
+            "Plan Width": 18,
+            "Inner Unique": false,
+            "Plans": [
+              {
+                "Node Type": "Index Scan",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Scan Direction": "Forward",
+                "Index Name": "account_pkey",
+                "Relation Name": "account",
+                "Alias": "account",
+                "Startup Cost": 0.28,
+                "Total Cost": 8.3,
+                "Plan Rows": 1,
+                "Plan Width": 8,
+                "Index Cond": "(account_id = 3001)"
+              },
+              {
+                "Node Type": "Index Scan",
+                "Parent Relationship": "Inner",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Scan Direction": "Forward",
+                "Index Name": "loan_pkey",
+                "Relation Name": "loan",
+                "Alias": "loan",
+                "Startup Cost": 0.28,
+                "Total Cost": 8.29,
+                "Plan Rows": 1,
+                "Plan Width": 10,
+                "Index Cond": "(loan_id = 6247)",
+                "Filter": "(account_id = 3001)"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 13.390700003588387
+  },
+  {
+    "timestamp": "2025-09-11T21:58:55.830319",
+    "dataset": "financial",
+    "query_type": "TP",
+    "query_index": 9,
+    "query_text": "SELECT \"card\".\"disp_id\", \"card\".\"card_id\", \"disp\".\"client_id\", \"disp\".\"account_id\" FROM \"card\" INNER JOIN \"disp\" ON \"card\".\"disp_id\" = \"disp\".\"disp_id\" WHERE \"card\".\"card_id\" = 637 AND \"disp\".\"disp_id\" = 568 LIMIT 100;",
+    "postgres_time_ms": 1.0478870244696736,
+    "duckdb_time_ms": 18.98334303405136,
+    "log_time_difference": -2.896786133227973,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 0.56,
+        "Total Cost": 16.61,
+        "Plan Rows": 1,
+        "Plan Width": 16,
+        "Plans": [
+          {
+            "Node Type": "Nested Loop",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Join Type": "Inner",
+            "Startup Cost": 0.56,
+            "Total Cost": 16.61,
+            "Plan Rows": 1,
+            "Plan Width": 16,
+            "Inner Unique": false,
+            "Plans": [
+              {
+                "Node Type": "Index Scan",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Scan Direction": "Forward",
+                "Index Name": "card_pkey",
+                "Relation Name": "card",
+                "Alias": "card",
+                "Startup Cost": 0.28,
+                "Total Cost": 8.29,
+                "Plan Rows": 1,
+                "Plan Width": 8,
+                "Index Cond": "(card_id = 637)",
+                "Filter": "(disp_id = 568)"
+              },
+              {
+                "Node Type": "Index Scan",
+                "Parent Relationship": "Inner",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Scan Direction": "Forward",
+                "Index Name": "disp_pkey",
+                "Relation Name": "disp",
+                "Alias": "disp",
+                "Startup Cost": 0.28,
+                "Total Cost": 8.3,
+                "Plan Rows": 1,
+                "Plan Width": 12,
+                "Index Cond": "(disp_id = 568)"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 18.115829846885127
+  },
+  {
+    "timestamp": "2025-09-11T21:58:55.842794",
+    "dataset": "financial",
+    "query_type": "TP",
+    "query_index": 11,
+    "query_text": "SELECT \"order\".\"account_id\", \"order\".\"order_id\", \"order\".\"k_symbol\" FROM \"order\" WHERE \"order\".\"order_id\" = 32793 LIMIT 1;",
+    "postgres_time_ms": 0.9349369793199003,
+    "duckdb_time_ms": 10.03344199853018,
+    "log_time_difference": -2.373199867208313,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 0.28,
+        "Total Cost": 8.3,
+        "Plan Rows": 1,
+        "Plan Width": 13,
+        "Plans": [
+          {
+            "Node Type": "Index Scan",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Scan Direction": "Forward",
+            "Index Name": "order_pkey",
+            "Relation Name": "order",
+            "Alias": "order",
+            "Startup Cost": 0.28,
+            "Total Cost": 8.3,
+            "Plan Rows": 1,
+            "Plan Width": 13,
+            "Index Cond": "(order_id = 32793)"
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 10.731677343459866
+  },
+  {
+    "timestamp": "2025-09-11T21:58:55.854157",
+    "dataset": "financial",
+    "query_type": "TP",
+    "query_index": 13,
+    "query_text": "SELECT \"account\".\"frequency\", \"account\".\"account_id\" FROM \"account\" WHERE \"account\".\"account_id\" = 3248 LIMIT 1;",
+    "postgres_time_ms": 0.27027796022593975,
+    "duckdb_time_ms": 9.53987700631842,
+    "log_time_difference": -3.5637849601766103,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 0.28,
+        "Total Cost": 8.3,
+        "Plan Rows": 1,
+        "Plan Width": 20,
+        "Plans": [
+          {
+            "Node Type": "Index Scan",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Scan Direction": "Forward",
+            "Index Name": "account_pkey",
+            "Relation Name": "account",
+            "Alias": "account",
+            "Startup Cost": 0.28,
+            "Total Cost": 8.3,
+            "Plan Rows": 1,
+            "Plan Width": 20,
+            "Index Cond": "(account_id = 3248)"
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 35.29654063669686
+  },
+  {
+    "timestamp": "2025-09-11T21:58:55.867049",
+    "dataset": "financial",
+    "query_type": "TP",
+    "query_index": 18,
+    "query_text": "SELECT \"client\".\"district_id\", \"client\".\"birth_date\" FROM \"client\" WHERE \"client\".\"client_id\" = 3884 ORDER BY \"client\".\"birth_date\" ASC LIMIT 10;",
+    "postgres_time_ms": 0.30923698795959353,
+    "duckdb_time_ms": 9.87090403214097,
+    "log_time_difference": -3.4632387879019,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 8.31,
+        "Total Cost": 8.32,
+        "Plan Rows": 1,
+        "Plan Width": 8,
+        "Plans": [
+          {
+            "Node Type": "Sort",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 8.31,
+            "Total Cost": 8.32,
+            "Plan Rows": 1,
+            "Plan Width": 8,
+            "Sort Key": [
+              "birth_date"
+            ],
+            "Plans": [
+              {
+                "Node Type": "Index Scan",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Scan Direction": "Forward",
+                "Index Name": "client_pkey",
+                "Relation Name": "client",
+                "Alias": "client",
+                "Startup Cost": 0.28,
+                "Total Cost": 8.3,
+                "Plan Rows": 1,
+                "Plan Width": 8,
+                "Index Cond": "(client_id = 3884)"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 31.920192009601234
+  },
+  {
+    "timestamp": "2025-09-11T21:58:55.879101",
+    "dataset": "financial",
+    "query_type": "TP",
+    "query_index": 21,
+    "query_text": "SELECT \"client\".\"district_id\", \"client\".\"client_id\" FROM \"client\" WHERE \"client\".\"client_id\" = 7384 LIMIT 1;",
+    "postgres_time_ms": 0.23819395573809743,
+    "duckdb_time_ms": 10.132193972822279,
+    "log_time_difference": -3.750387873648015,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 0.28,
+        "Total Cost": 8.3,
+        "Plan Rows": 1,
+        "Plan Width": 8,
+        "Plans": [
+          {
+            "Node Type": "Index Scan",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Scan Direction": "Forward",
+            "Index Name": "client_pkey",
+            "Relation Name": "client",
+            "Alias": "client",
+            "Startup Cost": 0.28,
+            "Total Cost": 8.3,
+            "Plan Rows": 1,
+            "Plan Width": 8,
+            "Index Cond": "(client_id = 7384)"
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 42.537578006231946
+  },
+  {
+    "timestamp": "2025-09-11T21:58:55.893608",
+    "dataset": "financial",
+    "query_type": "TP",
+    "query_index": 29,
+    "query_text": "SELECT \"trans\".\"type\", \"trans\".\"account\", \"trans\".\"trans_id\" FROM \"trans\" WHERE \"trans\".\"trans_id\" = 303348 LIMIT 100;",
+    "postgres_time_ms": 0.992017041426152,
+    "duckdb_time_ms": 9.768454008735716,
+    "log_time_difference": -2.2871732079068887,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 0.43,
+        "Total Cost": 8.45,
+        "Plan Rows": 1,
+        "Plan Width": 18,
+        "Plans": [
+          {
+            "Node Type": "Index Scan",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Scan Direction": "Forward",
+            "Index Name": "trans_pkey",
+            "Relation Name": "trans",
+            "Alias": "trans",
+            "Startup Cost": 0.43,
+            "Total Cost": 8.45,
+            "Plan Rows": 1,
+            "Plan Width": 18,
+            "Index Cond": "(trans_id = 303348)"
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 9.847062702362763
+  },
+  {
+    "timestamp": "2025-09-11T21:58:55.905198",
+    "dataset": "financial",
+    "query_type": "TP",
+    "query_index": 31,
+    "query_text": "SELECT \"order\".\"bank_to\" FROM \"order\" WHERE \"order\".\"order_id\" = 34470 LIMIT 10;",
+    "postgres_time_ms": 0.8828769787214696,
+    "duckdb_time_ms": 9.217298007570207,
+    "log_time_difference": -2.345651346902045,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 0.28,
+        "Total Cost": 8.3,
+        "Plan Rows": 1,
+        "Plan Width": 3,
+        "Plans": [
+          {
+            "Node Type": "Index Scan",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Scan Direction": "Forward",
+            "Index Name": "order_pkey",
+            "Relation Name": "order",
+            "Alias": "order",
+            "Startup Cost": 0.28,
+            "Total Cost": 8.3,
+            "Plan Rows": 1,
+            "Plan Width": 3,
+            "Index Cond": "(order_id = 34470)"
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 10.440070621071301
+  },
+  {
+    "timestamp": "2025-09-11T21:58:55.917614",
+    "dataset": "financial",
+    "query_type": "TP",
+    "query_index": 33,
+    "query_text": "SELECT \"disp\".\"client_id\", \"disp\".\"account_id\" FROM \"disp\" WHERE \"disp\".\"disp_id\" = 1279 AND \"disp\".\"account_id\" > 1694 LIMIT 1;",
+    "postgres_time_ms": 0.29586703749373555,
+    "duckdb_time_ms": 10.749983019195497,
+    "log_time_difference": -3.5927492981965687,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 0.28,
+        "Total Cost": 8.3,
+        "Plan Rows": 1,
+        "Plan Width": 8,
+        "Plans": [
+          {
+            "Node Type": "Index Scan",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Scan Direction": "Forward",
+            "Index Name": "disp_pkey",
+            "Relation Name": "disp",
+            "Alias": "disp",
+            "Startup Cost": 0.28,
+            "Total Cost": 8.3,
+            "Plan Rows": 1,
+            "Plan Width": 8,
+            "Index Cond": "(disp_id = 1279)",
+            "Filter": "(account_id > 1694)"
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 36.33383127183645
+  },
+  {
+    "timestamp": "2025-09-11T21:58:55.941646",
+    "dataset": "financial",
+    "query_type": "TP",
+    "query_index": 34,
+    "query_text": "SELECT \"card\".\"disp_id\", \"card\".\"type\", \"card\".\"issued\", \"disp\".\"type\", \"disp\".\"account_id\" FROM \"card\" INNER JOIN \"disp\" ON \"card\".\"disp_id\" = \"disp\".\"disp_id\" WHERE \"disp\".\"client_id\" = 8880 LIMIT 100;",
+    "postgres_time_ms": 0.806389027275145,
+    "duckdb_time_ms": 21.942372026387602,
+    "log_time_difference": -3.30360855204871,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 102.12,
+        "Total Cost": 119.39,
+        "Plan Rows": 1,
+        "Plan Width": 25,
+        "Plans": [
+          {
+            "Node Type": "Hash Join",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Join Type": "Inner",
+            "Startup Cost": 102.12,
+            "Total Cost": 119.39,
+            "Plan Rows": 1,
+            "Plan Width": 25,
+            "Inner Unique": true,
+            "Hash Cond": "(card.disp_id = disp.disp_id)",
+            "Plans": [
+              {
+                "Node Type": "Seq Scan",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Relation Name": "card",
+                "Alias": "card",
+                "Startup Cost": 0.0,
+                "Total Cost": 14.92,
+                "Plan Rows": 892,
+                "Plan Width": 15
+              },
+              {
+                "Node Type": "Hash",
+                "Parent Relationship": "Inner",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Startup Cost": 102.11,
+                "Total Cost": 102.11,
+                "Plan Rows": 1,
+                "Plan Width": 14,
+                "Plans": [
+                  {
+                    "Node Type": "Seq Scan",
+                    "Parent Relationship": "Outer",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Relation Name": "disp",
+                    "Alias": "disp",
+                    "Startup Cost": 0.0,
+                    "Total Cost": 102.11,
+                    "Plan Rows": 1,
+                    "Plan Width": 14,
+                    "Filter": "(client_id = 8880)"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 27.210653027525293
+  },
+  {
+    "timestamp": "2025-09-11T21:58:55.952922",
+    "dataset": "financial",
+    "query_type": "TP",
+    "query_index": 35,
+    "query_text": "SELECT \"disp\".\"client_id\", \"disp\".\"disp_id\" FROM \"disp\" WHERE \"disp\".\"disp_id\" = 2558 ORDER BY \"disp\".\"type\" DESC LIMIT 1;",
+    "postgres_time_ms": 0.29741699108853936,
+    "duckdb_time_ms": 9.887877968139946,
+    "log_time_difference": -3.5039296737107204,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 8.31,
+        "Total Cost": 8.32,
+        "Plan Rows": 1,
+        "Plan Width": 14,
+        "Plans": [
+          {
+            "Node Type": "Sort",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 8.31,
+            "Total Cost": 8.32,
+            "Plan Rows": 1,
+            "Plan Width": 14,
+            "Sort Key": [
+              "type DESC"
+            ],
+            "Plans": [
+              {
+                "Node Type": "Index Scan",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Scan Direction": "Forward",
+                "Index Name": "disp_pkey",
+                "Relation Name": "disp",
+                "Alias": "disp",
+                "Startup Cost": 0.28,
+                "Total Cost": 8.3,
+                "Plan Rows": 1,
+                "Plan Width": 14,
+                "Index Cond": "(disp_id = 2558)"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 33.24584090488758
+  },
+  {
+    "timestamp": "2025-09-11T21:58:55.975064",
+    "dataset": "financial",
+    "query_type": "TP",
+    "query_index": 36,
+    "query_text": "SELECT \"disp\".\"account_id\", \"card\".\"card_id\", \"card\".\"type\" FROM \"disp\" INNER JOIN \"card\" ON \"disp\".\"disp_id\" = \"card\".\"disp_id\" WHERE \"disp\".\"disp_id\" = 3168 AND \"card\".\"card_id\" = 882 LIMIT 10;",
+    "postgres_time_ms": 0.335916003677994,
+    "duckdb_time_ms": 20.69160796236247,
+    "log_time_difference": -4.120622344948216,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 0.56,
+        "Total Cost": 16.61,
+        "Plan Rows": 1,
+        "Plan Width": 15,
+        "Plans": [
+          {
+            "Node Type": "Nested Loop",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Join Type": "Inner",
+            "Startup Cost": 0.56,
+            "Total Cost": 16.61,
+            "Plan Rows": 1,
+            "Plan Width": 15,
+            "Inner Unique": false,
+            "Plans": [
+              {
+                "Node Type": "Index Scan",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Scan Direction": "Forward",
+                "Index Name": "disp_pkey",
+                "Relation Name": "disp",
+                "Alias": "disp",
+                "Startup Cost": 0.28,
+                "Total Cost": 8.3,
+                "Plan Rows": 1,
+                "Plan Width": 8,
+                "Index Cond": "(disp_id = 3168)"
+              },
+              {
+                "Node Type": "Index Scan",
+                "Parent Relationship": "Inner",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Scan Direction": "Forward",
+                "Index Name": "card_pkey",
+                "Relation Name": "card",
+                "Alias": "card",
+                "Startup Cost": 0.28,
+                "Total Cost": 8.29,
+                "Plan Rows": 1,
+                "Plan Width": 15,
+                "Index Cond": "(card_id = 882)",
+                "Filter": "(disp_id = 3168)"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 61.59756527169588
+  },
+  {
+    "timestamp": "2025-09-11T21:58:55.987987",
+    "dataset": "financial",
+    "query_type": "TP",
+    "query_index": 38,
+    "query_text": "SELECT \"card\".\"disp_id\" FROM \"card\" WHERE \"card\".\"card_id\" = 250 AND \"card\".\"card_id\" <= 910 LIMIT 10;",
+    "postgres_time_ms": 0.2743509830906987,
+    "duckdb_time_ms": 11.234779958613217,
+    "log_time_difference": -3.7123613522358987,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 0.28,
+        "Total Cost": 8.29,
+        "Plan Rows": 1,
+        "Plan Width": 4,
+        "Plans": [
+          {
+            "Node Type": "Index Scan",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Scan Direction": "Forward",
+            "Index Name": "card_pkey",
+            "Relation Name": "card",
+            "Alias": "card",
+            "Startup Cost": 0.28,
+            "Total Cost": 8.29,
+            "Plan Rows": 1,
+            "Plan Width": 4,
+            "Index Cond": "((card_id <= 910) AND (card_id = 250))"
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 40.95039074417703
+  },
+  {
+    "timestamp": "2025-09-11T21:58:56.000945",
+    "dataset": "financial",
+    "query_type": "TP",
+    "query_index": 39,
+    "query_text": "SELECT \"trans\".\"trans_id\", \"trans\".\"account\", \"trans\".\"balance\" FROM \"trans\" WHERE \"trans\".\"trans_id\" = 712778 LIMIT 100;",
+    "postgres_time_ms": 1.5310049639083445,
+    "duckdb_time_ms": 10.233028035145253,
+    "log_time_difference": -1.8996961728451454,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 0.43,
+        "Total Cost": 8.45,
+        "Plan Rows": 1,
+        "Plan Width": 16,
+        "Plans": [
+          {
+            "Node Type": "Index Scan",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Scan Direction": "Forward",
+            "Index Name": "trans_pkey",
+            "Relation Name": "trans",
+            "Alias": "trans",
+            "Startup Cost": 0.43,
+            "Total Cost": 8.45,
+            "Plan Rows": 1,
+            "Plan Width": 16,
+            "Index Cond": "(trans_id = 712778)"
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 6.683863394552564
+  },
+  {
+    "timestamp": "2025-09-11T21:58:56.034398",
+    "dataset": "financial",
+    "query_type": "TP",
+    "query_index": 42,
+    "query_text": "SELECT \"disp\".\"disp_id\", \"disp\".\"type\", \"disp\".\"account_id\", \"card\".\"issued\", \"card\".\"type\", \"client\".\"birth_date\", \"client\".\"client_id\", \"client\".\"gender\" FROM \"disp\" INNER JOIN \"card\" ON \"disp\".\"disp_id\" = \"card\".\"disp_id\" INNER JOIN \"client\" ON \"disp\".\"client_id\" = \"client\".\"client_id\" WHERE \"disp\".\"disp_id\" = 317 AND \"card\".\"card_id\" = 240 AND \"client\".\"client_id\" = 3308 LIMIT 100;",
+    "postgres_time_ms": 0.3996519953943789,
+    "duckdb_time_ms": 30.987854988779873,
+    "log_time_difference": -4.350756475233835,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 0.84,
+        "Total Cost": 24.92,
+        "Plan Rows": 1,
+        "Plan Width": 35,
+        "Plans": [
+          {
+            "Node Type": "Nested Loop",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Join Type": "Inner",
+            "Startup Cost": 0.84,
+            "Total Cost": 24.92,
+            "Plan Rows": 1,
+            "Plan Width": 35,
+            "Inner Unique": false,
+            "Plans": [
+              {
+                "Node Type": "Nested Loop",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Join Type": "Inner",
+                "Startup Cost": 0.56,
+                "Total Cost": 16.61,
+                "Plan Rows": 1,
+                "Plan Width": 29,
+                "Inner Unique": false,
+                "Plans": [
+                  {
+                    "Node Type": "Index Scan",
+                    "Parent Relationship": "Outer",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Scan Direction": "Forward",
+                    "Index Name": "disp_pkey",
+                    "Relation Name": "disp",
+                    "Alias": "disp",
+                    "Startup Cost": 0.28,
+                    "Total Cost": 8.3,
+                    "Plan Rows": 1,
+                    "Plan Width": 18,
+                    "Index Cond": "(disp_id = 317)",
+                    "Filter": "(client_id = 3308)"
+                  },
+                  {
+                    "Node Type": "Index Scan",
+                    "Parent Relationship": "Inner",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Scan Direction": "Forward",
+                    "Index Name": "card_pkey",
+                    "Relation Name": "card",
+                    "Alias": "card",
+                    "Startup Cost": 0.28,
+                    "Total Cost": 8.29,
+                    "Plan Rows": 1,
+                    "Plan Width": 15,
+                    "Index Cond": "(card_id = 240)",
+                    "Filter": "(disp_id = 317)"
+                  }
+                ]
+              },
+              {
+                "Node Type": "Index Scan",
+                "Parent Relationship": "Inner",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Scan Direction": "Forward",
+                "Index Name": "client_pkey",
+                "Relation Name": "client",
+                "Alias": "client",
+                "Startup Cost": 0.28,
+                "Total Cost": 8.3,
+                "Plan Rows": 1,
+                "Plan Width": 10,
+                "Index Cond": "(client_id = 3308)"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 77.53709563792088
+  },
+  {
+    "timestamp": "2025-09-11T21:58:56.069720",
+    "dataset": "financial",
+    "query_type": "TP",
+    "query_index": 43,
+    "query_text": "SELECT \"account\".\"district_id\", \"account\".\"frequency\", \"district\".\"A7\", \"district\".\"A6\", \"disp\".\"client_id\", \"disp\".\"type\" FROM \"account\" INNER JOIN \"district\" ON \"account\".\"district_id\" = \"district\".\"district_id\" INNER JOIN \"disp\" ON \"account\".\"account_id\" = \"disp\".\"account_id\" WHERE \"district\".\"district_id\" = 26 AND \"disp\".\"disp_id\" = 3888 LIMIT 1;",
+    "postgres_time_ms": 0.5199979641474783,
+    "duckdb_time_ms": 33.22796698193997,
+    "log_time_difference": -4.157322282809827,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 0.56,
+        "Total Cost": 19.92,
+        "Plan Rows": 1,
+        "Plan Width": 38,
+        "Plans": [
+          {
+            "Node Type": "Nested Loop",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Join Type": "Inner",
+            "Startup Cost": 0.56,
+            "Total Cost": 19.92,
+            "Plan Rows": 1,
+            "Plan Width": 38,
+            "Inner Unique": false,
+            "Plans": [
+              {
+                "Node Type": "Nested Loop",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Join Type": "Inner",
+                "Startup Cost": 0.56,
+                "Total Cost": 16.95,
+                "Plan Rows": 1,
+                "Plan Width": 30,
+                "Inner Unique": true,
+                "Plans": [
+                  {
+                    "Node Type": "Index Scan",
+                    "Parent Relationship": "Outer",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Scan Direction": "Forward",
+                    "Index Name": "disp_pkey",
+                    "Relation Name": "disp",
+                    "Alias": "disp",
+                    "Startup Cost": 0.28,
+                    "Total Cost": 8.3,
+                    "Plan Rows": 1,
+                    "Plan Width": 14,
+                    "Index Cond": "(disp_id = 3888)"
+                  },
+                  {
+                    "Node Type": "Index Scan",
+                    "Parent Relationship": "Inner",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Scan Direction": "Forward",
+                    "Index Name": "account_pkey",
+                    "Relation Name": "account",
+                    "Alias": "account",
+                    "Startup Cost": 0.28,
+                    "Total Cost": 8.3,
+                    "Plan Rows": 1,
+                    "Plan Width": 24,
+                    "Index Cond": "(account_id = disp.account_id)",
+                    "Filter": "(district_id = 26)"
+                  }
+                ]
+              },
+              {
+                "Node Type": "Seq Scan",
+                "Parent Relationship": "Inner",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Relation Name": "district",
+                "Alias": "district",
+                "Startup Cost": 0.0,
+                "Total Cost": 2.96,
+                "Plan Rows": 1,
+                "Plan Width": 12,
+                "Filter": "(district_id = 26)"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 63.90018667941569
+  },
+  {
+    "timestamp": "2025-09-11T21:58:56.081335",
+    "dataset": "financial",
+    "query_type": "TP",
+    "query_index": 44,
+    "query_text": "SELECT \"client\".\"client_id\" FROM \"client\" WHERE \"client\".\"client_id\" = 738 LIMIT 10;",
+    "postgres_time_ms": 0.3099250025115907,
+    "duckdb_time_ms": 10.149096953682601,
+    "log_time_difference": -3.4888096696032522,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 0.28,
+        "Total Cost": 4.3,
+        "Plan Rows": 1,
+        "Plan Width": 4,
+        "Plans": [
+          {
+            "Node Type": "Index Only Scan",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Scan Direction": "Forward",
+            "Index Name": "client_pkey",
+            "Relation Name": "client",
+            "Alias": "client",
+            "Startup Cost": 0.28,
+            "Total Cost": 4.3,
+            "Plan Rows": 1,
+            "Plan Width": 4,
+            "Index Cond": "(client_id = 738)"
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 32.74694481386038
+  },
+  {
+    "timestamp": "2025-09-11T21:58:56.107549",
+    "dataset": "financial",
+    "query_type": "TP",
+    "query_index": 46,
+    "query_text": "SELECT \"account\".\"district_id\", \"account\".\"date\", \"account\".\"account_id\", \"disp\".\"type\" FROM \"account\" INNER JOIN \"disp\" ON \"account\".\"account_id\" = \"disp\".\"account_id\" WHERE \"account\".\"account_id\" = 1135 AND \"disp\".\"client_id\" = 2106 LIMIT 10;",
+    "postgres_time_ms": 0.7575239869765937,
+    "duckdb_time_ms": 23.73550197808072,
+    "log_time_difference": -3.4446719771805325,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 0.28,
+        "Total Cost": 123.84,
+        "Plan Rows": 1,
+        "Plan Width": 18,
+        "Plans": [
+          {
+            "Node Type": "Nested Loop",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Join Type": "Inner",
+            "Startup Cost": 0.28,
+            "Total Cost": 123.84,
+            "Plan Rows": 1,
+            "Plan Width": 18,
+            "Inner Unique": false,
+            "Plans": [
+              {
+                "Node Type": "Index Scan",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Scan Direction": "Forward",
+                "Index Name": "account_pkey",
+                "Relation Name": "account",
+                "Alias": "account",
+                "Startup Cost": 0.28,
+                "Total Cost": 8.3,
+                "Plan Rows": 1,
+                "Plan Width": 12,
+                "Index Cond": "(account_id = 1135)"
+              },
+              {
+                "Node Type": "Seq Scan",
+                "Parent Relationship": "Inner",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Relation Name": "disp",
+                "Alias": "disp",
+                "Startup Cost": 0.0,
+                "Total Cost": 115.53,
+                "Plan Rows": 1,
+                "Plan Width": 10,
+                "Filter": "((account_id = 1135) AND (client_id = 2106))"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 31.33300382052999
+  },
+  {
+    "timestamp": "2025-09-11T21:58:56.120700",
+    "dataset": "financial",
+    "query_type": "TP",
+    "query_index": 48,
+    "query_text": "SELECT \"trans\".\"type\", \"trans\".\"amount\" FROM \"trans\" WHERE \"trans\".\"trans_id\" = 856799 AND \"trans\".\"account_id\" < 2372 LIMIT 1;",
+    "postgres_time_ms": 1.5745139680802822,
+    "duckdb_time_ms": 9.93321998976171,
+    "log_time_difference": -1.8419380613931535,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 0.43,
+        "Total Cost": 8.45,
+        "Plan Rows": 1,
+        "Plan Width": 10,
+        "Plans": [
+          {
+            "Node Type": "Index Scan",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Scan Direction": "Forward",
+            "Index Name": "trans_pkey",
+            "Relation Name": "trans",
+            "Alias": "trans",
+            "Startup Cost": 0.43,
+            "Total Cost": 8.45,
+            "Plan Rows": 1,
+            "Plan Width": 10,
+            "Index Cond": "(trans_id = 856799)",
+            "Filter": "(account_id < 2372)"
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 6.308753171540761
+  },
+  {
+    "timestamp": "2025-09-11T21:58:56.141698",
+    "dataset": "financial",
+    "query_type": "TP",
+    "query_index": 49,
+    "query_text": "SELECT \"district\".\"A8\", \"district\".\"A11\", \"account\".\"date\", \"account\".\"district_id\" FROM \"district\" INNER JOIN \"account\" ON \"district\".\"district_id\" = \"account\".\"district_id\" WHERE \"district\".\"district_id\" = 54 AND \"account\".\"account_id\" = 10815 LIMIT 10;",
+    "postgres_time_ms": 0.37371902726590633,
+    "duckdb_time_ms": 19.402892037760466,
+    "log_time_difference": -3.9496731569729255,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 0.28,
+        "Total Cost": 11.28,
+        "Plan Rows": 1,
+        "Plan Width": 16,
+        "Plans": [
+          {
+            "Node Type": "Nested Loop",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Join Type": "Inner",
+            "Startup Cost": 0.28,
+            "Total Cost": 11.28,
+            "Plan Rows": 1,
+            "Plan Width": 16,
+            "Inner Unique": false,
+            "Plans": [
+              {
+                "Node Type": "Seq Scan",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Relation Name": "district",
+                "Alias": "district",
+                "Startup Cost": 0.0,
+                "Total Cost": 2.96,
+                "Plan Rows": 1,
+                "Plan Width": 12,
+                "Filter": "(district_id = 54)"
+              },
+              {
+                "Node Type": "Index Scan",
+                "Parent Relationship": "Inner",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Scan Direction": "Forward",
+                "Index Name": "account_pkey",
+                "Relation Name": "account",
+                "Alias": "account",
+                "Startup Cost": 0.28,
+                "Total Cost": 8.3,
+                "Plan Rows": 1,
+                "Plan Width": 8,
+                "Index Cond": "(account_id = 10815)",
+                "Filter": "(district_id = 54)"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 51.91839489605392
+  }
+]

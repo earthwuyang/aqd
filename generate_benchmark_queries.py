@@ -45,6 +45,15 @@ CTU_DATASETS = [
     'Hepatitis_std'
 ]
 
+# TPC Benchmark Datasets
+TPC_DATASETS = [
+    'tpch_sf1',
+    'tpcds_sf1'
+]
+
+# All datasets
+ALL_DATASETS = CTU_DATASETS + TPC_DATASETS
+
 
 class Datatype(Enum):
     INT = 'INT'
@@ -100,11 +109,13 @@ class LogicalOperator(Enum):
 class DatabaseIntrospector:
     """Extract schema and statistics from PostgreSQL databases"""
     
-    def __init__(self, database):
+    def __init__(self, database, use_cache=True):
         self.database = database
         self.conn = None
         self.schema_info = {}
         self.column_stats = {}
+        self.use_cache = use_cache
+        self.cache_dir = OUTPUT_DIR / self.database / '.cache'
         
     def connect(self):
         """Connect to PostgreSQL database"""
@@ -192,8 +203,15 @@ class DatabaseIntrospector:
         cursor.close()
         return fks
     
-    def get_column_statistics(self, table, column, data_type):
-        """Get statistics for a column"""
+    def get_column_statistics(self, table, column, data_type, quick_mode=False):
+        """Get statistics for a column
+        
+        Args:
+            table: Table name
+            column: Column name
+            data_type: PostgreSQL data type
+            quick_mode: If True, skip expensive statistics calculations (for large tables)
+        """
         cursor = self.conn.cursor()
         stats = {}
         
@@ -215,71 +233,203 @@ class DatabaseIntrospector:
         
         stats['datatype'] = dtype
         
-        # Get basic statistics
-        cursor.execute(f"""
-            SELECT 
-                COUNT(*) as total_count,
-                COUNT("{column}") as non_null_count,
-                COUNT(DISTINCT "{column}") as unique_count
-            FROM "{table}"
-        """)
-        result = cursor.fetchone()
-        
-        total_count = result[0] if result[0] else 0
-        non_null_count = result[1] if result[1] else 0
-        unique_count = result[2] if result[2] else 0
-        
-        stats['total_count'] = total_count
-        stats['non_null_count'] = non_null_count
-        stats['unique_count'] = unique_count
-        stats['nan_ratio'] = 1.0 - (non_null_count / total_count) if total_count > 0 else 1.0
-        
-        if dtype in [Datatype.INT, Datatype.FLOAT]:
-            # Get numeric statistics
+        # For TPC datasets or quick mode, use simplified statistics
+        if quick_mode or self.database in TPC_DATASETS:
+            # Just get basic counts - much faster
             cursor.execute(f"""
                 SELECT 
-                    MIN("{column}")::float as min_val,
-                    MAX("{column}")::float as max_val,
-                    AVG("{column}")::float as mean_val,
-                    STDDEV("{column}")::float as std_val,
-                    PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY "{column}") as q1,
-                    PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY "{column}") as median,
-                    PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY "{column}") as q3
+                    COUNT(*) as total_count
                 FROM "{table}"
-                WHERE "{column}" IS NOT NULL
+                LIMIT 1
+            """)
+            result = cursor.fetchone()
+            total_count = result[0] if result[0] else 1000000  # Assume large for TPC
+            
+            stats['total_count'] = total_count
+            stats['non_null_count'] = int(total_count * 0.95)  # Assume 95% non-null
+            stats['unique_count'] = min(total_count // 2, 10000)  # Reasonable estimate
+            stats['nan_ratio'] = 0.05
+            
+            if dtype in [Datatype.INT, Datatype.FLOAT]:
+                # Use simplified stats for numeric columns
+                cursor.execute(f"""
+                    SELECT 
+                        MIN("{column}")::float as min_val,
+                        MAX("{column}")::float as max_val
+                    FROM "{table}"
+                    WHERE "{column}" IS NOT NULL
+                    LIMIT 1
+                """)
+                result = cursor.fetchone()
+                
+                if result:
+                    min_val = float(result[0]) if result[0] is not None else 0
+                    max_val = float(result[1]) if result[1] is not None else 100
+                    stats['min'] = min_val
+                    stats['max'] = max_val
+                    stats['mean'] = (min_val + max_val) / 2
+                    stats['std'] = (max_val - min_val) / 4
+                    stats['percentiles'] = [min_val, min_val, (min_val + max_val) / 2, max_val, max_val]
+            
+            elif dtype == Datatype.CATEGORICAL:
+                # Get just a few sample values
+                cursor.execute(f"""
+                    SELECT DISTINCT "{column}"
+                    FROM "{table}"
+                    WHERE "{column}" IS NOT NULL
+                    LIMIT 10
+                """)
+                unique_vals = [row[0] for row in cursor.fetchall()]
+                stats['unique_vals'] = unique_vals
+        else:
+            # Full statistics for smaller CTU datasets
+            # Get basic statistics
+            cursor.execute(f"""
+                SELECT 
+                    COUNT(*) as total_count,
+                    COUNT("{column}") as non_null_count,
+                    COUNT(DISTINCT "{column}") as unique_count
+                FROM "{table}"
             """)
             result = cursor.fetchone()
             
-            if result:
-                stats['min'] = float(result[0]) if result[0] is not None else 0
-                stats['max'] = float(result[1]) if result[1] is not None else 0
-                stats['mean'] = float(result[2]) if result[2] is not None else 0
-                stats['std'] = float(result[3]) if result[3] is not None else 0
-                stats['percentiles'] = [
-                    stats['min'],
-                    float(result[4]) if result[4] is not None else 0,
-                    float(result[5]) if result[5] is not None else 0,
-                    float(result[6]) if result[6] is not None else 0,
-                    stats['max']
-                ]
-        
-        elif dtype == Datatype.CATEGORICAL:
-            # Get sample unique values for categorical columns
-            cursor.execute(f"""
-                SELECT DISTINCT "{column}"
-                FROM "{table}"
-                WHERE "{column}" IS NOT NULL
-                LIMIT 100
-            """)
-            unique_vals = [row[0] for row in cursor.fetchall()]
-            stats['unique_vals'] = unique_vals
+            total_count = result[0] if result[0] else 0
+            non_null_count = result[1] if result[1] else 0
+            unique_count = result[2] if result[2] else 0
+            
+            stats['total_count'] = total_count
+            stats['non_null_count'] = non_null_count
+            stats['unique_count'] = unique_count
+            stats['nan_ratio'] = 1.0 - (non_null_count / total_count) if total_count > 0 else 1.0
+            
+            if dtype in [Datatype.INT, Datatype.FLOAT]:
+                # Get numeric statistics with percentiles
+                cursor.execute(f"""
+                    SELECT 
+                        MIN("{column}")::float as min_val,
+                        MAX("{column}")::float as max_val,
+                        AVG("{column}")::float as mean_val,
+                        STDDEV("{column}")::float as std_val,
+                        PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY "{column}") as q1,
+                        PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY "{column}") as median,
+                        PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY "{column}") as q3
+                    FROM "{table}"
+                    WHERE "{column}" IS NOT NULL
+                """)
+                result = cursor.fetchone()
+                
+                if result:
+                    stats['min'] = float(result[0]) if result[0] is not None else 0
+                    stats['max'] = float(result[1]) if result[1] is not None else 0
+                    stats['mean'] = float(result[2]) if result[2] is not None else 0
+                    stats['std'] = float(result[3]) if result[3] is not None else 0
+                    stats['percentiles'] = [
+                        stats['min'],
+                        float(result[4]) if result[4] is not None else 0,
+                        float(result[5]) if result[5] is not None else 0,
+                        float(result[6]) if result[6] is not None else 0,
+                        stats['max']
+                    ]
+            
+            elif dtype == Datatype.CATEGORICAL:
+                # Get sample unique values for categorical columns
+                cursor.execute(f"""
+                    SELECT DISTINCT "{column}"
+                    FROM "{table}"
+                    WHERE "{column}" IS NOT NULL
+                    LIMIT 100
+                """)
+                unique_vals = [row[0] for row in cursor.fetchall()]
+                stats['unique_vals'] = unique_vals
         
         cursor.close()
         return stats
     
+    def load_cache(self):
+        """Load cached analysis results if available"""
+        if not self.use_cache:
+            return False
+            
+        schema_cache_file = self.cache_dir / 'schema_info.json'
+        stats_cache_file = self.cache_dir / 'column_statistics.json'
+        
+        if schema_cache_file.exists() and stats_cache_file.exists():
+            try:
+                # Load schema info
+                with open(schema_cache_file, 'r') as f:
+                    self.schema_info = json.load(f)
+                
+                # Load column statistics and convert datatype strings back to enums
+                with open(stats_cache_file, 'r') as f:
+                    stats_data = json.load(f)
+                    self.column_stats = {}
+                    for table, cols in stats_data.items():
+                        self.column_stats[table] = {}
+                        for col, stats in cols.items():
+                            if 'datatype' in stats and isinstance(stats['datatype'], str):
+                                # Convert string back to Datatype enum
+                                stats['datatype'] = Datatype[stats['datatype']]
+                            self.column_stats[table][col] = stats
+                
+                print(f"  Loaded cached analysis from {self.cache_dir}")
+                return True
+            except Exception as e:
+                print(f"  Warning: Failed to load cache: {e}")
+                return False
+        return False
+    
+    def save_cache(self):
+        """Save analysis results to cache"""
+        if not self.use_cache:
+            return
+            
+        # Create cache directory
+        self.cache_dir.mkdir(parents=True, exist_ok=True)
+        
+        try:
+            # Save schema info
+            schema_cache_file = self.cache_dir / 'schema_info.json'
+            with open(schema_cache_file, 'w') as f:
+                # Convert foreign keys to serializable format
+                schema_copy = self.schema_info.copy()
+                if 'relationships' in schema_copy:
+                    schema_copy['relationships'] = [
+                        {
+                            'child_table': r[0] if isinstance(r, tuple) else r.get('child_table'),
+                            'child_column': r[1] if isinstance(r, tuple) else r.get('child_column'),
+                            'parent_table': r[2] if isinstance(r, tuple) else r.get('parent_table'),
+                            'parent_column': r[3] if isinstance(r, tuple) else r.get('parent_column')
+                        }
+                        for r in self.schema_info['relationships']
+                    ]
+                json.dump(schema_copy, f, indent=2, default=str)
+            
+            # Save column statistics
+            stats_cache_file = self.cache_dir / 'column_statistics.json'
+            with open(stats_cache_file, 'w') as f:
+                # Convert Datatype enums to strings
+                stats_copy = {}
+                for table, cols in self.column_stats.items():
+                    stats_copy[table] = {}
+                    for col, stats in cols.items():
+                        stats_dict = stats.copy()
+                        if 'datatype' in stats_dict and isinstance(stats_dict['datatype'], Datatype):
+                            stats_dict['datatype'] = stats_dict['datatype'].name
+                        stats_copy[table][col] = stats_dict
+                json.dump(stats_copy, f, indent=2, default=str)
+            
+            print(f"  Saved analysis cache to {self.cache_dir}")
+        except Exception as e:
+            print(f"  Warning: Failed to save cache: {e}")
+    
     def analyze_database(self):
         """Analyze complete database schema and statistics"""
         print(f"Analyzing database: {self.database}")
+        
+        # Try to load from cache first
+        if self.load_cache():
+            print(f"  Using cached analysis for {self.database}")
+            return True
         
         if not self.connect():
             return False
@@ -311,14 +461,20 @@ class DatabaseIntrospector:
             
             # Get column statistics
             self.column_stats[table] = {}
+            # Use quick mode for TPC datasets to avoid slow percentile calculations
+            quick_mode = self.database in TPC_DATASETS
             for col_name, data_type, is_nullable, default in columns:
                 try:
-                    stats = self.get_column_statistics(table, col_name, data_type)
+                    stats = self.get_column_statistics(table, col_name, data_type, quick_mode=quick_mode)
                     self.column_stats[table][col_name] = stats
                 except Exception as e:
                     print(f"    Warning: Failed to get stats for {table}.{col_name}: {e}")
         
         self.close()
+        
+        # Save cache for future use
+        self.save_cache()
+        
         return True
     
     def save_metadata(self):
@@ -331,15 +487,16 @@ class DatabaseIntrospector:
         with open(schema_path, 'w') as f:
             # Convert foreign keys to serializable format
             schema_copy = self.schema_info.copy()
-            schema_copy['relationships'] = [
-                {
-                    'child_table': r[0],
-                    'child_column': r[1],
-                    'parent_table': r[2],
-                    'parent_column': r[3]
-                }
-                for r in self.schema_info['relationships']
-            ]
+            if 'relationships' in schema_copy:
+                schema_copy['relationships'] = [
+                    {
+                        'child_table': r[0] if isinstance(r, tuple) else r.get('child_table'),
+                        'child_column': r[1] if isinstance(r, tuple) else r.get('child_column'),
+                        'parent_table': r[2] if isinstance(r, tuple) else r.get('parent_table'),
+                        'parent_column': r[3] if isinstance(r, tuple) else r.get('parent_column')
+                    }
+                    for r in self.schema_info['relationships']
+                ]
             json.dump(schema_copy, f, indent=2, default=str)
         
         # Save column statistics
@@ -797,14 +954,14 @@ class TPQueryGenerator(QueryGenerator):
         return ""
 
 
-def generate_queries_for_database(database, num_ap=1000, num_tp=1000):
+def generate_queries_for_database(database, num_ap=1000, num_tp=1000, use_cache=True):
     """Generate queries for a single database"""
     print(f"\n{'='*60}")
     print(f"Generating queries for: {database}")
     print(f"{'='*60}")
     
     # Analyze database
-    introspector = DatabaseIntrospector(database)
+    introspector = DatabaseIntrospector(database, use_cache=use_cache)
     if not introspector.analyze_database():
         print(f"Failed to analyze {database}")
         return False
@@ -882,7 +1039,7 @@ def main():
     parser.add_argument(
         '--databases', 
         nargs='+',
-        default=CTU_DATASETS,
+        default=ALL_DATASETS,
         help='Databases to generate queries for'
     )
     parser.add_argument(
@@ -903,16 +1060,54 @@ def main():
         default=str(OUTPUT_DIR),
         help='Output directory for queries'
     )
+    parser.add_argument(
+        '--tpc-only',
+        action='store_true',
+        help='Generate queries only for TPC-H and TPC-DS databases'
+    )
+    parser.add_argument(
+        '--ctu-only',
+        action='store_true',
+        help='Generate queries only for CTU databases'
+    )
+    parser.add_argument(
+        '--no-cache',
+        action='store_true',
+        help='Do not use cached analysis results (force re-analysis)'
+    )
+    parser.add_argument(
+        '--clear-cache',
+        action='store_true',
+        help='Clear all cached analysis results before generating queries'
+    )
     
     args = parser.parse_args()
+    
+    # Determine which databases to use based on flags
+    if args.tpc_only:
+        args.databases = TPC_DATASETS
+    elif args.ctu_only:
+        args.databases = CTU_DATASETS
+    # Otherwise use the provided databases or default (ALL_DATASETS)
     
     # Update output directory
     OUTPUT_DIR = Path(args.output_dir)
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     
+    # Handle cache clearing if requested
+    if args.clear_cache:
+        print("Clearing all cached analysis results...")
+        import shutil
+        for database in ALL_DATASETS:
+            cache_dir = OUTPUT_DIR / database / '.cache'
+            if cache_dir.exists():
+                shutil.rmtree(cache_dir)
+                print(f"  Cleared cache for {database}")
+    
     print("="*60)
     print("Benchmark Query Generator for PostgreSQL + pg_duckdb")
     print("Based on TiDB AQD methodology")
+    print("Supports CTU datasets and TPC-H/TPC-DS benchmarks")
     print("="*60)
     
     # Check which databases exist
@@ -940,7 +1135,7 @@ def main():
     successful = 0
     
     for db in available_dbs:
-        if generate_queries_for_database(db, args.num_ap, args.num_tp):
+        if generate_queries_for_database(db, args.num_ap, args.num_tp, use_cache=not args.no_cache):
             successful += 1
     
     # Summary

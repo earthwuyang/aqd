@@ -1,0 +1,2597 @@
+[
+  {
+    "timestamp": "2025-09-11T21:46:28.302555",
+    "dataset": "tpcds_sf1",
+    "query_type": "AP",
+    "query_index": 0,
+    "query_text": "SELECT STDDEV(\"catalog_returns\".\"cr_order_number\"), VARIANCE(\"catalog_returns\".\"cr_ship_mode_sk\"), SUM(\"catalog_returns\".\"cr_refunded_cash\"), AVG(\"catalog_returns\".\"cr_return_ship_cost\") FROM \"web_site\" CROSS JOIN \"income_band\" CROSS JOIN \"reason\" CROSS JOIN \"ship_mode\" CROSS JOIN \"catalog_returns\" WHERE \"reason\".\"r_reason_id\" LIKE '%u%' AND \"income_band\".\"ib_income_band_sk\" < 2 ORDER BY COUNT(*) ASC;",
+    "postgres_time_ms": 514.216661977116,
+    "duckdb_time_ms": 79.52069997554645,
+    "log_time_difference": 1.8666273331772887,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Sort",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 2324739959591.14,
+        "Total Cost": 2324739959591.14,
+        "Plan Rows": 1,
+        "Plan Width": 136,
+        "Sort Key": [
+          "(count(*))"
+        ],
+        "Plans": [
+          {
+            "Node Type": "Aggregate",
+            "Strategy": "Plain",
+            "Partial Mode": "Finalize",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 2324739959591.12,
+            "Total Cost": 2324739959591.13,
+            "Plan Rows": 1,
+            "Plan Width": 136,
+            "Plans": [
+              {
+                "Node Type": "Gather",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Startup Cost": 2324739959590.98,
+                "Total Cost": 2324739959591.09,
+                "Plan Rows": 1,
+                "Plan Width": 136,
+                "Workers Planned": 1,
+                "Single Copy": false,
+                "Plans": [
+                  {
+                    "Node Type": "Aggregate",
+                    "Strategy": "Plain",
+                    "Partial Mode": "Partial",
+                    "Parent Relationship": "Outer",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Startup Cost": 2324739958590.98,
+                    "Total Cost": 2324739958590.99,
+                    "Plan Rows": 1,
+                    "Plan Width": 136,
+                    "Plans": [
+                      {
+                        "Node Type": "Nested Loop",
+                        "Parent Relationship": "Outer",
+                        "Parallel Aware": false,
+                        "Async Capable": false,
+                        "Join Type": "Inner",
+                        "Startup Cost": 9.42,
+                        "Total Cost": 1494914038590.97,
+                        "Plan Rows": 66386073600000,
+                        "Plan Width": 20,
+                        "Inner Unique": false,
+                        "Plans": [
+                          {
+                            "Node Type": "Seq Scan",
+                            "Parent Relationship": "Outer",
+                            "Parallel Aware": true,
+                            "Async Capable": false,
+                            "Relation Name": "catalog_returns",
+                            "Alias": "catalog_returns",
+                            "Startup Cost": 0.0,
+                            "Total Cost": 3743.45,
+                            "Plan Rows": 84745,
+                            "Plan Width": 20
+                          },
+                          {
+                            "Node Type": "Nested Loop",
+                            "Parent Relationship": "Inner",
+                            "Parallel Aware": false,
+                            "Async Capable": false,
+                            "Join Type": "Inner",
+                            "Startup Cost": 9.42,
+                            "Total Cost": 9806544.37,
+                            "Plan Rows": 783360000,
+                            "Plan Width": 0,
+                            "Inner Unique": false,
+                            "Plans": [
+                              {
+                                "Node Type": "Nested Loop",
+                                "Parent Relationship": "Outer",
+                                "Parallel Aware": false,
+                                "Async Capable": false,
+                                "Join Type": "Inner",
+                                "Startup Cost": 0.0,
+                                "Total Cost": 14514.75,
+                                "Plan Rows": 1152000,
+                                "Plan Width": 0,
+                                "Inner Unique": false,
+                                "Plans": [
+                                  {
+                                    "Node Type": "Nested Loop",
+                                    "Parent Relationship": "Outer",
+                                    "Parallel Aware": false,
+                                    "Async Capable": false,
+                                    "Join Type": "Inner",
+                                    "Startup Cost": 0.0,
+                                    "Total Cost": 102.5,
+                                    "Plan Rows": 6400,
+                                    "Plan Width": 0,
+                                    "Inner Unique": false,
+                                    "Plans": [
+                                      {
+                                        "Node Type": "Seq Scan",
+                                        "Parent Relationship": "Outer",
+                                        "Parallel Aware": false,
+                                        "Async Capable": false,
+                                        "Relation Name": "reason",
+                                        "Alias": "reason",
+                                        "Startup Cost": 0.0,
+                                        "Total Cost": 12.0,
+                                        "Plan Rows": 160,
+                                        "Plan Width": 0,
+                                        "Filter": "(r_reason_id ~~ '%u%'::text)"
+                                      },
+                                      {
+                                        "Node Type": "Materialize",
+                                        "Parent Relationship": "Inner",
+                                        "Parallel Aware": false,
+                                        "Async Capable": false,
+                                        "Startup Cost": 0.0,
+                                        "Total Cost": 10.6,
+                                        "Plan Rows": 40,
+                                        "Plan Width": 0,
+                                        "Plans": [
+                                          {
+                                            "Node Type": "Seq Scan",
+                                            "Parent Relationship": "Outer",
+                                            "Parallel Aware": false,
+                                            "Async Capable": false,
+                                            "Relation Name": "web_site",
+                                            "Alias": "web_site",
+                                            "Startup Cost": 0.0,
+                                            "Total Cost": 10.4,
+                                            "Plan Rows": 40,
+                                            "Plan Width": 0
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "Node Type": "Materialize",
+                                    "Parent Relationship": "Inner",
+                                    "Parallel Aware": false,
+                                    "Async Capable": false,
+                                    "Startup Cost": 0.0,
+                                    "Total Cost": 12.7,
+                                    "Plan Rows": 180,
+                                    "Plan Width": 0,
+                                    "Plans": [
+                                      {
+                                        "Node Type": "Seq Scan",
+                                        "Parent Relationship": "Outer",
+                                        "Parallel Aware": false,
+                                        "Async Capable": false,
+                                        "Relation Name": "ship_mode",
+                                        "Alias": "ship_mode",
+                                        "Startup Cost": 0.0,
+                                        "Total Cost": 11.8,
+                                        "Plan Rows": 180,
+                                        "Plan Width": 0
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "Node Type": "Materialize",
+                                "Parent Relationship": "Inner",
+                                "Parallel Aware": false,
+                                "Async Capable": false,
+                                "Startup Cost": 9.42,
+                                "Total Cost": 31.32,
+                                "Plan Rows": 680,
+                                "Plan Width": 0,
+                                "Plans": [
+                                  {
+                                    "Node Type": "Bitmap Heap Scan",
+                                    "Parent Relationship": "Outer",
+                                    "Parallel Aware": false,
+                                    "Async Capable": false,
+                                    "Relation Name": "income_band",
+                                    "Alias": "income_band",
+                                    "Startup Cost": 9.42,
+                                    "Total Cost": 27.92,
+                                    "Plan Rows": 680,
+                                    "Plan Width": 0,
+                                    "Recheck Cond": "(ib_income_band_sk < 2)",
+                                    "Plans": [
+                                      {
+                                        "Node Type": "Bitmap Index Scan",
+                                        "Parent Relationship": "Outer",
+                                        "Parallel Aware": false,
+                                        "Async Capable": false,
+                                        "Index Name": "income_band_pkey",
+                                        "Startup Cost": 0.0,
+                                        "Total Cost": 9.25,
+                                        "Plan Rows": 680,
+                                        "Plan Width": 0,
+                                        "Index Cond": "(ib_income_band_sk < 2)"
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "duckdb",
+    "speedup_ratio": 6.466450397635379
+  },
+  {
+    "timestamp": "2025-09-11T21:47:03.888129",
+    "dataset": "tpcds_sf1",
+    "query_type": "AP",
+    "query_index": 6,
+    "query_text": "SELECT MAX(\"date_dim\".\"d_dow\"), AVG(\"date_dim\".\"d_year\"), MAX(\"date_dim\".\"d_fy_year\") FROM \"date_dim\" CROSS JOIN \"time_dim\";",
+    "postgres_time_ms": 30000,
+    "duckdb_time_ms": 5576.511594001204,
+    "log_time_difference": 1.6826339631297849,
+    "postgres_plan": null,
+    "optimal_engine": "duckdb",
+    "speedup_ratio": 5.37970727654754
+  },
+  {
+    "timestamp": "2025-09-11T21:47:03.913871",
+    "dataset": "tpcds_sf1",
+    "query_type": "AP",
+    "query_index": 7,
+    "query_text": "SELECT MAX(\"web_site\".\"web_close_date_sk\"), VARIANCE(\"web_page\".\"wp_access_date_sk\"), COUNT(*) FROM \"dbgen_version\" CROSS JOIN \"web_page\" CROSS JOIN \"web_site\" WHERE \"dbgen_version\".\"dv_version\" LIKE '%e%' AND \"dbgen_version\".\"dv_version\" IS NOT NULL AND \"web_site\".\"web_city\" != 'Fairview' AND \"web_page\".\"wp_type\" != 'protected                                         ' AND \"web_page\".\"wp_link_count\" > 25 ORDER BY COUNT(*) DESC;",
+    "postgres_time_ms": 0.5275130388326943,
+    "duckdb_time_ms": 23.005160968750715,
+    "log_time_difference": -3.7753002764743337,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Sort",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 149.93,
+        "Total Cost": 149.93,
+        "Plan Rows": 1,
+        "Plan Width": 44,
+        "Sort Key": [
+          "(count(*)) DESC"
+        ],
+        "Plans": [
+          {
+            "Node Type": "Aggregate",
+            "Strategy": "Plain",
+            "Partial Mode": "Simple",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 149.91,
+            "Total Cost": 149.92,
+            "Plan Rows": 1,
+            "Plan Width": 44,
+            "Plans": [
+              {
+                "Node Type": "Nested Loop",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Join Type": "Inner",
+                "Startup Cost": 0.0,
+                "Total Cost": 103.4,
+                "Plan Rows": 6201,
+                "Plan Width": 8,
+                "Inner Unique": false,
+                "Plans": [
+                  {
+                    "Node Type": "Seq Scan",
+                    "Parent Relationship": "Outer",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Relation Name": "dbgen_version",
+                    "Alias": "dbgen_version",
+                    "Startup Cost": 0.0,
+                    "Total Cost": 12.0,
+                    "Plan Rows": 159,
+                    "Plan Width": 0,
+                    "Filter": "((dv_version IS NOT NULL) AND ((dv_version)::text ~~ '%e%'::text))"
+                  },
+                  {
+                    "Node Type": "Materialize",
+                    "Parent Relationship": "Inner",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Startup Cost": 0.0,
+                    "Total Cost": 13.99,
+                    "Plan Rows": 39,
+                    "Plan Width": 8,
+                    "Plans": [
+                      {
+                        "Node Type": "Nested Loop",
+                        "Parent Relationship": "Outer",
+                        "Parallel Aware": false,
+                        "Async Capable": false,
+                        "Join Type": "Inner",
+                        "Startup Cost": 0.0,
+                        "Total Cost": 13.79,
+                        "Plan Rows": 39,
+                        "Plan Width": 8,
+                        "Inner Unique": false,
+                        "Plans": [
+                          {
+                            "Node Type": "Seq Scan",
+                            "Parent Relationship": "Outer",
+                            "Parallel Aware": false,
+                            "Async Capable": false,
+                            "Relation Name": "web_page",
+                            "Alias": "web_page",
+                            "Startup Cost": 0.0,
+                            "Total Cost": 2.9,
+                            "Plan Rows": 1,
+                            "Plan Width": 4,
+                            "Filter": "((wp_type <> 'protected                                         '::bpchar) AND (wp_link_count > 25))"
+                          },
+                          {
+                            "Node Type": "Seq Scan",
+                            "Parent Relationship": "Inner",
+                            "Parallel Aware": false,
+                            "Async Capable": false,
+                            "Relation Name": "web_site",
+                            "Alias": "web_site",
+                            "Startup Cost": 0.0,
+                            "Total Cost": 10.5,
+                            "Plan Rows": 39,
+                            "Plan Width": 4,
+                            "Filter": "((web_city)::text <> 'Fairview'::text)"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 43.61060158751264
+  },
+  {
+    "timestamp": "2025-09-11T21:48:04.770462",
+    "dataset": "tpcds_sf1",
+    "query_type": "AP",
+    "query_index": 11,
+    "query_text": "SELECT AVG(\"item\".\"i_manager_id\"), AVG(\"customer\".\"c_first_sales_date_sk\"), MIN(\"item\".\"i_item_sk\") FROM \"customer\" CROSS JOIN \"item\" WHERE \"item\".\"i_class\" = 'tables                                            ' AND \"item\".\"i_class\" IS NOT NULL AND \"item\".\"i_manufact\" LIKE '%a%' GROUP BY \"item\".\"i_container\", \"customer\".\"c_last_name\", \"item\".\"i_class\";",
+    "postgres_time_ms": 432.9306840081699,
+    "duckdb_time_ms": 409.70276697771624,
+    "log_time_difference": 0.05514569386794496,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Custom Scan",
+        "Custom Plan Provider": "DuckDBScan",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 0.0,
+        "Total Cost": 0.0,
+        "Plan Rows": 0,
+        "Plan Width": 0,
+        "DuckDB Execution Plan": [
+          {
+            "name": "PROJECTION",
+            "children": [
+              {
+                "name": "HASH_GROUP_BY",
+                "children": [
+                  {
+                    "name": "PROJECTION",
+                    "children": [
+                      {
+                        "name": "CROSS_PRODUCT",
+                        "children": [
+                          {
+                            "name": "PGDUCKDB_POSTGRES_SCAN ",
+                            "children": [],
+                            "extra_info": {
+                              "Table": "customer",
+                              "Projections": [
+                                "c_last_name",
+                                "c_first_sales_date_sk"
+                              ],
+                              "Estimated Cardinality": "100000"
+                            }
+                          },
+                          {
+                            "name": "PGDUCKDB_POSTGRES_SCAN ",
+                            "children": [],
+                            "extra_info": {
+                              "Table": "item",
+                              "Projections": [
+                                "i_class",
+                                "i_container",
+                                "i_manager_id",
+                                "i_item_sk"
+                              ],
+                              "Filters": [
+                                "i_class='tables                                            ' AND (i_class IS NOT NULL)",
+                                "like_escape(i_manufact, '%a%', '\\')"
+                              ],
+                              "Estimated Cardinality": "3600"
+                            }
+                          }
+                        ],
+                        "extra_info": {}
+                      }
+                    ],
+                    "extra_info": {
+                      "Projections": [
+                        "i_container",
+                        "c_last_name",
+                        "i_class",
+                        "i_manager_id",
+                        "c_first_sales_date_sk",
+                        "i_item_sk"
+                      ],
+                      "Estimated Cardinality": "360000000"
+                    }
+                  }
+                ],
+                "extra_info": {
+                  "Groups": [
+                    "#0",
+                    "#1",
+                    "#2"
+                  ],
+                  "Aggregates": [
+                    "avg(#3)",
+                    "avg(#4)",
+                    "min(#5)"
+                  ],
+                  "Estimated Cardinality": "359999601"
+                }
+              }
+            ],
+            "extra_info": {
+              "Projections": [
+                "avg",
+                "avg",
+                "min"
+              ],
+              "Estimated Cardinality": "359999601"
+            }
+          }
+        ]
+      }
+    },
+    "optimal_engine": "duckdb",
+    "speedup_ratio": 1.056694557378269
+  },
+  {
+    "timestamp": "2025-09-11T21:49:35.534989",
+    "dataset": "tpcds_sf1",
+    "query_type": "AP",
+    "query_index": 18,
+    "query_text": "SELECT SUM(\"customer_address\".\"ca_address_sk\"), MAX(\"store_returns\".\"sr_addr_sk\") FROM \"store\" CROSS JOIN \"customer_demographics\" CROSS JOIN \"customer_address\" CROSS JOIN \"store_returns\" CROSS JOIN \"household_demographics\" WHERE \"household_demographics\".\"hd_dep_count\" > 3 AND \"store\".\"s_street_name\" LIKE '%u%' AND \"customer_demographics\".\"cd_dep_employed_count\" = 6 AND \"store\".\"s_number_employees\" >= 262 AND \"customer_demographics\".\"cd_gender\" LIKE '%a%';",
+    "postgres_time_ms": 382.6850299956277,
+    "duckdb_time_ms": 355.5392980342731,
+    "log_time_difference": 0.07357648872587193,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Custom Scan",
+        "Custom Plan Provider": "DuckDBScan",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 0.0,
+        "Total Cost": 0.0,
+        "Plan Rows": 0,
+        "Plan Width": 0,
+        "DuckDB Execution Plan": [
+          {
+            "name": "UNGROUPED_AGGREGATE",
+            "children": [
+              {
+                "name": "PROJECTION",
+                "children": [
+                  {
+                    "name": "CROSS_PRODUCT",
+                    "children": [
+                      {
+                        "name": "CROSS_PRODUCT",
+                        "children": [
+                          {
+                            "name": "PGDUCKDB_POSTGRES_SCAN ",
+                            "children": [],
+                            "extra_info": {
+                              "Table": "store_returns",
+                              "Projections": "sr_addr_sk",
+                              "Estimated Cardinality": "287514"
+                            }
+                          },
+                          {
+                            "name": "PGDUCKDB_POSTGRES_SCAN ",
+                            "children": [],
+                            "extra_info": {
+                              "Table": "customer_address",
+                              "Projections": "ca_address_sk",
+                              "Estimated Cardinality": "50000"
+                            }
+                          }
+                        ],
+                        "extra_info": {}
+                      },
+                      {
+                        "name": "CROSS_PRODUCT",
+                        "children": [
+                          {
+                            "name": "PGDUCKDB_POSTGRES_SCAN ",
+                            "children": [],
+                            "extra_info": {
+                              "Table": "customer_demographics",
+                              "Projections": "",
+                              "Filters": [
+                                "cd_dep_employed_count=6",
+                                "like_escape(cd_gender, '%a%', '\\')"
+                              ],
+                              "Estimated Cardinality": "384160"
+                            }
+                          },
+                          {
+                            "name": "CROSS_PRODUCT",
+                            "children": [
+                              {
+                                "name": "PGDUCKDB_POSTGRES_SCAN ",
+                                "children": [],
+                                "extra_info": {
+                                  "Table": "household_demographics",
+                                  "Projections": "",
+                                  "Filters": "hd_dep_count>3",
+                                  "Estimated Cardinality": "1440"
+                                }
+                              },
+                              {
+                                "name": "PGDUCKDB_POSTGRES_SCAN ",
+                                "children": [],
+                                "extra_info": {
+                                  "Table": "store",
+                                  "Projections": "",
+                                  "Filters": [
+                                    "like_escape(s_street_name, '%u%', '\\')",
+                                    "s_number_employees>=262"
+                                  ],
+                                  "Estimated Cardinality": "8"
+                                }
+                              }
+                            ],
+                            "extra_info": {}
+                          }
+                        ],
+                        "extra_info": {}
+                      }
+                    ],
+                    "extra_info": {}
+                  }
+                ],
+                "extra_info": {
+                  "Projections": [
+                    "ca_address_sk",
+                    "sr_addr_sk"
+                  ],
+                  "Estimated Cardinality": "18446744073709551615"
+                }
+              }
+            ],
+            "extra_info": {
+              "Aggregates": [
+                "sum(#0)",
+                "max(#1)"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "optimal_engine": "duckdb",
+    "speedup_ratio": 1.0763508622294062
+  },
+  {
+    "timestamp": "2025-09-11T21:50:35.576195",
+    "dataset": "tpcds_sf1",
+    "query_type": "AP",
+    "query_index": 20,
+    "query_text": "SELECT COUNT(*), MIN(\"catalog_page\".\"cp_start_date_sk\"), SUM(\"catalog_page\".\"cp_catalog_number\"), STDDEV(\"catalog_page\".\"cp_end_date_sk\") FROM \"catalog_page\";",
+    "postgres_time_ms": 16.90754998708144,
+    "duckdb_time_ms": 16.822214995045215,
+    "log_time_difference": 0.005059932919788765,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Custom Scan",
+        "Custom Plan Provider": "DuckDBScan",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 0.0,
+        "Total Cost": 0.0,
+        "Plan Rows": 0,
+        "Plan Width": 0,
+        "DuckDB Execution Plan": [
+          {
+            "name": "UNGROUPED_AGGREGATE",
+            "children": [
+              {
+                "name": "PROJECTION",
+                "children": [
+                  {
+                    "name": "PGDUCKDB_POSTGRES_SCAN ",
+                    "children": [],
+                    "extra_info": {
+                      "Table": "catalog_page",
+                      "Projections": [
+                        "cp_start_date_sk",
+                        "cp_catalog_number",
+                        "cp_end_date_sk"
+                      ],
+                      "Estimated Cardinality": "11718"
+                    }
+                  }
+                ],
+                "extra_info": {
+                  "Projections": [
+                    "cp_start_date_sk",
+                    "cp_catalog_number",
+                    "CAST(cp_end_date_sk AS DOUBLE)"
+                  ],
+                  "Estimated Cardinality": "11718"
+                }
+              }
+            ],
+            "extra_info": {
+              "Aggregates": [
+                "count_star()",
+                "min(#0)",
+                "sum(#1)",
+                "stddev(#2)"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "optimal_engine": "duckdb",
+    "speedup_ratio": 1.0050727559992163
+  },
+  {
+    "timestamp": "2025-09-11T21:50:35.658467",
+    "dataset": "tpcds_sf1",
+    "query_type": "AP",
+    "query_index": 23,
+    "query_text": "SELECT MAX(\"web_returns\".\"wr_return_ship_cost\"), VARIANCE(\"web_returns\".\"wr_reversed_charge\"), AVG(\"web_returns\".\"wr_net_loss\"), MAX(\"web_returns\".\"wr_returned_date_sk\"), MAX(\"web_returns\".\"wr_returning_addr_sk\") FROM \"web_returns\" WHERE \"web_returns\".\"wr_return_ship_cost\" < 3308.8288790287957 AND \"web_returns\".\"wr_returning_addr_sk\" > 2;",
+    "postgres_time_ms": 45.91698304284364,
+    "duckdb_time_ms": 33.864349010400474,
+    "log_time_difference": 0.3044722401642072,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Aggregate",
+        "Strategy": "Plain",
+        "Partial Mode": "Simple",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 3230.09,
+        "Total Cost": 3230.1,
+        "Plan Rows": 1,
+        "Plan Width": 104,
+        "Plans": [
+          {
+            "Node Type": "Seq Scan",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Relation Name": "web_returns",
+            "Alias": "web_returns",
+            "Startup Cost": 0.0,
+            "Total Cost": 2436.44,
+            "Plan Rows": 63491,
+            "Plan Width": 26,
+            "Filter": "((wr_return_ship_cost < 3308.8288790287957) AND (wr_returning_addr_sk > 2))"
+          }
+        ]
+      }
+    },
+    "optimal_engine": "duckdb",
+    "speedup_ratio": 1.3559092197148552
+  },
+  {
+    "timestamp": "2025-09-11T21:51:35.718712",
+    "dataset": "tpcds_sf1",
+    "query_type": "AP",
+    "query_index": 27,
+    "query_text": "SELECT VARIANCE(\"income_band\".\"ib_upper_bound\"), COUNT(*), VARIANCE(\"household_demographics\".\"hd_dep_count\"), MIN(\"household_demographics\".\"hd_vehicle_count\") FROM \"household_demographics\" CROSS JOIN \"income_band\" WHERE \"income_band\".\"ib_lower_bound\" <= 0 AND \"household_demographics\".\"hd_buy_potential\" LIKE '%u%' AND \"household_demographics\".\"hd_buy_potential\" IS NULL GROUP BY \"household_demographics\".\"hd_buy_potential\", \"household_demographics\".\"hd_buy_potential\" LIMIT 10;",
+    "postgres_time_ms": 22.166769951581955,
+    "duckdb_time_ms": 20.001003984361887,
+    "log_time_difference": 0.10281184694055934,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Custom Scan",
+        "Custom Plan Provider": "DuckDBScan",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 0.0,
+        "Total Cost": 0.0,
+        "Plan Rows": 0,
+        "Plan Width": 0,
+        "DuckDB Execution Plan": [
+          {
+            "name": "PROJECTION",
+            "children": [
+              {
+                "name": "STREAMING_LIMIT",
+                "children": [
+                  {
+                    "name": "HASH_GROUP_BY",
+                    "children": [
+                      {
+                        "name": "PROJECTION",
+                        "children": [
+                          {
+                            "name": "CROSS_PRODUCT",
+                            "children": [
+                              {
+                                "name": "PGDUCKDB_POSTGRES_SCAN ",
+                                "children": [],
+                                "extra_info": {
+                                  "Table": "household_demographics",
+                                  "Projections": [
+                                    "hd_buy_potential",
+                                    "hd_dep_count",
+                                    "hd_vehicle_count"
+                                  ],
+                                  "Filters": "like_escape(hd_buy_potential, '%u%', '\\') AND (hd_buy_potential IS NULL)",
+                                  "Estimated Cardinality": "1440"
+                                }
+                              },
+                              {
+                                "name": "PGDUCKDB_POSTGRES_SCAN ",
+                                "children": [],
+                                "extra_info": {
+                                  "Table": "income_band",
+                                  "Projections": "ib_upper_bound",
+                                  "Filters": "ib_lower_bound<=0",
+                                  "Estimated Cardinality": "408"
+                                }
+                              }
+                            ],
+                            "extra_info": {}
+                          }
+                        ],
+                        "extra_info": {
+                          "Projections": [
+                            "hd_buy_potential",
+                            "CAST(ib_upper_bound AS DOUBLE)",
+                            "CAST(hd_dep_count AS DOUBLE)",
+                            "hd_vehicle_count"
+                          ],
+                          "Estimated Cardinality": "587520"
+                        }
+                      }
+                    ],
+                    "extra_info": {
+                      "Groups": "#0",
+                      "Aggregates": [
+                        "variance(#1)",
+                        "count_star()",
+                        "variance(#2)",
+                        "min(#3)"
+                      ],
+                      "Estimated Cardinality": "7200"
+                    }
+                  }
+                ],
+                "extra_info": {}
+              }
+            ],
+            "extra_info": {
+              "Projections": [
+                "variance",
+                "count",
+                "variance",
+                "min"
+              ],
+              "Estimated Cardinality": "0"
+            }
+          }
+        ]
+      }
+    },
+    "optimal_engine": "duckdb",
+    "speedup_ratio": 1.1082828626459655
+  },
+  {
+    "timestamp": "2025-09-11T21:51:35.777478",
+    "dataset": "tpcds_sf1",
+    "query_type": "AP",
+    "query_index": 28,
+    "query_text": "SELECT COUNT(*), STDDEV(\"web_returns\".\"wr_return_quantity\"), MAX(\"web_returns\".\"wr_returned_time_sk\"), MIN(\"customer_demographics\".\"cd_dep_employed_count\") FROM \"customer_demographics\" CROSS JOIN \"web_returns\" WHERE \"web_returns\".\"wr_reversed_charge\" > 0.0 AND \"web_returns\".\"wr_reversed_charge\" IS NOT NULL AND \"web_returns\".\"wr_web_page_sk\" < 57 AND \"customer_demographics\".\"cd_credit_rating\" != 'Unknown   ' AND \"customer_demographics\".\"cd_dep_count\" > 4 AND \"customer_demographics\".\"cd_demo_sk\" >= 1920800 AND \"customer_demographics\".\"cd_demo_sk\" IS NOT NULL ORDER BY COUNT(*) ASC LIMIT 100;",
+    "postgres_time_ms": 0.5605430342257023,
+    "duckdb_time_ms": 56.420776003506035,
+    "log_time_difference": -4.611686720667001,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 3618.76,
+        "Total Cost": 3618.76,
+        "Plan Rows": 1,
+        "Plan Width": 48,
+        "Plans": [
+          {
+            "Node Type": "Sort",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 3618.76,
+            "Total Cost": 3618.76,
+            "Plan Rows": 1,
+            "Plan Width": 48,
+            "Sort Key": [
+              "(count(*))"
+            ],
+            "Plans": [
+              {
+                "Node Type": "Aggregate",
+                "Strategy": "Plain",
+                "Partial Mode": "Simple",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Startup Cost": 3618.74,
+                "Total Cost": 3618.75,
+                "Plan Rows": 1,
+                "Plan Width": 48,
+                "Plans": [
+                  {
+                    "Node Type": "Nested Loop",
+                    "Parent Relationship": "Outer",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Join Type": "Inner",
+                    "Startup Cost": 0.43,
+                    "Total Cost": 3031.81,
+                    "Plan Rows": 58692,
+                    "Plan Width": 12,
+                    "Inner Unique": false,
+                    "Plans": [
+                      {
+                        "Node Type": "Index Scan",
+                        "Parent Relationship": "Outer",
+                        "Parallel Aware": false,
+                        "Async Capable": false,
+                        "Scan Direction": "Forward",
+                        "Index Name": "customer_demographics_pkey",
+                        "Relation Name": "customer_demographics",
+                        "Alias": "customer_demographics",
+                        "Startup Cost": 0.43,
+                        "Total Cost": 8.45,
+                        "Plan Rows": 1,
+                        "Plan Width": 4,
+                        "Index Cond": "(cd_demo_sk >= 1920800)",
+                        "Filter": "((cd_credit_rating <> 'Unknown   '::bpchar) AND (cd_dep_count > 4))"
+                      },
+                      {
+                        "Node Type": "Seq Scan",
+                        "Parent Relationship": "Inner",
+                        "Parallel Aware": false,
+                        "Async Capable": false,
+                        "Relation Name": "web_returns",
+                        "Alias": "web_returns",
+                        "Startup Cost": 0.0,
+                        "Total Cost": 2436.44,
+                        "Plan Rows": 58692,
+                        "Plan Width": 8,
+                        "Filter": "((wr_reversed_charge IS NOT NULL) AND (wr_reversed_charge > 0.0) AND (wr_web_page_sk < 57))"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 100.65378134872736
+  },
+  {
+    "timestamp": "2025-09-11T21:52:38.872509",
+    "dataset": "tpcds_sf1",
+    "query_type": "AP",
+    "query_index": 32,
+    "query_text": "SELECT COUNT(*), SUM(\"web_sales\".\"ws_bill_customer_sk\"), AVG(\"web_sales\".\"ws_ext_tax\") FROM \"income_band\" CROSS JOIN \"web_sales\" WHERE \"web_sales\".\"ws_ship_date_sk\" > 2452762 AND \"web_sales\".\"ws_sales_price\" <= 202.04701349976978 AND \"web_sales\".\"ws_sales_price\" IS NOT NULL AND \"income_band\".\"ib_lower_bound\" <= 183303 AND \"web_sales\".\"ws_ship_mode_sk\" > 13 ORDER BY COUNT(*) DESC;",
+    "postgres_time_ms": 174.06610096804798,
+    "duckdb_time_ms": 179.2506980127655,
+    "log_time_difference": -0.029350255850831272,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Custom Scan",
+        "Custom Plan Provider": "DuckDBScan",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 0.0,
+        "Total Cost": 0.0,
+        "Plan Rows": 0,
+        "Plan Width": 0,
+        "DuckDB Execution Plan": [
+          {
+            "name": "ORDER_BY",
+            "children": [
+              {
+                "name": "UNGROUPED_AGGREGATE",
+                "children": [
+                  {
+                    "name": "PROJECTION",
+                    "children": [
+                      {
+                        "name": "CROSS_PRODUCT",
+                        "children": [
+                          {
+                            "name": "PROJECTION",
+                            "children": [
+                              {
+                                "name": "FILTER",
+                                "children": [
+                                  {
+                                    "name": "PGDUCKDB_POSTGRES_SCAN ",
+                                    "children": [],
+                                    "extra_info": {
+                                      "Table": "web_sales",
+                                      "Projections": [
+                                        "ws_sales_price",
+                                        "ws_bill_customer_sk",
+                                        "ws_ext_tax"
+                                      ],
+                                      "Filters": [
+                                        "ws_ship_date_sk>2452762",
+                                        "(ws_sales_price IS NOT NULL)",
+                                        "ws_ship_mode_sk>13"
+                                      ],
+                                      "Estimated Cardinality": "143876"
+                                    }
+                                  }
+                                ],
+                                "extra_info": {
+                                  "Expression": "(CAST(ws_sales_price AS DECIMAL(19,14)) <= 202.04701349976978)",
+                                  "Estimated Cardinality": "28775"
+                                }
+                              }
+                            ],
+                            "extra_info": {
+                              "Projections": [
+                                "#1",
+                                "#2"
+                              ],
+                              "Estimated Cardinality": "28775"
+                            }
+                          },
+                          {
+                            "name": "PGDUCKDB_POSTGRES_SCAN ",
+                            "children": [],
+                            "extra_info": {
+                              "Table": "income_band",
+                              "Projections": "",
+                              "Filters": "ib_lower_bound<=183303",
+                              "Estimated Cardinality": "408"
+                            }
+                          }
+                        ],
+                        "extra_info": {}
+                      }
+                    ],
+                    "extra_info": {
+                      "Projections": [
+                        "ws_bill_customer_sk",
+                        "ws_ext_tax"
+                      ],
+                      "Estimated Cardinality": "11740200"
+                    }
+                  }
+                ],
+                "extra_info": {
+                  "Aggregates": [
+                    "count_star()",
+                    "sum(#0)",
+                    "avg(#1)"
+                  ]
+                }
+              }
+            ],
+            "extra_info": {
+              "Order By": "count_star() DESC"
+            }
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 1.029785219614181
+  },
+  {
+    "timestamp": "2025-09-11T21:52:39.635091",
+    "dataset": "tpcds_sf1",
+    "query_type": "AP",
+    "query_index": 33,
+    "query_text": "SELECT MAX(\"catalog_sales\".\"cs_call_center_sk\"), VARIANCE(\"catalog_sales\".\"cs_net_paid\") FROM \"web_returns\" CROSS JOIN \"catalog_sales\" CROSS JOIN \"web_page\" WHERE \"catalog_sales\".\"cs_net_paid_inc_ship_tax\" >= 35067.14207918736 AND \"web_returns\".\"wr_return_amt_inc_tax\" = 18301.795847183013 AND \"catalog_sales\".\"cs_net_paid\" > 0.0 AND \"catalog_sales\".\"cs_ship_addr_sk\" >= 1 AND \"web_returns\".\"wr_return_amt\" > 10926.034154978759 LIMIT 10;",
+    "postgres_time_ms": 209.3799290014431,
+    "duckdb_time_ms": 550.7224429748021,
+    "log_time_difference": -0.9670805051769575,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 57137.09,
+        "Total Cost": 57137.1,
+        "Plan Rows": 1,
+        "Plan Width": 36,
+        "Plans": [
+          {
+            "Node Type": "Aggregate",
+            "Strategy": "Plain",
+            "Partial Mode": "Simple",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 57137.09,
+            "Total Cost": 57137.1,
+            "Plan Rows": 1,
+            "Plan Width": 36,
+            "Plans": [
+              {
+                "Node Type": "Nested Loop",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Join Type": "Inner",
+                "Startup Cost": 1000.0,
+                "Total Cost": 55640.09,
+                "Plan Rows": 299400,
+                "Plan Width": 10,
+                "Inner Unique": false,
+                "Plans": [
+                  {
+                    "Node Type": "Gather",
+                    "Parent Relationship": "Outer",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Startup Cost": 1000.0,
+                    "Total Cost": 49457.79,
+                    "Plan Rows": 4990,
+                    "Plan Width": 10,
+                    "Workers Planned": 2,
+                    "Single Copy": false,
+                    "Plans": [
+                      {
+                        "Node Type": "Seq Scan",
+                        "Parent Relationship": "Outer",
+                        "Parallel Aware": true,
+                        "Async Capable": false,
+                        "Relation Name": "catalog_sales",
+                        "Alias": "catalog_sales",
+                        "Startup Cost": 0.0,
+                        "Total Cost": 47958.79,
+                        "Plan Rows": 2079,
+                        "Plan Width": 10,
+                        "Filter": "((cs_net_paid_inc_ship_tax >= 35067.14207918736) AND (cs_net_paid > 0.0) AND (cs_ship_addr_sk >= 1))"
+                      }
+                    ]
+                  },
+                  {
+                    "Node Type": "Materialize",
+                    "Parent Relationship": "Inner",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Startup Cost": 0.0,
+                    "Total Cost": 2439.94,
+                    "Plan Rows": 60,
+                    "Plan Width": 0,
+                    "Plans": [
+                      {
+                        "Node Type": "Nested Loop",
+                        "Parent Relationship": "Outer",
+                        "Parallel Aware": false,
+                        "Async Capable": false,
+                        "Join Type": "Inner",
+                        "Startup Cost": 0.0,
+                        "Total Cost": 2439.64,
+                        "Plan Rows": 60,
+                        "Plan Width": 0,
+                        "Inner Unique": false,
+                        "Plans": [
+                          {
+                            "Node Type": "Seq Scan",
+                            "Parent Relationship": "Outer",
+                            "Parallel Aware": false,
+                            "Async Capable": false,
+                            "Relation Name": "web_returns",
+                            "Alias": "web_returns",
+                            "Startup Cost": 0.0,
+                            "Total Cost": 2436.44,
+                            "Plan Rows": 1,
+                            "Plan Width": 0,
+                            "Filter": "((wr_return_amt > 10926.034154978759) AND (wr_return_amt_inc_tax = 18301.795847183013))"
+                          },
+                          {
+                            "Node Type": "Seq Scan",
+                            "Parent Relationship": "Inner",
+                            "Parallel Aware": false,
+                            "Async Capable": false,
+                            "Relation Name": "web_page",
+                            "Alias": "web_page",
+                            "Startup Cost": 0.0,
+                            "Total Cost": 2.6,
+                            "Plan Rows": 60,
+                            "Plan Width": 0
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 2.630254225422946
+  },
+  {
+    "timestamp": "2025-09-11T21:52:39.663261",
+    "dataset": "tpcds_sf1",
+    "query_type": "AP",
+    "query_index": 34,
+    "query_text": "SELECT MAX(\"item\".\"i_brand_id\") FROM \"item\" WHERE \"item\".\"i_item_sk\" = 14689 OR \"item\".\"i_item_sk\" IS NULL GROUP BY \"item\".\"i_size\", \"item\".\"i_manufact\", \"item\".\"i_formulation\" ORDER BY COUNT(*) ASC;",
+    "postgres_time_ms": 0.49357296666130424,
+    "duckdb_time_ms": 26.019142009317875,
+    "log_time_difference": -3.964917073858671,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Sort",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 12.65,
+        "Total Cost": 12.66,
+        "Plan Rows": 1,
+        "Plan Width": 105,
+        "Sort Key": [
+          "(count(*))"
+        ],
+        "Plans": [
+          {
+            "Node Type": "Aggregate",
+            "Strategy": "Sorted",
+            "Partial Mode": "Simple",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 12.61,
+            "Total Cost": 12.64,
+            "Plan Rows": 1,
+            "Plan Width": 105,
+            "Group Key": [
+              "i_size",
+              "i_manufact",
+              "i_formulation"
+            ],
+            "Plans": [
+              {
+                "Node Type": "Sort",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Startup Cost": 12.61,
+                "Total Cost": 12.62,
+                "Plan Rows": 1,
+                "Plan Width": 97,
+                "Sort Key": [
+                  "i_size",
+                  "i_manufact",
+                  "i_formulation"
+                ],
+                "Plans": [
+                  {
+                    "Node Type": "Bitmap Heap Scan",
+                    "Parent Relationship": "Outer",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Relation Name": "item",
+                    "Alias": "item",
+                    "Startup Cost": 8.59,
+                    "Total Cost": 12.6,
+                    "Plan Rows": 1,
+                    "Plan Width": 97,
+                    "Recheck Cond": "((i_item_sk = 14689) OR (i_item_sk IS NULL))",
+                    "Plans": [
+                      {
+                        "Node Type": "BitmapOr",
+                        "Parent Relationship": "Outer",
+                        "Parallel Aware": false,
+                        "Async Capable": false,
+                        "Startup Cost": 8.59,
+                        "Total Cost": 8.59,
+                        "Plan Rows": 1,
+                        "Plan Width": 0,
+                        "Plans": [
+                          {
+                            "Node Type": "Bitmap Index Scan",
+                            "Parent Relationship": "Member",
+                            "Parallel Aware": false,
+                            "Async Capable": false,
+                            "Index Name": "item_pkey",
+                            "Startup Cost": 0.0,
+                            "Total Cost": 4.29,
+                            "Plan Rows": 1,
+                            "Plan Width": 0,
+                            "Index Cond": "(i_item_sk = 14689)"
+                          },
+                          {
+                            "Node Type": "Bitmap Index Scan",
+                            "Parent Relationship": "Member",
+                            "Parallel Aware": false,
+                            "Async Capable": false,
+                            "Index Name": "item_pkey",
+                            "Startup Cost": 0.0,
+                            "Total Cost": 4.29,
+                            "Plan Rows": 1,
+                            "Plan Width": 0,
+                            "Index Cond": "(i_item_sk IS NULL)"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 52.71589768240392
+  },
+  {
+    "timestamp": "2025-09-11T21:52:39.708238",
+    "dataset": "tpcds_sf1",
+    "query_type": "AP",
+    "query_index": 35,
+    "query_text": "SELECT VARIANCE(\"item\".\"i_brand_id\"), STDDEV(\"item\".\"i_wholesale_cost\"), SUM(\"item\".\"i_wholesale_cost\"), MIN(\"item\".\"i_wholesale_cost\"), COUNT(*) FROM \"item\" WHERE \"item\".\"i_brand\" != 'corpunivamalg #5                                  ' AND \"item\".\"i_item_sk\" < 18000 AND \"item\".\"i_color\" = 'goldenrod           ' AND \"item\".\"i_units\" LIKE '%a%' AND \"item\".\"i_brand\" != 'edu packmaxi #10                                  ' GROUP BY \"item\".\"i_brand\", \"item\".\"i_item_id\", \"item\".\"i_item_id\" HAVING AVG(1) < 85 ORDER BY COUNT(*) DESC;",
+    "postgres_time_ms": 11.505672009661794,
+    "duckdb_time_ms": 31.46468399791047,
+    "log_time_difference": -1.0060256419487108,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Sort",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 1691.84,
+        "Total Cost": 1691.87,
+        "Plan Rows": 12,
+        "Plan Width": 204,
+        "Sort Key": [
+          "(count(*)) DESC"
+        ],
+        "Plans": [
+          {
+            "Node Type": "Aggregate",
+            "Strategy": "Sorted",
+            "Partial Mode": "Simple",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 1689.96,
+            "Total Cost": 1691.63,
+            "Plan Rows": 12,
+            "Plan Width": 204,
+            "Group Key": [
+              "i_brand",
+              "i_item_id"
+            ],
+            "Filter": "(avg(1) < '85'::numeric)",
+            "Plans": [
+              {
+                "Node Type": "Sort",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Startup Cost": 1689.96,
+                "Total Cost": 1690.06,
+                "Plan Rows": 37,
+                "Plan Width": 78,
+                "Sort Key": [
+                  "i_brand",
+                  "i_item_id"
+                ],
+                "Plans": [
+                  {
+                    "Node Type": "Seq Scan",
+                    "Parent Relationship": "Outer",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Relation Name": "item",
+                    "Alias": "item",
+                    "Startup Cost": 0.0,
+                    "Total Cost": 1689.0,
+                    "Plan Rows": 37,
+                    "Plan Width": 78,
+                    "Filter": "((i_brand <> 'corpunivamalg #5                                  '::bpchar) AND (i_item_sk < 18000) AND (i_units ~~ '%a%'::text) AND (i_brand <> 'edu packmaxi #10                                  '::bpchar) AND (i_color = 'goldenrod           '::bpchar))"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 2.734710668919491
+  },
+  {
+    "timestamp": "2025-09-11T21:52:39.722692",
+    "dataset": "tpcds_sf1",
+    "query_type": "AP",
+    "query_index": 37,
+    "query_text": "SELECT COUNT(*) FROM \"ship_mode\" WHERE \"ship_mode\".\"sm_contract\" = '5FKNB0j8aaqTB       ' OR \"ship_mode\".\"sm_ship_mode_sk\" = 11 ORDER BY COUNT(*) DESC;",
+    "postgres_time_ms": 0.3676100168377161,
+    "duckdb_time_ms": 12.08003400824964,
+    "log_time_difference": -3.4922866473405234,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Sort",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 12.72,
+        "Total Cost": 12.73,
+        "Plan Rows": 1,
+        "Plan Width": 8,
+        "Sort Key": [
+          "(count(*)) DESC"
+        ],
+        "Plans": [
+          {
+            "Node Type": "Aggregate",
+            "Strategy": "Plain",
+            "Partial Mode": "Simple",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 12.71,
+            "Total Cost": 12.71,
+            "Plan Rows": 1,
+            "Plan Width": 8,
+            "Plans": [
+              {
+                "Node Type": "Seq Scan",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Relation Name": "ship_mode",
+                "Alias": "ship_mode",
+                "Startup Cost": 0.0,
+                "Total Cost": 12.7,
+                "Plan Rows": 2,
+                "Plan Width": 0,
+                "Filter": "((sm_contract = '5FKNB0j8aaqTB       '::bpchar) OR (sm_ship_mode_sk = 11))"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 32.86100338659284
+  },
+  {
+    "timestamp": "2025-09-11T21:53:39.757157",
+    "dataset": "tpcds_sf1",
+    "query_type": "AP",
+    "query_index": 40,
+    "query_text": "SELECT MAX(\"ship_mode\".\"sm_ship_mode_sk\"), COUNT(*), MIN(\"ship_mode\".\"sm_ship_mode_sk\"), MAX(\"ship_mode\".\"sm_ship_mode_sk\") FROM \"ship_mode\" WHERE \"ship_mode\".\"sm_ship_mode_id\" LIKE '%o%' AND \"ship_mode\".\"sm_ship_mode_sk\" != 5 GROUP BY \"ship_mode\".\"sm_ship_mode_sk\", \"ship_mode\".\"sm_ship_mode_sk\" ORDER BY \"ship_mode\".\"sm_ship_mode_sk\", \"ship_mode\".\"sm_ship_mode_sk\" DESC LIMIT 1000;",
+    "postgres_time_ms": 11.398005008231848,
+    "duckdb_time_ms": 11.73703302629292,
+    "log_time_difference": -0.02931071816718871,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Custom Scan",
+        "Custom Plan Provider": "DuckDBScan",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 0.0,
+        "Total Cost": 0.0,
+        "Plan Rows": 0,
+        "Plan Width": 0,
+        "DuckDB Execution Plan": [
+          {
+            "name": "PROJECTION",
+            "children": [
+              {
+                "name": "TOP_N",
+                "children": [
+                  {
+                    "name": "PROJECTION",
+                    "children": [
+                      {
+                        "name": "HASH_GROUP_BY",
+                        "children": [
+                          {
+                            "name": "PROJECTION",
+                            "children": [
+                              {
+                                "name": "PGDUCKDB_POSTGRES_SCAN ",
+                                "children": [],
+                                "extra_info": {
+                                  "Table": "ship_mode",
+                                  "Projections": "sm_ship_mode_sk",
+                                  "Filters": [
+                                    "like_escape(sm_ship_mode_id, '%o%', '\\')",
+                                    "sm_ship_mode_sk!=5 AND optional: Dynamic Filter (sm_ship_mode_sk)"
+                                  ],
+                                  "Estimated Cardinality": "36"
+                                }
+                              }
+                            ],
+                            "extra_info": {
+                              "Projections": [
+                                "sm_ship_mode_sk",
+                                "sm_ship_mode_sk",
+                                "sm_ship_mode_sk"
+                              ],
+                              "Estimated Cardinality": "36"
+                            }
+                          }
+                        ],
+                        "extra_info": {
+                          "Groups": "#0",
+                          "Aggregates": [
+                            "max(#1)",
+                            "count_star()",
+                            "min(#2)"
+                          ],
+                          "Estimated Cardinality": "32"
+                        }
+                      }
+                    ],
+                    "extra_info": {
+                      "Projections": [
+                        "max",
+                        "count",
+                        "min",
+                        "max",
+                        "sm_ship_mode_sk"
+                      ],
+                      "Estimated Cardinality": "32"
+                    }
+                  }
+                ],
+                "extra_info": {
+                  "Top": "1000",
+                  "Order By": "#4 ASC"
+                }
+              }
+            ],
+            "extra_info": {
+              "Projections": [
+                "#0",
+                "#1",
+                "#2",
+                "#3"
+              ],
+              "Estimated Cardinality": "32"
+            }
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 1.0297445050968324
+  },
+  {
+    "timestamp": "2025-09-11T21:53:39.868536",
+    "dataset": "tpcds_sf1",
+    "query_type": "AP",
+    "query_index": 44,
+    "query_text": "SELECT MIN(\"store_returns\".\"sr_returned_date_sk\"), MAX(\"store_sales\".\"ss_net_profit\"), MAX(\"store_returns\".\"sr_customer_sk\") FROM \"store_returns\" CROSS JOIN \"store_sales\" WHERE \"store_returns\".\"sr_refunded_cash\" >= 14887.06 AND \"store_returns\".\"sr_refunded_cash\" IS NULL AND \"store_sales\".\"ss_item_sk\" != 7404 AND \"store_returns\".\"sr_returned_date_sk\" = 2451000;",
+    "postgres_time_ms": 26.517132006119937,
+    "duckdb_time_ms": 81.74112503184006,
+    "log_time_difference": -1.1257662266783954,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Aggregate",
+        "Strategy": "Plain",
+        "Partial Mode": "Finalize",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 133226.42,
+        "Total Cost": 133226.43,
+        "Plan Rows": 1,
+        "Plan Width": 40,
+        "Plans": [
+          {
+            "Node Type": "Gather",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 133226.2,
+            "Total Cost": 133226.41,
+            "Plan Rows": 2,
+            "Plan Width": 40,
+            "Workers Planned": 2,
+            "Single Copy": false,
+            "Plans": [
+              {
+                "Node Type": "Aggregate",
+                "Strategy": "Plain",
+                "Partial Mode": "Partial",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Startup Cost": 132226.2,
+                "Total Cost": 132226.21,
+                "Plan Rows": 1,
+                "Plan Width": 40,
+                "Plans": [
+                  {
+                    "Node Type": "Nested Loop",
+                    "Parent Relationship": "Outer",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Join Type": "Inner",
+                    "Startup Cost": 0.0,
+                    "Total Cost": 123224.85,
+                    "Plan Rows": 1200180,
+                    "Plan Width": 14,
+                    "Inner Unique": false,
+                    "Plans": [
+                      {
+                        "Node Type": "Seq Scan",
+                        "Parent Relationship": "Outer",
+                        "Parallel Aware": true,
+                        "Async Capable": false,
+                        "Relation Name": "store_returns",
+                        "Alias": "store_returns",
+                        "Startup Cost": 0.0,
+                        "Total Cost": 6620.96,
+                        "Plan Rows": 1,
+                        "Plan Width": 8,
+                        "Filter": "((sr_refunded_cash IS NULL) AND (sr_refunded_cash >= 14887.06) AND (sr_returned_date_sk = 2451000))"
+                      },
+                      {
+                        "Node Type": "Seq Scan",
+                        "Parent Relationship": "Inner",
+                        "Parallel Aware": false,
+                        "Async Capable": false,
+                        "Relation Name": "store_sales",
+                        "Alias": "store_sales",
+                        "Startup Cost": 0.0,
+                        "Total Cost": 87799.56,
+                        "Plan Rows": 2880432,
+                        "Plan Width": 6,
+                        "Filter": "(ss_item_sk <> 7404)"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 3.0825778976766744
+  },
+  {
+    "timestamp": "2025-09-11T21:53:39.906896",
+    "dataset": "tpcds_sf1",
+    "query_type": "TP",
+    "query_index": 2,
+    "query_text": "SELECT \"time_dim\".\"t_shift\" FROM \"time_dim\" WHERE \"time_dim\".\"t_time_id\" = 'AAAAAAAAHPDLAAAA' ORDER BY \"time_dim\".\"t_meal_time\" ASC LIMIT 10;",
+    "postgres_time_ms": 11.01665897294879,
+    "duckdb_time_ms": 21.874142985325307,
+    "log_time_difference": -0.6858966744039258,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 2488.01,
+        "Total Cost": 2488.02,
+        "Plan Rows": 1,
+        "Plan Width": 42,
+        "Plans": [
+          {
+            "Node Type": "Sort",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 2488.01,
+            "Total Cost": 2488.02,
+            "Plan Rows": 1,
+            "Plan Width": 42,
+            "Sort Key": [
+              "t_meal_time"
+            ],
+            "Plans": [
+              {
+                "Node Type": "Seq Scan",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Relation Name": "time_dim",
+                "Alias": "time_dim",
+                "Startup Cost": 0.0,
+                "Total Cost": 2488.0,
+                "Plan Rows": 1,
+                "Plan Width": 42,
+                "Filter": "(t_time_id = 'AAAAAAAAHPDLAAAA'::bpchar)"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 1.9855514307047968
+  },
+  {
+    "timestamp": "2025-09-11T21:53:39.920407",
+    "dataset": "tpcds_sf1",
+    "query_type": "TP",
+    "query_index": 3,
+    "query_text": "SELECT \"web_site\".\"web_company_id\", \"web_site\".\"web_street_type\" FROM \"web_site\" ORDER BY \"web_site\".\"web_manager\" ASC LIMIT 100;",
+    "postgres_time_ms": 0.37891900865361094,
+    "duckdb_time_ms": 11.814982979558408,
+    "log_time_difference": -3.439801264278921,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 11.46,
+        "Total Cost": 11.56,
+        "Plan Rows": 40,
+        "Plan Width": 166,
+        "Plans": [
+          {
+            "Node Type": "Sort",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 11.46,
+            "Total Cost": 11.56,
+            "Plan Rows": 40,
+            "Plan Width": 166,
+            "Sort Key": [
+              "web_manager"
+            ],
+            "Plans": [
+              {
+                "Node Type": "Seq Scan",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Relation Name": "web_site",
+                "Alias": "web_site",
+                "Startup Cost": 0.0,
+                "Total Cost": 10.4,
+                "Plan Rows": 40,
+                "Plan Width": 166
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 31.18076082152712
+  },
+  {
+    "timestamp": "2025-09-11T21:53:40.923685",
+    "dataset": "tpcds_sf1",
+    "query_type": "TP",
+    "query_index": 8,
+    "query_text": "SELECT \"store_sales\".\"ss_ext_list_price\" FROM \"store_sales\" WHERE \"store_sales\".\"ss_promo_sk\" = 185 AND \"store_sales\".\"ss_list_price\" < 1.0 ORDER BY \"store_sales\".\"ss_wholesale_cost\" ASC LIMIT 1;",
+    "postgres_time_ms": 266.67368796188384,
+    "duckdb_time_ms": 733.039935992565,
+    "log_time_difference": -1.0111744148289035,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 70795.89,
+        "Total Cost": 70795.9,
+        "Plan Rows": 1,
+        "Plan Width": 13,
+        "Plans": [
+          {
+            "Node Type": "Sort",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 70795.89,
+            "Total Cost": 70795.9,
+            "Plan Rows": 1,
+            "Plan Width": 13,
+            "Sort Key": [
+              "ss_wholesale_cost"
+            ],
+            "Plans": [
+              {
+                "Node Type": "Gather",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Startup Cost": 1000.0,
+                "Total Cost": 70795.88,
+                "Plan Rows": 1,
+                "Plan Width": 13,
+                "Workers Planned": 2,
+                "Single Copy": false,
+                "Plans": [
+                  {
+                    "Node Type": "Seq Scan",
+                    "Parent Relationship": "Outer",
+                    "Parallel Aware": true,
+                    "Async Capable": false,
+                    "Relation Name": "store_sales",
+                    "Alias": "store_sales",
+                    "Startup Cost": 0.0,
+                    "Total Cost": 69795.78,
+                    "Plan Rows": 1,
+                    "Plan Width": 13,
+                    "Filter": "((ss_list_price < 1.0) AND (ss_promo_sk = 185))"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 2.7488273837400103
+  },
+  {
+    "timestamp": "2025-09-11T21:53:40.936643",
+    "dataset": "tpcds_sf1",
+    "query_type": "TP",
+    "query_index": 9,
+    "query_text": "SELECT \"catalog_returns\".\"cr_catalog_page_sk\", \"catalog_returns\".\"cr_warehouse_sk\" FROM \"catalog_returns\" WHERE \"catalog_returns\".\"cr_item_sk\" = 2708 LIMIT 1;",
+    "postgres_time_ms": 0.36403501871973276,
+    "duckdb_time_ms": 11.264991015195847,
+    "log_time_difference": -3.432204986996915,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 0.42,
+        "Total Cost": 4.88,
+        "Plan Rows": 1,
+        "Plan Width": 8,
+        "Plans": [
+          {
+            "Node Type": "Index Scan",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Scan Direction": "Forward",
+            "Index Name": "catalog_returns_pkey",
+            "Relation Name": "catalog_returns",
+            "Alias": "catalog_returns",
+            "Startup Cost": 0.42,
+            "Total Cost": 40.58,
+            "Plan Rows": 9,
+            "Plan Width": 8,
+            "Index Cond": "(cr_item_sk = 2708)"
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 30.944800461267327
+  },
+  {
+    "timestamp": "2025-09-11T21:53:40.952298",
+    "dataset": "tpcds_sf1",
+    "query_type": "TP",
+    "query_index": 10,
+    "query_text": "SELECT \"catalog_sales\".\"cs_promo_sk\" FROM \"catalog_sales\" WHERE \"catalog_sales\".\"cs_item_sk\" = 1 LIMIT 100;",
+    "postgres_time_ms": 1.4380650245584548,
+    "duckdb_time_ms": 12.630245997570455,
+    "log_time_difference": -2.172795936391332,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 5.09,
+        "Total Cost": 334.0,
+        "Plan Rows": 85,
+        "Plan Width": 4,
+        "Plans": [
+          {
+            "Node Type": "Bitmap Heap Scan",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Relation Name": "catalog_sales",
+            "Alias": "catalog_sales",
+            "Startup Cost": 5.09,
+            "Total Cost": 334.0,
+            "Plan Rows": 85,
+            "Plan Width": 4,
+            "Recheck Cond": "(cs_item_sk = 1)",
+            "Plans": [
+              {
+                "Node Type": "Bitmap Index Scan",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Index Name": "catalog_sales_pkey",
+                "Startup Cost": 0.0,
+                "Total Cost": 5.07,
+                "Plan Rows": 85,
+                "Plan Width": 0,
+                "Index Cond": "(cs_item_sk = 1)"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 8.78280591063569
+  },
+  {
+    "timestamp": "2025-09-11T21:53:40.956575",
+    "dataset": "tpcds_sf1",
+    "query_type": "TP",
+    "query_index": 11,
+    "query_text": "SELECT \"reason\".\"r_reason_sk\", \"reason\".\"r_reason_desc\" FROM \"reason\" WHERE \"reason\".\"r_reason_sk\" = 1 AND \"reason\".\"r_reason_sk\" >= 35 LIMIT 1;",
+    "postgres_time_ms": 0.30187697848305106,
+    "duckdb_time_ms": 2.7886690222658217,
+    "log_time_difference": -2.2233001296716504,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 0.14,
+        "Total Cost": 8.16,
+        "Plan Rows": 1,
+        "Plan Width": 408,
+        "Plans": [
+          {
+            "Node Type": "Index Scan",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Scan Direction": "Forward",
+            "Index Name": "reason_pkey",
+            "Relation Name": "reason",
+            "Alias": "reason",
+            "Startup Cost": 0.14,
+            "Total Cost": 8.16,
+            "Plan Rows": 1,
+            "Plan Width": 408,
+            "Index Cond": "((r_reason_sk >= 35) AND (r_reason_sk = 1))"
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 9.237766444725404
+  },
+  {
+    "timestamp": "2025-09-11T21:53:40.970462",
+    "dataset": "tpcds_sf1",
+    "query_type": "TP",
+    "query_index": 12,
+    "query_text": "SELECT \"web_returns\".\"wr_returned_date_sk\", \"web_returns\".\"wr_web_page_sk\", \"web_returns\".\"wr_reversed_charge\" FROM \"web_returns\" WHERE \"web_returns\".\"wr_item_sk\" = 11156 LIMIT 100;",
+    "postgres_time_ms": 1.1858849902637303,
+    "duckdb_time_ms": 11.449965997599065,
+    "log_time_difference": -2.2674974372766483,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 4.33,
+        "Total Cost": 23.48,
+        "Plan Rows": 5,
+        "Plan Width": 14,
+        "Plans": [
+          {
+            "Node Type": "Bitmap Heap Scan",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Relation Name": "web_returns",
+            "Alias": "web_returns",
+            "Startup Cost": 4.33,
+            "Total Cost": 23.48,
+            "Plan Rows": 5,
+            "Plan Width": 14,
+            "Recheck Cond": "(wr_item_sk = 11156)",
+            "Plans": [
+              {
+                "Node Type": "Bitmap Index Scan",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Index Name": "web_returns_pkey",
+                "Startup Cost": 0.0,
+                "Total Cost": 4.33,
+                "Plan Rows": 5,
+                "Plan Width": 0,
+                "Index Cond": "(wr_item_sk = 11156)"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 9.655207791315998
+  },
+  {
+    "timestamp": "2025-09-11T21:53:40.983002",
+    "dataset": "tpcds_sf1",
+    "query_type": "TP",
+    "query_index": 14,
+    "query_text": "SELECT \"date_dim\".\"d_last_dom\" FROM \"date_dim\" WHERE \"date_dim\".\"d_date_sk\" = 2488070 LIMIT 100;",
+    "postgres_time_ms": 0.2935669617727399,
+    "duckdb_time_ms": 10.614652012009174,
+    "log_time_difference": -3.5878848285482143,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 0.29,
+        "Total Cost": 8.31,
+        "Plan Rows": 1,
+        "Plan Width": 4,
+        "Plans": [
+          {
+            "Node Type": "Index Scan",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Scan Direction": "Forward",
+            "Index Name": "date_dim_pkey",
+            "Relation Name": "date_dim",
+            "Alias": "date_dim",
+            "Startup Cost": 0.29,
+            "Total Cost": 8.31,
+            "Plan Rows": 1,
+            "Plan Width": 4,
+            "Index Cond": "(d_date_sk = 2488070)"
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 36.157515641103835
+  },
+  {
+    "timestamp": "2025-09-11T21:53:40.995024",
+    "dataset": "tpcds_sf1",
+    "query_type": "TP",
+    "query_index": 15,
+    "query_text": "SELECT \"web_site\".\"web_zip\", \"web_site\".\"web_name\", \"web_site\".\"web_company_name\" FROM \"web_site\" WHERE \"web_site\".\"web_site_sk\" = 15 AND \"web_site\".\"web_open_date_sk\" < 2450579 LIMIT 10;",
+    "postgres_time_ms": 0.32976199872791767,
+    "duckdb_time_ms": 10.461956029757857,
+    "log_time_difference": -3.457129542786131,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 0.14,
+        "Total Cost": 8.16,
+        "Plan Rows": 1,
+        "Plan Width": 366,
+        "Plans": [
+          {
+            "Node Type": "Index Scan",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Scan Direction": "Forward",
+            "Index Name": "web_site_pkey",
+            "Relation Name": "web_site",
+            "Alias": "web_site",
+            "Startup Cost": 0.14,
+            "Total Cost": 8.16,
+            "Plan Rows": 1,
+            "Plan Width": 366,
+            "Index Cond": "(web_site_sk = 15)",
+            "Filter": "(web_open_date_sk < 2450579)"
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 31.72577819795992
+  },
+  {
+    "timestamp": "2025-09-11T21:53:41.006685",
+    "dataset": "tpcds_sf1",
+    "query_type": "TP",
+    "query_index": 16,
+    "query_text": "SELECT \"income_band\".\"ib_upper_bound\" FROM \"income_band\" ORDER BY \"income_band\".\"ib_lower_bound\" ASC LIMIT 10;",
+    "postgres_time_ms": 0.33889798214659095,
+    "duckdb_time_ms": 10.089908028021455,
+    "log_time_difference": -3.393591873675747,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 74.48,
+        "Total Cost": 74.51,
+        "Plan Rows": 10,
+        "Plan Width": 8,
+        "Plans": [
+          {
+            "Node Type": "Sort",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 74.48,
+            "Total Cost": 79.58,
+            "Plan Rows": 2040,
+            "Plan Width": 8,
+            "Sort Key": [
+              "ib_lower_bound"
+            ],
+            "Plans": [
+              {
+                "Node Type": "Seq Scan",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Relation Name": "income_band",
+                "Alias": "income_band",
+                "Startup Cost": 0.0,
+                "Total Cost": 30.4,
+                "Plan Rows": 2040,
+                "Plan Width": 8
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 29.77270022120417
+  },
+  {
+    "timestamp": "2025-09-11T21:53:41.021444",
+    "dataset": "tpcds_sf1",
+    "query_type": "TP",
+    "query_index": 18,
+    "query_text": "SELECT \"reason\".\"r_reason_id\", \"reason\".\"r_reason_sk\" FROM \"reason\" WHERE \"reason\".\"r_reason_sk\" = 12 LIMIT 10;",
+    "postgres_time_ms": 0.30429998878389597,
+    "duckdb_time_ms": 12.835662986617535,
+    "log_time_difference": -3.7419687265134542,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 0.14,
+        "Total Cost": 8.16,
+        "Plan Rows": 1,
+        "Plan Width": 72,
+        "Plans": [
+          {
+            "Node Type": "Index Scan",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Scan Direction": "Forward",
+            "Index Name": "reason_pkey",
+            "Relation Name": "reason",
+            "Alias": "reason",
+            "Startup Cost": 0.14,
+            "Total Cost": 8.16,
+            "Plan Rows": 1,
+            "Plan Width": 72,
+            "Index Cond": "(r_reason_sk = 12)"
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 42.18095123142778
+  },
+  {
+    "timestamp": "2025-09-11T21:53:41.033812",
+    "dataset": "tpcds_sf1",
+    "query_type": "TP",
+    "query_index": 21,
+    "query_text": "SELECT \"catalog_page\".\"cp_end_date_sk\", \"catalog_page\".\"cp_start_date_sk\" FROM \"catalog_page\" WHERE \"catalog_page\".\"cp_catalog_page_sk\" = 8121 LIMIT 100;",
+    "postgres_time_ms": 0.3051739768125117,
+    "duckdb_time_ms": 10.110170987900347,
+    "log_time_difference": -3.500415194860387,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 0.29,
+        "Total Cost": 8.3,
+        "Plan Rows": 1,
+        "Plan Width": 8,
+        "Plans": [
+          {
+            "Node Type": "Index Scan",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Scan Direction": "Forward",
+            "Index Name": "catalog_page_pkey",
+            "Relation Name": "catalog_page",
+            "Alias": "catalog_page",
+            "Startup Cost": 0.29,
+            "Total Cost": 8.3,
+            "Plan Rows": 1,
+            "Plan Width": 8,
+            "Index Cond": "(cp_catalog_page_sk = 8121)"
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 33.129204178872975
+  },
+  {
+    "timestamp": "2025-09-11T21:53:41.046892",
+    "dataset": "tpcds_sf1",
+    "query_type": "TP",
+    "query_index": 23,
+    "query_text": "SELECT \"customer_demographics\".\"cd_education_status\" FROM \"customer_demographics\" WHERE \"customer_demographics\".\"cd_demo_sk\" = 493306 LIMIT 10;",
+    "postgres_time_ms": 1.5244089881889522,
+    "duckdb_time_ms": 9.866646025329828,
+    "log_time_difference": -1.867553194417932,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 0.43,
+        "Total Cost": 8.45,
+        "Plan Rows": 1,
+        "Plan Width": 21,
+        "Plans": [
+          {
+            "Node Type": "Index Scan",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Scan Direction": "Forward",
+            "Index Name": "customer_demographics_pkey",
+            "Relation Name": "customer_demographics",
+            "Alias": "customer_demographics",
+            "Startup Cost": 0.43,
+            "Total Cost": 8.45,
+            "Plan Rows": 1,
+            "Plan Width": 21,
+            "Index Cond": "(cd_demo_sk = 493306)"
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 6.472440205860847
+  },
+  {
+    "timestamp": "2025-09-11T21:53:41.058004",
+    "dataset": "tpcds_sf1",
+    "query_type": "TP",
+    "query_index": 24,
+    "query_text": "SELECT \"promotion\".\"p_discount_active\" FROM \"promotion\" WHERE \"promotion\".\"p_promo_sk\" = 300 ORDER BY \"promotion\".\"p_end_date_sk\" ASC LIMIT 1;",
+    "postgres_time_ms": 0.32787397503852844,
+    "duckdb_time_ms": 9.470034041441977,
+    "log_time_difference": -3.363258468726629,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 8.18,
+        "Total Cost": 8.18,
+        "Plan Rows": 1,
+        "Plan Width": 6,
+        "Plans": [
+          {
+            "Node Type": "Sort",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 8.18,
+            "Total Cost": 8.18,
+            "Plan Rows": 1,
+            "Plan Width": 6,
+            "Sort Key": [
+              "p_end_date_sk"
+            ],
+            "Plans": [
+              {
+                "Node Type": "Index Scan",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Scan Direction": "Forward",
+                "Index Name": "promotion_pkey",
+                "Relation Name": "promotion",
+                "Alias": "promotion",
+                "Startup Cost": 0.15,
+                "Total Cost": 8.17,
+                "Plan Rows": 1,
+                "Plan Width": 6,
+                "Index Cond": "(p_promo_sk = 300)"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 28.883152559849112
+  },
+  {
+    "timestamp": "2025-09-11T21:53:41.070405",
+    "dataset": "tpcds_sf1",
+    "query_type": "TP",
+    "query_index": 28,
+    "query_text": "SELECT \"web_site\".\"web_zip\", \"web_site\".\"web_site_id\" FROM \"web_site\" WHERE \"web_site\".\"web_site_sk\" = 24 LIMIT 100;",
+    "postgres_time_ms": 0.26529497699812055,
+    "duckdb_time_ms": 9.59630700526759,
+    "log_time_difference": -3.5882912888193315,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 0.14,
+        "Total Cost": 8.16,
+        "Plan Rows": 1,
+        "Plan Width": 112,
+        "Plans": [
+          {
+            "Node Type": "Index Scan",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Scan Direction": "Forward",
+            "Index Name": "web_site_pkey",
+            "Relation Name": "web_site",
+            "Alias": "web_site",
+            "Startup Cost": 0.14,
+            "Total Cost": 8.16,
+            "Plan Rows": 1,
+            "Plan Width": 112,
+            "Index Cond": "(web_site_sk = 24)"
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 36.17221522190967
+  },
+  {
+    "timestamp": "2025-09-11T21:53:41.084864",
+    "dataset": "tpcds_sf1",
+    "query_type": "TP",
+    "query_index": 30,
+    "query_text": "SELECT \"store\".\"s_city\", \"store\".\"s_country\" FROM \"store\" LIMIT 1;",
+    "postgres_time_ms": 0.2851990284398198,
+    "duckdb_time_ms": 12.615157989785075,
+    "log_time_difference": -3.789467103017245,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 0.0,
+        "Total Cost": 0.26,
+        "Plan Rows": 1,
+        "Plan Width": 196,
+        "Plans": [
+          {
+            "Node Type": "Seq Scan",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Relation Name": "store",
+            "Alias": "store",
+            "Startup Cost": 0.0,
+            "Total Cost": 10.4,
+            "Plan Rows": 40,
+            "Plan Width": 196
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 44.23282245664107
+  },
+  {
+    "timestamp": "2025-09-11T21:53:41.100221",
+    "dataset": "tpcds_sf1",
+    "query_type": "TP",
+    "query_index": 38,
+    "query_text": "SELECT \"date_dim\".\"d_current_week\" FROM \"date_dim\" WHERE \"date_dim\".\"d_date_sk\" = 2415022 LIMIT 1;",
+    "postgres_time_ms": 0.2817180356942117,
+    "duckdb_time_ms": 11.335344985127449,
+    "log_time_difference": -3.6947743005604337,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 0.29,
+        "Total Cost": 8.31,
+        "Plan Rows": 1,
+        "Plan Width": 2,
+        "Plans": [
+          {
+            "Node Type": "Index Scan",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Scan Direction": "Forward",
+            "Index Name": "date_dim_pkey",
+            "Relation Name": "date_dim",
+            "Alias": "date_dim",
+            "Startup Cost": 0.29,
+            "Total Cost": 8.31,
+            "Plan Rows": 1,
+            "Plan Width": 2,
+            "Index Cond": "(d_date_sk = 2415022)"
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 40.23649020977591
+  },
+  {
+    "timestamp": "2025-09-11T21:53:41.125872",
+    "dataset": "tpcds_sf1",
+    "query_type": "TP",
+    "query_index": 40,
+    "query_text": "SELECT \"time_dim\".\"t_time_sk\" FROM \"time_dim\" WHERE \"time_dim\".\"t_minute\" = 59 LIMIT 10;",
+    "postgres_time_ms": 0.6526249926537275,
+    "duckdb_time_ms": 23.349315975792706,
+    "log_time_difference": -3.577320287795137,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 0.0,
+        "Total Cost": 17.67,
+        "Plan Rows": 10,
+        "Plan Width": 4,
+        "Plans": [
+          {
+            "Node Type": "Seq Scan",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Relation Name": "time_dim",
+            "Alias": "time_dim",
+            "Startup Cost": 0.0,
+            "Total Cost": 2488.0,
+            "Plan Rows": 1408,
+            "Plan Width": 4,
+            "Filter": "(t_minute = 59)"
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 35.777538768242486
+  },
+  {
+    "timestamp": "2025-09-11T21:53:41.138792",
+    "dataset": "tpcds_sf1",
+    "query_type": "TP",
+    "query_index": 41,
+    "query_text": "SELECT \"dbgen_version\".\"dv_version\" FROM \"dbgen_version\" LIMIT 1;",
+    "postgres_time_ms": 0.27503102319315076,
+    "duckdb_time_ms": 11.465431016404182,
+    "log_time_difference": -3.7302078857742456,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 0.0,
+        "Total Cost": 0.07,
+        "Plan Rows": 1,
+        "Plan Width": 50,
+        "Plans": [
+          {
+            "Node Type": "Seq Scan",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Relation Name": "dbgen_version",
+            "Alias": "dbgen_version",
+            "Startup Cost": 0.0,
+            "Total Cost": 11.6,
+            "Plan Rows": 160,
+            "Plan Width": 50
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 41.687773558374744
+  },
+  {
+    "timestamp": "2025-09-11T21:53:41.152971",
+    "dataset": "tpcds_sf1",
+    "query_type": "TP",
+    "query_index": 44,
+    "query_text": "SELECT \"customer_demographics\".\"cd_marital_status\", \"customer_demographics\".\"cd_credit_rating\" FROM \"customer_demographics\" WHERE \"customer_demographics\".\"cd_demo_sk\" = 89665 LIMIT 1;",
+    "postgres_time_ms": 1.0294769890606403,
+    "duckdb_time_ms": 10.880745016038418,
+    "log_time_difference": -2.357943819154459,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 0.43,
+        "Total Cost": 8.45,
+        "Plan Rows": 1,
+        "Plan Width": 13,
+        "Plans": [
+          {
+            "Node Type": "Index Scan",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Scan Direction": "Forward",
+            "Index Name": "customer_demographics_pkey",
+            "Relation Name": "customer_demographics",
+            "Alias": "customer_demographics",
+            "Startup Cost": 0.43,
+            "Total Cost": 8.45,
+            "Plan Rows": 1,
+            "Plan Width": 13,
+            "Index Cond": "(cd_demo_sk = 89665)"
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 10.569196914218253
+  },
+  {
+    "timestamp": "2025-09-11T21:53:41.166827",
+    "dataset": "tpcds_sf1",
+    "query_type": "TP",
+    "query_index": 45,
+    "query_text": "SELECT \"call_center\".\"cc_division\", \"call_center\".\"cc_mkt_class\", \"call_center\".\"cc_class\" FROM \"call_center\" WHERE \"call_center\".\"cc_call_center_sk\" = 1 ORDER BY \"call_center\".\"cc_county\" ASC LIMIT 10;",
+    "postgres_time_ms": 0.49576599849388003,
+    "duckdb_time_ms": 11.444598960224539,
+    "log_time_difference": -3.1391691529902985,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 8.17,
+        "Total Cost": 8.17,
+        "Plan Rows": 1,
+        "Plan Width": 404,
+        "Plans": [
+          {
+            "Node Type": "Sort",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 8.17,
+            "Total Cost": 8.17,
+            "Plan Rows": 1,
+            "Plan Width": 404,
+            "Sort Key": [
+              "cc_county"
+            ],
+            "Plans": [
+              {
+                "Node Type": "Index Scan",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Scan Direction": "Forward",
+                "Index Name": "call_center_pkey",
+                "Relation Name": "call_center",
+                "Alias": "call_center",
+                "Startup Cost": 0.14,
+                "Total Cost": 8.16,
+                "Plan Rows": 1,
+                "Plan Width": 404,
+                "Index Cond": "(cc_call_center_sk = 1)"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 23.084679052199697
+  },
+  {
+    "timestamp": "2025-09-11T21:53:41.181616",
+    "dataset": "tpcds_sf1",
+    "query_type": "TP",
+    "query_index": 49,
+    "query_text": "SELECT \"catalog_sales\".\"cs_sales_price\" FROM \"catalog_sales\" WHERE \"catalog_sales\".\"cs_item_sk\" = 18000 LIMIT 1;",
+    "postgres_time_ms": 0.31491898698732257,
+    "duckdb_time_ms": 11.837315978482366,
+    "log_time_difference": -3.626696770152266,
+    "postgres_plan": {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 0.43,
+        "Total Cost": 4.49,
+        "Plan Rows": 1,
+        "Plan Width": 6,
+        "Plans": [
+          {
+            "Node Type": "Index Scan",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Scan Direction": "Forward",
+            "Index Name": "catalog_sales_pkey",
+            "Relation Name": "catalog_sales",
+            "Alias": "catalog_sales",
+            "Startup Cost": 0.43,
+            "Total Cost": 345.91,
+            "Plan Rows": 85,
+            "Plan Width": 6,
+            "Index Cond": "(cs_item_sk = 18000)"
+          }
+        ]
+      }
+    },
+    "optimal_engine": "postgres",
+    "speedup_ratio": 37.58844803777706
+  }
+]
