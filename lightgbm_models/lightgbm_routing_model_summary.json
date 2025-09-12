@@ -1,0 +1,63 @@
+{
+  "training_metrics": {
+    "accuracy": 0.7333333333333333,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1_score": 0.0,
+    "roc_auc": 0.6931818181818181,
+    "num_train_samples": 60,
+    "num_test_samples": 15,
+    "num_features": 25
+  },
+  "cv_scores": [
+    0.6,
+    0.7333333333333333,
+    0.5333333333333333,
+    0.4666666666666667,
+    0.7333333333333333
+  ],
+  "cv_mean": 0.6133333333333334,
+  "cv_std": 0.10666666666666665,
+  "top_features": [
+    {
+      "feature": "complexity_score",
+      "importance": 19.74388875812292
+    },
+    {
+      "feature": "num_tables",
+      "importance": 2.8609399795532227
+    },
+    {
+      "feature": "num_joins",
+      "importance": 0.0
+    },
+    {
+      "feature": "query_depth",
+      "importance": 0.0
+    },
+    {
+      "feature": "has_aggregates",
+      "importance": 0.0
+    },
+    {
+      "feature": "has_group_by",
+      "importance": 0.0
+    },
+    {
+      "feature": "has_order_by",
+      "importance": 0.0
+    },
+    {
+      "feature": "has_limit",
+      "importance": 0.0
+    },
+    {
+      "feature": "has_distinct",
+      "importance": 0.0
+    },
+    {
+      "feature": "has_window_functions",
+      "importance": 0.0
+    }
+  ]
+}

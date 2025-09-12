@@ -1,0 +1,33 @@
+{
+  "feature_columns": [
+    "num_tables",
+    "num_joins",
+    "query_depth",
+    "complexity_score",
+    "has_aggregates",
+    "has_group_by",
+    "has_order_by",
+    "has_limit",
+    "has_distinct",
+    "has_window_functions",
+    "has_outer_joins",
+    "estimated_join_complexity",
+    "has_subqueries",
+    "has_correlated_subqueries",
+    "has_large_tables",
+    "all_tables_small",
+    "has_complex_expressions",
+    "has_user_functions",
+    "has_text_operations",
+    "has_numeric_heavy_ops",
+    "num_aggregate_funcs",
+    "analytical_pattern",
+    "transactional_pattern",
+    "etl_pattern",
+    "command_type"
+  ],
+  "num_features": 25,
+  "model_type": "LightGBM",
+  "objective": "binary",
+  "target_description": "Engine selection: 0=PostgreSQL, 1=DuckDB"
+}
