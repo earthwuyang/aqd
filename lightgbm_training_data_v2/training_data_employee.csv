@@ -1,0 +1,11 @@
+query_id,query_length,num_tables,num_joins,query_depth,complexity_score,has_aggregates,has_group_by,has_order_by,has_limit,has_distinct,has_window_functions,has_outer_joins,estimated_join_complexity,has_subqueries,has_correlated_subqueries,has_large_tables,all_tables_small,has_complex_expressions,has_user_functions,has_text_operations,has_numeric_heavy_ops,num_aggregate_funcs,analytical_pattern,transactional_pattern,etl_pattern,command_type,pg_time_ms,duck_time_ms,optimal_engine
+employee_workload_ap_queries.sql_4001,339,4,3,4,3,1,0,0,0,0,0,1,6,0,0,0,0,0,0,0,1,1,0,0,0,0,-1,-1,unknown
+employee_workload_tp_queries.sql_9500,200,1,0,0,2,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0.7263029692694545,22.134153987281024,postgres
+employee_workload_tp_queries.sql_3974,99,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0.564927002415061,29.642470995895565,postgres
+employee_workload_tp_queries.sql_514,317,2,1,0,3,0,0,0,1,0,0,0,2,0,0,0,0,0,0,0,0,0,0,1,0,0,-1,-1,unknown
+employee_workload_tp_queries.sql_8258,314,2,1,0,3,0,0,0,1,0,0,0,2,0,0,0,0,0,0,0,0,0,0,1,0,0,-1,-1,unknown
+employee_workload_tp_queries.sql_2152,283,2,1,0,2,0,0,0,1,0,0,0,2,0,0,0,0,0,0,0,0,0,0,1,0,0,0.8244869532063603,49.07687893137336,postgres
+employee_workload_tp_queries.sql_8271,425,2,1,0,4,0,0,1,1,0,0,0,2,0,0,0,0,0,0,0,0,0,0,1,0,0,-1,-1,unknown
+employee_workload_tp_queries.sql_240,126,1,0,0,1,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1.232760027050972,37.10598102770746,postgres
+employee_workload_tp_queries.sql_9446,259,2,1,0,2,0,0,0,1,0,0,0,2,0,0,0,0,0,0,0,0,0,0,1,0,0,0.9346599690616131,41.38172196689993,postgres
+employee_workload_ap_queries.sql_8631,495,5,4,4,4,1,0,0,0,0,0,1,8,0,0,0,0,0,0,1,1,3,0,0,0,0,39.05517200473696,89.69149889890105,postgres

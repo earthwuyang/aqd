@@ -1,0 +1,6 @@
+query_id,query_length,num_tables,num_joins,query_depth,complexity_score,has_aggregates,has_group_by,has_order_by,has_limit,has_distinct,has_window_functions,has_outer_joins,estimated_join_complexity,has_subqueries,has_correlated_subqueries,has_large_tables,all_tables_small,has_complex_expressions,has_user_functions,has_text_operations,has_numeric_heavy_ops,num_aggregate_funcs,analytical_pattern,transactional_pattern,etl_pattern,command_type,pg_time_ms,duck_time_ms,optimal_engine
+Hepatitis_std_3119,100,1,0,3,1,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,3,0,1,0,0,0.3287619911134243,33.58304395806044,postgres
+Hepatitis_std_9723,182,1,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,-1,-1,unknown
+Hepatitis_std_8484,261,2,1,2,2,1,0,1,0,0,0,0,2,0,0,0,0,0,0,1,1,2,0,0,0,0,3.9786980487406254,24.555700016207993,postgres
+Hepatitis_std_878,179,1,0,0,1,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,-1,-1,unknown
+Hepatitis_std_4377,271,2,1,0,2,0,0,1,1,0,0,0,2,0,0,0,0,0,0,0,0,0,0,1,0,0,-1,-1,unknown

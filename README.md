@@ -1,16 +1,18 @@
-# PostgreSQL 17 + pg_duckdb with GNN-based Query Routing
+# PostgreSQL 17 + pg_duckdb with LightGBM Query Routing
 
-A complete PostgreSQL 17 environment with pg_duckdb extension, kernel-level GNN query routing, CTU/TPC benchmark datasets, and comprehensive ML training pipeline for hybrid OLTP/OLAP workload optimization.
+A high-performance PostgreSQL 17 environment with pg_duckdb extension and LightGBM-based query routing that makes routing decisions at the planner hook level (before query planning) to avoid double planning overhead.
 
 ## 🚀 Key Features
 
-- **PostgreSQL 17** with kernel-level GNN plan logging and routing
-- **pg_duckdb v1.1.0** - DuckDB analytical engine integration
-- **R-GIN Model** - Relational Graph Isomorphism Network for query routing
+- **PostgreSQL 17** with pre-optimization query tree feature extraction
+- **pg_duckdb v1.1.0** - DuckDB analytical engine integration  
+- **LightGBM Model** - Lightweight gradient boosting for fast query routing (<1ms)
+- **Pre-planning routing** - Decisions made before query planning to avoid overhead
+- **Per-backend model caching** - Model loaded once per connection
+- **25 lightweight features** - Extracted from Query trees without planning
 - **9 benchmark databases** - 7 CTU datasets + TPC-H/TPC-DS (SF=1)
-- **18,000+ benchmark queries** with cached analysis for fast generation
 - **Dual execution collection** - Training data from both engines
-- **Kernel modifications** - Full JSON plan logging for GNN training
+- **Comprehensive observability** - GUCs for monitoring routing decisions
 
 ## 📋 Prerequisites
 
@@ -22,8 +24,17 @@ sudo apt-get install -y \
     flex bison libxml2-dev libxslt1-dev libssl-dev \
     cmake ninja-build pkg-config
 
-# Python packages
-pip install psycopg2-binary mysql-connector-python tqdm numpy torch
+# Python packages  
+pip install psycopg2-binary mysql-connector-python tqdm numpy pandas lightgbm scikit-learn
+
+# LightGBM C library
+git clone --recursive https://github.com/microsoft/LightGBM
+cd LightGBM
+mkdir build && cd build
+cmake ..
+make -j4
+sudo make install
+sudo ldconfig
 ```
 
 ## 📁 Repository Structure
@@ -32,425 +43,206 @@ pip install psycopg2-binary mysql-connector-python tqdm numpy torch
 pg_duckdb_postgres/
 ├── postgres/                    # Modified PostgreSQL 17 source
 │   ├── src/include/utils/
-│   │   ├── gnn_plan_logger.h   # GNN routing structures
-│   │   └── rginn.h              # R-GIN model header
+│   │   ├── lightgbm_routing.h  # LightGBM routing API
+│   │   └── preopt_feature_extractor.h # Pre-optimization features
 │   └── src/backend/utils/misc/
-│       ├── gnn_plan_logger.c   # Plan logging implementation
-│       └── rginn.c              # R-GIN forward pass
-├── pg_duckdb/                   # pg_duckdb extension
+│       ├── lightgbm_routing.c  # LightGBM C API integration
+│       └── preopt_feature_extractor.c # Feature extraction
+├── pg_duckdb/                   # pg_duckdb extension with planner hook
 ├── pgsql/                       # PostgreSQL installation
 ├── data/                        # PostgreSQL data directory
+├── lightgbm_models/             # Trained LightGBM models
+├── lightgbm_training_data/      # CSV training data
 ├── benchmark_queries/           # Generated queries with cache
-│   ├── {database}/
-│   │   ├── .cache/             # Cached table analysis
-│   │   ├── workload_ap_queries.sql
-│   │   └── workload_tp_queries.sql
-├── dual_execution_data/         # Training data
-│   ├── {database}.json         # Per-database execution times
-├── tpch-dbgen/                  # TPC-H generator
-├── databricks-tpcds/            # TPC-DS generator
-├── setup_postgres.sh            # PostgreSQL + pg_duckdb setup
-├── setup_tpc_benchmarks.sh      # TPC-H/DS setup (1GB each)
-├── import_ctu_datasets.py       # CTU importer
-├── generate_benchmark_queries.py # Query generator with caching
-├── collect_dual_execution_data.py # Training data collector
-├── train_rginn_model.py        # Python GNN training script
-├── train_rginn.cpp              # C++ GNN training (simplified)
-├── train_rginn_real.cpp         # C++ GNN training (full JSON)
-└── Makefile.rginn               # Build system for C++ training
+├── dual_execution_data/         # Execution timing data
+├── collect_lightgbm_data.py    # Data collection script
+├── train_lightgbm.py           # Model training script
+└── CLAUDE.md                    # Implementation documentation
 ```
 
-## 📋 Prerequisites
+## 🔧 Building and Installation
 
-### System Dependencies
+### 1. Build PostgreSQL with LightGBM support
 
 ```bash
-# Ubuntu/Debian
-sudo apt-get update
-sudo apt-get install -y \
-    build-essential \
-    git \
-    wget \
-    cmake \
-    libreadline-dev \
-    zlib1g-dev \
-    libssl-dev \
-    libxml2-dev \
-    libxslt1-dev \
-    python3-dev \
-    python3-pip \
-    nlohmann-json3-dev  # Required for C++ training
-
-# Python dependencies
-pip3 install psycopg2-binary numpy scikit-learn
-```
-
-## 🛠️ Installation
-
-### Quick Setup (Recommended)
-
-```bash
-# 1. Setup modified PostgreSQL with GNN support
-./setup_postgres.sh
-
-# 2. Setup TPC benchmarks (1GB each)
-./setup_tpc_benchmarks.sh
-
-# 3. Import CTU datasets
-python3 import_ctu_datasets.py
-
-# 4. Generate benchmark queries (uses cache after first run)
-python3 generate_benchmark_queries.py --num-ap 1000 --num-tp 1000
-
-# 5. Collect dual execution training data
-python3 collect_dual_execution_data.py --sample-size 100
-```
-
-## 🧠 GNN Query Routing
-
-### Kernel Modifications
-
-The PostgreSQL kernel has been modified to support GNN-based query routing:
-
-```c
-// Enable GNN plan logging in postgresql.conf
-gnn_plan_logging.enabled = true
-gnn_plan_logging.directory = '/tmp/pg_gnn_plans'
-gnn_plan_logging.routing_method = 'gnn'  // or 'rules', 'cost'
-```
-
-### Plan Logging
-
-Full JSON query plans are logged to disk for training:
-
-```json
-{
-  "timestamp": "2025-09-11T12:00:00",
-  "database": "financial",
-  "query_hash": "abc123",
-  "plan": {
-    "Node Type": "Aggregate",
-    "Startup Cost": 1000.00,
-    "Total Cost": 5000.00,
-    "Plans": [...]
-  },
-  "features": {
-    "num_nodes": 15,
-    "max_depth": 5,
-    "has_join": true,
-    "has_aggregate": true
-  },
-  "routing_decision": 1  // 0=PostgreSQL, 1=DuckDB
-}
-```
-
-### R-GIN Architecture
-
-The Relational Graph Isomorphism Network (R-GIN) model:
-- **Input**: Query plan graph with node features
-- **Architecture**: 3-layer GIN with relation-specific transforms
-- **Output**: Binary classification (PostgreSQL vs DuckDB)
-- **Training**: Supervised learning on dual execution times
-
-## 📊 Benchmark Datasets
-
-### CTU Datasets
-| Database | Tables | Records | Description |
-|----------|--------|---------|-------------|
-| **Airline** | 19 | 445,827 | Flight performance data |
-| **Credit** | 8 | 1,646,563 | Credit card transactions |
-| **Carcinogenesis** | 6 | ~330k | Chemical research data |
-| **employee** | 6 | ~4k | Employee management |
-| **financial** | 8 | 1,056,320 | Bank transactions |
-| **geneea** | 19 | ~240k | Text analysis/NLP |
-| **Hepatitis_std** | 7 | ~750 | Patient records |
-
-### TPC Benchmarks
-| Database | Scale | Size | Tables |
-|----------|-------|------|--------|
-| **tpch_sf1** | SF=1 | 1GB | 8 |
-| **tpcds_sf1** | SF=1 | 1GB | 25 |
-
-## 🔍 Query Generation with Caching
-
-### Cached Analysis
-Table analysis is cached for 45x faster query generation:
-
-```bash
-# First run: Analyzes tables and caches results
-python3 generate_benchmark_queries.py --databases financial
-# Time: ~11 seconds
-
-# Subsequent runs: Uses cached analysis
-python3 generate_benchmark_queries.py --databases financial
-# Time: ~0.25 seconds
-
-# Force re-analysis
-python3 generate_benchmark_queries.py --no-cache
-
-# Clear all caches
-python3 generate_benchmark_queries.py --clear-cache
-```
-
-### Generation Options
-
-```bash
-# Generate for all databases (CTU + TPC)
-python3 generate_benchmark_queries.py
-
-# TPC benchmarks only
-python3 generate_benchmark_queries.py --tpc-only --num-ap 2000 --num-tp 2000
-
-# CTU datasets only
-python3 generate_benchmark_queries.py --ctu-only
-
-# Specific databases
-python3 generate_benchmark_queries.py --databases financial employee tpch_sf1
-```
-
-## 📈 Training Data Collection
-
-### Dual Execution Collection
-
-Measures execution time on both engines:
-
-```bash
-# Collect from all databases
-python3 collect_dual_execution_data.py --sample-size 100
-
-# Specific datasets
-python3 collect_dual_execution_data.py \
-    --datasets financial employee \
-    --sample-size 500 \
-    --timeout 30
-```
-
-Output format (`dual_execution_data/{database}.json`):
-```json
-{
-  "query": "SELECT COUNT(*) FROM trans WHERE amount > 1000",
-  "query_type": "AP",
-  "postgres_time": 0.234,
-  "duckdb_time": 0.089,
-  "best_engine": "duckdb",
-  "speedup": 2.63,
-  "plan_features": {...}
-}
-```
-
-## 🤖 GNN Model Training
-
-### Python Training (Development)
-
-```bash
-# Train with self-paced learning
-python3 train_rginn_model.py \
-    --data-dir dual_execution_data/ \
-    --epochs 100 \
-    --learning-rate 0.005 \
-    --hidden-dim 32 \
-    --self-paced
-
-# Evaluate model
-python3 train_rginn_model.py --evaluate \
-    --threshold 0.0 \
-    --test-split 0.2
-```
-
-### C++ Training (Production/Kernel)
-
-The C++ implementation is required for kernel integration and provides simplified training:
-
-```bash
-# Build C++ training program (requires nlohmann-json)
-g++ -std=c++17 -O3 train_rginn.cpp -o train_rginn -lnlohmann_json
-
-# Train model (simplified - output layer only)
-./train_rginn
-
-# Output: models/rginn_model.txt (kernel-compatible format)
-```
-
-### Deploy R-GIN to Kernel
-
-```bash
-# 1. Rebuild PostgreSQL with R-GIN support
 cd postgres
-make -j$(nproc) && make install
+./configure --prefix=/home/wuy/DB/pg_duckdb_postgres/pgsql \
+    --enable-debug --enable-cassert CFLAGS="-ggdb -O0"
+make -j$(nproc)
+make install
+```
 
-# 2. Rebuild pg_duckdb with routing integration  
-cd ../pg_duckdb
-make clean && make -j$(nproc) && make install
+### 2. Build pg_duckdb extension
 
-# 3. Restart PostgreSQL
-pg_ctl -D ../data restart
+```bash
+cd pg_duckdb
+export PATH=/home/wuy/DB/pg_duckdb_postgres/pgsql/bin:$PATH
+make
+make install
+```
 
-# 4. Configure R-GIN routing (configure_rginn.sql)
-psql -d postgres -f configure_rginn.sql
+### 3. Initialize database
 
-# Or manually:
-ALTER SYSTEM SET rginn.enabled = on;
-ALTER SYSTEM SET rginn.model_path = '/home/wuy/DB/pg_duckdb_postgres/models/rginn_model.txt';
-ALTER SYSTEM SET rginn.routing_threshold = 0.0;
-ALTER SYSTEM SET gnn_plan_logging.enabled = on;
-ALTER SYSTEM SET duckdb.force_execution = off;
+```bash
+export PATH=/home/wuy/DB/pg_duckdb_postgres/pgsql/bin:$PATH
+initdb -D data
+pg_ctl -D data start
+createdb test
+```
+
+## 🎯 LightGBM Query Routing
+
+### Configuration (GUCs)
+
+```sql
+-- Main settings
+SET lightgbm.enabled = true;
+SET lightgbm.model_path = '/path/to/lightgbm_model.txt';
+SET lightgbm.routing_threshold = 0.0;  -- >0 favors DuckDB
+
+-- Feature extraction control
+SET lightgbm.enable_preopt_feature_extraction = true;  -- default ON
+SET lightgbm.enable_plan_logging = false;              -- default OFF for performance
+
+-- Observability (read-only)
+SHOW lightgbm.last_routed_engine;     -- 'postgres' or 'duckdb'
+SHOW lightgbm.last_decision_us;       -- routing overhead in microseconds
+SHOW lightgbm.last_features_json;     -- extracted features as JSON
+SHOW lightgbm.prediction_count;       -- total predictions made
+SHOW lightgbm.inference_time_ms;      -- average inference time
+```
+
+### Pre-Optimization Features (v1.0.0)
+
+The system extracts 25 lightweight features from Query trees before planning:
+
+1. **Query structure**: num_tables, num_joins, query_depth, complexity_score
+2. **Query clauses**: has_aggregates, has_group_by, has_order_by, has_limit, has_distinct
+3. **Advanced features**: has_window_functions, has_outer_joins, has_subqueries
+4. **Complexity indicators**: has_correlated_subqueries, has_complex_expressions
+5. **Function analysis**: has_user_functions, has_text_operations, has_numeric_heavy_ops
+6. **Pattern detection**: analytical_pattern, transactional_pattern, etl_pattern
+7. **Command type**: SELECT=0, INSERT=1, UPDATE=2, DELETE=3, OTHER=4
+
+## 📊 Training Pipeline
+
+### 1. Collect training data
+
+```bash
+# Collects features and dual-engine execution times
+python collect_lightgbm_data.py \
+    --databases tpch,tpcds,accidents,airline \
+    --queries-per-db 1000 \
+    --output lightgbm_training_data/training.csv
+```
+
+### 2. Train LightGBM model
+
+```bash
+# Trains regression model on log(pg_time/duck_time)
+python train_lightgbm.py \
+    --input lightgbm_training_data/training.csv \
+    --output lightgbm_models/model.txt \
+    --calibrate-threshold  # Optimizes for minimum makespan
+```
+
+### 3. Deploy model
+
+```sql
+-- In PostgreSQL
+ALTER SYSTEM SET lightgbm.model_path = '/absolute/path/to/model.txt';
+ALTER SYSTEM SET lightgbm.enabled = true;
 SELECT pg_reload_conf();
 ```
 
-### Verify R-GIN Routing
+## 🔍 Verification
 
-```bash
-# Check configuration status
-python3 verify_rginn_routing.py
-
-# Test routing with sample queries
-python3 test_rginn_routing.py
-
-# Monitor routing decisions
-tail -f /tmp/pg_gnn_plans/plans_*.jsonl | grep -E 'engine_used|gnn_prediction'
-```
-
-## ⚙️ Configuration
-
-### PostgreSQL Settings (data/postgresql.conf)
-
-```conf
-# Memory
-shared_buffers = 2GB
-work_mem = 128MB
-maintenance_work_mem = 512MB
-effective_cache_size = 8GB
-
-# pg_duckdb
-duckdb.execution = on
-duckdb.postgres_role = 'read_only'
-
-# GNN Plan Logging
-gnn_plan_logging.enabled = true
-gnn_plan_logging.directory = '/tmp/pg_gnn_plans'
-gnn_plan_logging.routing_method = 'gnn'
-gnn_plan_logging.sample_rate = 1.0
-
-# Logging
-log_statement = 'all'
-log_duration = on
-```
-
-## 💻 Usage Examples
-
-### Check GNN Routing
+### Check routing decisions
 
 ```sql
--- View routing decision for a query
-EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON) 
-SELECT COUNT(*) FROM trans WHERE amount > 1000;
+-- Run a query
+SELECT COUNT(*), AVG(value) FROM large_table GROUP BY category;
 
--- Check GNN plan logs
-SELECT * FROM pg_ls_dir('/tmp/pg_gnn_plans') 
-ORDER BY modification DESC LIMIT 10;
+-- Check which engine was selected
+SHOW lightgbm.last_routed_engine;  -- Should show 'duckdb' for analytical
+
+-- Verify with EXPLAIN
+EXPLAIN SELECT COUNT(*), AVG(value) FROM large_table GROUP BY category;
+-- Should show "Custom Scan (DuckDBScan)" if routed to DuckDB
 ```
 
-### Monitor Performance
+### Monitor performance
 
 ```sql
--- Compare engine performance
-WITH engine_stats AS (
-  SELECT 
-    CASE 
-      WHEN query LIKE '%/*+ duckdb */%' THEN 'DuckDB'
-      ELSE 'PostgreSQL'
-    END as engine,
-    mean_exec_time,
-    calls
-  FROM pg_stat_statements
-  WHERE query NOT LIKE '%pg_stat%'
-)
-SELECT 
-  engine,
-  COUNT(*) as query_count,
-  AVG(mean_exec_time) as avg_time_ms,
-  SUM(calls) as total_calls
-FROM engine_stats
-GROUP BY engine;
+-- View routing overhead
+SHOW lightgbm.last_decision_us;  -- Should be <1000 (under 1ms)
+
+-- View extracted features
+SHOW lightgbm.last_features_json;
+
+-- Check prediction statistics
+SHOW lightgbm.prediction_count;
+SHOW lightgbm.inference_time_ms;
 ```
 
-## 🔧 Maintenance & Troubleshooting
-
-### Common Commands
+## 🏃 Running Benchmarks
 
 ```bash
-# Check GNN logging status
-psql -c "SHOW gnn_plan_logging.enabled;"
+# Generate benchmark queries
+python generate_benchmark_queries.py --num-ap 1000 --num-tp 1000
 
-# Monitor plan log growth
-watch -n 1 'du -sh /tmp/pg_gnn_plans; ls -la /tmp/pg_gnn_plans | tail -5'
-
-# Clear old plan logs
-find /tmp/pg_gnn_plans -mtime +7 -delete
-
-# Rebuild after kernel changes
-cd postgres && make clean && make -j$(nproc) && make install
-pg_ctl -D ../data restart
+# Run benchmark comparison
+python run_benchmark.py \
+    --methods default,cost,lightgbm \
+    --databases tpch,tpcds \
+    --persistent-connections \
+    --interleave \
+    --output results.csv
 ```
 
-### Debugging
+## 🔬 Key Improvements Over Previous Approaches
 
-```bash
-# Check PostgreSQL logs for GNN decisions
-tail -f data/log/*.log | grep -i gnn
+| Aspect | GNN/R-GIN Approach | LightGBM Approach |
+|--------|-------------------|-------------------|
+| **Decision Point** | After planning (too late) | Before planning (planner hook) |
+| **Features** | Full plan graphs (heavy) | 25 pre-opt features (lightweight) |
+| **Inference Time** | >10ms | <1ms |
+| **Model Loading** | Per query | Once per backend |
+| **Training** | Complex GNN | Standard gradient boosting |
+| **Double Planning** | Yes (plan then re-plan) | No (route then plan once) |
+| **Feature Extraction** | Requires planning | Query tree only |
 
-# Verify R-GIN model loading
-psql -c "SELECT * FROM pg_gnn_model_info();"
+## 🐛 Troubleshooting
 
-# Test routing decision
-psql -c "SELECT pg_gnn_predict_routing('SELECT * FROM trans');"
-```
+- **Model fails to load**: Check file path and permissions, verify LightGBM library is installed
+- **Wrong engine selected**: Check threshold calibration, verify features match training
+- **High routing overhead**: Ensure model is cached per-backend, not reloaded per query
+- **Features mismatch**: Verify feature schema version matches between training and kernel
 
 ## 📚 Documentation
 
-- [PostgreSQL 17 Docs](https://www.postgresql.org/docs/17/)
-- [pg_duckdb GitHub](https://github.com/duckdb/pg_duckdb)
-- [DuckDB Documentation](https://duckdb.org/docs/)
-- [CTU Dataset Repository](https://relational.fel.cvut.cz/)
-- [R-GIN Paper](https://arxiv.org/abs/relational-gin)
+- [CLAUDE.md](CLAUDE.md) - Detailed implementation documentation
+- [ChatGPT Review](docs/chatgpt_review.md) - Architecture recommendations
 
-## 📊 Performance Statistics
+## 🧪 Testing
 
-- **Total Databases:** 9 (7 CTU + 2 TPC)
-- **Total Tables:** 98+
-- **Total Records:** ~10 million
-- **Generated Queries:** 18,000+
-- **Query Generation Speed:** 
-  - Without cache: ~186 queries/second
-  - With cache: ~546 queries/second (3x faster)
-- **Cache Speedup:** 45x for table analysis
-- **GNN Model Accuracy:** ~92% routing accuracy
-- **Average Speedup:** 2.3x with optimal routing
+```bash
+# PostgreSQL regression tests
+cd postgres
+make check
 
-## 🚦 Workflow Summary
+# pg_duckdb tests
+cd pg_duckdb
+make installcheck
+```
 
-1. **Setup** → PostgreSQL + pg_duckdb + kernel mods
-2. **Import** → CTU datasets + TPC benchmarks
-3. **Generate** → 18,000+ queries with cached analysis
-4. **Collect** → Dual execution times for training
-5. **Train** → R-GIN model on execution data
-6. **Deploy** → Model weights to PostgreSQL kernel
-7. **Route** → Automatic GNN-based query routing
+## 📝 License
 
-## 🏗️ Recent Updates
+PostgreSQL License for PostgreSQL components, MIT License for routing implementation.
 
-### 2025-09-12
-- **R-GIN Kernel Integration**: Successfully integrated R-GIN model loading and query routing into PostgreSQL kernel
-- **pg_duckdb Hooks Modified**: Added R-GIN prediction logic to planner hooks for automatic query routing
-- **Model Deployment**: Trained R-GIN model deployed to kernel (`models/rginn_model.txt`)
-- **Configuration Scripts**: Added `configure_rginn.sql` for easy R-GIN setup
-- **Verification Tools**: Created `test_rginn_routing.py` and `verify_rginn_routing.py` for testing
+## 🙏 Acknowledgments
 
-### 2025-09-11
-- **C++ Training Implementation**: Replaced Python-only training with C++ implementation using nlohmann-json
-- **Incremental Data Flushing**: Updated collection script to flush data every 10 queries
-- **Kernel-level GNN Logging**: Full JSON plan logging implemented in PostgreSQL kernel
-- **Self-paced Learning**: Added Taylor-based optimization for handling class imbalance
-
----
-*Last Updated: 2025-09-12*
+- PostgreSQL Community
+- DuckDB Labs (pg_duckdb extension)
+- Microsoft Research (LightGBM)
+- CTU Prague (benchmark datasets)
