@@ -1,0 +1,95 @@
+{
+  "category": {
+    "category_no": "int",
+    "category_desc": "char",
+    "category_code": "char"
+  },
+  "charge": {
+    "charge_no": "int",
+    "member_no": "int",
+    "provider_no": "int",
+    "category_no": "int",
+    "charge_dt": "char",
+    "charge_amt": "float",
+    "statement_no": "int",
+    "charge_code": "char"
+  },
+  "corporation": {
+    "corp_no": "int",
+    "corp_name": "char",
+    "street": "char",
+    "city": "char",
+    "state_prov": "char",
+    "country": "char",
+    "mail_code": "char",
+    "phone_no": "char",
+    "expr_dt": "char",
+    "region_no": "int",
+    "corp_code": "char"
+  },
+  "member": {
+    "member_no": "int",
+    "lastname": "char",
+    "firstname": "char",
+    "middleinitial": "char",
+    "street": "char",
+    "city": "char",
+    "state_prov": "char",
+    "country": "char",
+    "mail_code": "char",
+    "phone_no": "char",
+    "photograph": null,
+    "issue_dt": "char",
+    "expr_dt": "char",
+    "region_no": "int",
+    "corp_no": "int",
+    "prev_balance": "float",
+    "curr_balance": "float",
+    "member_code": "char"
+  },
+  "payment": {
+    "payment_no": "int",
+    "member_no": "int",
+    "payment_dt": "char",
+    "payment_amt": "float",
+    "statement_no": "int",
+    "payment_code": "char"
+  },
+  "provider": {
+    "provider_no": "int",
+    "provider_name": "char",
+    "street": "char",
+    "city": "char",
+    "state_prov": "char",
+    "mail_code": "char",
+    "country": "char",
+    "phone_no": "char",
+    "issue_dt": "char",
+    "expr_dt": "char",
+    "region_no": "int",
+    "provider_code": "char"
+  },
+  "region": {
+    "region_no": "int",
+    "region_name": "char",
+    "street": "char",
+    "city": "char",
+    "state_prov": "char",
+    "country": "char",
+    "mail_code": "char",
+    "phone_no": "char",
+    "region_code": "char"
+  },
+  "statement": {
+    "statement_no": "int",
+    "member_no": "int",
+    "statement_dt": "char",
+    "due_dt": "char",
+    "statement_amt": "float",
+    "statement_code": "char"
+  },
+  "status": {
+    "status_code": "char",
+    "status_desc": "char"
+  }
+}

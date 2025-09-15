@@ -1,0 +1,132 @@
+{
+  "tables": {
+    "atom": [
+      {
+        "name": "atomid",
+        "type": "character",
+        "nullable": false
+      },
+      {
+        "name": "drug",
+        "type": "character",
+        "nullable": true
+      },
+      {
+        "name": "atomtype",
+        "type": "character",
+        "nullable": true
+      },
+      {
+        "name": "charge",
+        "type": "character",
+        "nullable": true
+      },
+      {
+        "name": "name",
+        "type": "character",
+        "nullable": true
+      }
+    ],
+    "canc": [
+      {
+        "name": "drug_id",
+        "type": "character",
+        "nullable": false
+      },
+      {
+        "name": "class",
+        "type": "character",
+        "nullable": true
+      }
+    ],
+    "sbond_1": [
+      {
+        "name": "id",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "drug",
+        "type": "character",
+        "nullable": true
+      },
+      {
+        "name": "atomid",
+        "type": "character",
+        "nullable": true
+      },
+      {
+        "name": "atomid_2",
+        "type": "character",
+        "nullable": true
+      }
+    ],
+    "sbond_2": [
+      {
+        "name": "id",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "drug",
+        "type": "character",
+        "nullable": true
+      },
+      {
+        "name": "atomid",
+        "type": "character",
+        "nullable": true
+      },
+      {
+        "name": "atomid_2",
+        "type": "character",
+        "nullable": true
+      }
+    ],
+    "sbond_3": [
+      {
+        "name": "id",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "drug",
+        "type": "character",
+        "nullable": true
+      },
+      {
+        "name": "atomid",
+        "type": "character",
+        "nullable": true
+      },
+      {
+        "name": "atomid_2",
+        "type": "character",
+        "nullable": true
+      }
+    ],
+    "sbond_7": [
+      {
+        "name": "id",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "drug",
+        "type": "character",
+        "nullable": true
+      },
+      {
+        "name": "atomid",
+        "type": "character",
+        "nullable": true
+      },
+      {
+        "name": "atomid_2",
+        "type": "character",
+        "nullable": true
+      }
+    ]
+  },
+  "relationships": []
+}

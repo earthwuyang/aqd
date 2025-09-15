@@ -1,0 +1,638 @@
+{
+  "tables": {
+    "L_AIRLINE_ID": [
+      {
+        "name": "Code",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "Description",
+        "type": "character varying",
+        "nullable": true
+      }
+    ],
+    "L_AIRPORT": [
+      {
+        "name": "Code",
+        "type": "character",
+        "nullable": false
+      },
+      {
+        "name": "Description",
+        "type": "character varying",
+        "nullable": true
+      }
+    ],
+    "L_AIRPORT_ID": [
+      {
+        "name": "Code",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "Description",
+        "type": "character varying",
+        "nullable": true
+      }
+    ],
+    "L_AIRPORT_SEQ_ID": [
+      {
+        "name": "Code",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "Description",
+        "type": "character varying",
+        "nullable": true
+      }
+    ],
+    "L_CANCELLATION": [
+      {
+        "name": "Code",
+        "type": "character",
+        "nullable": false
+      },
+      {
+        "name": "Description",
+        "type": "character varying",
+        "nullable": true
+      }
+    ],
+    "L_CITY_MARKET_ID": [
+      {
+        "name": "Code",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "Description",
+        "type": "character varying",
+        "nullable": true
+      }
+    ],
+    "L_DEPARRBLK": [
+      {
+        "name": "Code",
+        "type": "character",
+        "nullable": false
+      },
+      {
+        "name": "Description",
+        "type": "character varying",
+        "nullable": true
+      }
+    ],
+    "L_DISTANCE_GROUP_250": [
+      {
+        "name": "Code",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "Description",
+        "type": "character varying",
+        "nullable": true
+      }
+    ],
+    "L_DIVERSIONS": [
+      {
+        "name": "Code",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "Description",
+        "type": "character varying",
+        "nullable": true
+      }
+    ],
+    "L_MONTHS": [
+      {
+        "name": "Code",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "Description",
+        "type": "character varying",
+        "nullable": true
+      }
+    ],
+    "L_ONTIME_DELAY_GROUPS": [
+      {
+        "name": "Code",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "Description",
+        "type": "character varying",
+        "nullable": true
+      }
+    ],
+    "L_QUARTERS": [
+      {
+        "name": "Code",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "Description",
+        "type": "character varying",
+        "nullable": true
+      }
+    ],
+    "L_STATE_ABR_AVIATION": [
+      {
+        "name": "Code",
+        "type": "character",
+        "nullable": false
+      },
+      {
+        "name": "Description",
+        "type": "character varying",
+        "nullable": true
+      }
+    ],
+    "L_STATE_FIPS": [
+      {
+        "name": "Code",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "Description",
+        "type": "character varying",
+        "nullable": true
+      }
+    ],
+    "L_UNIQUE_CARRIERS": [
+      {
+        "name": "Code",
+        "type": "character varying",
+        "nullable": false
+      },
+      {
+        "name": "Description",
+        "type": "character varying",
+        "nullable": true
+      }
+    ],
+    "L_WEEKDAYS": [
+      {
+        "name": "Code",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "Description",
+        "type": "character varying",
+        "nullable": true
+      }
+    ],
+    "L_WORLD_AREA_CODES": [
+      {
+        "name": "Code",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "Description",
+        "type": "character varying",
+        "nullable": true
+      }
+    ],
+    "L_YESNO_RESP": [
+      {
+        "name": "Code",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "Description",
+        "type": "character varying",
+        "nullable": true
+      }
+    ],
+    "On_Time_On_Time_Performance_2016_1": [
+      {
+        "name": "Year",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "Quarter",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "Month",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "DayofMonth",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "DayOfWeek",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "FlightDate",
+        "type": "date",
+        "nullable": true
+      },
+      {
+        "name": "UniqueCarrier",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "AirlineID",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "Carrier",
+        "type": "character",
+        "nullable": true
+      },
+      {
+        "name": "TailNum",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "FlightNum",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "OriginAirportID",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "OriginAirportSeqID",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "OriginCityMarketID",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "Origin",
+        "type": "character",
+        "nullable": true
+      },
+      {
+        "name": "OriginCityName",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "OriginState",
+        "type": "character",
+        "nullable": true
+      },
+      {
+        "name": "OriginStateFips",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "OriginStateName",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "OriginWac",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "DestAirportID",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "DestAirportSeqID",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "DestCityMarketID",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "Dest",
+        "type": "character",
+        "nullable": true
+      },
+      {
+        "name": "DestCityName",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "DestState",
+        "type": "character",
+        "nullable": true
+      },
+      {
+        "name": "DestStateFips",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "DestStateName",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "DestWac",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "CRSDepTime",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "DepTime",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "DepDelay",
+        "type": "numeric",
+        "nullable": true
+      },
+      {
+        "name": "DepDelayMinutes",
+        "type": "real",
+        "nullable": true
+      },
+      {
+        "name": "DepDel15",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "DepartureDelayGroups",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "DepTimeBlk",
+        "type": "character",
+        "nullable": true
+      },
+      {
+        "name": "TaxiOut",
+        "type": "real",
+        "nullable": true
+      },
+      {
+        "name": "WheelsOff",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "WheelsOn",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "TaxiIn",
+        "type": "real",
+        "nullable": true
+      },
+      {
+        "name": "CRSArrTime",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "ArrTime",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "ArrDelay",
+        "type": "numeric",
+        "nullable": true
+      },
+      {
+        "name": "ArrDelayMinutes",
+        "type": "real",
+        "nullable": true
+      },
+      {
+        "name": "ArrDel15",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "ArrivalDelayGroups",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "ArrTimeBlk",
+        "type": "character",
+        "nullable": true
+      },
+      {
+        "name": "Cancelled",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "CancellationCode",
+        "type": "character",
+        "nullable": true
+      },
+      {
+        "name": "Diverted",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "CRSElapsedTime",
+        "type": "real",
+        "nullable": true
+      },
+      {
+        "name": "ActualElapsedTime",
+        "type": "real",
+        "nullable": true
+      },
+      {
+        "name": "AirTime",
+        "type": "real",
+        "nullable": true
+      },
+      {
+        "name": "Flights",
+        "type": "real",
+        "nullable": true
+      },
+      {
+        "name": "Distance",
+        "type": "real",
+        "nullable": true
+      },
+      {
+        "name": "DistanceGroup",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "CarrierDelay",
+        "type": "numeric",
+        "nullable": true
+      },
+      {
+        "name": "WeatherDelay",
+        "type": "numeric",
+        "nullable": true
+      },
+      {
+        "name": "NASDelay",
+        "type": "numeric",
+        "nullable": true
+      },
+      {
+        "name": "SecurityDelay",
+        "type": "numeric",
+        "nullable": true
+      },
+      {
+        "name": "LateAircraftDelay",
+        "type": "numeric",
+        "nullable": true
+      },
+      {
+        "name": "FirstDepTime",
+        "type": "numeric",
+        "nullable": true
+      },
+      {
+        "name": "TotalAddGTime",
+        "type": "numeric",
+        "nullable": true
+      },
+      {
+        "name": "LongestAddGTime",
+        "type": "numeric",
+        "nullable": true
+      },
+      {
+        "name": "DivAirportLandings",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "DivReachedDest",
+        "type": "numeric",
+        "nullable": true
+      },
+      {
+        "name": "DivActualElapsedTime",
+        "type": "numeric",
+        "nullable": true
+      },
+      {
+        "name": "DivArrDelay",
+        "type": "numeric",
+        "nullable": true
+      },
+      {
+        "name": "DivDistance",
+        "type": "numeric",
+        "nullable": true
+      },
+      {
+        "name": "Div1Airport",
+        "type": "character",
+        "nullable": true
+      },
+      {
+        "name": "Div1AirportID",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "Div1AirportSeqID",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "Div1WheelsOn",
+        "type": "numeric",
+        "nullable": true
+      },
+      {
+        "name": "Div1TotalGTime",
+        "type": "numeric",
+        "nullable": true
+      },
+      {
+        "name": "Div1LongestGTime",
+        "type": "numeric",
+        "nullable": true
+      },
+      {
+        "name": "Div1WheelsOff",
+        "type": "numeric",
+        "nullable": true
+      },
+      {
+        "name": "Div1TailNum",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "Div2Airport",
+        "type": "character",
+        "nullable": true
+      },
+      {
+        "name": "Div2AirportID",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "Div2AirportSeqID",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "Div2WheelsOn",
+        "type": "numeric",
+        "nullable": true
+      },
+      {
+        "name": "Div2TotalGTime",
+        "type": "numeric",
+        "nullable": true
+      },
+      {
+        "name": "Div2LongestGTime",
+        "type": "numeric",
+        "nullable": true
+      }
+    ]
+  },
+  "relationships": []
+}

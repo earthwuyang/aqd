@@ -1,0 +1,168 @@
+{
+  "bod_schuze": {
+    "id_bod": "int",
+    "id_schuze": "int",
+    "id_tisk": "char",
+    "id_typ": "char",
+    "bod": "int",
+    "uplny_naz": null,
+    "uplny_kon": "char",
+    "poznamka": "char",
+    "id_bod_stav": "int",
+    "pozvanka": "char",
+    "rj": "char",
+    "pozn2": "char",
+    "druh_bodu": "char",
+    "id_sd": "char",
+    "zkratka": "char"
+  },
+  "bod_stav": {
+    "id_bod_stav": "int",
+    "popis": "char"
+  },
+  "funkce": {
+    "id_funkce": "int",
+    "id_organ": "int",
+    "id_typ_funkce": "int",
+    "nazev_funkce_cz": null,
+    "priorita": "int"
+  },
+  "hl_check": {
+    "id_hlasovani": "int",
+    "turn": "int",
+    "mode": "int",
+    "id_h2": "char",
+    "id_h3": "char"
+  },
+  "hl_hlasovani": {
+    "id_hlasovani": "int",
+    "id_organ": "int",
+    "schuze": "int",
+    "cislo": "int",
+    "bod": "int",
+    "datum": "char",
+    "cas": "time",
+    "pro": "int",
+    "proti": "int",
+    "zdrzel": "int",
+    "nehlasoval": "int",
+    "prihlaseno": "int",
+    "kvorum": "int",
+    "druh_hlasovani": "char",
+    "vysledek": "char",
+    "nazev_dlouhy": null,
+    "nazev_kratky": "char"
+  },
+  "hl_poslanec": {
+    "id_poslanec": "int",
+    "id_hlasovani": "int",
+    "vysledek": "char"
+  },
+  "hl_vazby": {
+    "id_hlasovani": "int",
+    "turn": "int",
+    "typ": "int"
+  },
+  "hl_zposlanec": {
+    "id_hlasovani": "int",
+    "id_osoba": "int",
+    "mode": "int"
+  },
+  "omluvy": {
+    "id_organ": "int",
+    "id_poslanec": "int",
+    "den": "char",
+    "od": "char",
+    "do": "char"
+  },
+  "organy": {
+    "id_organ": "int",
+    "organ_id_organ": "int",
+    "id_typ_organu": "int",
+    "zkratka": "char",
+    "nazev_organu_cz": null,
+    "nazev_organu_en": null,
+    "od_organ": "char",
+    "do_organ": "char",
+    "priorita": "char",
+    "cl_organ_base": "int"
+  },
+  "osoby": {
+    "id_osoba": "int",
+    "pred": "char",
+    "jmeno": "char",
+    "prijmeni": "char",
+    "za": "char",
+    "narozeni": "char",
+    "pohlavi": "char",
+    "zmena": "char",
+    "umrti": "char"
+  },
+  "pkgps": {
+    "id_poslanec": "int",
+    "adresa": "char",
+    "sirka": null,
+    "delka": null
+  },
+  "poslanec": {
+    "id_poslanec": "int",
+    "id_osoba": "int",
+    "id_kraj": "int",
+    "id_kandidatka": "int",
+    "id_obdobi": "int",
+    "web": "char",
+    "ulice": "char",
+    "obec": "char",
+    "psc": "char",
+    "email": "char",
+    "telefon": "char",
+    "fax": "char",
+    "psp_telefon": "char",
+    "facebook": "char",
+    "foto": "int"
+  },
+  "schuze": {
+    "id_schuze": "int",
+    "id_organ": "int",
+    "schuze": "int",
+    "od_schuze": "char",
+    "do_schuze": "char",
+    "aktualizace": "char"
+  },
+  "schuze_stav": {
+    "id_schuze": "int",
+    "stav": "int",
+    "typ": "char",
+    "text_dt": "char",
+    "text_st": "char",
+    "tm_line": "char"
+  },
+  "typ_funkce": {
+    "id_typ_funkce": "int",
+    "id_typ_org": "int",
+    "typ_funkce_cz": "char",
+    "typ_funkce_en": "char",
+    "priorita": "int",
+    "typ_funkce_obecny": "int"
+  },
+  "typ_organu": {
+    "id_typ_org": "int",
+    "typ_id_typ_org": "char",
+    "nazev_typ_org_cz": "char",
+    "nazev_typ_org_en": "char",
+    "typ_org_obecny": "char",
+    "priorita": "int"
+  },
+  "zarazeni": {
+    "id_osoba": "int",
+    "id_of": "int",
+    "cl_funkce": "int",
+    "od_o": "char",
+    "do_o": "char",
+    "od_f": "char",
+    "do_f": "char"
+  },
+  "zmatecne": {
+    "id_hlasovani": "int"
+  }
+}

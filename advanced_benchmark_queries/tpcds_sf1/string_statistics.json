@@ -1,0 +1,6147 @@
+{
+  "dbgen_version": {
+    "dv_version": {
+      "min_length": 6,
+      "max_length": 6,
+      "avg_length": 6.0,
+      "top_values": [
+        [
+          "2.13.0",
+          1
+        ]
+      ],
+      "total_unique": 1
+    },
+    "dv_cmdline_args": {
+      "min_length": 77,
+      "max_length": 77,
+      "avg_length": 77.0,
+      "top_values": [
+        [
+          "-SCALE 1 -DIR /home/wuy/DB/pg_duckdb_postgres/tpcds_data -TERMINATE N -FORCE ",
+          1
+        ]
+      ],
+      "total_unique": 1
+    }
+  },
+  "customer_address": {
+    "ca_address_id": {
+      "min_length": 16,
+      "max_length": 16,
+      "avg_length": 16.0,
+      "top_values": [
+        [
+          "AAAAAAAAKJCIAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAFBOBAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAKCEEAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAOHNJAAAA",
+          1
+        ],
+        [
+          "AAAAAAAALECIAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAILCCAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAFKPJAAAA",
+          1
+        ],
+        [
+          "AAAAAAAANMIAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAFINFAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAAIMEAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAPNOFAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAAMALAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAJPMEAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAFCDJAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAJDLHAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAENLKAAAA",
+          1
+        ],
+        [
+          "AAAAAAAADKLEAAAA",
+          1
+        ],
+        [
+          "AAAAAAAACNFIAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAPHADAAAA",
+          1
+        ],
+        [
+          "AAAAAAAANHFHAAAA",
+          1
+        ]
+      ],
+      "total_unique": 50000
+    },
+    "ca_street_number": {
+      "min_length": 1,
+      "max_length": 4,
+      "avg_length": 2.894858463316002,
+      "top_values": [
+        [
+          "643       ",
+          70
+        ],
+        [
+          "393       ",
+          69
+        ],
+        [
+          "320       ",
+          67
+        ],
+        [
+          "703       ",
+          67
+        ],
+        [
+          "590       ",
+          67
+        ],
+        [
+          "102       ",
+          67
+        ],
+        [
+          "304       ",
+          67
+        ],
+        [
+          "917       ",
+          66
+        ],
+        [
+          "80        ",
+          66
+        ],
+        [
+          "698       ",
+          66
+        ],
+        [
+          "741       ",
+          66
+        ],
+        [
+          "810       ",
+          66
+        ],
+        [
+          "773       ",
+          65
+        ],
+        [
+          "212       ",
+          65
+        ],
+        [
+          "719       ",
+          64
+        ],
+        [
+          "146       ",
+          64
+        ],
+        [
+          "22        ",
+          64
+        ],
+        [
+          "409       ",
+          64
+        ],
+        [
+          "216       ",
+          64
+        ],
+        [
+          "303       ",
+          64
+        ]
+      ],
+      "total_unique": 1000
+    },
+    "ca_street_name": {
+      "min_length": 4,
+      "max_length": 21,
+      "avg_length": 8.707693575977412,
+      "top_values": [
+        [
+          "Park ",
+          663
+        ],
+        [
+          "Main ",
+          558
+        ],
+        [
+          "Oak ",
+          530
+        ],
+        [
+          "4th ",
+          527
+        ],
+        [
+          "2nd ",
+          524
+        ],
+        [
+          "1st ",
+          514
+        ],
+        [
+          "3rd ",
+          512
+        ],
+        [
+          "Maple ",
+          478
+        ],
+        [
+          "Pine ",
+          469
+        ],
+        [
+          "5th ",
+          439
+        ],
+        [
+          "Elm ",
+          426
+        ],
+        [
+          "Cedar ",
+          411
+        ],
+        [
+          "Hill ",
+          395
+        ],
+        [
+          "6th ",
+          392
+        ],
+        [
+          "Lake ",
+          389
+        ],
+        [
+          "Walnut ",
+          384
+        ],
+        [
+          "View ",
+          382
+        ],
+        [
+          "Washington ",
+          368
+        ],
+        [
+          "7th ",
+          359
+        ],
+        [
+          "Lincoln ",
+          337
+        ]
+      ],
+      "total_unique": 6901
+    },
+    "ca_street_type": {
+      "min_length": 2,
+      "max_length": 9,
+      "avg_length": 4.206581579001629,
+      "top_values": [
+        [
+          "Avenue         ",
+          2504
+        ],
+        [
+          "Ave            ",
+          2485
+        ],
+        [
+          "RD             ",
+          2472
+        ],
+        [
+          "Blvd           ",
+          2455
+        ],
+        [
+          "Street         ",
+          2454
+        ],
+        [
+          "Wy             ",
+          2450
+        ],
+        [
+          "Circle         ",
+          2449
+        ],
+        [
+          "Dr.            ",
+          2447
+        ],
+        [
+          "Pkwy           ",
+          2440
+        ],
+        [
+          "Boulevard      ",
+          2436
+        ],
+        [
+          "Ct.            ",
+          2433
+        ],
+        [
+          "Court          ",
+          2428
+        ],
+        [
+          "Parkway        ",
+          2416
+        ],
+        [
+          "Drive          ",
+          2398
+        ],
+        [
+          "Lane           ",
+          2395
+        ],
+        [
+          "Cir.           ",
+          2378
+        ],
+        [
+          "ST             ",
+          2378
+        ],
+        [
+          "Way            ",
+          2374
+        ],
+        [
+          "Ln             ",
+          2355
+        ],
+        [
+          "Road           ",
+          2352
+        ]
+      ],
+      "total_unique": 20
+    },
+    "ca_suite_number": {
+      "min_length": 7,
+      "max_length": 9,
+      "avg_length": 7.8839740286509326,
+      "top_values": [
+        [
+          "Suite W   ",
+          1092
+        ],
+        [
+          "Suite Y   ",
+          1026
+        ],
+        [
+          "Suite X   ",
+          1015
+        ],
+        [
+          "Suite A   ",
+          1003
+        ],
+        [
+          "Suite V   ",
+          996
+        ],
+        [
+          "Suite O   ",
+          995
+        ],
+        [
+          "Suite T   ",
+          989
+        ],
+        [
+          "Suite L   ",
+          989
+        ],
+        [
+          "Suite N   ",
+          986
+        ],
+        [
+          "Suite C   ",
+          984
+        ],
+        [
+          "Suite S   ",
+          984
+        ],
+        [
+          "Suite J   ",
+          978
+        ],
+        [
+          "Suite I   ",
+          974
+        ],
+        [
+          "Suite M   ",
+          973
+        ],
+        [
+          "Suite K   ",
+          972
+        ],
+        [
+          "Suite R   ",
+          970
+        ],
+        [
+          "Suite G   ",
+          968
+        ],
+        [
+          "Suite Q   ",
+          963
+        ],
+        [
+          "Suite H   ",
+          963
+        ],
+        [
+          "Suite D   ",
+          951
+        ]
+      ],
+      "total_unique": 75
+    },
+    "ca_city": {
+      "min_length": 3,
+      "max_length": 20,
+      "avg_length": 8.942987974670489,
+      "top_values": [
+        [
+          "Marion",
+          484
+        ],
+        [
+          "Shiloh",
+          473
+        ],
+        [
+          "Plainview",
+          467
+        ],
+        [
+          "Edgewood",
+          464
+        ],
+        [
+          "Bunker Hill",
+          462
+        ],
+        [
+          "Harmony",
+          458
+        ],
+        [
+          "Enterprise",
+          458
+        ],
+        [
+          "Greenfield",
+          456
+        ],
+        [
+          "Jamestown",
+          454
+        ],
+        [
+          "Brownsville",
+          448
+        ],
+        [
+          "Cedar Grove",
+          445
+        ],
+        [
+          "Kingston",
+          444
+        ],
+        [
+          "Hopewell",
+          442
+        ],
+        [
+          "Liberty",
+          441
+        ],
+        [
+          "New Hope",
+          440
+        ],
+        [
+          "Lakeside",
+          439
+        ],
+        [
+          "Greenwood",
+          437
+        ],
+        [
+          "Oakwood",
+          435
+        ],
+        [
+          "Highland Park",
+          434
+        ],
+        [
+          "Fairview",
+          434
+        ]
+      ],
+      "total_unique": 695
+    },
+    "ca_county": {
+      "min_length": 10,
+      "max_length": 28,
+      "avg_length": 13.960132685017307,
+      "top_values": [
+        [
+          "Washington County",
+          497
+        ],
+        [
+          "Jefferson County",
+          408
+        ],
+        [
+          "Lincoln County",
+          390
+        ],
+        [
+          "Jackson County",
+          375
+        ],
+        [
+          "Franklin County",
+          347
+        ],
+        [
+          "Madison County",
+          305
+        ],
+        [
+          "Clay County",
+          298
+        ],
+        [
+          "Montgomery County",
+          285
+        ],
+        [
+          "Union County",
+          275
+        ],
+        [
+          "Monroe County",
+          271
+        ],
+        [
+          "Marion County",
+          244
+        ],
+        [
+          "Wayne County",
+          240
+        ],
+        [
+          "Carroll County",
+          218
+        ],
+        [
+          "Grant County",
+          209
+        ],
+        [
+          "Warren County",
+          205
+        ],
+        [
+          "Greene County",
+          203
+        ],
+        [
+          "Lee County",
+          201
+        ],
+        [
+          "Douglas County",
+          196
+        ],
+        [
+          "Polk County",
+          193
+        ],
+        [
+          "Calhoun County",
+          185
+        ]
+      ],
+      "total_unique": 1846
+    },
+    "ca_state": {
+      "min_length": 2,
+      "max_length": 2,
+      "avg_length": 2.0,
+      "top_values": [
+        [
+          "TX",
+          3962
+        ],
+        [
+          "GA",
+          2446
+        ],
+        [
+          "VA",
+          2156
+        ],
+        [
+          "KY",
+          1945
+        ],
+        [
+          "KS",
+          1699
+        ],
+        [
+          "MO",
+          1628
+        ],
+        [
+          "NC",
+          1618
+        ],
+        [
+          "IL",
+          1596
+        ],
+        [
+          "IA",
+          1555
+        ],
+        [
+          "NE",
+          1452
+        ],
+        [
+          "TN",
+          1418
+        ],
+        [
+          "IN",
+          1394
+        ],
+        [
+          "OH",
+          1356
+        ],
+        [
+          "MN",
+          1326
+        ],
+        [
+          "MS",
+          1309
+        ],
+        [
+          "MI",
+          1285
+        ],
+        [
+          "OK",
+          1200
+        ],
+        [
+          "AR",
+          1140
+        ],
+        [
+          "WI",
+          1047
+        ],
+        [
+          "FL",
+          1039
+        ]
+      ],
+      "total_unique": 51
+    },
+    "ca_zip": {
+      "min_length": 5,
+      "max_length": 5,
+      "avg_length": 5.0,
+      "top_values": [
+        [
+          "54975     ",
+          87
+        ],
+        [
+          "69532     ",
+          83
+        ],
+        [
+          "60169     ",
+          81
+        ],
+        [
+          "71087     ",
+          81
+        ],
+        [
+          "75804     ",
+          81
+        ],
+        [
+          "68877     ",
+          81
+        ],
+        [
+          "50411     ",
+          79
+        ],
+        [
+          "74289     ",
+          79
+        ],
+        [
+          "74136     ",
+          78
+        ],
+        [
+          "60069     ",
+          78
+        ],
+        [
+          "70069     ",
+          78
+        ],
+        [
+          "56614     ",
+          78
+        ],
+        [
+          "78252     ",
+          77
+        ],
+        [
+          "69275     ",
+          77
+        ],
+        [
+          "68252     ",
+          76
+        ],
+        [
+          "68371     ",
+          76
+        ],
+        [
+          "76192     ",
+          76
+        ],
+        [
+          "79431     ",
+          76
+        ],
+        [
+          "58370     ",
+          75
+        ],
+        [
+          "55038     ",
+          75
+        ]
+      ],
+      "total_unique": 3692
+    },
+    "ca_country": {
+      "min_length": 13,
+      "max_length": 13,
+      "avg_length": 13.0,
+      "top_values": [
+        [
+          "United States",
+          48475
+        ]
+      ],
+      "total_unique": 1
+    },
+    "ca_location_type": {
+      "min_length": 5,
+      "max_length": 13,
+      "avg_length": 8.998185866248866,
+      "top_values": [
+        [
+          "condo               ",
+          16237
+        ],
+        [
+          "single family       ",
+          16215
+        ],
+        [
+          "apartment           ",
+          16056
+        ]
+      ],
+      "total_unique": 3
+    }
+  },
+  "customer_demographics": {
+    "cd_gender": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          "F",
+          960400
+        ],
+        [
+          "M",
+          960400
+        ]
+      ],
+      "total_unique": 2
+    },
+    "cd_marital_status": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          "D",
+          384160
+        ],
+        [
+          "M",
+          384160
+        ],
+        [
+          "S",
+          384160
+        ],
+        [
+          "U",
+          384160
+        ],
+        [
+          "W",
+          384160
+        ]
+      ],
+      "total_unique": 5
+    },
+    "cd_education_status": {
+      "min_length": 7,
+      "max_length": 15,
+      "avg_length": 9.571428571428571,
+      "top_values": [
+        [
+          "2 yr Degree         ",
+          274400
+        ],
+        [
+          "4 yr Degree         ",
+          274400
+        ],
+        [
+          "Advanced Degree     ",
+          274400
+        ],
+        [
+          "College             ",
+          274400
+        ],
+        [
+          "Primary             ",
+          274400
+        ],
+        [
+          "Secondary           ",
+          274400
+        ],
+        [
+          "Unknown             ",
+          274400
+        ]
+      ],
+      "total_unique": 7
+    },
+    "cd_credit_rating": {
+      "min_length": 4,
+      "max_length": 9,
+      "avg_length": 7.0,
+      "top_values": [
+        [
+          "Good      ",
+          480200
+        ],
+        [
+          "High Risk ",
+          480200
+        ],
+        [
+          "Low Risk  ",
+          480200
+        ],
+        [
+          "Unknown   ",
+          480200
+        ]
+      ],
+      "total_unique": 4
+    }
+  },
+  "date_dim": {
+    "d_date_id": {
+      "min_length": 16,
+      "max_length": 16,
+      "avg_length": 16.0,
+      "top_values": [
+        [
+          "AAAAAAAAPNNCFCAA",
+          1
+        ],
+        [
+          "AAAAAAAAAPDJFCAA",
+          1
+        ],
+        [
+          "AAAAAAAAGAOGFCAA",
+          1
+        ],
+        [
+          "AAAAAAAAPCBPECAA",
+          1
+        ],
+        [
+          "AAAAAAAAHPMDFCAA",
+          1
+        ],
+        [
+          "AAAAAAAAOBHOECAA",
+          1
+        ],
+        [
+          "AAAAAAAANBNCFCAA",
+          1
+        ],
+        [
+          "AAAAAAAAMDDBFCAA",
+          1
+        ],
+        [
+          "AAAAAAAADFEHFCAA",
+          1
+        ],
+        [
+          "AAAAAAAAFLCBFCAA",
+          1
+        ],
+        [
+          "AAAAAAAAIIBOECAA",
+          1
+        ],
+        [
+          "AAAAAAAAOLNPECAA",
+          1
+        ],
+        [
+          "AAAAAAAAMJOIFCAA",
+          1
+        ],
+        [
+          "AAAAAAAALGHAFCAA",
+          1
+        ],
+        [
+          "AAAAAAAALHHFFCAA",
+          1
+        ],
+        [
+          "AAAAAAAALELOECAA",
+          1
+        ],
+        [
+          "AAAAAAAAMCFDFCAA",
+          1
+        ],
+        [
+          "AAAAAAAAKFEPECAA",
+          1
+        ],
+        [
+          "AAAAAAAACPKEFCAA",
+          1
+        ],
+        [
+          "AAAAAAAACOAHFCAA",
+          1
+        ]
+      ],
+      "total_unique": 73049
+    },
+    "d_day_name": {
+      "min_length": 6,
+      "max_length": 9,
+      "avg_length": 7.142863009760572,
+      "top_values": [
+        [
+          "Thursday ",
+          10437
+        ],
+        [
+          "Tuesday  ",
+          10436
+        ],
+        [
+          "Monday   ",
+          10436
+        ],
+        [
+          "Saturday ",
+          10435
+        ],
+        [
+          "Friday   ",
+          10435
+        ],
+        [
+          "Wednesday",
+          10435
+        ],
+        [
+          "Sunday   ",
+          10435
+        ]
+      ],
+      "total_unique": 7
+    },
+    "d_quarter_name": {
+      "min_length": 6,
+      "max_length": 6,
+      "avg_length": 6.0,
+      "top_values": [
+        [
+          "2034Q3",
+          92
+        ],
+        [
+          "1912Q4",
+          92
+        ],
+        [
+          "1961Q3",
+          92
+        ],
+        [
+          "1946Q3",
+          92
+        ],
+        [
+          "2029Q3",
+          92
+        ],
+        [
+          "2078Q3",
+          92
+        ],
+        [
+          "2006Q3",
+          92
+        ],
+        [
+          "2081Q3",
+          92
+        ],
+        [
+          "2095Q3",
+          92
+        ],
+        [
+          "2039Q3",
+          92
+        ],
+        [
+          "2046Q3",
+          92
+        ],
+        [
+          "1998Q3",
+          92
+        ],
+        [
+          "2079Q3",
+          92
+        ],
+        [
+          "1919Q3",
+          92
+        ],
+        [
+          "2070Q3",
+          92
+        ],
+        [
+          "1905Q3",
+          92
+        ],
+        [
+          "1988Q4",
+          92
+        ],
+        [
+          "1903Q3",
+          92
+        ],
+        [
+          "2080Q4",
+          92
+        ],
+        [
+          "1944Q3",
+          92
+        ]
+      ],
+      "total_unique": 801
+    },
+    "d_holiday": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          "N",
+          72399
+        ],
+        [
+          "Y",
+          650
+        ]
+      ],
+      "total_unique": 2
+    },
+    "d_weekend": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          "N",
+          52179
+        ],
+        [
+          "Y",
+          20870
+        ]
+      ],
+      "total_unique": 2
+    },
+    "d_following_holiday": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          "N",
+          72399
+        ],
+        [
+          "Y",
+          650
+        ]
+      ],
+      "total_unique": 2
+    },
+    "d_current_day": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          "N",
+          73049
+        ]
+      ],
+      "total_unique": 1
+    },
+    "d_current_week": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          "N",
+          73049
+        ]
+      ],
+      "total_unique": 1
+    },
+    "d_current_month": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          "N",
+          73018
+        ],
+        [
+          "Y",
+          31
+        ]
+      ],
+      "total_unique": 2
+    },
+    "d_current_quarter": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          "N",
+          72958
+        ],
+        [
+          "Y",
+          91
+        ]
+      ],
+      "total_unique": 2
+    },
+    "d_current_year": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          "N",
+          72684
+        ],
+        [
+          "Y",
+          365
+        ]
+      ],
+      "total_unique": 2
+    }
+  },
+  "warehouse": {
+    "w_warehouse_id": {
+      "min_length": 16,
+      "max_length": 16,
+      "avg_length": 16.0,
+      "top_values": [
+        [
+          "AAAAAAAADAAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAEAAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAACAAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAFAAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAABAAAAAAA",
+          1
+        ]
+      ],
+      "total_unique": 5
+    },
+    "w_warehouse_name": {
+      "min_length": 11,
+      "max_length": 20,
+      "avg_length": 17.5,
+      "top_values": [
+        [
+          "Important issues liv",
+          1
+        ],
+        [
+          "Bad cards must make.",
+          1
+        ],
+        [
+          "Conventional childr",
+          1
+        ],
+        [
+          "Doors canno",
+          1
+        ]
+      ],
+      "total_unique": 4
+    },
+    "w_street_number": {
+      "min_length": 3,
+      "max_length": 3,
+      "avg_length": 3.0,
+      "top_values": [
+        [
+          "534       ",
+          1
+        ],
+        [
+          "600       ",
+          1
+        ],
+        [
+          "651       ",
+          1
+        ],
+        [
+          "368       ",
+          1
+        ]
+      ],
+      "total_unique": 4
+    },
+    "w_street_name": {
+      "min_length": 4,
+      "max_length": 10,
+      "avg_length": 8.5,
+      "top_values": [
+        [
+          "Wilson Elm",
+          1
+        ],
+        [
+          "View First",
+          1
+        ],
+        [
+          "6th ",
+          1
+        ],
+        [
+          "Ash Laurel",
+          1
+        ]
+      ],
+      "total_unique": 4
+    },
+    "w_street_type": {
+      "min_length": 3,
+      "max_length": 7,
+      "avg_length": 5.25,
+      "top_values": [
+        [
+          "Drive          ",
+          1
+        ],
+        [
+          "Parkway        ",
+          1
+        ],
+        [
+          "Dr.            ",
+          1
+        ],
+        [
+          "Avenue         ",
+          1
+        ]
+      ],
+      "total_unique": 4
+    },
+    "w_suite_number": {
+      "min_length": 7,
+      "max_length": 9,
+      "avg_length": 7.75,
+      "top_values": [
+        [
+          "Suite 80  ",
+          1
+        ],
+        [
+          "Suite 0   ",
+          1
+        ],
+        [
+          "Suite 470 ",
+          1
+        ],
+        [
+          "Suite P   ",
+          1
+        ]
+      ],
+      "total_unique": 4
+    },
+    "w_city": {
+      "min_length": 8,
+      "max_length": 8,
+      "avg_length": 8.0,
+      "top_values": [
+        [
+          "Fairview",
+          5
+        ]
+      ],
+      "total_unique": 1
+    },
+    "w_county": {
+      "min_length": 17,
+      "max_length": 17,
+      "avg_length": 17.0,
+      "top_values": [
+        [
+          "Williamson County",
+          5
+        ]
+      ],
+      "total_unique": 1
+    },
+    "w_state": {
+      "min_length": 2,
+      "max_length": 2,
+      "avg_length": 2.0,
+      "top_values": [
+        [
+          "TN",
+          5
+        ]
+      ],
+      "total_unique": 1
+    },
+    "w_zip": {
+      "min_length": 5,
+      "max_length": 5,
+      "avg_length": 5.0,
+      "top_values": [
+        [
+          "35709     ",
+          5
+        ]
+      ],
+      "total_unique": 1
+    },
+    "w_country": {
+      "min_length": 13,
+      "max_length": 13,
+      "avg_length": 13.0,
+      "top_values": [
+        [
+          "United States",
+          5
+        ]
+      ],
+      "total_unique": 1
+    }
+  },
+  "ship_mode": {
+    "sm_ship_mode_id": {
+      "min_length": 16,
+      "max_length": 16,
+      "avg_length": 16.0,
+      "top_values": [
+        [
+          "AAAAAAAAJAAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAGAAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAMAAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAANAAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAADAAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAEAAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAALAAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAABAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAABBAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAPAAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAFAAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAABAAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAHAAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAIAAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAOAAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAACAAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAACBAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAKAAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAEBAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAADBAAAAAA",
+          1
+        ]
+      ],
+      "total_unique": 20
+    },
+    "sm_type": {
+      "min_length": 7,
+      "max_length": 9,
+      "avg_length": 7.5,
+      "top_values": [
+        [
+          "NEXT DAY                      ",
+          4
+        ],
+        [
+          "EXPRESS                       ",
+          4
+        ],
+        [
+          "LIBRARY                       ",
+          3
+        ],
+        [
+          "OVERNIGHT                     ",
+          3
+        ],
+        [
+          "REGULAR                       ",
+          3
+        ],
+        [
+          "TWO DAY                       ",
+          3
+        ]
+      ],
+      "total_unique": 6
+    },
+    "sm_code": {
+      "min_length": 3,
+      "max_length": 7,
+      "avg_length": 4.35,
+      "top_values": [
+        [
+          "SURFACE   ",
+          6
+        ],
+        [
+          "SEA       ",
+          6
+        ],
+        [
+          "AIR       ",
+          5
+        ],
+        [
+          "BIKE      ",
+          3
+        ]
+      ],
+      "total_unique": 4
+    },
+    "sm_carrier": {
+      "min_length": 3,
+      "max_length": 14,
+      "avg_length": 6.65,
+      "top_values": [
+        [
+          "GREAT EASTERN       ",
+          1
+        ],
+        [
+          "ZHOU                ",
+          1
+        ],
+        [
+          "FEDEX               ",
+          1
+        ],
+        [
+          "USPS                ",
+          1
+        ],
+        [
+          "ZOUROS              ",
+          1
+        ],
+        [
+          "MSC                 ",
+          1
+        ],
+        [
+          "TBS                 ",
+          1
+        ],
+        [
+          "ALLIANCE            ",
+          1
+        ],
+        [
+          "PRIVATECARRIER      ",
+          1
+        ],
+        [
+          "LATVIAN             ",
+          1
+        ],
+        [
+          "DHL                 ",
+          1
+        ],
+        [
+          "RUPEKSA             ",
+          1
+        ],
+        [
+          "ORIENTAL            ",
+          1
+        ],
+        [
+          "UPS                 ",
+          1
+        ],
+        [
+          "GERMA               ",
+          1
+        ],
+        [
+          "HARMSTORF           ",
+          1
+        ],
+        [
+          "DIAMOND             ",
+          1
+        ],
+        [
+          "BOXBUNDLES          ",
+          1
+        ],
+        [
+          "BARIAN              ",
+          1
+        ],
+        [
+          "AIRBORNE            ",
+          1
+        ]
+      ],
+      "total_unique": 20
+    },
+    "sm_contract": {
+      "min_length": 2,
+      "max_length": 20,
+      "avg_length": 12.6,
+      "top_values": [
+        [
+          "YvxVaJI10           ",
+          1
+        ],
+        [
+          "GNJr3g5i7oorKqtX    ",
+          1
+        ],
+        [
+          "yVfotg7Tio3MVhBg6Bkn",
+          1
+        ],
+        [
+          "HVDFCcQ             ",
+          1
+        ],
+        [
+          "ldhM8IvpzHgdbBgDfI  ",
+          1
+        ],
+        [
+          "A5BYO1qH8HGTTN      ",
+          1
+        ],
+        [
+          "5FKNB0j8aaqTB       ",
+          1
+        ],
+        [
+          "Ek                  ",
+          1
+        ],
+        [
+          "2mM8l               ",
+          1
+        ],
+        [
+          "hGoF18SLDDPBj       ",
+          1
+        ],
+        [
+          "O9V6oF8RJnLMmZYd1   ",
+          1
+        ],
+        [
+          "6Hzzp4JkzjqD8MGXLCDa",
+          1
+        ],
+        [
+          "OrDuVy2H            ",
+          1
+        ],
+        [
+          "UaAJjKDnL4gTOqbpj   ",
+          1
+        ],
+        [
+          "fop0bcSd91J26IVpR   ",
+          1
+        ],
+        [
+          "I3uCelXtjP          ",
+          1
+        ],
+        [
+          "qENFQ               ",
+          1
+        ],
+        [
+          "P7FBIt8yd           ",
+          1
+        ],
+        [
+          "uukTktPYycct8       ",
+          1
+        ],
+        [
+          "Xjy3ZPuiDjzHlRx14Z3 ",
+          1
+        ]
+      ],
+      "total_unique": 20
+    }
+  },
+  "time_dim": {
+    "t_time_id": {
+      "min_length": 16,
+      "max_length": 16,
+      "avg_length": 16.0,
+      "top_values": [
+        [
+          "AAAAAAAAPNOFAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAAMALAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAJPMEAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAFCDJAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAPHADAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAEFBBAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAHPDLAAAA",
+          1
+        ],
+        [
+          "AAAAAAAABJFGAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAFLGDAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAJBGAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAJJHLAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAHHLHAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAOHOBAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAOADEAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAJNFGAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAFMKAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAADHIJAAAA",
+          1
+        ],
+        [
+          "AAAAAAAADLOAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAACJLLAAAA",
+          1
+        ],
+        [
+          "AAAAAAAANMIAAAAA",
+          1
+        ]
+      ],
+      "total_unique": 86400
+    },
+    "t_am_pm": {
+      "min_length": 2,
+      "max_length": 2,
+      "avg_length": 2.0,
+      "top_values": [
+        [
+          "PM",
+          43200
+        ],
+        [
+          "AM",
+          43200
+        ]
+      ],
+      "total_unique": 2
+    },
+    "t_shift": {
+      "min_length": 5,
+      "max_length": 6,
+      "avg_length": 5.333333333333333,
+      "top_values": [
+        [
+          "first               ",
+          28800
+        ],
+        [
+          "second              ",
+          28800
+        ],
+        [
+          "third               ",
+          28800
+        ]
+      ],
+      "total_unique": 3
+    },
+    "t_sub_shift": {
+      "min_length": 5,
+      "max_length": 9,
+      "avg_length": 6.916666666666667,
+      "top_values": [
+        [
+          "evening             ",
+          25200
+        ],
+        [
+          "morning             ",
+          21600
+        ],
+        [
+          "night               ",
+          21600
+        ],
+        [
+          "afternoon           ",
+          18000
+        ]
+      ],
+      "total_unique": 4
+    },
+    "t_meal_time": {
+      "min_length": 5,
+      "max_length": 9,
+      "avg_length": 6.9,
+      "top_values": [
+        [
+          "breakfast           ",
+          14400
+        ],
+        [
+          "lunch               ",
+          10800
+        ],
+        [
+          "dinner              ",
+          10800
+        ]
+      ],
+      "total_unique": 3
+    }
+  },
+  "reason": {
+    "r_reason_id": {
+      "min_length": 16,
+      "max_length": 16,
+      "avg_length": 16.0,
+      "top_values": [
+        [
+          "AAAAAAAAFBAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAJAAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAIBAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAMBAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAGAAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAMAAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAANAAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAANBAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAADAAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAEAAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAALAAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAABCAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAABAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAADCAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAACAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAABBAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAACCAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAPAAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAALBAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAKBAAAAAA",
+          1
+        ]
+      ],
+      "total_unique": 35
+    },
+    "r_reason_desc": {
+      "min_length": 9,
+      "max_length": 43,
+      "avg_length": 16.514285714285716,
+      "top_values": [
+        [
+          "reason 31                                                                                           ",
+          2
+        ],
+        [
+          "reason 32                                                                                           ",
+          1
+        ],
+        [
+          "Package was damaged                                                                                 ",
+          1
+        ],
+        [
+          "Did not like the color                                                                              ",
+          1
+        ],
+        [
+          "reason 35                                                                                           ",
+          1
+        ],
+        [
+          "unauthoized purchase                                                                                ",
+          1
+        ],
+        [
+          "Did not like the model                                                                              ",
+          1
+        ],
+        [
+          "Gift exchange                                                                                       ",
+          1
+        ],
+        [
+          "reason 26                                                                                           ",
+          1
+        ],
+        [
+          "Not working any more                                                                                ",
+          1
+        ],
+        [
+          "reason 27                                                                                           ",
+          1
+        ],
+        [
+          "reason 28                                                                                           ",
+          1
+        ],
+        [
+          "Lost my job                                                                                         ",
+          1
+        ],
+        [
+          "Not the product that was ordred                                                                     ",
+          1
+        ],
+        [
+          "reason 29                                                                                           ",
+          1
+        ],
+        [
+          "duplicate purchase                                                                                  ",
+          1
+        ],
+        [
+          "Did not like the warranty                                                                           ",
+          1
+        ],
+        [
+          "Does not work with a product that I have                                                            ",
+          1
+        ],
+        [
+          "Wrong size                                                                                          ",
+          1
+        ],
+        [
+          "reason 25                                                                                           ",
+          1
+        ]
+      ],
+      "total_unique": 34
+    }
+  },
+  "item": {
+    "i_item_id": {
+      "min_length": 16,
+      "max_length": 16,
+      "avg_length": 16.0,
+      "top_values": [
+        [
+          "AAAAAAAAOOLBAAAA",
+          3
+        ],
+        [
+          "AAAAAAAAAMBAAAAA",
+          3
+        ],
+        [
+          "AAAAAAAAGOODAAAA",
+          3
+        ],
+        [
+          "AAAAAAAAGPOCAAAA",
+          3
+        ],
+        [
+          "AAAAAAAAIPBEAAAA",
+          3
+        ],
+        [
+          "AAAAAAAAMFLDAAAA",
+          3
+        ],
+        [
+          "AAAAAAAAADAEAAAA",
+          3
+        ],
+        [
+          "AAAAAAAAAOHBAAAA",
+          3
+        ],
+        [
+          "AAAAAAAAOIMDAAAA",
+          3
+        ],
+        [
+          "AAAAAAAAGGDBAAAA",
+          3
+        ],
+        [
+          "AAAAAAAAOOFEAAAA",
+          3
+        ],
+        [
+          "AAAAAAAAAEMAAAAA",
+          3
+        ],
+        [
+          "AAAAAAAAAIEBAAAA",
+          3
+        ],
+        [
+          "AAAAAAAAOENAAAAA",
+          3
+        ],
+        [
+          "AAAAAAAAKNJCAAAA",
+          3
+        ],
+        [
+          "AAAAAAAAEOLCAAAA",
+          3
+        ],
+        [
+          "AAAAAAAAOIKCAAAA",
+          3
+        ],
+        [
+          "AAAAAAAAKDMAAAAA",
+          3
+        ],
+        [
+          "AAAAAAAACOOBAAAA",
+          3
+        ],
+        [
+          "AAAAAAAAMAFCAAAA",
+          3
+        ]
+      ],
+      "total_unique": 9000
+    },
+    "i_item_desc": {
+      "min_length": 1,
+      "max_length": 200,
+      "avg_length": 100.43489888016046,
+      "top_values": [
+        [
+          "O",
+          9
+        ],
+        [
+          "R",
+          8
+        ],
+        [
+          "S",
+          8
+        ],
+        [
+          "N",
+          7
+        ],
+        [
+          "Pr",
+          6
+        ],
+        [
+          "Co",
+          6
+        ],
+        [
+          "In",
+          6
+        ],
+        [
+          "T",
+          5
+        ],
+        [
+          "C",
+          5
+        ],
+        [
+          "P",
+          5
+        ],
+        [
+          "Ag",
+          5
+        ],
+        [
+          "A",
+          5
+        ],
+        [
+          "Ju",
+          4
+        ],
+        [
+          "Maj",
+          4
+        ],
+        [
+          "Wo",
+          4
+        ],
+        [
+          "F",
+          4
+        ],
+        [
+          "The",
+          4
+        ],
+        [
+          "I",
+          4
+        ],
+        [
+          "Gre",
+          4
+        ],
+        [
+          "All ",
+          4
+        ]
+      ],
+      "total_unique": 13453
+    },
+    "i_brand": {
+      "min_length": 11,
+      "max_length": 22,
+      "avg_length": 16.196714922048997,
+      "top_values": [
+        [
+          "importoscholar #2                                 ",
+          253
+        ],
+        [
+          "edu packscholar #1                                ",
+          253
+        ],
+        [
+          "importoimporto #2                                 ",
+          251
+        ],
+        [
+          "exportischolar #1                                 ",
+          245
+        ],
+        [
+          "importoedu pack #2                                ",
+          243
+        ],
+        [
+          "edu packscholar #2                                ",
+          243
+        ],
+        [
+          "edu packimporto #1                                ",
+          243
+        ],
+        [
+          "importoimporto #1                                 ",
+          242
+        ],
+        [
+          "importoedu pack #1                                ",
+          241
+        ],
+        [
+          "exportiexporti #1                                 ",
+          241
+        ],
+        [
+          "exportischolar #2                                 ",
+          239
+        ],
+        [
+          "importoamalg #2                                   ",
+          238
+        ],
+        [
+          "edu packamalg #2                                  ",
+          234
+        ],
+        [
+          "amalgedu pack #2                                  ",
+          234
+        ],
+        [
+          "importoamalg #1                                   ",
+          227
+        ],
+        [
+          "edu packedu pack #2                               ",
+          227
+        ],
+        [
+          "edu packamalg #1                                  ",
+          227
+        ],
+        [
+          "amalgamalg #1                                     ",
+          227
+        ],
+        [
+          "amalgexporti #1                                   ",
+          226
+        ],
+        [
+          "amalgscholar #1                                   ",
+          225
+        ]
+      ],
+      "total_unique": 712
+    },
+    "i_class": {
+      "min_length": 3,
+      "max_length": 15,
+      "avg_length": 7.777357019546695,
+      "top_values": [
+        [
+          "kids                                              ",
+          538
+        ],
+        [
+          "classical                                         ",
+          495
+        ],
+        [
+          "shirts                                            ",
+          492
+        ],
+        [
+          "mens                                              ",
+          483
+        ],
+        [
+          "pop                                               ",
+          483
+        ],
+        [
+          "fragrances                                        ",
+          465
+        ],
+        [
+          "swimwear                                          ",
+          460
+        ],
+        [
+          "womens                                            ",
+          459
+        ],
+        [
+          "toddlers                                          ",
+          459
+        ],
+        [
+          "athletic                                          ",
+          451
+        ],
+        [
+          "country                                           ",
+          451
+        ],
+        [
+          "dresses                                           ",
+          449
+        ],
+        [
+          "newborn                                           ",
+          448
+        ],
+        [
+          "sports-apparel                                    ",
+          444
+        ],
+        [
+          "accessories                                       ",
+          443
+        ],
+        [
+          "school-uniforms                                   ",
+          440
+        ],
+        [
+          "infants                                           ",
+          437
+        ],
+        [
+          "pants                                             ",
+          432
+        ],
+        [
+          "rock                                              ",
+          428
+        ],
+        [
+          "maternity                                         ",
+          418
+        ]
+      ],
+      "total_unique": 99
+    },
+    "i_category": {
+      "min_length": 3,
+      "max_length": 11,
+      "avg_length": 5.894581500250599,
+      "top_values": [
+        [
+          "Music                                             ",
+          1860
+        ],
+        [
+          "Shoes                                             ",
+          1835
+        ],
+        [
+          "Electronics                                       ",
+          1812
+        ],
+        [
+          "Men                                               ",
+          1811
+        ],
+        [
+          "Home                                              ",
+          1807
+        ],
+        [
+          "Women                                             ",
+          1790
+        ],
+        [
+          "Children                                          ",
+          1786
+        ],
+        [
+          "Sports                                            ",
+          1783
+        ],
+        [
+          "Jewelry                                           ",
+          1740
+        ],
+        [
+          "Books                                             ",
+          1733
+        ]
+      ],
+      "total_unique": 10
+    },
+    "i_manufact": {
+      "min_length": 3,
+      "max_length": 15,
+      "avg_length": 11.342986022164059,
+      "top_values": [
+        [
+          "callyoughtought                                   ",
+          58
+        ],
+        [
+          "ationeseought                                     ",
+          56
+        ],
+        [
+          "eingantiought                                     ",
+          55
+        ],
+        [
+          "prioughtpri                                       ",
+          54
+        ],
+        [
+          "callypri                                          ",
+          50
+        ],
+        [
+          "antin stable                                      ",
+          49
+        ],
+        [
+          "eingese                                           ",
+          48
+        ],
+        [
+          "ationbarable                                      ",
+          48
+        ],
+        [
+          "priantiable                                       ",
+          47
+        ],
+        [
+          "baroughtought                                     ",
+          47
+        ],
+        [
+          "oughtoughtpri                                     ",
+          47
+        ],
+        [
+          "antioughtpri                                      ",
+          46
+        ],
+        [
+          "eseanti                                           ",
+          46
+        ],
+        [
+          "n stpriable                                       ",
+          46
+        ],
+        [
+          "ableationable                                     ",
+          45
+        ],
+        [
+          "n stought                                         ",
+          45
+        ],
+        [
+          "ationoughtought                                   ",
+          44
+        ],
+        [
+          "ationoughtpri                                     ",
+          44
+        ],
+        [
+          "oughtantiable                                     ",
+          44
+        ],
+        [
+          "priationought                                     ",
+          44
+        ]
+      ],
+      "total_unique": 989
+    },
+    "i_size": {
+      "min_length": 3,
+      "max_length": 11,
+      "avg_length": 4.340386435770366,
+      "top_values": [
+        [
+          "N/A                 ",
+          10979
+        ],
+        [
+          "medium              ",
+          2162
+        ],
+        [
+          "large               ",
+          1322
+        ],
+        [
+          "small               ",
+          1086
+        ],
+        [
+          "petite              ",
+          1070
+        ],
+        [
+          "extra large         ",
+          1050
+        ],
+        [
+          "economy             ",
+          290
+        ]
+      ],
+      "total_unique": 7
+    },
+    "i_formulation": {
+      "min_length": 20,
+      "max_length": 20,
+      "avg_length": 20.0,
+      "top_values": [
+        [
+          "60puff25953849594845",
+          3
+        ],
+        [
+          "27drab76103678707793",
+          3
+        ],
+        [
+          "4564878133502white29",
+          3
+        ],
+        [
+          "9293185501sandy32827",
+          3
+        ],
+        [
+          "violet98445335625871",
+          3
+        ],
+        [
+          "8318turquoise8176996",
+          3
+        ],
+        [
+          "015902130993salmon63",
+          3
+        ],
+        [
+          "921086057seashell198",
+          3
+        ],
+        [
+          "610342red46498200513",
+          3
+        ],
+        [
+          "174153938olive737037",
+          3
+        ],
+        [
+          "656puff1679021471375",
+          3
+        ],
+        [
+          "729210382834895snow7",
+          3
+        ],
+        [
+          "461peru7080632970870",
+          3
+        ],
+        [
+          "54341641798peach2658",
+          3
+        ],
+        [
+          "peach090555735312833",
+          3
+        ],
+        [
+          "7221259413072white94",
+          3
+        ],
+        [
+          "589wheat947823419219",
+          3
+        ],
+        [
+          "9258royal16626178984",
+          3
+        ],
+        [
+          "8127348733367royal45",
+          3
+        ],
+        [
+          "98470248dodger178221",
+          3
+        ]
+      ],
+      "total_unique": 13497
+    },
+    "i_color": {
+      "min_length": 3,
+      "max_length": 10,
+      "avg_length": 5.387691450849346,
+      "top_values": [
+        [
+          "turquoise           ",
+          449
+        ],
+        [
+          "smoke               ",
+          424
+        ],
+        [
+          "slate               ",
+          424
+        ],
+        [
+          "thistle             ",
+          410
+        ],
+        [
+          "peach               ",
+          409
+        ],
+        [
+          "spring              ",
+          407
+        ],
+        [
+          "saddle              ",
+          406
+        ],
+        [
+          "salmon              ",
+          405
+        ],
+        [
+          "tan                 ",
+          405
+        ],
+        [
+          "sky                 ",
+          402
+        ],
+        [
+          "royal               ",
+          402
+        ],
+        [
+          "yellow              ",
+          402
+        ],
+        [
+          "papaya              ",
+          402
+        ],
+        [
+          "pale                ",
+          401
+        ],
+        [
+          "rosy                ",
+          399
+        ],
+        [
+          "seashell            ",
+          397
+        ],
+        [
+          "steel               ",
+          395
+        ],
+        [
+          "wheat               ",
+          395
+        ],
+        [
+          "white               ",
+          394
+        ],
+        [
+          "peru                ",
+          393
+        ]
+      ],
+      "total_unique": 92
+    },
+    "i_units": {
+      "min_length": 2,
+      "max_length": 7,
+      "avg_length": 4.192125633457705,
+      "top_values": [
+        [
+          "Cup       ",
+          923
+        ],
+        [
+          "Carton    ",
+          892
+        ],
+        [
+          "Oz        ",
+          889
+        ],
+        [
+          "N/A       ",
+          882
+        ],
+        [
+          "Dram      ",
+          882
+        ],
+        [
+          "Ounce     ",
+          881
+        ],
+        [
+          "Case      ",
+          879
+        ],
+        [
+          "Dozen     ",
+          874
+        ],
+        [
+          "Ton       ",
+          874
+        ],
+        [
+          "Tsp       ",
+          865
+        ],
+        [
+          "Unknown   ",
+          861
+        ],
+        [
+          "Pallet    ",
+          861
+        ],
+        [
+          "Each      ",
+          860
+        ],
+        [
+          "Bundle    ",
+          847
+        ],
+        [
+          "Box       ",
+          828
+        ],
+        [
+          "Bunch     ",
+          824
+        ],
+        [
+          "Gross     ",
+          821
+        ],
+        [
+          "Gram      ",
+          818
+        ],
+        [
+          "Tbl       ",
+          803
+        ],
+        [
+          "Pound     ",
+          802
+        ]
+      ],
+      "total_unique": 21
+    },
+    "i_container": {
+      "min_length": 7,
+      "max_length": 7,
+      "avg_length": 7.0,
+      "top_values": [
+        [
+          "Unknown   ",
+          17961
+        ]
+      ],
+      "total_unique": 1
+    },
+    "i_product_name": {
+      "min_length": 3,
+      "max_length": 25,
+      "avg_length": 18.03885548875529,
+      "top_values": [
+        [
+          "antioughtationable                                ",
+          1
+        ],
+        [
+          "esecallypriationought                             ",
+          1
+        ],
+        [
+          "barationbarbarought                               ",
+          1
+        ],
+        [
+          "barationn stbarought                              ",
+          1
+        ],
+        [
+          "oughtoughtableanti                                ",
+          1
+        ],
+        [
+          "antin stcallyeseought                             ",
+          1
+        ],
+        [
+          "callyn stn stcallyought                           ",
+          1
+        ],
+        [
+          "ablecallyablepriought                             ",
+          1
+        ],
+        [
+          "prieingoughtanti                                  ",
+          1
+        ],
+        [
+          "baresebarbarought                                 ",
+          1
+        ],
+        [
+          "prioughtbarpri                                    ",
+          1
+        ],
+        [
+          "esen stought                                      ",
+          1
+        ],
+        [
+          "ableantipripriought                               ",
+          1
+        ],
+        [
+          "esepribarn st                                     ",
+          1
+        ],
+        [
+          "n stoughtableese                                  ",
+          1
+        ],
+        [
+          "eseationantipriought                              ",
+          1
+        ],
+        [
+          "eingableesepri                                    ",
+          1
+        ],
+        [
+          "oughtbarcallyese                                  ",
+          1
+        ],
+        [
+          "ableeingoughtbarought                             ",
+          1
+        ],
+        [
+          "callyn stationcallyought                          ",
+          1
+        ]
+      ],
+      "total_unique": 17964
+    }
+  },
+  "store": {
+    "s_store_id": {
+      "min_length": 16,
+      "max_length": 16,
+      "avg_length": 16.0,
+      "top_values": [
+        [
+          "AAAAAAAAKAAAAAAA",
+          3
+        ],
+        [
+          "AAAAAAAAEAAAAAAA",
+          3
+        ],
+        [
+          "AAAAAAAACAAAAAAA",
+          2
+        ],
+        [
+          "AAAAAAAAIAAAAAAA",
+          2
+        ],
+        [
+          "AAAAAAAAHAAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAABAAAAAAA",
+          1
+        ]
+      ],
+      "total_unique": 6
+    },
+    "s_store_name": {
+      "min_length": 3,
+      "max_length": 5,
+      "avg_length": 4.25,
+      "top_values": [
+        [
+          "ought",
+          3
+        ],
+        [
+          "able",
+          2
+        ],
+        [
+          "eing",
+          2
+        ],
+        [
+          "ese",
+          1
+        ],
+        [
+          "ation",
+          1
+        ],
+        [
+          "anti",
+          1
+        ],
+        [
+          "bar",
+          1
+        ],
+        [
+          "cally",
+          1
+        ]
+      ],
+      "total_unique": 8
+    },
+    "s_hours": {
+      "min_length": 7,
+      "max_length": 8,
+      "avg_length": 7.083333333333333,
+      "top_values": [
+        [
+          "8AM-4PM             ",
+          11
+        ],
+        [
+          "8AM-12AM            ",
+          1
+        ]
+      ],
+      "total_unique": 2
+    },
+    "s_manager": {
+      "min_length": 11,
+      "max_length": 15,
+      "avg_length": 12.0,
+      "top_values": [
+        [
+          "Edwin Adams",
+          3
+        ],
+        [
+          "Brett Yates",
+          2
+        ],
+        [
+          "Raymond Jacobs",
+          2
+        ],
+        [
+          "Scott Smith",
+          2
+        ],
+        [
+          "David Thomas",
+          1
+        ],
+        [
+          "Robert Thompson",
+          1
+        ],
+        [
+          "William Ward",
+          1
+        ]
+      ],
+      "total_unique": 7
+    },
+    "s_geography_class": {
+      "min_length": 7,
+      "max_length": 7,
+      "avg_length": 7.0,
+      "top_values": [
+        [
+          "Unknown",
+          12
+        ]
+      ],
+      "total_unique": 1
+    },
+    "s_market_desc": {
+      "min_length": 15,
+      "max_length": 94,
+      "avg_length": 55.5,
+      "top_values": [
+        [
+          "Events would achieve other, eastern hours. Mechanisms must not eat other, new org",
+          3
+        ],
+        [
+          "Events develop i",
+          1
+        ],
+        [
+          "Parliamentary candidates wait then heavy, keen mil",
+          1
+        ],
+        [
+          "Various bars make most. Difficult levels introduce at a boots. Buildings welcome only never el",
+          1
+        ],
+        [
+          "Architects coul",
+          1
+        ],
+        [
+          "Formal, psychological pounds relate reasonable, young principles. Black, ",
+          1
+        ],
+        [
+          "Mysterious employe",
+          1
+        ],
+        [
+          "Impossible, true arms can treat constant, complete w",
+          1
+        ],
+        [
+          "Enough high areas stop expectations. Elaborate, local is",
+          1
+        ],
+        [
+          "Little expectations include yet forward meetings.",
+          1
+        ]
+      ],
+      "total_unique": 10
+    },
+    "s_market_manager": {
+      "min_length": 12,
+      "max_length": 16,
+      "avg_length": 14.0,
+      "top_values": [
+        [
+          "Thomas Pollack",
+          3
+        ],
+        [
+          "David Lamontagne",
+          2
+        ],
+        [
+          "Michael Wilson",
+          2
+        ],
+        [
+          "Dean Morrison",
+          2
+        ],
+        [
+          "Charles Bartley",
+          1
+        ],
+        [
+          "Dustin Kelly",
+          1
+        ],
+        [
+          "Thomas Benton",
+          1
+        ]
+      ],
+      "total_unique": 7
+    },
+    "s_division_name": {
+      "min_length": 7,
+      "max_length": 7,
+      "avg_length": 7.0,
+      "top_values": [
+        [
+          "Unknown",
+          12
+        ]
+      ],
+      "total_unique": 1
+    },
+    "s_company_name": {
+      "min_length": 7,
+      "max_length": 7,
+      "avg_length": 7.0,
+      "top_values": [
+        [
+          "Unknown",
+          12
+        ]
+      ],
+      "total_unique": 1
+    },
+    "s_street_number": {
+      "min_length": 2,
+      "max_length": 3,
+      "avg_length": 2.8333333333333335,
+      "top_values": [
+        [
+          "175",
+          2
+        ],
+        [
+          "226",
+          2
+        ],
+        [
+          "27",
+          2
+        ],
+        [
+          "877",
+          1
+        ],
+        [
+          "811",
+          1
+        ],
+        [
+          "337",
+          1
+        ],
+        [
+          "220",
+          1
+        ],
+        [
+          "767",
+          1
+        ],
+        [
+          "255",
+          1
+        ]
+      ],
+      "total_unique": 9
+    },
+    "s_street_name": {
+      "min_length": 4,
+      "max_length": 11,
+      "avg_length": 6.583333333333333,
+      "top_values": [
+        [
+          "Lake ",
+          1
+        ],
+        [
+          "Lee ",
+          1
+        ],
+        [
+          "Sycamore ",
+          1
+        ],
+        [
+          "6th ",
+          1
+        ],
+        [
+          "College ",
+          1
+        ],
+        [
+          "Spring ",
+          1
+        ],
+        [
+          "4th ",
+          1
+        ],
+        [
+          "Lee 6th",
+          1
+        ],
+        [
+          "Park Green",
+          1
+        ],
+        [
+          "Park Laurel",
+          1
+        ],
+        [
+          "Hill ",
+          1
+        ],
+        [
+          "12th ",
+          1
+        ]
+      ],
+      "total_unique": 12
+    },
+    "s_street_type": {
+      "min_length": 2,
+      "max_length": 9,
+      "avg_length": 4.833333333333333,
+      "top_values": [
+        [
+          "Court          ",
+          3
+        ],
+        [
+          "Lane           ",
+          2
+        ],
+        [
+          "Boulevard      ",
+          2
+        ],
+        [
+          "Dr.            ",
+          1
+        ],
+        [
+          "Wy             ",
+          1
+        ],
+        [
+          "Ln             ",
+          1
+        ],
+        [
+          "Circle         ",
+          1
+        ],
+        [
+          "Road           ",
+          1
+        ]
+      ],
+      "total_unique": 8
+    },
+    "s_suite_number": {
+      "min_length": 7,
+      "max_length": 9,
+      "avg_length": 8.25,
+      "top_values": [
+        [
+          "Suite T   ",
+          2
+        ],
+        [
+          "Suite 80  ",
+          1
+        ],
+        [
+          "Suite 250 ",
+          1
+        ],
+        [
+          "Suite 140 ",
+          1
+        ],
+        [
+          "Suite 160 ",
+          1
+        ],
+        [
+          "Suite D   ",
+          1
+        ],
+        [
+          "Suite 260 ",
+          1
+        ],
+        [
+          "Suite 410 ",
+          1
+        ],
+        [
+          "Suite C   ",
+          1
+        ],
+        [
+          "Suite 100 ",
+          1
+        ],
+        [
+          "Suite 190 ",
+          1
+        ]
+      ],
+      "total_unique": 11
+    },
+    "s_city": {
+      "min_length": 6,
+      "max_length": 8,
+      "avg_length": 6.5,
+      "top_values": [
+        [
+          "Midway",
+          9
+        ],
+        [
+          "Fairview",
+          3
+        ]
+      ],
+      "total_unique": 2
+    },
+    "s_county": {
+      "min_length": 17,
+      "max_length": 17,
+      "avg_length": 17.0,
+      "top_values": [
+        [
+          "Williamson County",
+          12
+        ]
+      ],
+      "total_unique": 1
+    },
+    "s_state": {
+      "min_length": 2,
+      "max_length": 2,
+      "avg_length": 2.0,
+      "top_values": [
+        [
+          "TN",
+          12
+        ]
+      ],
+      "total_unique": 1
+    },
+    "s_zip": {
+      "min_length": 5,
+      "max_length": 5,
+      "avg_length": 5.0,
+      "top_values": [
+        [
+          "31904     ",
+          10
+        ],
+        [
+          "35709     ",
+          2
+        ]
+      ],
+      "total_unique": 2
+    },
+    "s_country": {
+      "min_length": 13,
+      "max_length": 13,
+      "avg_length": 13.0,
+      "top_values": [
+        [
+          "United States",
+          12
+        ]
+      ],
+      "total_unique": 1
+    }
+  },
+  "call_center": {
+    "cc_call_center_id": {
+      "min_length": 16,
+      "max_length": 16,
+      "avg_length": 16.0,
+      "top_values": [
+        [
+          "AAAAAAAAEAAAAAAA",
+          3
+        ],
+        [
+          "AAAAAAAACAAAAAAA",
+          2
+        ],
+        [
+          "AAAAAAAABAAAAAAA",
+          1
+        ]
+      ],
+      "total_unique": 3
+    },
+    "cc_name": {
+      "min_length": 8,
+      "max_length": 13,
+      "avg_length": 11.833333333333334,
+      "top_values": [
+        [
+          "North Midwest",
+          3
+        ],
+        [
+          "Mid Atlantic",
+          2
+        ],
+        [
+          "NY Metro",
+          1
+        ]
+      ],
+      "total_unique": 3
+    },
+    "cc_class": {
+      "min_length": 5,
+      "max_length": 6,
+      "avg_length": 5.666666666666667,
+      "top_values": [
+        [
+          "medium",
+          4
+        ],
+        [
+          "large",
+          1
+        ],
+        [
+          "small",
+          1
+        ]
+      ],
+      "total_unique": 3
+    },
+    "cc_hours": {
+      "min_length": 7,
+      "max_length": 7,
+      "avg_length": 7.0,
+      "top_values": [
+        [
+          "8AM-4PM             ",
+          4
+        ],
+        [
+          "8AM-8AM             ",
+          2
+        ]
+      ],
+      "total_unique": 2
+    },
+    "cc_manager": {
+      "min_length": 11,
+      "max_length": 14,
+      "avg_length": 12.5,
+      "top_values": [
+        [
+          "Larry Mccray",
+          3
+        ],
+        [
+          "Bob Belcher",
+          1
+        ],
+        [
+          "Felipe Perkins",
+          1
+        ],
+        [
+          "Mark Hightower",
+          1
+        ]
+      ],
+      "total_unique": 4
+    },
+    "cc_mkt_class": {
+      "min_length": 23,
+      "max_length": 45,
+      "avg_length": 37.166666666666664,
+      "top_values": [
+        [
+          "Dealers make most historical, direct students     ",
+          2
+        ],
+        [
+          "Silly particles could pro                         ",
+          1
+        ],
+        [
+          "More than other authori                           ",
+          1
+        ],
+        [
+          "Wrong troops shall work sometimes in a opti       ",
+          1
+        ],
+        [
+          "A bit narrow forms matter animals. Consist        ",
+          1
+        ]
+      ],
+      "total_unique": 5
+    },
+    "cc_mkt_desc": {
+      "min_length": 45,
+      "max_length": 92,
+      "avg_length": 69.33333333333333,
+      "top_values": [
+        [
+          "Largely blank years put substantially deaf, new others. Question",
+          2
+        ],
+        [
+          "Blue, due beds come. Politicians would not make far thoughts. Specifically new horses partic",
+          2
+        ],
+        [
+          "Shared others could not count fully dollars. New members ca",
+          1
+        ],
+        [
+          "Rich groups catch longer other fears; future,",
+          1
+        ]
+      ],
+      "total_unique": 4
+    },
+    "cc_market_manager": {
+      "min_length": 11,
+      "max_length": 15,
+      "avg_length": 12.666666666666666,
+      "top_values": [
+        [
+          "Julius Durham",
+          2
+        ],
+        [
+          "Gary Colburn",
+          2
+        ],
+        [
+          "Matthew Clifton",
+          1
+        ],
+        [
+          "Julius Tran",
+          1
+        ]
+      ],
+      "total_unique": 4
+    },
+    "cc_division_name": {
+      "min_length": 3,
+      "max_length": 5,
+      "avg_length": 3.6666666666666665,
+      "top_values": [
+        [
+          "ese",
+          2
+        ],
+        [
+          "anti",
+          2
+        ],
+        [
+          "pri",
+          1
+        ],
+        [
+          "ought",
+          1
+        ]
+      ],
+      "total_unique": 4
+    },
+    "cc_company_name": {
+      "min_length": 3,
+      "max_length": 5,
+      "avg_length": 3.8333333333333335,
+      "top_values": [
+        [
+          "pri                                               ",
+          3
+        ],
+        [
+          "cally                                             ",
+          1
+        ],
+        [
+          "able                                              ",
+          1
+        ],
+        [
+          "ought                                             ",
+          1
+        ]
+      ],
+      "total_unique": 4
+    },
+    "cc_street_number": {
+      "min_length": 3,
+      "max_length": 3,
+      "avg_length": 3.0,
+      "top_values": [
+        [
+          "463       ",
+          3
+        ],
+        [
+          "984       ",
+          2
+        ],
+        [
+          "730       ",
+          1
+        ]
+      ],
+      "total_unique": 3
+    },
+    "cc_street_name": {
+      "min_length": 8,
+      "max_length": 11,
+      "avg_length": 10.0,
+      "top_values": [
+        [
+          "Pine Ridge",
+          3
+        ],
+        [
+          "Center Hill",
+          2
+        ],
+        [
+          "Ash Hill",
+          1
+        ]
+      ],
+      "total_unique": 3
+    },
+    "cc_street_type": {
+      "min_length": 2,
+      "max_length": 9,
+      "avg_length": 3.5,
+      "top_values": [
+        [
+          "RD             ",
+          3
+        ],
+        [
+          "Way            ",
+          2
+        ],
+        [
+          "Boulevard      ",
+          1
+        ]
+      ],
+      "total_unique": 3
+    },
+    "cc_suite_number": {
+      "min_length": 7,
+      "max_length": 8,
+      "avg_length": 7.333333333333333,
+      "top_values": [
+        [
+          "Suite U   ",
+          3
+        ],
+        [
+          "Suite 70  ",
+          2
+        ],
+        [
+          "Suite 0   ",
+          1
+        ]
+      ],
+      "total_unique": 3
+    },
+    "cc_city": {
+      "min_length": 6,
+      "max_length": 6,
+      "avg_length": 6.0,
+      "top_values": [
+        [
+          "Midway",
+          6
+        ]
+      ],
+      "total_unique": 1
+    },
+    "cc_county": {
+      "min_length": 17,
+      "max_length": 17,
+      "avg_length": 17.0,
+      "top_values": [
+        [
+          "Williamson County",
+          6
+        ]
+      ],
+      "total_unique": 1
+    },
+    "cc_state": {
+      "min_length": 2,
+      "max_length": 2,
+      "avg_length": 2.0,
+      "top_values": [
+        [
+          "TN",
+          6
+        ]
+      ],
+      "total_unique": 1
+    },
+    "cc_zip": {
+      "min_length": 5,
+      "max_length": 5,
+      "avg_length": 5.0,
+      "top_values": [
+        [
+          "31904     ",
+          6
+        ]
+      ],
+      "total_unique": 1
+    },
+    "cc_country": {
+      "min_length": 13,
+      "max_length": 13,
+      "avg_length": 13.0,
+      "top_values": [
+        [
+          "United States",
+          6
+        ]
+      ],
+      "total_unique": 1
+    }
+  },
+  "customer": {
+    "c_customer_id": {
+      "min_length": 16,
+      "max_length": 16,
+      "avg_length": 16.0,
+      "top_values": [
+        [
+          "AAAAAAAAPNOFAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAAMALAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAJPMEAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAFCDJAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAPHADAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAEFBBAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAHPDLAAAA",
+          1
+        ],
+        [
+          "AAAAAAAABJFGAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAFLGDAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAJBGAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAJJHLAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAHHLHAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAOHOBAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAOADEAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAJNFGAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAFMKAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAADHIJAAAA",
+          1
+        ],
+        [
+          "AAAAAAAADLOAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAACJLLAAAA",
+          1
+        ],
+        [
+          "AAAAAAAANMIAAAAA",
+          1
+        ]
+      ],
+      "total_unique": 100000
+    },
+    "c_salutation": {
+      "min_length": 3,
+      "max_length": 4,
+      "avg_length": 3.24143286054457,
+      "top_values": [
+        [
+          "Dr.       ",
+          28346
+        ],
+        [
+          "Mr.       ",
+          16731
+        ],
+        [
+          "Sir       ",
+          16463
+        ],
+        [
+          "Mrs.      ",
+          11788
+        ],
+        [
+          "Ms.       ",
+          11730
+        ],
+        [
+          "Miss      ",
+          11532
+        ]
+      ],
+      "total_unique": 6
+    },
+    "c_first_name": {
+      "min_length": 2,
+      "max_length": 11,
+      "avg_length": 5.839474447714179,
+      "top_values": [
+        [
+          "James               ",
+          1951
+        ],
+        [
+          "John                ",
+          1871
+        ],
+        [
+          "Robert              ",
+          1803
+        ],
+        [
+          "Michael             ",
+          1503
+        ],
+        [
+          "William             ",
+          1403
+        ],
+        [
+          "David               ",
+          1341
+        ],
+        [
+          "Richard             ",
+          933
+        ],
+        [
+          "Charles             ",
+          863
+        ],
+        [
+          "Joseph              ",
+          859
+        ],
+        [
+          "Thomas              ",
+          775
+        ],
+        [
+          "Christopher         ",
+          580
+        ],
+        [
+          "Elizabeth           ",
+          579
+        ],
+        [
+          "Barbara             ",
+          565
+        ],
+        [
+          "Paul                ",
+          561
+        ],
+        [
+          "Daniel              ",
+          554
+        ],
+        [
+          "Mark                ",
+          544
+        ],
+        [
+          "George              ",
+          537
+        ],
+        [
+          "Jennifer            ",
+          529
+        ],
+        [
+          "Donald              ",
+          528
+        ],
+        [
+          "Linda               ",
+          511
+        ]
+      ],
+      "total_unique": 4131
+    },
+    "c_last_name": {
+      "min_length": 2,
+      "max_length": 13,
+      "avg_length": 6.124794047853435,
+      "top_values": [
+        [
+          "Smith                         ",
+          1521
+        ],
+        [
+          "Johnson                       ",
+          1216
+        ],
+        [
+          "Williams                      ",
+          1073
+        ],
+        [
+          "Jones                         ",
+          964
+        ],
+        [
+          "Brown                         ",
+          885
+        ],
+        [
+          "Davis                         ",
+          736
+        ],
+        [
+          "Miller                        ",
+          672
+        ],
+        [
+          "Wilson                        ",
+          501
+        ],
+        [
+          "Jackson                       ",
+          492
+        ],
+        [
+          "Moore                         ",
+          478
+        ],
+        [
+          "Taylor                        ",
+          469
+        ],
+        [
+          "Thomas                        ",
+          463
+        ],
+        [
+          "Anderson                      ",
+          448
+        ],
+        [
+          "Martin                        ",
+          448
+        ],
+        [
+          "White                         ",
+          446
+        ],
+        [
+          "Harris                        ",
+          431
+        ],
+        [
+          "Thompson                      ",
+          413
+        ],
+        [
+          "Clark                         ",
+          384
+        ],
+        [
+          "Martinez                      ",
+          375
+        ],
+        [
+          "Robinson                      ",
+          362
+        ]
+      ],
+      "total_unique": 4972
+    },
+    "c_preferred_cust_flag": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          "N",
+          49146
+        ],
+        [
+          "Y",
+          47428
+        ]
+      ],
+      "total_unique": 2
+    },
+    "c_birth_country": {
+      "min_length": 4,
+      "max_length": 20,
+      "avg_length": 8.708826544878367,
+      "top_values": [
+        [
+          "VANUATU",
+          532
+        ],
+        [
+          "BERMUDA",
+          516
+        ],
+        [
+          "LESOTHO",
+          506
+        ],
+        [
+          "MAURITIUS",
+          506
+        ],
+        [
+          "LIBERIA",
+          501
+        ],
+        [
+          "UNITED ARAB EMIRATES",
+          500
+        ],
+        [
+          "NETHERLANDS ANTILLES",
+          498
+        ],
+        [
+          "ARGENTINA",
+          497
+        ],
+        [
+          "BAHRAIN",
+          495
+        ],
+        [
+          "FRENCH POLYNESIA",
+          492
+        ],
+        [
+          "SLOVENIA",
+          492
+        ],
+        [
+          "MONTSERRAT",
+          492
+        ],
+        [
+          "ISRAEL",
+          491
+        ],
+        [
+          "SRI LANKA",
+          490
+        ],
+        [
+          "MONGOLIA",
+          489
+        ],
+        [
+          "SWITZERLAND",
+          489
+        ],
+        [
+          "TURKEY",
+          488
+        ],
+        [
+          "SOLOMON ISLANDS",
+          486
+        ],
+        [
+          "MAURITANIA",
+          485
+        ],
+        [
+          "CZECH REPUBLIC",
+          485
+        ]
+      ],
+      "total_unique": 211
+    },
+    "c_login": {
+      "min_length": 0,
+      "max_length": 0,
+      "avg_length": 0,
+      "top_values": [],
+      "total_unique": 0
+    },
+    "c_email_address": {
+      "min_length": 13,
+      "max_length": 46,
+      "avg_length": 27.452233128452825,
+      "top_values": [
+        [
+          "William.Jones@a.org                               ",
+          2
+        ],
+        [
+          "James.Jackson@p.com                               ",
+          2
+        ],
+        [
+          "David.Roberts@d437.com                            ",
+          1
+        ],
+        [
+          "Rachel.Salazar@F6JyQc.com                         ",
+          1
+        ],
+        [
+          "Brent.King@VRadk.org                              ",
+          1
+        ],
+        [
+          "Jasper.Wirth@yanT0QcfR1sSpXYf.edu                 ",
+          1
+        ],
+        [
+          "Marvin.Chandler@z0.edu                            ",
+          1
+        ],
+        [
+          "Freda.Wickham@K0ZSMVv30Aojv.com                   ",
+          1
+        ],
+        [
+          "Christine.Wallis@8y8kf0agPp1.edu                  ",
+          1
+        ],
+        [
+          "Mark.Bruce@splcUGqHfuJ0yK.edu                     ",
+          1
+        ],
+        [
+          "Bess.Preston@HUVzxbp89m.edu                       ",
+          1
+        ],
+        [
+          "Homer.Bartlett@M2FVPA.org                         ",
+          1
+        ],
+        [
+          "Anna.Beard@OSdqqKBQDDR.edu                        ",
+          1
+        ],
+        [
+          "Victor.Cote@yfCrG9l.edu                           ",
+          1
+        ],
+        [
+          "Kathleen.Hamilton@VDfi7GHZKhxa.org                ",
+          1
+        ],
+        [
+          "David.Hull@iL0xfSHYNX.edu                         ",
+          1
+        ],
+        [
+          "Deborah.Miller@79jUG.com                          ",
+          1
+        ],
+        [
+          "Anne.Merritt@8KGLLI8Uzq.edu                       ",
+          1
+        ],
+        [
+          "James.Conley@qDMas2HP0sqQB.edu                    ",
+          1
+        ],
+        [
+          "Richard.Moore@ZSP4.edu                            ",
+          1
+        ]
+      ],
+      "total_unique": 96477
+    },
+    "c_last_review_date": {
+      "min_length": 7,
+      "max_length": 7,
+      "avg_length": 7.0,
+      "top_values": [
+        [
+          "2452454   ",
+          311
+        ],
+        [
+          "2452403   ",
+          307
+        ],
+        [
+          "2452640   ",
+          307
+        ],
+        [
+          "2452304   ",
+          305
+        ],
+        [
+          "2452585   ",
+          303
+        ],
+        [
+          "2452539   ",
+          301
+        ],
+        [
+          "2452598   ",
+          301
+        ],
+        [
+          "2452321   ",
+          301
+        ],
+        [
+          "2452358   ",
+          298
+        ],
+        [
+          "2452359   ",
+          297
+        ],
+        [
+          "2452399   ",
+          296
+        ],
+        [
+          "2452555   ",
+          296
+        ],
+        [
+          "2452620   ",
+          296
+        ],
+        [
+          "2452580   ",
+          295
+        ],
+        [
+          "2452450   ",
+          295
+        ],
+        [
+          "2452430   ",
+          295
+        ],
+        [
+          "2452563   ",
+          295
+        ],
+        [
+          "2452514   ",
+          294
+        ],
+        [
+          "2452318   ",
+          294
+        ],
+        [
+          "2452633   ",
+          294
+        ]
+      ],
+      "total_unique": 366
+    }
+  },
+  "web_site": {
+    "web_site_id": {
+      "min_length": 16,
+      "max_length": 16,
+      "avg_length": 16.0,
+      "top_values": [
+        [
+          "AAAAAAAAABAAAAAA",
+          3
+        ],
+        [
+          "AAAAAAAAEAAAAAAA",
+          3
+        ],
+        [
+          "AAAAAAAAGBAAAAAA",
+          3
+        ],
+        [
+          "AAAAAAAAKAAAAAAA",
+          3
+        ],
+        [
+          "AAAAAAAAMBAAAAAA",
+          3
+        ],
+        [
+          "AAAAAAAAOAAAAAAA",
+          2
+        ],
+        [
+          "AAAAAAAACAAAAAAA",
+          2
+        ],
+        [
+          "AAAAAAAAEBAAAAAA",
+          2
+        ],
+        [
+          "AAAAAAAAKBAAAAAA",
+          2
+        ],
+        [
+          "AAAAAAAAIAAAAAAA",
+          2
+        ],
+        [
+          "AAAAAAAANAAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAJBAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAABAAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAADBAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAHAAAAAAA",
+          1
+        ]
+      ],
+      "total_unique": 15
+    },
+    "web_name": {
+      "min_length": 6,
+      "max_length": 6,
+      "avg_length": 6.0,
+      "top_values": [
+        [
+          "site_0",
+          6
+        ],
+        [
+          "site_3",
+          6
+        ],
+        [
+          "site_1",
+          6
+        ],
+        [
+          "site_4",
+          6
+        ],
+        [
+          "site_2",
+          6
+        ]
+      ],
+      "total_unique": 5
+    },
+    "web_class": {
+      "min_length": 7,
+      "max_length": 7,
+      "avg_length": 7.0,
+      "top_values": [
+        [
+          "Unknown",
+          30
+        ]
+      ],
+      "total_unique": 1
+    },
+    "web_manager": {
+      "min_length": 9,
+      "max_length": 16,
+      "avg_length": 12.6,
+      "top_values": [
+        [
+          "Harold Wilson",
+          3
+        ],
+        [
+          "Raymond Oneill",
+          3
+        ],
+        [
+          "Charles Castillo",
+          2
+        ],
+        [
+          "Dwight Aaron",
+          2
+        ],
+        [
+          "Tommy Jones",
+          2
+        ],
+        [
+          "William Carter",
+          2
+        ],
+        [
+          "Ronald Shaffer",
+          1
+        ],
+        [
+          "Marshall Conner",
+          1
+        ],
+        [
+          "Charles Parker",
+          1
+        ],
+        [
+          "Robert Arnold",
+          1
+        ],
+        [
+          "Adam Stonge",
+          1
+        ],
+        [
+          "Herbert Hawes",
+          1
+        ],
+        [
+          "John Ward",
+          1
+        ],
+        [
+          "James Austin",
+          1
+        ],
+        [
+          "Richard Fuchs",
+          1
+        ],
+        [
+          "Julio Davis",
+          1
+        ],
+        [
+          "Moses Hicks",
+          1
+        ],
+        [
+          "Peter Cassidy",
+          1
+        ],
+        [
+          "John Thomas",
+          1
+        ],
+        [
+          "Lewis Wolf",
+          1
+        ]
+      ],
+      "total_unique": 22
+    },
+    "web_mkt_class": {
+      "min_length": 21,
+      "max_length": 49,
+      "avg_length": 32.733333333333334,
+      "top_values": [
+        [
+          "Severe, useful funds lift; just",
+          3
+        ],
+        [
+          "Wide, final representat",
+          2
+        ],
+        [
+          "Right efforts must no",
+          2
+        ],
+        [
+          "Completely excellent things ought to pro",
+          2
+        ],
+        [
+          "Well-known, patient proposals m",
+          2
+        ],
+        [
+          "Necessary, intermediat",
+          2
+        ],
+        [
+          "Also difficult women relax. Raw solutions exclude",
+          2
+        ],
+        [
+          "Hard new suggestions might contain nat",
+          1
+        ],
+        [
+          "Hands look again nice years. Alre",
+          1
+        ],
+        [
+          "As strong notes deal questions. Proud visito",
+          1
+        ],
+        [
+          "Broad, new groups show car",
+          1
+        ],
+        [
+          "Just popular words shall ",
+          1
+        ],
+        [
+          "New, different roads know standa",
+          1
+        ],
+        [
+          "New, important system",
+          1
+        ],
+        [
+          "Only, temporary services ",
+          1
+        ],
+        [
+          "Grey lines ought to result indeed centres. Tod",
+          1
+        ],
+        [
+          "Labour cars withdraw big, full issues",
+          1
+        ],
+        [
+          "New homes comment great. Possibilities re",
+          1
+        ],
+        [
+          "About rural reasons shall no",
+          1
+        ],
+        [
+          "Leaders make as yet particular, desperate machi",
+          1
+        ]
+      ],
+      "total_unique": 22
+    },
+    "web_mkt_desc": {
+      "min_length": 26,
+      "max_length": 94,
+      "avg_length": 68.8,
+      "top_values": [
+        [
+          "Individual negotiations might join badly children. Brown features travel fiercely dramatic k",
+          3
+        ],
+        [
+          "Basic others will not appreciate so late, potential chil",
+          3
+        ],
+        [
+          "Skills can want as common agencies. Appropriate issues can use. Over national lives may lear",
+          3
+        ],
+        [
+          "Often well-known police can hand acres. Healthy, sensible problems make more silent recordings",
+          2
+        ],
+        [
+          "Formerly long minds deal aside parties. Lef",
+          2
+        ],
+        [
+          "Associations may kill sole parents. Red, pink results rise nearly",
+          2
+        ],
+        [
+          "Physical witnesses might not agree really already existing prayers. Loyal, possible m",
+          2
+        ],
+        [
+          "Companies grow cells. Apart true eyes u",
+          2
+        ],
+        [
+          "Deeply small books cannot extend all similar, clear historians. Free, new camp",
+          2
+        ],
+        [
+          "Enough small animals emerge at a holidays. Managers expect only.",
+          1
+        ],
+        [
+          "Lucky passengers know. Red details will not hang alive, international s",
+          1
+        ],
+        [
+          "Political affairs ought to",
+          1
+        ],
+        [
+          "Concerned, royal weeks should announce.",
+          1
+        ],
+        [
+          "Particular, common seasons shall not indicate fully more single decisions; ",
+          1
+        ],
+        [
+          "Well similar decisions used to keep hardly democratic, personal priorities.",
+          1
+        ],
+        [
+          "Thin roles should run quickly. Patient parts include even in the ladies; only united trouser",
+          1
+        ],
+        [
+          "Acres see else children. Mutual too",
+          1
+        ],
+        [
+          "Home new thoughts must get however thoughts; technical, oth",
+          1
+        ]
+      ],
+      "total_unique": 18
+    },
+    "web_market_manager": {
+      "min_length": 10,
+      "max_length": 16,
+      "avg_length": 12.733333333333333,
+      "top_values": [
+        [
+          "Jeffrey Campbell",
+          3
+        ],
+        [
+          "Casey Banks",
+          2
+        ],
+        [
+          "Keith Frazier",
+          2
+        ],
+        [
+          "David Myers",
+          2
+        ],
+        [
+          "Zachery Oneil",
+          1
+        ],
+        [
+          "John Isaacs",
+          1
+        ],
+        [
+          "Gilbert Chapman",
+          1
+        ],
+        [
+          "Edward George",
+          1
+        ],
+        [
+          "Scott Bryant",
+          1
+        ],
+        [
+          "Eldon Snow",
+          1
+        ],
+        [
+          "James Brewer",
+          1
+        ],
+        [
+          "John Sheppard",
+          1
+        ],
+        [
+          "Joe George",
+          1
+        ],
+        [
+          "Jarvis Allen",
+          1
+        ],
+        [
+          "James Harris",
+          1
+        ],
+        [
+          "Albert Leung",
+          1
+        ],
+        [
+          "William Reyes",
+          1
+        ],
+        [
+          "Kelvin Lynch",
+          1
+        ],
+        [
+          "Keith Williams",
+          1
+        ],
+        [
+          "Frank Cooper",
+          1
+        ]
+      ],
+      "total_unique": 25
+    },
+    "web_company_name": {
+      "min_length": 3,
+      "max_length": 5,
+      "avg_length": 3.966666666666667,
+      "top_values": [
+        [
+          "able                                              ",
+          8
+        ],
+        [
+          "anti                                              ",
+          7
+        ],
+        [
+          "pri                                               ",
+          5
+        ],
+        [
+          "cally                                             ",
+          4
+        ],
+        [
+          "ought                                             ",
+          3
+        ],
+        [
+          "ese                                               ",
+          3
+        ]
+      ],
+      "total_unique": 6
+    },
+    "web_street_number": {
+      "min_length": 2,
+      "max_length": 3,
+      "avg_length": 2.933333333333333,
+      "top_values": [
+        [
+          "841       ",
+          3
+        ],
+        [
+          "292       ",
+          3
+        ],
+        [
+          "409       ",
+          3
+        ],
+        [
+          "828       ",
+          2
+        ],
+        [
+          "892       ",
+          2
+        ],
+        [
+          "247       ",
+          2
+        ],
+        [
+          "835       ",
+          2
+        ],
+        [
+          "805       ",
+          2
+        ],
+        [
+          "887       ",
+          2
+        ],
+        [
+          "63        ",
+          1
+        ],
+        [
+          "358       ",
+          1
+        ],
+        [
+          "753       ",
+          1
+        ],
+        [
+          "671       ",
+          1
+        ],
+        [
+          "184       ",
+          1
+        ],
+        [
+          "973       ",
+          1
+        ],
+        [
+          "784       ",
+          1
+        ],
+        [
+          "51        ",
+          1
+        ],
+        [
+          "730       ",
+          1
+        ]
+      ],
+      "total_unique": 18
+    },
+    "web_street_name": {
+      "min_length": 4,
+      "max_length": 14,
+      "avg_length": 9.066666666666666,
+      "top_values": [
+        [
+          "West Cedar",
+          1
+        ],
+        [
+          "7th ",
+          1
+        ],
+        [
+          "Broadway South",
+          1
+        ],
+        [
+          "Central ",
+          1
+        ],
+        [
+          "Cedar ",
+          1
+        ],
+        [
+          "Lake ",
+          1
+        ],
+        [
+          "Central 14th",
+          1
+        ],
+        [
+          "2nd 3rd",
+          1
+        ],
+        [
+          "Sycamore ",
+          1
+        ],
+        [
+          "South Third",
+          1
+        ],
+        [
+          "2nd ",
+          1
+        ],
+        [
+          "Hickory Meadow",
+          1
+        ],
+        [
+          "River ",
+          1
+        ],
+        [
+          "Willow ",
+          1
+        ],
+        [
+          "Cedar North",
+          1
+        ],
+        [
+          "Dogwood Sunset",
+          1
+        ],
+        [
+          "Lincoln ",
+          1
+        ],
+        [
+          "Spruce ",
+          1
+        ],
+        [
+          "Wilson Ridge",
+          1
+        ],
+        [
+          "Hill Hill",
+          1
+        ]
+      ],
+      "total_unique": 30
+    },
+    "web_street_type": {
+      "min_length": 2,
+      "max_length": 9,
+      "avg_length": 4.066666666666666,
+      "top_values": [
+        [
+          "Wy             ",
+          5
+        ],
+        [
+          "Drive          ",
+          3
+        ],
+        [
+          "Dr.            ",
+          3
+        ],
+        [
+          "Road           ",
+          2
+        ],
+        [
+          "Boulevard      ",
+          2
+        ],
+        [
+          "Pkwy           ",
+          2
+        ],
+        [
+          "Ct.            ",
+          2
+        ],
+        [
+          "Blvd           ",
+          2
+        ],
+        [
+          "Parkway        ",
+          2
+        ],
+        [
+          "Cir.           ",
+          2
+        ],
+        [
+          "Ln             ",
+          1
+        ],
+        [
+          "Avenue         ",
+          1
+        ],
+        [
+          "Way            ",
+          1
+        ],
+        [
+          "Court          ",
+          1
+        ],
+        [
+          "ST             ",
+          1
+        ]
+      ],
+      "total_unique": 15
+    },
+    "web_suite_number": {
+      "min_length": 7,
+      "max_length": 9,
+      "avg_length": 8.2,
+      "top_values": [
+        [
+          "Suite R   ",
+          3
+        ],
+        [
+          "Suite D   ",
+          3
+        ],
+        [
+          "Suite 210 ",
+          2
+        ],
+        [
+          "Suite 280 ",
+          2
+        ],
+        [
+          "Suite Q   ",
+          2
+        ],
+        [
+          "Suite 350 ",
+          1
+        ],
+        [
+          "Suite 130 ",
+          1
+        ],
+        [
+          "Suite J   ",
+          1
+        ],
+        [
+          "Suite 450 ",
+          1
+        ],
+        [
+          "Suite 200 ",
+          1
+        ],
+        [
+          "Suite T   ",
+          1
+        ],
+        [
+          "Suite 150 ",
+          1
+        ],
+        [
+          "Suite 260 ",
+          1
+        ],
+        [
+          "Suite 30  ",
+          1
+        ],
+        [
+          "Suite 460 ",
+          1
+        ],
+        [
+          "Suite 390 ",
+          1
+        ],
+        [
+          "Suite U   ",
+          1
+        ],
+        [
+          "Suite 100 ",
+          1
+        ],
+        [
+          "Suite 20  ",
+          1
+        ],
+        [
+          "Suite 370 ",
+          1
+        ]
+      ],
+      "total_unique": 23
+    },
+    "web_city": {
+      "min_length": 6,
+      "max_length": 8,
+      "avg_length": 6.733333333333333,
+      "top_values": [
+        [
+          "Midway",
+          19
+        ],
+        [
+          "Fairview",
+          11
+        ]
+      ],
+      "total_unique": 2
+    },
+    "web_county": {
+      "min_length": 17,
+      "max_length": 17,
+      "avg_length": 17.0,
+      "top_values": [
+        [
+          "Williamson County",
+          30
+        ]
+      ],
+      "total_unique": 1
+    },
+    "web_state": {
+      "min_length": 2,
+      "max_length": 2,
+      "avg_length": 2.0,
+      "top_values": [
+        [
+          "TN",
+          30
+        ]
+      ],
+      "total_unique": 1
+    },
+    "web_zip": {
+      "min_length": 5,
+      "max_length": 5,
+      "avg_length": 5.0,
+      "top_values": [
+        [
+          "31904     ",
+          24
+        ],
+        [
+          "35709     ",
+          6
+        ]
+      ],
+      "total_unique": 2
+    },
+    "web_country": {
+      "min_length": 13,
+      "max_length": 13,
+      "avg_length": 13.0,
+      "top_values": [
+        [
+          "United States",
+          30
+        ]
+      ],
+      "total_unique": 1
+    }
+  },
+  "household_demographics": {
+    "hd_buy_potential": {
+      "min_length": 5,
+      "max_length": 10,
+      "avg_length": 7.5,
+      "top_values": [
+        [
+          "0-500          ",
+          1200
+        ],
+        [
+          "Unknown        ",
+          1200
+        ],
+        [
+          "1001-5000      ",
+          1200
+        ],
+        [
+          "501-1000       ",
+          1200
+        ],
+        [
+          ">10000         ",
+          1200
+        ],
+        [
+          "5001-10000     ",
+          1200
+        ]
+      ],
+      "total_unique": 6
+    }
+  },
+  "web_page": {
+    "wp_web_page_id": {
+      "min_length": 16,
+      "max_length": 16,
+      "avg_length": 16.0,
+      "top_values": [
+        [
+          "AAAAAAAAMBAAAAAA",
+          3
+        ],
+        [
+          "AAAAAAAAABAAAAAA",
+          3
+        ],
+        [
+          "AAAAAAAAICAAAAAA",
+          3
+        ],
+        [
+          "AAAAAAAAOCAAAAAA",
+          3
+        ],
+        [
+          "AAAAAAAACCAAAAAA",
+          3
+        ],
+        [
+          "AAAAAAAAKDAAAAAA",
+          3
+        ],
+        [
+          "AAAAAAAAEDAAAAAA",
+          3
+        ],
+        [
+          "AAAAAAAAKAAAAAAA",
+          3
+        ],
+        [
+          "AAAAAAAAEAAAAAAA",
+          3
+        ],
+        [
+          "AAAAAAAAGBAAAAAA",
+          3
+        ],
+        [
+          "AAAAAAAAOAAAAAAA",
+          2
+        ],
+        [
+          "AAAAAAAAIDAAAAAA",
+          2
+        ],
+        [
+          "AAAAAAAACAAAAAAA",
+          2
+        ],
+        [
+          "AAAAAAAAACAAAAAA",
+          2
+        ],
+        [
+          "AAAAAAAAEBAAAAAA",
+          2
+        ],
+        [
+          "AAAAAAAAKBAAAAAA",
+          2
+        ],
+        [
+          "AAAAAAAAGCAAAAAA",
+          2
+        ],
+        [
+          "AAAAAAAACDAAAAAA",
+          2
+        ],
+        [
+          "AAAAAAAAMCAAAAAA",
+          2
+        ],
+        [
+          "AAAAAAAAIAAAAAAA",
+          2
+        ]
+      ],
+      "total_unique": 30
+    },
+    "wp_autogen_flag": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          "N",
+          39
+        ],
+        [
+          "Y",
+          21
+        ]
+      ],
+      "total_unique": 2
+    },
+    "wp_url": {
+      "min_length": 18,
+      "max_length": 18,
+      "avg_length": 18.0,
+      "top_values": [
+        [
+          "http://www.foo.com",
+          60
+        ]
+      ],
+      "total_unique": 1
+    },
+    "wp_type": {
+      "min_length": 2,
+      "max_length": 9,
+      "avg_length": 6.47457627118644,
+      "top_values": [
+        [
+          "general                                           ",
+          12
+        ],
+        [
+          "protected                                         ",
+          11
+        ],
+        [
+          "welcome                                           ",
+          11
+        ],
+        [
+          "ad                                                ",
+          10
+        ],
+        [
+          "dynamic                                           ",
+          6
+        ],
+        [
+          "feedback                                          ",
+          5
+        ],
+        [
+          "order                                             ",
+          4
+        ]
+      ],
+      "total_unique": 7
+    }
+  },
+  "promotion": {
+    "p_promo_id": {
+      "min_length": 16,
+      "max_length": 16,
+      "avg_length": 16.0,
+      "top_values": [
+        [
+          "AAAAAAAAFPAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAHFAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAJAAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAICAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAHABAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAGPAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAKDAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAACBBAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAIBAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAALGAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAMBAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAGKAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAABBBAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAALABAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAGAAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAEABAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAFCAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAANEAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAMGAAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAPMAAAAAA",
+          1
+        ]
+      ],
+      "total_unique": 300
+    },
+    "p_promo_name": {
+      "min_length": 3,
+      "max_length": 5,
+      "avg_length": 3.993174061433447,
+      "top_values": [
+        [
+          "anti                                              ",
+          30
+        ],
+        [
+          "pri                                               ",
+          30
+        ],
+        [
+          "able                                              ",
+          30
+        ],
+        [
+          "n st                                              ",
+          30
+        ],
+        [
+          "bar                                               ",
+          29
+        ],
+        [
+          "cally                                             ",
+          29
+        ],
+        [
+          "ese                                               ",
+          29
+        ],
+        [
+          "ation                                             ",
+          29
+        ],
+        [
+          "eing                                              ",
+          29
+        ],
+        [
+          "ought                                             ",
+          28
+        ]
+      ],
+      "total_unique": 10
+    },
+    "p_channel_dmail": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          "Y",
+          158
+        ],
+        [
+          "N",
+          137
+        ]
+      ],
+      "total_unique": 2
+    },
+    "p_channel_email": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          "N",
+          295
+        ]
+      ],
+      "total_unique": 1
+    },
+    "p_channel_catalog": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          "N",
+          296
+        ]
+      ],
+      "total_unique": 1
+    },
+    "p_channel_tv": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          "N",
+          294
+        ]
+      ],
+      "total_unique": 1
+    },
+    "p_channel_radio": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          "N",
+          294
+        ]
+      ],
+      "total_unique": 1
+    },
+    "p_channel_press": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          "N",
+          293
+        ]
+      ],
+      "total_unique": 1
+    },
+    "p_channel_event": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          "N",
+          296
+        ]
+      ],
+      "total_unique": 1
+    },
+    "p_channel_demo": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          "N",
+          297
+        ]
+      ],
+      "total_unique": 1
+    },
+    "p_channel_details": {
+      "min_length": 20,
+      "max_length": 60,
+      "avg_length": 40.23154362416108,
+      "top_values": [
+        [
+          "Roles might not seem everyday contra",
+          1
+        ],
+        [
+          "Urban abilities would",
+          1
+        ],
+        [
+          "Only local achievements used to make t",
+          1
+        ],
+        [
+          "Little hot conditions look nice, possible results; gen",
+          1
+        ],
+        [
+          "English, other followers help here claims.",
+          1
+        ],
+        [
+          "So reasonable wages know parents.",
+          1
+        ],
+        [
+          "Scenes might make high ",
+          1
+        ],
+        [
+          "Words appear technical, casual f",
+          1
+        ],
+        [
+          "Companies shall not pr",
+          1
+        ],
+        [
+          "Finally glad reasons mobili",
+          1
+        ],
+        [
+          "Other facts ensure large children. Easily incre",
+          1
+        ],
+        [
+          "Miles might pay. Average, activ",
+          1
+        ],
+        [
+          "Sorry, unlikely practitioners demand either",
+          1
+        ],
+        [
+          "Effectively related observations may ch",
+          1
+        ],
+        [
+          "Women contrast never dear, blue minutes. Domestic pl",
+          1
+        ],
+        [
+          "Broad times might satisfy bars. Then short men anticipat",
+          1
+        ],
+        [
+          "Welsh, distinct penalties should lose sorry pairs",
+          1
+        ],
+        [
+          "Other years support then political, s",
+          1
+        ],
+        [
+          "Residential, necessary ",
+          1
+        ],
+        [
+          "Bad matters offer und",
+          1
+        ]
+      ],
+      "total_unique": 298
+    },
+    "p_purpose": {
+      "min_length": 7,
+      "max_length": 7,
+      "avg_length": 7.0,
+      "top_values": [
+        [
+          "Unknown        ",
+          296
+        ]
+      ],
+      "total_unique": 1
+    },
+    "p_discount_active": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          "N",
+          293
+        ]
+      ],
+      "total_unique": 1
+    }
+  },
+  "catalog_page": {
+    "cp_catalog_page_id": {
+      "min_length": 16,
+      "max_length": 16,
+      "avg_length": 16.0,
+      "top_values": [
+        [
+          "AAAAAAAAHMNBAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAEOLCAAAA",
+          1
+        ],
+        [
+          "AAAAAAAADGMAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAOKDCAAAA",
+          1
+        ],
+        [
+          "AAAAAAAADJPBAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAPGDAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAFBOBAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAAIEBAAAA",
+          1
+        ],
+        [
+          "AAAAAAAALMFAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAJFEAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAAEMAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAILCCAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAOENAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAGADAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAKNJCAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAMPACAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAAKABAAAA",
+          1
+        ],
+        [
+          "AAAAAAAANMIAAAAA",
+          1
+        ],
+        [
+          "AAAAAAAADELBAAAA",
+          1
+        ],
+        [
+          "AAAAAAAAKPNAAAAA",
+          1
+        ]
+      ],
+      "total_unique": 11718
+    },
+    "cp_department": {
+      "min_length": 10,
+      "max_length": 10,
+      "avg_length": 10.0,
+      "top_values": [
+        [
+          "DEPARTMENT",
+          11598
+        ]
+      ],
+      "total_unique": 1
+    },
+    "cp_description": {
+      "min_length": 50,
+      "max_length": 99,
+      "avg_length": 74.55749849254889,
+      "top_values": [
+        [
+          "Certain employees cannot hope even as a children; public members introduce great years. Gu",
+          1
+        ],
+        [
+          "Global measurements must not empty circumstances. White, religious ind",
+          1
+        ],
+        [
+          "Other, similar teachers should not get most during a questions. White ",
+          1
+        ],
+        [
+          "Ethnic, southern users isolate even opportunities. Famous women mention c",
+          1
+        ],
+        [
+          "Simple types stir oddly. More head depths could tak",
+          1
+        ],
+        [
+          "Later traditional games would salvage yet. Just possible buildings beli",
+          1
+        ],
+        [
+          "States cannot pay beautiful months; now high policies than",
+          1
+        ],
+        [
+          "Flexible, successful children help respective appearances. Only increased ",
+          1
+        ],
+        [
+          "Long-term, electric parents sneak less like the others. So international cards could co",
+          1
+        ],
+        [
+          "Arguments accept about satisfactory ministers; variables ma",
+          1
+        ],
+        [
+          "Gold changes want more english, ready causes; now small lawyers ought to descr",
+          1
+        ],
+        [
+          "Employees know too concentrations. Part-time times will hurt for a pra",
+          1
+        ],
+        [
+          "Careful, new forms should help during a stages. Gre",
+          1
+        ],
+        [
+          "New factors will need into a origins. Drugs will not reme",
+          1
+        ],
+        [
+          "Quiet, full sides expand before a bands. Full men go again profess",
+          1
+        ],
+        [
+          "Softly natural years quit men. Substances make animals; just general e",
+          1
+        ],
+        [
+          "Proposals could not open about a instructions. Open others get vag",
+          1
+        ],
+        [
+          "Important, big decisions check also glad, long examples. Already natio",
+          1
+        ],
+        [
+          "Just proper taxes answer more certain expectations. A",
+          1
+        ],
+        [
+          "Particularly easy terms must not prevent about a orders; human connections extend for th",
+          1
+        ]
+      ],
+      "total_unique": 11609
+    },
+    "cp_type": {
+      "min_length": 7,
+      "max_length": 9,
+      "avg_length": 7.672467263955893,
+      "top_values": [
+        [
+          "monthly",
+          7705
+        ],
+        [
+          "quarterly",
+          2565
+        ],
+        [
+          "bi-annual",
+          1338
+        ]
+      ],
+      "total_unique": 3
+    }
+  }
+}

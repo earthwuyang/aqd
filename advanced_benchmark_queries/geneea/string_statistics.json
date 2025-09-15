@@ -1,0 +1,4582 @@
+{
+  "poslanec": {
+    "web": {
+      "min_length": 1,
+      "max_length": 32,
+      "avg_length": 1.852701702442635,
+      "top_values": [
+        [
+          "\\",
+          1303
+        ],
+        [
+          "http://vahalova.cz/",
+          1
+        ],
+        [
+          "http://www.jirimihola.cz/",
+          1
+        ],
+        [
+          "http://www.josefkott.cz",
+          1
+        ],
+        [
+          "http://www.petrkorenek.cz",
+          1
+        ],
+        [
+          "http://www.marianjurecka.cz/",
+          1
+        ],
+        [
+          "http://www.chalankova.cz/",
+          1
+        ],
+        [
+          "http://www.vera-kovarova.cz",
+          1
+        ],
+        [
+          "http://www.pavelbelobradek.cz/",
+          1
+        ],
+        [
+          "http://www.mladek.eu",
+          1
+        ],
+        [
+          "http://www.miroslav-kalousek.cz/",
+          1
+        ],
+        [
+          "http://gabriela-peckova.cz/",
+          1
+        ],
+        [
+          "http://www.votavav.cz/",
+          1
+        ],
+        [
+          "http://www.miroslavanemcova.cz/",
+          1
+        ],
+        [
+          "http://bohuslav-chalupa.blog.cz/",
+          1
+        ],
+        [
+          "http://www.karamazov.cz/",
+          1
+        ],
+        [
+          "http://www.helenalangsadlova.cz/",
+          1
+        ],
+        [
+          "http://www.stanjura.eu/",
+          1
+        ],
+        [
+          "http://tomaspodivinsky.cz/",
+          1
+        ],
+        [
+          "http://www.janbirke.cz/",
+          1
+        ]
+      ],
+      "total_unique": 49
+    },
+    "ulice": {
+      "min_length": 1,
+      "max_length": 55,
+      "avg_length": 3.080238726790451,
+      "top_values": [
+        [
+          "\\",
+          1303
+        ],
+        [
+          "Malostransk\u00e9 n\u00e1m. 266/5",
+          5
+        ],
+        [
+          "Truhl\u00e1\u0159sk\u00e1 9",
+          3
+        ],
+        [
+          "Hou\u0161kova 822/35",
+          3
+        ],
+        [
+          "V\u00edde\u0148sk\u00e1 134/102",
+          2
+        ],
+        [
+          "Rudolfovsk\u00e1 131/69",
+          2
+        ],
+        [
+          "n\u00e1m. Dr. E. Bene\u0161e 5/13",
+          2
+        ],
+        [
+          "\u010ceskobratrsk\u00e1 1579/4",
+          2
+        ],
+        [
+          "Anglick\u00e9 n\u00e1b\u0159e\u017e\u00ed 2434/1",
+          2
+        ],
+        [
+          "\u010cSA 287",
+          2
+        ],
+        [
+          "Politick\u00fdch v\u011bz\u0148\u016f 1531/9",
+          2
+        ],
+        [
+          "\u010c\u00e9\u010dova 689/11",
+          2
+        ],
+        [
+          "Gork\u00e9ho 1611",
+          2
+        ],
+        [
+          "Ur\u010dick\u00e1 4220/53",
+          2
+        ],
+        [
+          "Horsk\u00e1 97",
+          2
+        ],
+        [
+          "\u0160ilingrovo n\u00e1m\u011bst\u00ed 257/3",
+          2
+        ],
+        [
+          "K\u0159enov\u00e1 67",
+          2
+        ],
+        [
+          "Vrchlick\u00e9ho 2078/12",
+          2
+        ],
+        [
+          "V\u0161ehrdova 194",
+          2
+        ],
+        [
+          "5. kv\u011btna 175",
+          1
+        ]
+      ],
+      "total_unique": 183
+    },
+    "obec": {
+      "min_length": 1,
+      "max_length": 34,
+      "avg_length": 2.043103448275862,
+      "top_values": [
+        [
+          "\\",
+          1303
+        ],
+        [
+          "Brno",
+          17
+        ],
+        [
+          "Praha 1",
+          13
+        ],
+        [
+          "\u010cesk\u00e9 Bud\u011bjovice",
+          11
+        ],
+        [
+          "Plze\u0148",
+          11
+        ],
+        [
+          "Jihlava",
+          8
+        ],
+        [
+          "Olomouc",
+          7
+        ],
+        [
+          "Ostrava",
+          7
+        ],
+        [
+          "Pardubice",
+          6
+        ],
+        [
+          "Liberec",
+          6
+        ],
+        [
+          "Kladno",
+          5
+        ],
+        [
+          "Hradec Kr\u00e1lov\u00e9",
+          5
+        ],
+        [
+          "Mlad\u00e1 Boleslav",
+          4
+        ],
+        [
+          "Prost\u011bjov",
+          4
+        ],
+        [
+          "Most",
+          4
+        ],
+        [
+          "Opava",
+          4
+        ],
+        [
+          "\u00dast\u00ed nad Labem",
+          4
+        ],
+        [
+          "Zl\u00edn",
+          4
+        ],
+        [
+          "Vset\u00edn",
+          3
+        ],
+        [
+          "Fr\u00fddek - M\u00edstek",
+          3
+        ]
+      ],
+      "total_unique": 76
+    },
+    "psc": {
+      "min_length": 1,
+      "max_length": 5,
+      "avg_length": 1.5368770764119601,
+      "top_values": [
+        [
+          "\\",
+          1303
+        ],
+        [
+          "60200",
+          12
+        ],
+        [
+          "58601",
+          8
+        ],
+        [
+          "37001",
+          7
+        ],
+        [
+          "11800",
+          7
+        ],
+        [
+          "30100",
+          6
+        ],
+        [
+          "53002",
+          6
+        ],
+        [
+          "70200",
+          6
+        ],
+        [
+          "76001",
+          5
+        ],
+        [
+          "77900",
+          5
+        ],
+        [
+          "27201",
+          5
+        ],
+        [
+          "43401",
+          4
+        ],
+        [
+          "79601",
+          4
+        ],
+        [
+          "46001",
+          4
+        ],
+        [
+          "29301",
+          4
+        ],
+        [
+          "40001",
+          4
+        ],
+        [
+          "54101",
+          3
+        ],
+        [
+          "26601",
+          3
+        ],
+        [
+          "12000",
+          3
+        ],
+        [
+          "73801",
+          3
+        ]
+      ],
+      "total_unique": 92
+    },
+    "email": {
+      "min_length": 1,
+      "max_length": 40,
+      "avg_length": 2.9556878306878307,
+      "top_values": [
+        [
+          "\\",
+          1303
+        ],
+        [
+          "posta@psp.cz",
+          3
+        ],
+        [
+          "benesiko@psp.cz",
+          1
+        ],
+        [
+          "cernochovaj@psp.cz",
+          1
+        ],
+        [
+          "kailovaz@psp.cz",
+          1
+        ],
+        [
+          "kudelap@psp.cz",
+          1
+        ],
+        [
+          "bezecnyz@psp.cz",
+          1
+        ],
+        [
+          "farskyj@psp.cz",
+          1
+        ],
+        [
+          "aulickah@psp.cz",
+          1
+        ],
+        [
+          "fiedlerk@psp.cz",
+          1
+        ],
+        [
+          "mladekj@psp.cz",
+          1
+        ],
+        [
+          "vondracekr@psp.cz",
+          1
+        ],
+        [
+          "pencikovam@psp.cz",
+          1
+        ],
+        [
+          "balastikovam@psp.cz",
+          1
+        ],
+        [
+          "gazdikp@psp.cz",
+          1
+        ],
+        [
+          "bendam@psp.cz",
+          1
+        ],
+        [
+          "plisekm@psp.cz",
+          1
+        ],
+        [
+          "zimolaj@psp.cz",
+          1
+        ],
+        [
+          "hegerl@psp.cz",
+          1
+        ],
+        [
+          "pilnyi@psp.cz",
+          1
+        ]
+      ],
+      "total_unique": 208
+    },
+    "telefon": {
+      "min_length": 1,
+      "max_length": 16,
+      "avg_length": 1.0374617737003058,
+      "top_values": [
+        [
+          "\\",
+          1303
+        ],
+        [
+          "775 900 057",
+          1
+        ],
+        [
+          "255790811",
+          1
+        ],
+        [
+          "601560352",
+          1
+        ],
+        [
+          "+420 776 435 852",
+          1
+        ],
+        [
+          "602721229",
+          1
+        ]
+      ],
+      "total_unique": 6
+    },
+    "fax": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          "\\",
+          1303
+        ]
+      ],
+      "total_unique": 1
+    },
+    "psp_telefon": {
+      "min_length": 1,
+      "max_length": 4,
+      "avg_length": 1.0023006134969326,
+      "top_values": [
+        [
+          "\\",
+          1303
+        ],
+        [
+          "2097",
+          1
+        ]
+      ],
+      "total_unique": 2
+    },
+    "facebook": {
+      "min_length": 1,
+      "max_length": 72,
+      "avg_length": 2.211624441132638,
+      "top_values": [
+        [
+          "\\",
+          1303
+        ],
+        [
+          "http://www.facebook.com/anoolomouc",
+          1
+        ],
+        [
+          "http://www.facebook.com/miroslav.opalka",
+          1
+        ],
+        [
+          "https://www.facebook.com/ladislav.sincl",
+          1
+        ],
+        [
+          "https://www.facebook.com/ladislavvelebny",
+          1
+        ],
+        [
+          "https://www.facebook.com/pages/Radim-F-Hole%C4%8Dek/1382120098684027",
+          1
+        ],
+        [
+          "http://www.facebook.com/pages/Adam-Rykala/142355647957",
+          1
+        ],
+        [
+          "https://www.facebook.com/farsky.jan",
+          1
+        ],
+        [
+          "https://www.facebook.com/martin.novotny.144",
+          1
+        ],
+        [
+          "https://www.facebook.com/pages/Mat%C4%9Bj-Fichtner/184667901611350",
+          1
+        ],
+        [
+          "https://www.facebook.com/karamazov.simeon",
+          1
+        ],
+        [
+          "https://www.facebook.com/jaroslav.klaska.9",
+          1
+        ],
+        [
+          "https://www.facebook.com/hamacekjan",
+          1
+        ],
+        [
+          "http://www.facebook.com/petr.gazdik.1",
+          1
+        ],
+        [
+          "http://www.facebook.com/helena.langsadlova",
+          1
+        ],
+        [
+          "https://www.facebook.com/pages/MUDr-Gabriela-Peckov\u00e1-TOP-09/113755299053",
+          1
+        ],
+        [
+          "https://www.facebook.com/HerbertPavera",
+          1
+        ],
+        [
+          "https://www.facebook.com/vera.kovarovazelezna",
+          1
+        ],
+        [
+          "https://www.facebook.com/tomas.jan.podivinsky",
+          1
+        ],
+        [
+          "https://www.facebook.com/plisek.top09",
+          1
+        ]
+      ],
+      "total_unique": 40
+    }
+  },
+  "zarazeni": {
+    "od_o": {
+      "min_length": 13,
+      "max_length": 13,
+      "avg_length": 13.0,
+      "top_values": [
+        [
+          "1992-06-06 00",
+          1170
+        ],
+        [
+          "1969-01-01 00",
+          707
+        ],
+        [
+          "1986-05-24 00",
+          582
+        ],
+        [
+          "1971-11-27 00",
+          566
+        ],
+        [
+          "1981-06-07 00",
+          561
+        ],
+        [
+          "1976-10-23 00",
+          561
+        ],
+        [
+          "1990-06-07 00",
+          521
+        ],
+        [
+          "1954-11-28 00",
+          395
+        ],
+        [
+          "1948-05-30 00",
+          386
+        ],
+        [
+          "2010-07-07 00",
+          344
+        ],
+        [
+          "1918-11-14 00",
+          340
+        ],
+        [
+          "1929-10-27 00",
+          337
+        ],
+        [
+          "1920-04-25 00",
+          336
+        ],
+        [
+          "1925-11-15 00",
+          327
+        ],
+        [
+          "1935-05-19 00",
+          324
+        ],
+        [
+          "1946-05-26 00",
+          322
+        ],
+        [
+          "2013-12-04 00",
+          321
+        ],
+        [
+          "2014-02-06 00",
+          313
+        ],
+        [
+          "1960-06-12 00",
+          312
+        ],
+        [
+          "2002-07-16 00",
+          307
+        ]
+      ],
+      "total_unique": 1477
+    },
+    "do_o": {
+      "min_length": 13,
+      "max_length": 13,
+      "avg_length": 13.0,
+      "top_values": [
+        [
+          "2002-06-20 00",
+          2609
+        ],
+        [
+          "2013-08-28 00",
+          2382
+        ],
+        [
+          "2010-06-03 14",
+          2121
+        ],
+        [
+          "2006-06-15 13",
+          2084
+        ],
+        [
+          "1998-06-19 00",
+          967
+        ],
+        [
+          "1996-06-06 00",
+          866
+        ],
+        [
+          "1925-11-14 00",
+          771
+        ],
+        [
+          "1971-11-25 00",
+          697
+        ],
+        [
+          "1990-06-05 00",
+          569
+        ],
+        [
+          "1976-10-21 00",
+          566
+        ],
+        [
+          "1986-05-22 00",
+          561
+        ],
+        [
+          "1981-06-05 00",
+          561
+        ],
+        [
+          "1992-06-04 00",
+          532
+        ],
+        [
+          "1992-12-31 00",
+          505
+        ],
+        [
+          "1920-04-15 00",
+          406
+        ],
+        [
+          "1960-06-11 00",
+          401
+        ],
+        [
+          "1954-11-27 00",
+          392
+        ],
+        [
+          "1935-05-18 00",
+          344
+        ],
+        [
+          "1929-09-25 00",
+          329
+        ],
+        [
+          "1948-05-29 00",
+          327
+        ]
+      ],
+      "total_unique": 1020
+    },
+    "od_f": {
+      "min_length": 10,
+      "max_length": 10,
+      "avg_length": 10.0,
+      "top_values": [
+        [
+          "05.04.2015",
+          9
+        ],
+        [
+          "24.05.2015",
+          7
+        ],
+        [
+          "15.05.2003",
+          5
+        ],
+        [
+          "22.05.2003",
+          4
+        ],
+        [
+          "17.09.1993",
+          4
+        ],
+        [
+          "08.07.1993",
+          2
+        ],
+        [
+          "16.12.2014",
+          2
+        ],
+        [
+          "09.01.2003",
+          2
+        ],
+        [
+          "13.09.2010",
+          2
+        ],
+        [
+          "25.04.2001",
+          2
+        ],
+        [
+          "15.07.1993",
+          2
+        ],
+        [
+          "04.06.2015",
+          2
+        ],
+        [
+          "09.12.2005",
+          2
+        ],
+        [
+          "04.06.1998",
+          1
+        ],
+        [
+          "07.03.2008",
+          1
+        ],
+        [
+          "07.03.2003",
+          1
+        ],
+        [
+          "03.05.2002",
+          1
+        ],
+        [
+          "01.12.2006",
+          1
+        ],
+        [
+          "06.04.2004",
+          1
+        ],
+        [
+          "02.02.1998",
+          1
+        ]
+      ],
+      "total_unique": 43
+    },
+    "do_f": {
+      "min_length": 10,
+      "max_length": 10,
+      "avg_length": 10.0,
+      "top_values": [
+        [
+          "04.04.2015",
+          13
+        ],
+        [
+          "24.05.2021",
+          7
+        ],
+        [
+          "25.05.2007",
+          5
+        ],
+        [
+          "05.04.2016",
+          3
+        ],
+        [
+          "05.04.2018",
+          3
+        ],
+        [
+          "05.04.2017",
+          3
+        ],
+        [
+          "06.11.2025",
+          2
+        ],
+        [
+          "02.08.2016",
+          2
+        ],
+        [
+          "06.08.2014",
+          2
+        ],
+        [
+          "02.04.2015",
+          2
+        ],
+        [
+          "19.07.2016",
+          2
+        ],
+        [
+          "01.05.2026",
+          2
+        ],
+        [
+          "11.06.2038",
+          2
+        ],
+        [
+          "16.12.2017",
+          2
+        ],
+        [
+          "23.03.2026",
+          2
+        ],
+        [
+          "05.06.2016",
+          1
+        ],
+        [
+          "03.02.2008",
+          1
+        ],
+        [
+          "01.12.2012",
+          1
+        ],
+        [
+          "07.03.2013",
+          1
+        ],
+        [
+          "04.09.2020",
+          1
+        ]
+      ],
+      "total_unique": 47
+    }
+  },
+  "schuze": {
+    "od_schuze": {
+      "min_length": 13,
+      "max_length": 13,
+      "avg_length": 13.0,
+      "top_values": [
+        [
+          "2011-11-03 00",
+          3
+        ],
+        [
+          "2001-12-19 09",
+          2
+        ],
+        [
+          "2014-09-10 00",
+          2
+        ],
+        [
+          "2012-07-18 00",
+          2
+        ],
+        [
+          "1993-02-02 14",
+          2
+        ],
+        [
+          "2011-08-30 14",
+          2
+        ],
+        [
+          "2011-04-26 14",
+          2
+        ],
+        [
+          "1995-09-26 14",
+          1
+        ],
+        [
+          "2013-08-07 10",
+          1
+        ],
+        [
+          "2005-10-25 14",
+          1
+        ],
+        [
+          "2009-09-15 14",
+          1
+        ],
+        [
+          "2010-02-11 09",
+          1
+        ],
+        [
+          "1997-02-26 14",
+          1
+        ],
+        [
+          "1994-12-15 14",
+          1
+        ],
+        [
+          "2010-06-22 14",
+          1
+        ],
+        [
+          "1998-06-18 14",
+          1
+        ],
+        [
+          "1998-04-14 14",
+          1
+        ],
+        [
+          "2010-02-24 09",
+          1
+        ],
+        [
+          "2010-12-21 16",
+          1
+        ],
+        [
+          "2003-03-11 14",
+          1
+        ]
+      ],
+      "total_unique": 342
+    },
+    "do_schuze": {
+      "min_length": 13,
+      "max_length": 13,
+      "avg_length": 13.0,
+      "top_values": [
+        [
+          "2010-02-12 12",
+          4
+        ],
+        [
+          "1996-07-26 16",
+          2
+        ],
+        [
+          "1994-12-15 16",
+          2
+        ],
+        [
+          "2013-08-16 13",
+          2
+        ],
+        [
+          "1996-04-26 16",
+          2
+        ],
+        [
+          "1998-02-27 16",
+          2
+        ],
+        [
+          "2011-11-03 12",
+          2
+        ],
+        [
+          "2005-04-01 13",
+          2
+        ],
+        [
+          "2010-03-09 19",
+          2
+        ],
+        [
+          "2001-11-09 13",
+          2
+        ],
+        [
+          "2012-12-19 20",
+          1
+        ],
+        [
+          "2003-03-11 16",
+          1
+        ],
+        [
+          "2006-01-17 18",
+          1
+        ],
+        [
+          "2013-07-17 18",
+          1
+        ],
+        [
+          "2009-09-15 14",
+          1
+        ],
+        [
+          "2014-11-07 15",
+          1
+        ],
+        [
+          "1998-02-26 16",
+          1
+        ],
+        [
+          "2000-05-30 20",
+          1
+        ],
+        [
+          "2008-04-01 17",
+          1
+        ],
+        [
+          "2013-12-19 14",
+          1
+        ]
+      ],
+      "total_unique": 335
+    },
+    "aktualizace": {
+      "min_length": 16,
+      "max_length": 16,
+      "avg_length": 16.0,
+      "top_values": [
+        [
+          "2000-06-26 12:00",
+          84
+        ],
+        [
+          "2010-12-22 13:56",
+          2
+        ],
+        [
+          "2010-04-16 13:49",
+          1
+        ],
+        [
+          "2005-07-01 15:00",
+          1
+        ],
+        [
+          "2011-03-24 13:12",
+          1
+        ],
+        [
+          "2001-12-19 12:42",
+          1
+        ],
+        [
+          "2015-10-26 13:39",
+          1
+        ],
+        [
+          "2001-01-29 08:39",
+          1
+        ],
+        [
+          "2008-08-22 13:22",
+          1
+        ],
+        [
+          "2011-06-16 19:09",
+          1
+        ],
+        [
+          "2003-07-09 08:24",
+          1
+        ],
+        [
+          "2008-05-07 18:14",
+          1
+        ],
+        [
+          "2002-07-18 17:33",
+          1
+        ],
+        [
+          "2000-06-01 09:13",
+          1
+        ],
+        [
+          "2015-11-24 19:02",
+          1
+        ],
+        [
+          "2010-12-21 12:48",
+          1
+        ],
+        [
+          "2009-07-02 10:04",
+          1
+        ],
+        [
+          "2007-10-31 19:12",
+          1
+        ],
+        [
+          "2014-06-20 13:11",
+          1
+        ],
+        [
+          "2011-07-13 19:35",
+          1
+        ]
+      ],
+      "total_unique": 266
+    }
+  },
+  "bod_schuze": {
+    "id_tisk": {
+      "min_length": 2,
+      "max_length": 5,
+      "avg_length": 4.601335811726159,
+      "top_values": [
+        [
+          "39575",
+          42
+        ],
+        [
+          "39544",
+          37
+        ],
+        [
+          "31370",
+          33
+        ],
+        [
+          "31894",
+          32
+        ],
+        [
+          "38850",
+          32
+        ],
+        [
+          "39591",
+          32
+        ],
+        [
+          "8929",
+          31
+        ],
+        [
+          "39659",
+          30
+        ],
+        [
+          "39554",
+          28
+        ],
+        [
+          "32727",
+          27
+        ],
+        [
+          "31696",
+          26
+        ],
+        [
+          "39553",
+          26
+        ],
+        [
+          "39592",
+          26
+        ],
+        [
+          "39599",
+          26
+        ],
+        [
+          "31833",
+          26
+        ],
+        [
+          "27148",
+          26
+        ],
+        [
+          "8941",
+          26
+        ],
+        [
+          "31715",
+          25
+        ],
+        [
+          "31837",
+          25
+        ],
+        [
+          "31695",
+          24
+        ]
+      ],
+      "total_unique": 5948
+    },
+    "id_typ": {
+      "min_length": 1,
+      "max_length": 2,
+      "avg_length": 1.037056753319729,
+      "top_values": [
+        [
+          "1",
+          16339
+        ],
+        [
+          "5",
+          5875
+        ],
+        [
+          "3",
+          5251
+        ],
+        [
+          "0",
+          2977
+        ],
+        [
+          "2",
+          1860
+        ],
+        [
+          "14",
+          1060
+        ],
+        [
+          "6",
+          233
+        ],
+        [
+          "13",
+          157
+        ],
+        [
+          "7",
+          22
+        ],
+        [
+          "10",
+          22
+        ],
+        [
+          "43",
+          7
+        ],
+        [
+          "54",
+          4
+        ],
+        [
+          "18",
+          3
+        ],
+        [
+          "4",
+          3
+        ]
+      ],
+      "total_unique": 14
+    },
+    "uplny_naz": {
+      "min_length": 1,
+      "max_length": 1307,
+      "avg_length": 176.2053073002346,
+      "top_values": [
+        [
+          "Po\u0159ad sch\u016fze",
+          522
+        ],
+        [
+          "\u00dastn\u00ed interpelace",
+          267
+        ],
+        [
+          "Odpov\u011bdi \u010dlen\u016f vl\u00e1dy na p\u00edsemn\u00e9 interpelace",
+          254
+        ],
+        [
+          "N\u00e1vrh na zm\u011bny ve slo\u017een\u00ed org\u00e1n\u016f Poslaneck\u00e9 sn\u011bmovny",
+          110
+        ],
+        [
+          "Odpov\u011bdi \u010dlen\u016f vl\u00e1dy na p\u00edsemn\u00e9 interpelace poslanc\u016f",
+          59
+        ],
+        [
+          "Vl\u00e1dn\u00ed n\u00e1vrh \u00fastavn\u00edho z\u00e1kona, kter\u00fdm se m\u011bn\u00ed \u00fastavn\u00ed z\u00e1kon \u010d. 1/1993 Sb., \u00dastava \u010cesk\u00e9 republiky, ve zn\u011bn\u00ed pozd\u011bj\u0161\u00edch \u00fastavn\u00edch z\u00e1kon\u016f",
+          59
+        ],
+        [
+          "Vl\u00e1dn\u00ed n\u00e1vrh z\u00e1kona, kter\u00fdm se m\u011bn\u00ed z\u00e1kon \u010d. 141/1961 Sb., o trestn\u00edm \u0159\u00edzen\u00ed soudn\u00edm (trestn\u00ed \u0159\u00e1d), ve zn\u011bn\u00ed pozd\u011bj\u0161\u00edch p\u0159edpis\u016f, a n\u011bkter\u00e9 dal\u0161\u00ed z\u00e1kony",
+          48
+        ],
+        [
+          "N\u00e1vrh na volbu \u010dlena Nejvy\u0161\u0161\u00edho kontroln\u00edho \u00fa\u0159adu",
+          44
+        ],
+        [
+          "N\u00e1vrh poslanc\u016f Jaroslava Foldyny, Jeron\u00fdma Tejce, Michala Ha\u0161ka a dal\u0161\u00edch na vyd\u00e1n\u00ed z\u00e1kona, kter\u00fdm se m\u011bn\u00ed z\u00e1kon \u010d. 428/2012 Sb., o majetkov\u00e9m vyrovn\u00e1n\u00ed s c\u00edrkvemi a n\u00e1bo\u017eensk\u00fdmi spole\u010dnostmi a o zm\u011bn\u011b n\u011bkter\u00fdch z\u00e1kon\u016f (z\u00e1kon o majetkov\u00e9m vyrovn\u00e1n\u00ed s c\u00edrkvemi a n\u00e1bo\u017eensk\u00fdmi spole\u010dnostmi), ve zn\u011bn\u00ed n\u00e1lezu \u00dastavn\u00edho soudu, vyhl\u00e1\u0161en\u00e9ho pod \u010d. 177/2013 Sb.",
+          42
+        ],
+        [
+          "Vl\u00e1dn\u00ed n\u00e1vrh z\u00e1kona, kter\u00fdm se m\u011bn\u00ed z\u00e1kon \u010d. 44/1988 Sb., o ochran\u011b a vyu\u017eit\u00ed nerostn\u00e9ho bohatstv\u00ed (horn\u00ed z\u00e1kon), ve zn\u011bn\u00ed pozd\u011bj\u0161\u00edch p\u0159edpis\u016f",
+          40
+        ],
+        [
+          "Vl\u00e1dn\u00ed n\u00e1vrh z\u00e1kona, kter\u00fdm se m\u011bn\u00ed z\u00e1kon \u010d. 563/2004 Sb., o pedagogick\u00fdch pracovn\u00edc\u00edch a o zm\u011bn\u011b n\u011bkter\u00fdch z\u00e1kon\u016f, ve zn\u011bn\u00ed pozd\u011bj\u0161\u00edch p\u0159edpis\u016f",
+          39
+        ],
+        [
+          "Vl\u00e1dn\u00ed n\u00e1vrh z\u00e1kona, kter\u00fdm se m\u011bn\u00ed z\u00e1kon \u010d. 185/2001 Sb., o odpadech a o zm\u011bn\u011b n\u011bkter\u00fdch dal\u0161\u00edch z\u00e1kon\u016f, ve zn\u011bn\u00ed pozd\u011bj\u0161\u00edch p\u0159edpis\u016f",
+          39
+        ],
+        [
+          "Sen\u00e1tn\u00ed n\u00e1vrh z\u00e1kona, kter\u00fdm se m\u011bn\u00ed z\u00e1kon \u010d. 361/2000 Sb., o provozu na pozemn\u00edch komunikac\u00edch a o zm\u011bn\u00e1ch n\u011bkter\u00fdch z\u00e1kon\u016f (z\u00e1kon o silni\u010dn\u00edm provozu), ve zn\u011bn\u00ed pozd\u011bj\u0161\u00edch p\u0159edpis\u016f",
+          38
+        ],
+        [
+          "Vl\u00e1dn\u00ed n\u00e1vrh z\u00e1kona, kter\u00fdm se m\u011bn\u00ed z\u00e1kon \u010d. 353/2003 Sb., o spot\u0159ebn\u00edch dan\u00edch, ve zn\u011bn\u00ed pozd\u011bj\u0161\u00edch p\u0159edpis\u016f, a dal\u0161\u00ed souvisej\u00edc\u00ed z\u00e1kony",
+          38
+        ],
+        [
+          "Vl\u00e1dn\u00ed n\u00e1vrh z\u00e1kona, kter\u00fdm se m\u011bn\u00ed z\u00e1kon \u010d. 569/1991 Sb., o Pozemkov\u00e9m fondu \u010cesk\u00e9 republiky, ve zn\u011bn\u00ed pozd\u011bj\u0161\u00edch p\u0159edpis\u016f",
+          37
+        ],
+        [
+          "N\u00e1vrh Zastupitelstva hlavn\u00edho m\u011bsta Prahy na vyd\u00e1n\u00ed z\u00e1kona o regulaci prostituce a o zm\u011bn\u011b n\u011bkter\u00fdch z\u00e1kon\u016f (z\u00e1kon o regulaci prostituce)",
+          37
+        ],
+        [
+          "Vl\u00e1dn\u00ed n\u00e1vrh z\u00e1kona, kter\u00fdm se m\u011bn\u00ed z\u00e1kon \u010d. 235/2004 Sb., o dani z p\u0159idan\u00e9 hodnoty, ve zn\u011bn\u00ed pozd\u011bj\u0161\u00edch p\u0159edpis\u016f",
+          36
+        ],
+        [
+          "Vl\u00e1dn\u00ed n\u00e1vrh z\u00e1kona, kter\u00fdm se m\u011bn\u00ed z\u00e1kon \u010d. 166/1993 Sb., o Nejvy\u0161\u0161\u00edm kontroln\u00edm \u00fa\u0159adu, ve zn\u011bn\u00ed pozd\u011bj\u0161\u00edch p\u0159edpis\u016f",
+          34
+        ],
+        [
+          "Sen\u00e1tn\u00ed n\u00e1vrh z\u00e1kona, kter\u00fdm se m\u011bn\u00ed z\u00e1kon \u010d. 111/2006 Sb., o pomoci v hmotn\u00e9 nouzi, ve zn\u011bn\u00ed pozd\u011bj\u0161\u00edch p\u0159edpis\u016f",
+          34
+        ],
+        [
+          "\u00dastn\u00ed interpelace poslanc\u016f na p\u0159edsedu vl\u00e1dy a ostatn\u00ed \u010dleny vl\u00e1dy",
+          34
+        ]
+      ],
+      "total_unique": 8176
+    },
+    "uplny_kon": {
+      "min_length": 12,
+      "max_length": 40,
+      "avg_length": 18.499132876372947,
+      "top_values": [
+        [
+          "Nen\u00ed sn.tiskem",
+          3201
+        ],
+        [
+          "Nen\u00ed sn.tisk",
+          1507
+        ],
+        [
+          "/sn\u011bmovn\u00ed tisk 144/",
+          62
+        ],
+        [
+          "/sn\u011bmovn\u00ed tisk 603/",
+          57
+        ],
+        [
+          "/sn\u011bmovn\u00ed tisk 115/",
+          57
+        ],
+        [
+          "/sn\u011bmovn\u00ed tisk 142/",
+          56
+        ],
+        [
+          "/sn\u011bmovn\u00ed tisk 631/",
+          55
+        ],
+        [
+          "/sn\u011bmovn\u00ed tisk 435/",
+          54
+        ],
+        [
+          "/sn\u011bmovn\u00ed tisk 124/",
+          52
+        ],
+        [
+          "/sn\u011bmovn\u00ed tisk 275/",
+          52
+        ],
+        [
+          "/sn\u011bmovn\u00ed tisk 373/",
+          52
+        ],
+        [
+          "/sn\u011bmovn\u00ed tisk 221/",
+          51
+        ],
+        [
+          "/sn\u011bmovn\u00ed tisk 233/",
+          51
+        ],
+        [
+          "/sn\u011bmovn\u00ed tisk 226/",
+          50
+        ],
+        [
+          "/sn\u011bmovn\u00ed tisk 297/",
+          50
+        ],
+        [
+          "/sn\u011bmovn\u00ed tisk 580/",
+          50
+        ],
+        [
+          "/sn\u011bmovn\u00ed tisk 457/",
+          49
+        ],
+        [
+          "/sn\u011bmovn\u00ed tisk 574/",
+          49
+        ],
+        [
+          "/sn\u011bmovn\u00ed tisk 156/",
+          49
+        ],
+        [
+          "/sn\u011bmovn\u00ed tisk 416/",
+          49
+        ]
+      ],
+      "total_unique": 2700
+    },
+    "poznamka": {
+      "min_length": 1,
+      "max_length": 69,
+      "avg_length": 17.471442885771545,
+      "top_values": [
+        [
+          "zam\u00edtnut",
+          54
+        ],
+        [
+          "vzat zp\u011bt",
+          30
+        ],
+        [
+          "zam\u00edtnuto",
+          28
+        ],
+        [
+          "\u010ct 14.30 - 18.00h",
+          26
+        ],
+        [
+          "\u010ct 14.30 - 18.00 h",
+          24
+        ],
+        [
+          "\u010ct 9.00 - 11.00 h",
+          24
+        ],
+        [
+          "\u010ct 9.00 - 11.00h",
+          23
+        ],
+        [
+          "vy\u0159azen",
+          19
+        ],
+        [
+          "vr\u00e1cen navrhovateli k dopracov\u00e1n\u00ed",
+          19
+        ],
+        [
+          "\u010ct 14.30-16.15 h",
+          14
+        ],
+        [
+          "vy\u0159azen z po\u0159adu",
+          12
+        ],
+        [
+          "\u010ct 16.15-19.00 h",
+          12
+        ],
+        [
+          "vy\u0159azeno",
+          11
+        ],
+        [
+          "pokra\u010dov\u00e1n\u00ed p\u0159eru\u0161en\u00e9ho jedn\u00e1n\u00ed",
+          11
+        ],
+        [
+          "P\u00e1 28.11.",
+          10
+        ],
+        [
+          "\u00dat 12.12.",
+          10
+        ],
+        [
+          "\u010ct 14.30-16.15h",
+          9
+        ],
+        [
+          "\u00dat 28.6.-od 18h",
+          9
+        ],
+        [
+          "vy\u0159azen z po\u0159adu sch\u016fze",
+          9
+        ],
+        [
+          "p\u0159ik\u00e1z\u00e1n RV",
+          8
+        ]
+      ],
+      "total_unique": 1379
+    },
+    "pozvanka": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          "1",
+          17625
+        ],
+        [
+          "0",
+          233
+        ]
+      ],
+      "total_unique": 2
+    },
+    "rj": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          "0",
+          22354
+        ],
+        [
+          "1",
+          1434
+        ],
+        [
+          "2",
+          53
+        ]
+      ],
+      "total_unique": 3
+    },
+    "pozn2": {
+      "min_length": 1,
+      "max_length": 117,
+      "avg_length": 18.30503233061569,
+      "top_values": [
+        [
+          "\\",
+          1432
+        ],
+        [
+          "\u00dat 21.&nbsp;10., 1. bod",
+          3
+        ],
+        [
+          "\u00dat 8.&nbsp;2., 7. bod",
+          2
+        ],
+        [
+          "St 8.&nbsp;12., 1. bod",
+          2
+        ],
+        [
+          "\u00dat 14.&nbsp;12., 8. bod",
+          2
+        ],
+        [
+          "St 15.&nbsp;12., 3. bod",
+          2
+        ],
+        [
+          "St 15.&nbsp;12., 2. bod",
+          2
+        ],
+        [
+          "\u00dat 8.&nbsp;2., 4. bod",
+          2
+        ],
+        [
+          "\u010ct 2.&nbsp;4., 9. bod",
+          2
+        ],
+        [
+          "St 2.&nbsp;2., 3. bod",
+          2
+        ],
+        [
+          "St 10.&nbsp;12., 1. bod",
+          2
+        ],
+        [
+          "\u010ct 2.&nbsp;4., 8. bod",
+          2
+        ],
+        [
+          "\u010ct 2.&nbsp;4., 3. bod",
+          2
+        ],
+        [
+          "\u00dat 14.&nbsp;12., 3. bod",
+          2
+        ],
+        [
+          "\u00dat 7.&nbsp;12., 1. bod",
+          2
+        ],
+        [
+          "\u010ct 2.&nbsp;4., 6. bod",
+          2
+        ],
+        [
+          "\u00dat 14.&nbsp;12., 6. bod",
+          2
+        ],
+        [
+          "\u010ct 11.&nbsp;12., 1. bod",
+          2
+        ],
+        [
+          "\u010ct 2.&nbsp;4., 5. bod",
+          2
+        ],
+        [
+          "\u00dat 14.&nbsp;12., 1. bod",
+          2
+        ]
+      ],
+      "total_unique": 2068
+    },
+    "druh_bodu": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          "0",
+          9442
+        ],
+        [
+          "2",
+          231
+        ],
+        [
+          "1",
+          85
+        ],
+        [
+          "3",
+          80
+        ]
+      ],
+      "total_unique": 4
+    },
+    "id_sd": {
+      "min_length": 3,
+      "max_length": 4,
+      "avg_length": 3.9827586206896552,
+      "top_values": [
+        [
+          "5991",
+          14
+        ],
+        [
+          "4462",
+          8
+        ],
+        [
+          "4636",
+          5
+        ],
+        [
+          "4665",
+          5
+        ],
+        [
+          "4805",
+          4
+        ],
+        [
+          "6603",
+          4
+        ],
+        [
+          "7442",
+          4
+        ],
+        [
+          "7671",
+          3
+        ],
+        [
+          "7160",
+          3
+        ],
+        [
+          "7137",
+          3
+        ],
+        [
+          "7585",
+          3
+        ],
+        [
+          "3483",
+          2
+        ],
+        [
+          "3337",
+          2
+        ],
+        [
+          "4799",
+          2
+        ],
+        [
+          "5811",
+          2
+        ],
+        [
+          "5818",
+          2
+        ],
+        [
+          "5056",
+          2
+        ],
+        [
+          "3086",
+          2
+        ],
+        [
+          "5466",
+          2
+        ],
+        [
+          "5051",
+          2
+        ]
+      ],
+      "total_unique": 51
+    },
+    "zkratka": {
+      "min_length": 2,
+      "max_length": 38,
+      "avg_length": 18.683364655563476,
+      "top_values": [
+        [
+          "Po\u0159ad sch\u016fze",
+          522
+        ],
+        [
+          "interpelace",
+          190
+        ],
+        [
+          "trestn\u00ed \u0159\u00e1d",
+          144
+        ],
+        [
+          "odp.na p\u00eds.interpelace",
+          138
+        ],
+        [
+          "\u00faz \u00dastava \u010cR",
+          135
+        ],
+        [
+          "\u0161kolsk\u00fd z\u00e1kon",
+          109
+        ],
+        [
+          "trestn\u00ed z\u00e1kon\u00edk",
+          94
+        ],
+        [
+          "pozemn\u00ed komunikace",
+          89
+        ],
+        [
+          "o obc\u00edch",
+          86
+        ],
+        [
+          "ob\u010dansk\u00fd z\u00e1kon\u00edk",
+          85
+        ],
+        [
+          "spot\u0159ebn\u00ed dan\u011b-EU",
+          76
+        ],
+        [
+          "dan\u011b z p\u0159\u00edjm\u016f",
+          70
+        ],
+        [
+          "I protiraketov\u00e1 obrana",
+          67
+        ],
+        [
+          "\u00fastn\u00ed interpelace",
+          66
+        ],
+        [
+          "st\u00e1tn\u00ed sv\u00e1tky",
+          64
+        ],
+        [
+          "odpov\u011bdi na p\u00eds. interpel.",
+          63
+        ],
+        [
+          "jednac\u00ed \u0159\u00e1d PS",
+          62
+        ],
+        [
+          "\u00faz \u00dastava",
+          60
+        ],
+        [
+          "vlastnictv\u00ed byt\u016f",
+          59
+        ],
+        [
+          "z\u00e1kon\u00edk pr\u00e1ce",
+          58
+        ]
+      ],
+      "total_unique": 5315
+    }
+  },
+  "bod_stav": {
+    "popis": {
+      "min_length": 7,
+      "max_length": 18,
+      "avg_length": 11.571428571428571,
+      "top_values": [
+        [
+          "neprojednateln\u00fd",
+          1
+        ],
+        [
+          "odro\u010den",
+          1
+        ],
+        [
+          "p\u0159eru\u0161en",
+          1
+        ],
+        [
+          "jiz projednan",
+          1
+        ],
+        [
+          "pr\u00e1v\u011b projedn\u00e1van\u00fd",
+          1
+        ],
+        [
+          "neprojedn\u00e1n",
+          1
+        ],
+        [
+          "projedn\u00e1n",
+          1
+        ]
+      ],
+      "total_unique": 7
+    }
+  },
+  "omluvy": {
+    "den": {
+      "min_length": 10,
+      "max_length": 10,
+      "avg_length": 10.0,
+      "top_values": [
+        [
+          "06.11.2014",
+          91
+        ],
+        [
+          "25.09.2014",
+          80
+        ],
+        [
+          "17.09.2015",
+          79
+        ],
+        [
+          "22.10.2015",
+          77
+        ],
+        [
+          "01.10.2015",
+          77
+        ],
+        [
+          "21.05.2015",
+          73
+        ],
+        [
+          "30.04.2015",
+          72
+        ],
+        [
+          "05.11.2015",
+          72
+        ],
+        [
+          "05.11.2014",
+          69
+        ],
+        [
+          "11.12.2014",
+          68
+        ],
+        [
+          "15.10.2014",
+          66
+        ],
+        [
+          "27.10.2015",
+          65
+        ],
+        [
+          "18.09.2014",
+          65
+        ],
+        [
+          "12.02.2015",
+          64
+        ],
+        [
+          "15.05.2014",
+          64
+        ],
+        [
+          "30.10.2014",
+          62
+        ],
+        [
+          "12.03.2015",
+          62
+        ],
+        [
+          "09.04.2015",
+          61
+        ],
+        [
+          "04.12.2014",
+          61
+        ],
+        [
+          "08.08.2014",
+          60
+        ]
+      ],
+      "total_unique": 838
+    },
+    "od": {
+      "min_length": 5,
+      "max_length": 5,
+      "avg_length": 5.0,
+      "top_values": [
+        [
+          "08:30",
+          332
+        ],
+        [
+          "08:00",
+          330
+        ],
+        [
+          "14:30",
+          268
+        ],
+        [
+          "14:00",
+          242
+        ],
+        [
+          "12:00",
+          146
+        ],
+        [
+          "13:00",
+          144
+        ],
+        [
+          "09:00",
+          143
+        ],
+        [
+          "18:00",
+          130
+        ],
+        [
+          "11:00",
+          126
+        ],
+        [
+          "16:00",
+          123
+        ],
+        [
+          "17:00",
+          114
+        ],
+        [
+          "13:30",
+          112
+        ],
+        [
+          "15:00",
+          106
+        ],
+        [
+          "10:00",
+          88
+        ],
+        [
+          "19:00",
+          77
+        ],
+        [
+          "15:30",
+          65
+        ],
+        [
+          "12:30",
+          65
+        ],
+        [
+          "17:30",
+          63
+        ],
+        [
+          "16:30",
+          49
+        ],
+        [
+          "11:30",
+          48
+        ]
+      ],
+      "total_unique": 109
+    },
+    "do": {
+      "min_length": 5,
+      "max_length": 5,
+      "avg_length": 5.0,
+      "top_values": [
+        [
+          "23:00",
+          1381
+        ],
+        [
+          "13:00",
+          173
+        ],
+        [
+          "11:00",
+          143
+        ],
+        [
+          "23:59",
+          142
+        ],
+        [
+          "16:00",
+          123
+        ],
+        [
+          "14:00",
+          105
+        ],
+        [
+          "19:00",
+          104
+        ],
+        [
+          "13:30",
+          101
+        ],
+        [
+          "12:00",
+          93
+        ],
+        [
+          "15:00",
+          88
+        ],
+        [
+          "17:00",
+          85
+        ],
+        [
+          "18:00",
+          84
+        ],
+        [
+          "10:00",
+          73
+        ],
+        [
+          "23:30",
+          57
+        ],
+        [
+          "22:00",
+          43
+        ],
+        [
+          "10:30",
+          43
+        ],
+        [
+          "14:30",
+          42
+        ],
+        [
+          "11:30",
+          42
+        ],
+        [
+          "15:30",
+          34
+        ],
+        [
+          "16:30",
+          30
+        ]
+      ],
+      "total_unique": 69
+    }
+  },
+  "organy": {
+    "zkratka": {
+      "min_length": 1,
+      "max_length": 7,
+      "avg_length": 3.7047377326565143,
+      "top_values": [
+        [
+          "Vl\u00e1da\u010cR",
+          12
+        ],
+        [
+          "PV",
+          12
+        ],
+        [
+          "VK",
+          11
+        ],
+        [
+          "ODS",
+          10
+        ],
+        [
+          "\u010cSSD",
+          9
+        ],
+        [
+          "KDU-\u010cSL",
+          9
+        ],
+        [
+          "RV",
+          9
+        ],
+        [
+          "UPV",
+          8
+        ],
+        [
+          "ZAV",
+          8
+        ],
+        [
+          "HV",
+          8
+        ],
+        [
+          "MIV",
+          8
+        ],
+        [
+          "Neza\u0159az",
+          8
+        ],
+        [
+          "ORGV",
+          8
+        ],
+        [
+          "VVVKM",
+          8
+        ],
+        [
+          "KS\u010cM",
+          8
+        ],
+        [
+          "ZEV",
+          8
+        ],
+        [
+          "VZ",
+          7
+        ],
+        [
+          "SKBIS",
+          7
+        ],
+        [
+          "FSSL",
+          7
+        ],
+        [
+          "FSSS",
+          7
+        ]
+      ],
+      "total_unique": 734
+    },
+    "nazev_organu_cz": {
+      "min_length": 3,
+      "max_length": 317,
+      "avg_length": 32.40609137055838,
+      "top_values": [
+        [
+          "Sen\u00e1t",
+          14
+        ],
+        [
+          "Vl\u00e1da \u010cesk\u00e9 republiky",
+          12
+        ],
+        [
+          "Poslaneck\u00e1 sn\u011bmovna",
+          11
+        ],
+        [
+          "Neza\u0159azen\u00ed",
+          11
+        ],
+        [
+          "Mand\u00e1tov\u00fd a imunitn\u00ed v\u00fdbor",
+          8
+        ],
+        [
+          "Zem\u011bd\u011blsk\u00fd v\u00fdbor",
+          8
+        ],
+        [
+          "V\u00fdbor pro v\u011bdu, vzd\u011bl\u00e1n\u00ed, kulturu, ml\u00e1de\u017e a t\u011blov\u00fdchovu",
+          8
+        ],
+        [
+          "Organiza\u010dn\u00ed v\u00fdbor",
+          8
+        ],
+        [
+          "\u00dastavn\u011b pr\u00e1vn\u00ed v\u00fdbor",
+          8
+        ],
+        [
+          "Zahrani\u010dn\u00ed v\u00fdbor",
+          8
+        ],
+        [
+          "Rozpo\u010dtov\u00fd v\u00fdbor",
+          8
+        ],
+        [
+          "Hospod\u00e1\u0159sk\u00fd v\u00fdbor",
+          8
+        ],
+        [
+          "Sn\u011bmovna lidu",
+          7
+        ],
+        [
+          "\u010cesk\u00e1 n\u00e1rodn\u00ed rada",
+          7
+        ],
+        [
+          "Poslaneck\u00fd klub Ob\u010dansk\u00e9 demokratick\u00e9 strany",
+          7
+        ],
+        [
+          "St\u00e1l\u00e1 komise pro pr\u00e1ci Kancel\u00e1\u0159e Poslaneck\u00e9 sn\u011bmovny",
+          7
+        ],
+        [
+          "Poslaneck\u00fd klub \u010cesk\u00e9 strany soci\u00e1ln\u011b demokratick\u00e9",
+          7
+        ],
+        [
+          "Feder\u00e1ln\u00ed shrom\u00e1\u017ed\u011bn\u00ed",
+          7
+        ],
+        [
+          "Sn\u011bmovna n\u00e1rod\u016f",
+          7
+        ],
+        [
+          "Spole\u010dn\u00e9 sch\u016fze Poslaneck\u00e9 sn\u011bmovny a Sen\u00e1tu",
+          7
+        ]
+      ],
+      "total_unique": 626
+    },
+    "nazev_organu_en": {
+      "min_length": 3,
+      "max_length": 391,
+      "avg_length": 39.70935960591133,
+      "top_values": [
+        [
+          "Senate",
+          14
+        ],
+        [
+          "Chamber of Deputies",
+          11
+        ],
+        [
+          "Mandate and Immunity Committee",
+          8
+        ],
+        [
+          "Federal Assembly",
+          7
+        ],
+        [
+          "Government of Czech Republic",
+          7
+        ],
+        [
+          "Czech National Council",
+          7
+        ],
+        [
+          "Permanent Delegation to the Central European Initiative",
+          6
+        ],
+        [
+          "Permanent Delegation to the Inter-Parliamentary Union",
+          6
+        ],
+        [
+          "Unclassified Deputies",
+          6
+        ],
+        [
+          "Permanent Delegation to the Parliamentary Assembly of the OSCE",
+          6
+        ],
+        [
+          "Political group Czech Social Democratic Party",
+          6
+        ],
+        [
+          "Committee for Defence and Security",
+          6
+        ],
+        [
+          "Agricultural Committee",
+          5
+        ],
+        [
+          "Organisational Committee",
+          5
+        ],
+        [
+          "National Assembly",
+          5
+        ],
+        [
+          "Committee for Social Policy and Health Care",
+          5
+        ],
+        [
+          "Political group Civic Democratic Party",
+          5
+        ],
+        [
+          "Permanent Delegation to the Parliament. Assembly of the Council of Europe",
+          5
+        ],
+        [
+          "Electoral Commission of the Chamber of Deputies",
+          5
+        ],
+        [
+          "Committee for Economics",
+          5
+        ]
+      ],
+      "total_unique": 487
+    },
+    "od_organ": {
+      "min_length": 10,
+      "max_length": 10,
+      "avg_length": 10.0,
+      "top_values": [
+        [
+          "06.06.1992",
+          53
+        ],
+        [
+          "07.06.1990",
+          50
+        ],
+        [
+          "14.11.1918",
+          46
+        ],
+        [
+          "01.01.1993",
+          37
+        ],
+        [
+          "15.11.1925",
+          25
+        ],
+        [
+          "01.03.2007",
+          23
+        ],
+        [
+          "06.08.2002",
+          19
+        ],
+        [
+          "24.06.2010",
+          17
+        ],
+        [
+          "09.09.2010",
+          17
+        ],
+        [
+          "27.11.2013",
+          17
+        ],
+        [
+          "12.09.2006",
+          16
+        ],
+        [
+          "08.11.2006",
+          15
+        ],
+        [
+          "26.02.2014",
+          15
+        ],
+        [
+          "13.02.2014",
+          15
+        ],
+        [
+          "01.06.2002",
+          14
+        ],
+        [
+          "06.02.2014",
+          14
+        ],
+        [
+          "16.07.2002",
+          13
+        ],
+        [
+          "09.07.2010",
+          12
+        ],
+        [
+          "22.07.1998",
+          12
+        ],
+        [
+          "02.07.1996",
+          11
+        ]
+      ],
+      "total_unique": 352
+    },
+    "do_organ": {
+      "min_length": 10,
+      "max_length": 10,
+      "avg_length": 10.0,
+      "top_values": [
+        [
+          "03.06.2010",
+          149
+        ],
+        [
+          "20.06.2002",
+          135
+        ],
+        [
+          "28.08.2013",
+          134
+        ],
+        [
+          "15.06.2006",
+          130
+        ],
+        [
+          "04.06.1992",
+          50
+        ],
+        [
+          "19.06.1998",
+          40
+        ],
+        [
+          "15.04.1920",
+          34
+        ],
+        [
+          "06.06.1996",
+          33
+        ],
+        [
+          "25.09.1929",
+          31
+        ],
+        [
+          "31.12.1992",
+          29
+        ],
+        [
+          "18.05.1935",
+          21
+        ],
+        [
+          "14.11.1925",
+          21
+        ],
+        [
+          "28.05.1919",
+          12
+        ],
+        [
+          "06.12.2011",
+          7
+        ],
+        [
+          "22.05.1986",
+          4
+        ],
+        [
+          "01.01.2006",
+          4
+        ],
+        [
+          "05.06.1981",
+          4
+        ],
+        [
+          "20.10.1921",
+          4
+        ],
+        [
+          "25.11.1971",
+          4
+        ],
+        [
+          "05.06.1990",
+          4
+        ]
+      ],
+      "total_unique": 93
+    },
+    "priorita": {
+      "min_length": 1,
+      "max_length": 4,
+      "avg_length": 2.7642276422764227,
+      "top_values": [
+        [
+          "10",
+          17
+        ],
+        [
+          "20",
+          12
+        ],
+        [
+          "110",
+          7
+        ],
+        [
+          "200",
+          7
+        ],
+        [
+          "150",
+          6
+        ],
+        [
+          "30",
+          6
+        ],
+        [
+          "120",
+          6
+        ],
+        [
+          "25",
+          6
+        ],
+        [
+          "50",
+          6
+        ],
+        [
+          "170",
+          6
+        ],
+        [
+          "210",
+          6
+        ],
+        [
+          "180",
+          5
+        ],
+        [
+          "40",
+          5
+        ],
+        [
+          "190",
+          5
+        ],
+        [
+          "130",
+          5
+        ],
+        [
+          "140",
+          5
+        ],
+        [
+          "160",
+          5
+        ],
+        [
+          "220",
+          4
+        ],
+        [
+          "100",
+          4
+        ],
+        [
+          "70",
+          4
+        ]
+      ],
+      "total_unique": 106
+    }
+  },
+  "funkce": {
+    "nazev_funkce_cz": {
+      "min_length": 4,
+      "max_length": 66,
+      "avg_length": 16.671736997055937,
+      "top_values": [
+        [
+          "P\u0159edseda",
+          566
+        ],
+        [
+          "M\u00edstop\u0159edseda",
+          339
+        ],
+        [
+          "Ov\u011b\u0159ovatel v\u00fdboru",
+          44
+        ],
+        [
+          "M\u00edstop\u0159edseda v\u00fdboru",
+          34
+        ],
+        [
+          "P\u0159edseda v\u00fdboru",
+          34
+        ],
+        [
+          "Ov\u011b\u0159ovatel",
+          27
+        ],
+        [
+          "\u010clen",
+          26
+        ],
+        [
+          "1. m\u00edstop\u0159edseda",
+          23
+        ],
+        [
+          "Vedouc\u00ed delegace",
+          21
+        ],
+        [
+          "N\u00e1hradn\u00edk",
+          19
+        ],
+        [
+          "2. m\u00edstop\u0159edseda",
+          18
+        ],
+        [
+          "Zapisovatel",
+          18
+        ],
+        [
+          "m\u00edstop\u0159edseda",
+          15
+        ],
+        [
+          "3. m\u00edstop\u0159edseda",
+          13
+        ],
+        [
+          "p\u0159edseda",
+          12
+        ],
+        [
+          "Ministr financ\u00ed",
+          11
+        ],
+        [
+          "Ministr obrany",
+          11
+        ],
+        [
+          "Ministr kultury",
+          11
+        ],
+        [
+          "Ministr \u0161kolstv\u00ed, ml\u00e1de\u017ee a t\u011blov\u00fdchovy",
+          11
+        ],
+        [
+          "Ministr pro m\u00edstn\u00ed rozvoj",
+          11
+        ]
+      ],
+      "total_unique": 449
+    }
+  },
+  "hl_hlasovani": {
+    "druh_hlasovani": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          "N",
+          3523
+        ]
+      ],
+      "total_unique": 1
+    },
+    "vysledek": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          "A",
+          2483
+        ],
+        [
+          "R",
+          1040
+        ]
+      ],
+      "total_unique": 2
+    },
+    "nazev_dlouhy": {
+      "min_length": 12,
+      "max_length": 70,
+      "avg_length": 37.19071704849747,
+      "top_values": [
+        [
+          "Po\u0159ad sch\u016fze",
+          586
+        ],
+        [
+          "Novela z. o spot\u0159ebn\u00edch dan\u00edch - EU",
+          72
+        ],
+        [
+          "Novela z. - slu\u017eebn\u00ed z\u00e1kon",
+          68
+        ],
+        [
+          "N.z. o Registru smluv",
+          49
+        ],
+        [
+          "Novela z. - \u0161kolsk\u00fd z\u00e1kon",
+          48
+        ],
+        [
+          "Vl.n.z. o st\u00e1tn\u00edm rozpo\u010dtu \u010cR na rok 2015",
+          47
+        ],
+        [
+          "Novela z. o ve\u0159ejn\u00e9m zdravotn\u00edm poji\u0161t\u011bn\u00ed",
+          46
+        ],
+        [
+          "Novela z. - energetick\u00fd z\u00e1kon - EU",
+          44
+        ],
+        [
+          "Novela z. o posuzov\u00e1n\u00ed vliv\u016f na \u017eivotn\u00ed prost\u0159ed\u00ed - EU",
+          42
+        ],
+        [
+          "Vl. n. z. o st\u00e1tn\u00edm rozpo\u010dtu \u010cR na rok 2014",
+          33
+        ],
+        [
+          "Informace vl\u00e1dy \u010cR k situaci ohledn\u011b muni\u010dn\u00edho skladu ve Vrb\u011btic\u00edch",
+          33
+        ],
+        [
+          "Novela z. o loteri\u00edch",
+          32
+        ],
+        [
+          "Vl.n.z. o poskytov\u00e1n\u00ed slu\u017eby p\u00e9\u010de o d\u00edt\u011b v d\u011btsk\u00e9 skupin\u011b",
+          32
+        ],
+        [
+          "N\u00e1vrh na zm\u011bny ve slo\u017een\u00ed org\u00e1n\u016f Poslaneck\u00e9 sn\u011bmovny",
+          31
+        ],
+        [
+          "Novela z. o dan\u00edch z p\u0159\u00edjm\u016f - EU",
+          31
+        ],
+        [
+          "Novela z. o ochran\u011b zem\u011bd\u011blsk\u00e9ho p\u016fdn\u00edho fondu",
+          29
+        ],
+        [
+          "Novela z. o dani z p\u0159idan\u00e9 hodnoty - EU",
+          26
+        ],
+        [
+          "Novela z. - ob\u010dansk\u00fd soudn\u00ed \u0159\u00e1d",
+          26
+        ],
+        [
+          "Novela z. o pedagogick\u00fdch pracovn\u00edc\u00edch",
+          24
+        ],
+        [
+          "Novela z. o azylu a o pobytu cizinc\u016f na \u00fazem\u00ed \u010cR - EU",
+          24
+        ]
+      ],
+      "total_unique": 571
+    },
+    "nazev_kratky": {
+      "min_length": 12,
+      "max_length": 15,
+      "avg_length": 13.5,
+      "top_values": [
+        [
+          "lh\u016fta ST 340",
+          1
+        ],
+        [
+          "p\u0159edseda v\u00fdboru",
+          1
+        ]
+      ],
+      "total_unique": 2
+    }
+  },
+  "schuze_stav": {
+    "typ": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          "2",
+          47
+        ],
+        [
+          "1",
+          45
+        ]
+      ],
+      "total_unique": 2
+    },
+    "text_dt": {
+      "min_length": 12,
+      "max_length": 47,
+      "avg_length": 31.523809523809526,
+      "top_values": [
+        [
+          "27. \u0159\u00edjna 2015, 10 minut po skon\u010den\u00ed 33. sch\u016fze",
+          1
+        ],
+        [
+          "12. prosince, 10 minut po ukon\u010den\u00ed 23. sch\u016fze",
+          1
+        ],
+        [
+          "10 minut po ukon\u010den\u00ed 30. sch\u016fze",
+          1
+        ],
+        [
+          "ve 14:30 hod.",
+          1
+        ],
+        [
+          "20 minut po ukon\u010den\u00ed 10. sch\u016fze",
+          1
+        ],
+        [
+          "30 minut po skon\u010den\u00ed 55. sch\u016fze",
+          1
+        ],
+        [
+          "ve 14:30 hodin",
+          1
+        ],
+        [
+          "10 minut po ukon\u010den\u00ed 27. sch\u016fze",
+          1
+        ],
+        [
+          "10 minut po p\u0159eru\u0161en\u00ed 20. sch\u016fze PS",
+          1
+        ],
+        [
+          "10 minut po ukon\u010den\u00ed 34. sch\u016fze",
+          1
+        ],
+        [
+          "6. prosince, 20 minut po ukon\u010den\u00ed 2. sch\u016fze PS",
+          1
+        ],
+        [
+          "20 minut po ukon\u010den\u00ed 11. sch\u016fze",
+          1
+        ],
+        [
+          "10. z\u00e1\u0159\u00ed, 10 minut po skon\u010den\u00ed p\u0159edchoz\u00ed sch\u016fze",
+          1
+        ],
+        [
+          "20 minut po schv\u00e1len\u00ed po\u0159adu 21. sch\u016fze",
+          1
+        ],
+        [
+          "10 minut po skon\u010den\u00ed 43. sch\u016fze",
+          1
+        ],
+        [
+          "10 minut po ukon\u010den\u00ed 26. sch\u016fze",
+          1
+        ],
+        [
+          "30 minut po ukon\u010den\u00ed 57. sch\u016fze",
+          1
+        ],
+        [
+          "10 minut po ukon\u010den\u00ed 28. sch\u016fze",
+          1
+        ],
+        [
+          "v 11:30 hodin",
+          1
+        ],
+        [
+          "10. z\u00e1\u0159\u00ed, 10 minut po skon\u010den\u00ed 14. sch\u016fze",
+          1
+        ]
+      ],
+      "total_unique": 21
+    },
+    "text_st": {
+      "min_length": 9,
+      "max_length": 51,
+      "avg_length": 35.8235294117647,
+      "top_values": [
+        [
+          "n\u00e1vrh na vysloven\u00ed ned\u016fv\u011bry vl\u00e1d\u011b \u010cR nebyl schv\u00e1len",
+          3
+        ],
+        [
+          "p\u0159eru\u0161eno",
+          2
+        ],
+        [
+          "n\u00e1vrh na vysloven\u00ed ned\u016fv\u011bry vl\u00e1d\u011b \u010cR",
+          2
+        ],
+        [
+          "vyslovena d\u016fv\u011bra vl\u00e1d\u011b \u010cR",
+          1
+        ],
+        [
+          "p\u0159eru\u0161eno do st\u0159edy 25. listopadu do 9 hodin",
+          1
+        ],
+        [
+          "projedn\u00e1v\u00e1n\u00ed n\u00e1vrh\u016f ve stavu legislativn\u00ed nouze",
+          1
+        ],
+        [
+          "volba ve\u0159ejn\u00e9ho ochr\u00e1nce pr\u00e1v",
+          1
+        ],
+        [
+          "\u017e\u00e1dost vl\u00e1dy o vysloven\u00ed d\u016fv\u011bry",
+          1
+        ],
+        [
+          "\u017e\u00e1dost o svol\u00e1n\u00ed sch\u016fze byla sta\u017eena",
+          1
+        ],
+        [
+          "n\u00e1vrh prezidentu republiky na rozpu\u0161t\u011bn\u00ed PS",
+          1
+        ],
+        [
+          "\u017e\u00e1dost vl\u00e1dy \u010cR o vysloven\u00ed d\u016fv\u011bry",
+          1
+        ],
+        [
+          "\u017e\u00e1dost vl\u00e1dy \u010cR o vysloven\u00ed d\u016fv\u011bry - vyslovena",
+          1
+        ],
+        [
+          "ned\u016fv\u011bra vl\u00e1d\u011b nebyla vyslovena",
+          1
+        ]
+      ],
+      "total_unique": 13
+    },
+    "tm_line": {
+      "min_length": 10,
+      "max_length": 45,
+      "avg_length": 25.5,
+      "top_values": [
+        [
+          "P\u0159eru\u0161eno.",
+          2
+        ],
+        [
+          "\u017d\u00e1dost o svol\u00e1n\u00ed sch\u016fze byla sta\u017eena.",
+          1
+        ],
+        [
+          "P\u0159eru\u0161eno do st\u0159edy 25. listopadu do 9 hodin.",
+          1
+        ]
+      ],
+      "total_unique": 3
+    }
+  },
+  "typ_funkce": {
+    "typ_funkce_cz": {
+      "min_length": 4,
+      "max_length": 39,
+      "avg_length": 13.284552845528456,
+      "top_values": [
+        [
+          "P\u0159edseda",
+          21
+        ],
+        [
+          "M\u00edstop\u0159edseda",
+          20
+        ],
+        [
+          "\u010clen",
+          7
+        ],
+        [
+          "N\u00e1hradn\u00edk",
+          5
+        ],
+        [
+          "Zapisovatel",
+          3
+        ],
+        [
+          "5. m\u00edstop\u0159edseda",
+          2
+        ],
+        [
+          "Ov\u011b\u0159ovatel",
+          2
+        ],
+        [
+          "4. m\u00edstop\u0159edseda",
+          2
+        ],
+        [
+          "2. m\u00edstop\u0159edseda",
+          2
+        ],
+        [
+          "Po\u0159adatel",
+          2
+        ],
+        [
+          "Prezident",
+          2
+        ],
+        [
+          "3. m\u00edstop\u0159edseda",
+          2
+        ],
+        [
+          "1. m\u00edstop\u0159edseda",
+          2
+        ],
+        [
+          "Pozorovatel",
+          2
+        ],
+        [
+          "\u0158editel",
+          2
+        ],
+        [
+          "Vedouc\u00ed delegace",
+          1
+        ],
+        [
+          "Revizor",
+          1
+        ],
+        [
+          "Z\u00e1stupce finan\u010dn\u00edho arbitra",
+          1
+        ],
+        [
+          "Inspektor",
+          1
+        ],
+        [
+          "Ministr spravedlnosti",
+          1
+        ]
+      ],
+      "total_unique": 62
+    },
+    "typ_funkce_en": {
+      "min_length": 6,
+      "max_length": 33,
+      "avg_length": 12.596153846153847,
+      "top_values": [
+        [
+          "Chairperson",
+          12
+        ],
+        [
+          "Vice-chairperson",
+          12
+        ],
+        [
+          "Chairman",
+          6
+        ],
+        [
+          "Vice-chairman",
+          6
+        ],
+        [
+          "Member",
+          5
+        ],
+        [
+          "Observer",
+          2
+        ],
+        [
+          "Secretary - verifier of committee",
+          1
+        ],
+        [
+          "Verifier of committee",
+          1
+        ],
+        [
+          "Secretary",
+          1
+        ],
+        [
+          "Head of delegation",
+          1
+        ],
+        [
+          "Verifier",
+          1
+        ],
+        [
+          "Alternate of delegation",
+          1
+        ],
+        [
+          "Internal Auditor",
+          1
+        ],
+        [
+          "Verifier of commission",
+          1
+        ],
+        [
+          "President",
+          1
+        ]
+      ],
+      "total_unique": 15
+    }
+  },
+  "hl_check": {
+    "id_h2": {
+      "min_length": 5,
+      "max_length": 5,
+      "avg_length": 5.0,
+      "top_values": [
+        [
+          "59382",
+          2
+        ],
+        [
+          "59006",
+          2
+        ],
+        [
+          "60001",
+          1
+        ],
+        [
+          "61026",
+          1
+        ],
+        [
+          "60146",
+          1
+        ],
+        [
+          "61059",
+          1
+        ],
+        [
+          "61724",
+          1
+        ],
+        [
+          "59614",
+          1
+        ],
+        [
+          "58746",
+          1
+        ],
+        [
+          "59716",
+          1
+        ],
+        [
+          "60164",
+          1
+        ],
+        [
+          "61162",
+          1
+        ],
+        [
+          "58349",
+          1
+        ],
+        [
+          "61679",
+          1
+        ],
+        [
+          "61658",
+          1
+        ],
+        [
+          "60876",
+          1
+        ],
+        [
+          "59718",
+          1
+        ],
+        [
+          "58744",
+          1
+        ],
+        [
+          "59712",
+          1
+        ],
+        [
+          "60940",
+          1
+        ]
+      ],
+      "total_unique": 36
+    },
+    "id_h3": {
+      "min_length": 5,
+      "max_length": 5,
+      "avg_length": 5.0,
+      "top_values": [
+        [
+          "60002",
+          2
+        ],
+        [
+          "59719",
+          2
+        ],
+        [
+          "60877",
+          1
+        ],
+        [
+          "59704",
+          1
+        ],
+        [
+          "61680",
+          1
+        ],
+        [
+          "59713",
+          1
+        ],
+        [
+          "59382",
+          1
+        ],
+        [
+          "59008",
+          1
+        ],
+        [
+          "61027",
+          1
+        ],
+        [
+          "61060",
+          1
+        ],
+        [
+          "60147",
+          1
+        ],
+        [
+          "61163",
+          1
+        ],
+        [
+          "61719",
+          1
+        ],
+        [
+          "61659",
+          1
+        ],
+        [
+          "59007",
+          1
+        ],
+        [
+          "59175",
+          1
+        ],
+        [
+          "58504",
+          1
+        ],
+        [
+          "59319",
+          1
+        ],
+        [
+          "58350",
+          1
+        ],
+        [
+          "59615",
+          1
+        ]
+      ],
+      "total_unique": 36
+    }
+  },
+  "osoby": {
+    "pred": {
+      "min_length": 3,
+      "max_length": 16,
+      "avg_length": 5.141505553270259,
+      "top_values": [
+        [
+          "Ing.",
+          927
+        ],
+        [
+          "JUDr.",
+          382
+        ],
+        [
+          "MUDr.",
+          203
+        ],
+        [
+          "Mgr.",
+          162
+        ],
+        [
+          "PhDr.",
+          159
+        ],
+        [
+          "RNDr.",
+          67
+        ],
+        [
+          "RSDr.",
+          67
+        ],
+        [
+          "MVDr.",
+          23
+        ],
+        [
+          "ThDr.",
+          20
+        ],
+        [
+          "PaedDr.",
+          18
+        ],
+        [
+          "Bc.",
+          17
+        ],
+        [
+          "prof. Ing.",
+          13
+        ],
+        [
+          "Doc. Ing.",
+          11
+        ],
+        [
+          "akad.",
+          10
+        ],
+        [
+          "Ing. arch.",
+          9
+        ],
+        [
+          "Dr.",
+          9
+        ],
+        [
+          "JUDr. Ing.",
+          8
+        ],
+        [
+          "prof.JUDr.",
+          8
+        ],
+        [
+          "prof.Ing.",
+          7
+        ],
+        [
+          "prof. MUDr.",
+          7
+        ]
+      ],
+      "total_unique": 192
+    },
+    "jmeno": {
+      "min_length": 3,
+      "max_length": 22,
+      "avg_length": 6.694400506168934,
+      "top_values": [
+        [
+          "Svoboda",
+          33
+        ],
+        [
+          "Nov\u00e1k",
+          32
+        ],
+        [
+          "Novotn\u00fd",
+          21
+        ],
+        [
+          "\u010cern\u00fd",
+          21
+        ],
+        [
+          "Ku\u010dera",
+          20
+        ],
+        [
+          "Proch\u00e1zka",
+          18
+        ],
+        [
+          "N\u011bmec",
+          18
+        ],
+        [
+          "Dvo\u0159\u00e1k",
+          13
+        ],
+        [
+          "Krej\u010d\u00ed",
+          13
+        ],
+        [
+          "Hor\u00e1k",
+          12
+        ],
+        [
+          "Bla\u017eek",
+          12
+        ],
+        [
+          "H\u00e1jek",
+          11
+        ],
+        [
+          "Zeman",
+          10
+        ],
+        [
+          "Vl\u010dek",
+          10
+        ],
+        [
+          "Benda",
+          9
+        ],
+        [
+          "Bure\u0161",
+          9
+        ],
+        [
+          "Mal\u00fd",
+          9
+        ],
+        [
+          "Fiala",
+          9
+        ],
+        [
+          "Bene\u0161",
+          8
+        ],
+        [
+          "Havl\u00ed\u010dek",
+          8
+        ]
+      ],
+      "total_unique": 4660
+    },
+    "prijmeni": {
+      "min_length": 2,
+      "max_length": 18,
+      "avg_length": 5.892439101550142,
+      "top_values": [
+        [
+          "Josef",
+          433
+        ],
+        [
+          "Franti\u0161ek",
+          332
+        ],
+        [
+          "Jan",
+          310
+        ],
+        [
+          "Ji\u0159\u00ed",
+          210
+        ],
+        [
+          "V\u00e1clav",
+          201
+        ],
+        [
+          "Jaroslav",
+          179
+        ],
+        [
+          "Pavel",
+          139
+        ],
+        [
+          "Vladim\u00edr",
+          126
+        ],
+        [
+          "Karel",
+          126
+        ],
+        [
+          "J\u00e1n",
+          115
+        ],
+        [
+          "Miroslav",
+          114
+        ],
+        [
+          "Jozef",
+          109
+        ],
+        [
+          "Anton\u00edn",
+          104
+        ],
+        [
+          "Zden\u011bk",
+          104
+        ],
+        [
+          "Petr",
+          103
+        ],
+        [
+          "Rudolf",
+          97
+        ],
+        [
+          "Marie",
+          93
+        ],
+        [
+          "Ladislav",
+          83
+        ],
+        [
+          "Milan",
+          76
+        ],
+        [
+          "Stanislav",
+          74
+        ]
+      ],
+      "total_unique": 596
+    },
+    "za": {
+      "min_length": 3,
+      "max_length": 12,
+      "avg_length": 4.557065217391305,
+      "top_values": [
+        [
+          "CSc.",
+          240
+        ],
+        [
+          "DrSc.",
+          39
+        ],
+        [
+          "Ph.D.",
+          28
+        ],
+        [
+          "MBA",
+          14
+        ],
+        [
+          "Ph.D., MBA",
+          5
+        ],
+        [
+          "Msgre.",
+          3
+        ],
+        [
+          "genmjr.",
+          2
+        ],
+        [
+          "DrSc.akad.",
+          2
+        ],
+        [
+          "CSc., MBA",
+          2
+        ],
+        [
+          "MPA",
+          2
+        ],
+        [
+          "akad.",
+          2
+        ],
+        [
+          "Dr.",
+          2
+        ],
+        [
+          "Dr.Sc.",
+          2
+        ],
+        [
+          "zasl.um.",
+          2
+        ],
+        [
+          "Prof.",
+          1
+        ],
+        [
+          "arch.",
+          1
+        ],
+        [
+          "DiS.",
+          1
+        ],
+        [
+          "M.A., Ph.D.",
+          1
+        ],
+        [
+          "Ph.D., LL.M.",
+          1
+        ],
+        [
+          "DrSc. FCMA",
+          1
+        ]
+      ],
+      "total_unique": 37
+    },
+    "narozeni": {
+      "min_length": 10,
+      "max_length": 10,
+      "avg_length": 10.0,
+      "top_values": [
+        [
+          "01.01.1900",
+          847
+        ],
+        [
+          "08.11.1921",
+          4
+        ],
+        [
+          "13.08.1948",
+          4
+        ],
+        [
+          "26.11.1936",
+          3
+        ],
+        [
+          "25.09.1965",
+          3
+        ],
+        [
+          "11.04.1957",
+          3
+        ],
+        [
+          "04.10.1956",
+          3
+        ],
+        [
+          "22.02.1905",
+          3
+        ],
+        [
+          "05.06.1951",
+          3
+        ],
+        [
+          "05.11.1940",
+          3
+        ],
+        [
+          "01.01.1955",
+          3
+        ],
+        [
+          "31.05.1956",
+          3
+        ],
+        [
+          "21.01.1897",
+          3
+        ],
+        [
+          "01.12.1892",
+          3
+        ],
+        [
+          "18.10.1952",
+          3
+        ],
+        [
+          "01.08.1921",
+          3
+        ],
+        [
+          "11.02.1933",
+          3
+        ],
+        [
+          "12.08.1924",
+          3
+        ],
+        [
+          "19.09.1923",
+          3
+        ],
+        [
+          "27.05.1941",
+          3
+        ]
+      ],
+      "total_unique": 5071
+    },
+    "pohlavi": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          "M",
+          5283
+        ],
+        [
+          "\u017d",
+          1014
+        ],
+        [
+          "Z",
+          25
+        ]
+      ],
+      "total_unique": 3
+    },
+    "zmena": {
+      "min_length": 10,
+      "max_length": 10,
+      "avg_length": 10.0,
+      "top_values": [
+        [
+          "07.12.1998",
+          68
+        ],
+        [
+          "08.12.1998",
+          64
+        ],
+        [
+          "09.12.1998",
+          25
+        ],
+        [
+          "15.11.1925",
+          15
+        ],
+        [
+          "13.04.2000",
+          8
+        ],
+        [
+          "25.04.1920",
+          6
+        ],
+        [
+          "27.10.1929",
+          6
+        ],
+        [
+          "07.06.1981",
+          6
+        ],
+        [
+          "26.05.1946",
+          4
+        ],
+        [
+          "23.10.1976",
+          3
+        ],
+        [
+          "18.05.1999",
+          3
+        ],
+        [
+          "01.01.1969",
+          3
+        ],
+        [
+          "19.05.1935",
+          3
+        ],
+        [
+          "30.05.1958",
+          3
+        ],
+        [
+          "22.06.1999",
+          2
+        ],
+        [
+          "26.01.2000",
+          2
+        ],
+        [
+          "12.06.1960",
+          2
+        ],
+        [
+          "26.04.2000",
+          2
+        ],
+        [
+          "15.02.2000",
+          2
+        ],
+        [
+          "24.05.1986",
+          2
+        ]
+      ],
+      "total_unique": 51
+    },
+    "umrti": {
+      "min_length": 10,
+      "max_length": 10,
+      "avg_length": 10.0,
+      "top_values": [
+        [
+          "03.12.1952",
+          3
+        ],
+        [
+          "15.12.1952",
+          2
+        ],
+        [
+          "13.12.1979",
+          2
+        ],
+        [
+          "31.03.1937",
+          2
+        ],
+        [
+          "15.02.1947",
+          2
+        ],
+        [
+          "07.05.1945",
+          2
+        ],
+        [
+          "10.02.1989",
+          2
+        ],
+        [
+          "10.04.1940",
+          2
+        ],
+        [
+          "26.11.2013",
+          2
+        ],
+        [
+          "31.10.1924",
+          2
+        ],
+        [
+          "25.07.1953",
+          2
+        ],
+        [
+          "29.11.1969",
+          2
+        ],
+        [
+          "17.09.1947",
+          2
+        ],
+        [
+          "12.12.1937",
+          2
+        ],
+        [
+          "29.08.1935",
+          2
+        ],
+        [
+          "16.12.1960",
+          2
+        ],
+        [
+          "04.03.1988",
+          2
+        ],
+        [
+          "20.06.1942",
+          2
+        ],
+        [
+          "20.08.1972",
+          1
+        ],
+        [
+          "05.01.1996",
+          1
+        ]
+      ],
+      "total_unique": 816
+    }
+  },
+  "hl_poslanec": {
+    "vysledek": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          "A",
+          364694
+        ],
+        [
+          "@",
+          158718
+        ],
+        [
+          "K",
+          91343
+        ],
+        [
+          "B",
+          89834
+        ],
+        [
+          "W",
+          11
+        ]
+      ],
+      "total_unique": 5
+    }
+  },
+  "typ_organu": {
+    "typ_id_typ_org": {
+      "min_length": 1,
+      "max_length": 2,
+      "avg_length": 1.8888888888888888,
+      "top_values": [
+        [
+          "12",
+          20
+        ],
+        [
+          "11",
+          5
+        ],
+        [
+          "24",
+          4
+        ],
+        [
+          "15",
+          4
+        ],
+        [
+          "30",
+          3
+        ],
+        [
+          "22",
+          3
+        ],
+        [
+          "31",
+          3
+        ],
+        [
+          "21",
+          3
+        ],
+        [
+          "3",
+          2
+        ],
+        [
+          "7",
+          2
+        ],
+        [
+          "54",
+          2
+        ],
+        [
+          "20",
+          2
+        ],
+        [
+          "27",
+          2
+        ],
+        [
+          "84",
+          1
+        ],
+        [
+          "9",
+          1
+        ],
+        [
+          "8",
+          1
+        ],
+        [
+          "55",
+          1
+        ],
+        [
+          "5",
+          1
+        ],
+        [
+          "85",
+          1
+        ],
+        [
+          "79",
+          1
+        ]
+      ],
+      "total_unique": 21
+    },
+    "nazev_typ_org_cz": {
+      "min_length": 4,
+      "max_length": 61,
+      "avg_length": 16.90909090909091,
+      "top_values": [
+        [
+          "Klub",
+          9
+        ],
+        [
+          "V\u00fdbor",
+          7
+        ],
+        [
+          "P\u0159edsednictvo",
+          5
+        ],
+        [
+          "Sn\u011bmovna lidu",
+          2
+        ],
+        [
+          "Sn\u011bmovna n\u00e1rod\u016f",
+          2
+        ],
+        [
+          "Komise",
+          2
+        ],
+        [
+          "Pracovn\u00ed skupina",
+          2
+        ],
+        [
+          "Delegace",
+          1
+        ],
+        [
+          "Evropsk\u00fd parlament",
+          1
+        ],
+        [
+          "Podv\u00fdbor",
+          1
+        ],
+        [
+          "Sen\u00e1t",
+          1
+        ],
+        [
+          "Snem Slovenskej republiky",
+          1
+        ],
+        [
+          "Feder\u00e1ln\u00ed shrom\u00e1\u017ed\u011bn\u00ed \u010ceskoslovensk\u00e9 socialistick\u00e9 republiky",
+          1
+        ],
+        [
+          "Spole\u010dn\u00e9 sch\u016fze Poslaneck\u00e9 sn\u011bmovny a Sen\u00e1tu",
+          1
+        ],
+        [
+          "Parlament",
+          1
+        ],
+        [
+          "Feder\u00e1ln\u00ed shrom\u00e1\u017ed\u011bn\u00ed \u010cesk\u00e9 a Slovensk\u00e9 Federativn\u00ed republiky",
+          1
+        ],
+        [
+          "Legislativn\u00ed rada vl\u00e1dy",
+          1
+        ],
+        [
+          "Prezident",
+          1
+        ],
+        [
+          "Sn\u011bm kr\u00e1lovstv\u00ed \u010cesk\u00e9ho",
+          1
+        ],
+        [
+          "Dozor\u010d\u00ed rada",
+          1
+        ]
+      ],
+      "total_unique": 44
+    },
+    "nazev_typ_org_en": {
+      "min_length": 5,
+      "max_length": 35,
+      "avg_length": 13.291666666666666,
+      "top_values": [
+        [
+          "Committee",
+          4
+        ],
+        [
+          "Commission",
+          2
+        ],
+        [
+          "Federal Assembly",
+          2
+        ],
+        [
+          "International organizations",
+          1
+        ],
+        [
+          "Institution",
+          1
+        ],
+        [
+          "Working Group",
+          1
+        ],
+        [
+          "European Parliament",
+          1
+        ],
+        [
+          "Europena Central Bank",
+          1
+        ],
+        [
+          "Parliament",
+          1
+        ],
+        [
+          "Political Group",
+          1
+        ],
+        [
+          "Government",
+          1
+        ],
+        [
+          "National Assembly",
+          1
+        ],
+        [
+          "Senate",
+          1
+        ],
+        [
+          "Region",
+          1
+        ],
+        [
+          "Interparliamentary Friendship Group",
+          1
+        ],
+        [
+          "Subcommittee",
+          1
+        ],
+        [
+          "Delegation",
+          1
+        ],
+        [
+          "Czech republic",
+          1
+        ],
+        [
+          "Party",
+          1
+        ]
+      ],
+      "total_unique": 19
+    },
+    "typ_org_obecny": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          "3",
+          5
+        ],
+        [
+          "1",
+          5
+        ],
+        [
+          "2",
+          2
+        ],
+        [
+          "0",
+          1
+        ],
+        [
+          "7",
+          1
+        ]
+      ],
+      "total_unique": 5
+    }
+  },
+  "pkgps": {
+    "adresa": {
+      "min_length": 23,
+      "max_length": 71,
+      "avg_length": 33.795918367346935,
+      "top_values": [
+        [
+          "Malostransk\u00e9 n\u00e1m. 266/5; Praha 1; 11800",
+          5
+        ],
+        [
+          "Truhl\u00e1\u0159sk\u00e1 9; Praha 1; 11000",
+          3
+        ],
+        [
+          "K\u0159enov\u00e1 67; Brno; 60200",
+          2
+        ],
+        [
+          "Gork\u00e9ho 1611; Pardubice; 53002",
+          2
+        ],
+        [
+          "\u010c\u00e9\u010dova 689/11; \u010cesk\u00e9 Bud\u011bjovice; 37004",
+          2
+        ],
+        [
+          "Horsk\u00e1 97; Trutnov; 54101",
+          2
+        ],
+        [
+          "Hou\u0161kova 822/35; Plze\u0148; 32600",
+          2
+        ],
+        [
+          "V\u0161ehrdova 194; Hradec Kr\u00e1lov\u00e9; 50002",
+          2
+        ],
+        [
+          "n\u00e1m. Dr. E. Bene\u0161e 5/13; Liberec; 46001",
+          2
+        ],
+        [
+          "Vrchlick\u00e9ho 2078/12; Jihlava; 58601",
+          2
+        ],
+        [
+          "\u0160ilingrovo n\u00e1m\u011bst\u00ed 257/3; Brno; 60200",
+          2
+        ],
+        [
+          "Anglick\u00e9 n\u00e1b\u0159e\u017e\u00ed 2434/1; Plze\u0148; 30100",
+          2
+        ],
+        [
+          "Ur\u010dick\u00e1 4220/53; Prost\u011bjov; 79601",
+          2
+        ],
+        [
+          "Politick\u00fdch v\u011bz\u0148\u016f 1531/9; Praha 1; 11121",
+          2
+        ],
+        [
+          "V\u00edde\u0148sk\u00e1 134/102; Brno; 61900",
+          2
+        ],
+        [
+          "\u010ceskobratrsk\u00e1 1579/4; Ostrava; 70200",
+          2
+        ],
+        [
+          "\u010cSA 287; Hradec Kr\u00e1lov\u00e9;",
+          2
+        ],
+        [
+          "N\u00e1m\u011bst\u00ed Svobody 526; T\u0159inec; 73961",
+          1
+        ],
+        [
+          "Sportovc\u016f 215; Kutn\u00e1 Hora; 28401",
+          1
+        ],
+        [
+          "\u017di\u017ekova 463; Kladno; 27201",
+          1
+        ]
+      ],
+      "total_unique": 175
+    }
+  }
+}

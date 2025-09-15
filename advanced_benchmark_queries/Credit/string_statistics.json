@@ -1,0 +1,823 @@
+{
+  "statement": {
+    "statement_code": {
+      "min_length": 0,
+      "max_length": 0,
+      "avg_length": 0,
+      "top_values": [],
+      "total_unique": 0
+    }
+  },
+  "category": {
+    "category_desc": {
+      "min_length": 4,
+      "max_length": 13,
+      "avg_length": 8.9,
+      "top_values": [
+        [
+          "Entertainment",
+          1
+        ],
+        [
+          "Meals",
+          1
+        ],
+        [
+          "Electronics",
+          1
+        ],
+        [
+          "Groceries",
+          1
+        ],
+        [
+          "Travel",
+          1
+        ],
+        [
+          "Lodging",
+          1
+        ],
+        [
+          "Misc",
+          1
+        ],
+        [
+          "Home Supplies",
+          1
+        ],
+        [
+          "Clothing",
+          1
+        ],
+        [
+          "Communication",
+          1
+        ]
+      ],
+      "total_unique": 10
+    },
+    "category_code": {
+      "min_length": 0,
+      "max_length": 0,
+      "avg_length": 0,
+      "top_values": [],
+      "total_unique": 0
+    }
+  },
+  "provider": {
+    "provider_name": {
+      "min_length": 14,
+      "max_length": 15,
+      "avg_length": 14.78,
+      "top_values": [
+        [
+          "Prov. Imperial",
+          50
+        ],
+        [
+          "Prov. Computer",
+          50
+        ],
+        [
+          "Prov. Boston Ma",
+          5
+        ],
+        [
+          "Prov. Expert Op",
+          5
+        ],
+        [
+          "Prov. Boston Li",
+          5
+        ],
+        [
+          "Prov. Famous Li",
+          5
+        ],
+        [
+          "Prov. Apex Key",
+          5
+        ],
+        [
+          "Prov. Boston Qu",
+          5
+        ],
+        [
+          "Prov. Apex Need",
+          5
+        ],
+        [
+          "Prov. Humble Re",
+          5
+        ],
+        [
+          "Prov. Boston Sa",
+          5
+        ],
+        [
+          "Prov. Giant Res",
+          5
+        ],
+        [
+          "Prov. Giant Ope",
+          5
+        ],
+        [
+          "Prov. Driven Ne",
+          5
+        ],
+        [
+          "Prov. Driven Ma",
+          5
+        ],
+        [
+          "Prov. Just Need",
+          5
+        ],
+        [
+          "Prov. Just Tran",
+          5
+        ],
+        [
+          "Prov. Boston Tr",
+          5
+        ],
+        [
+          "Prov. Just Sail",
+          5
+        ],
+        [
+          "Prov. Just Rest",
+          5
+        ]
+      ],
+      "total_unique": 82
+    },
+    "street": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          " ",
+          500
+        ]
+      ],
+      "total_unique": 1
+    },
+    "city": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          " ",
+          500
+        ]
+      ],
+      "total_unique": 1
+    },
+    "state_prov": {
+      "min_length": 0,
+      "max_length": 0,
+      "avg_length": 0,
+      "top_values": [],
+      "total_unique": 0
+    },
+    "mail_code": {
+      "min_length": 0,
+      "max_length": 0,
+      "avg_length": 0,
+      "top_values": [],
+      "total_unique": 0
+    },
+    "country": {
+      "min_length": 0,
+      "max_length": 0,
+      "avg_length": 0,
+      "top_values": [],
+      "total_unique": 0
+    },
+    "phone_no": {
+      "min_length": 0,
+      "max_length": 0,
+      "avg_length": 0,
+      "top_values": [],
+      "total_unique": 0
+    },
+    "provider_code": {
+      "min_length": 0,
+      "max_length": 0,
+      "avg_length": 0,
+      "top_values": [],
+      "total_unique": 0
+    }
+  },
+  "payment": {
+    "payment_code": {
+      "min_length": 0,
+      "max_length": 0,
+      "avg_length": 0,
+      "top_values": [],
+      "total_unique": 0
+    }
+  },
+  "charge": {
+    "charge_code": {
+      "min_length": 0,
+      "max_length": 0,
+      "avg_length": 0,
+      "top_values": [],
+      "total_unique": 0
+    }
+  },
+  "corporation": {
+    "corp_name": {
+      "min_length": 19,
+      "max_length": 31,
+      "avg_length": 25.3,
+      "top_values": [
+        [
+          "Corp. Humble TransitCorp.",
+          1
+        ],
+        [
+          "Corp. Apex TransitAg.",
+          1
+        ],
+        [
+          "Corp. Famous PetroleumLtd.",
+          1
+        ],
+        [
+          "Corp. Computer Sail MakersInc.",
+          1
+        ],
+        [
+          "Corp. Giant NeedleworkLtd.",
+          1
+        ],
+        [
+          "Corp. Apex NeedleworkLtd.",
+          1
+        ],
+        [
+          "Corp. Giant QuestsCo.",
+          1
+        ],
+        [
+          "Corp. Driven OperaLtd.",
+          1
+        ],
+        [
+          "Corp. Computer Key StonesCo.",
+          1
+        ],
+        [
+          "Corp. Computer Key StonesCorp.",
+          1
+        ],
+        [
+          "Corp. Expert PetroleumCorp.",
+          1
+        ],
+        [
+          "Corp. Famous RestaurantsInc.",
+          1
+        ],
+        [
+          "Corp. Just PetroleumCorp.",
+          1
+        ],
+        [
+          "Corp. Boston QuestsCorp.",
+          1
+        ],
+        [
+          "Corp. Giant OperaCo.",
+          1
+        ],
+        [
+          "Corp. Imperial TransitCorp.",
+          1
+        ],
+        [
+          "Corp. Computer RestaurantsCorp.",
+          1
+        ],
+        [
+          "Corp. Just Key StonesCo.",
+          1
+        ],
+        [
+          "Corp. Apex MachineryAg.",
+          1
+        ],
+        [
+          "Corp. Just MachineryLtd.",
+          1
+        ]
+      ],
+      "total_unique": 500
+    },
+    "street": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          " ",
+          500
+        ]
+      ],
+      "total_unique": 1
+    },
+    "city": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          " ",
+          500
+        ]
+      ],
+      "total_unique": 1
+    },
+    "state_prov": {
+      "min_length": 0,
+      "max_length": 0,
+      "avg_length": 0,
+      "top_values": [],
+      "total_unique": 0
+    },
+    "country": {
+      "min_length": 0,
+      "max_length": 0,
+      "avg_length": 0,
+      "top_values": [],
+      "total_unique": 0
+    },
+    "mail_code": {
+      "min_length": 0,
+      "max_length": 0,
+      "avg_length": 0,
+      "top_values": [],
+      "total_unique": 0
+    },
+    "phone_no": {
+      "min_length": 0,
+      "max_length": 0,
+      "avg_length": 0,
+      "top_values": [],
+      "total_unique": 0
+    },
+    "corp_code": {
+      "min_length": 0,
+      "max_length": 0,
+      "avg_length": 0,
+      "top_values": [],
+      "total_unique": 0
+    }
+  },
+  "member": {
+    "lastname": {
+      "min_length": 4,
+      "max_length": 8,
+      "avg_length": 5.6154,
+      "top_values": [
+        [
+          "GOHAN",
+          385
+        ],
+        [
+          "FLORINI",
+          385
+        ],
+        [
+          "CHEN",
+          385
+        ],
+        [
+          "NELSON",
+          385
+        ],
+        [
+          "LING",
+          385
+        ],
+        [
+          "MAKAI",
+          385
+        ],
+        [
+          "BARR",
+          385
+        ],
+        [
+          "PAYNTER",
+          385
+        ],
+        [
+          "JONES",
+          385
+        ],
+        [
+          "EFLIN",
+          385
+        ],
+        [
+          "DORR",
+          385
+        ],
+        [
+          "ANDERSON",
+          385
+        ],
+        [
+          "OLPHANT",
+          385
+        ],
+        [
+          "INFANTE",
+          385
+        ],
+        [
+          "KAHRMANN",
+          385
+        ],
+        [
+          "HAHN",
+          385
+        ],
+        [
+          "YEONG",
+          384
+        ],
+        [
+          "WOLFMULE",
+          384
+        ],
+        [
+          "STEIN",
+          384
+        ],
+        [
+          "TOLSKY",
+          384
+        ]
+      ],
+      "total_unique": 26
+    },
+    "firstname": {
+      "min_length": 3,
+      "max_length": 14,
+      "avg_length": 10.9372,
+      "top_values": [
+        [
+          "BXI",
+          2
+        ],
+        [
+          "MVE",
+          2
+        ],
+        [
+          "RPKHUTGOHJHQVS",
+          1
+        ],
+        [
+          "SXQBFHNEEXFJZJ",
+          1
+        ],
+        [
+          "CFLMMAMLWBQCGK",
+          1
+        ],
+        [
+          "SWXWGQTQLQOIYP",
+          1
+        ],
+        [
+          "HPOUWLMEO",
+          1
+        ],
+        [
+          "GLNT",
+          1
+        ],
+        [
+          "VIJXLTAUR",
+          1
+        ],
+        [
+          "EIEBZBSVYFCKVH",
+          1
+        ],
+        [
+          "TFALXDPNQTAITG",
+          1
+        ],
+        [
+          "MTQH",
+          1
+        ],
+        [
+          "KVDHJTJCOGWEDA",
+          1
+        ],
+        [
+          "USOVNCKGNNGSDK",
+          1
+        ],
+        [
+          "VGTKABUTENJRS",
+          1
+        ],
+        [
+          "HETOUOXJCHXSWO",
+          1
+        ],
+        [
+          "NRHNCYXJGMRPWG",
+          1
+        ],
+        [
+          "NGIJVRLQRRUJMK",
+          1
+        ],
+        [
+          "LIKSB",
+          1
+        ],
+        [
+          "WZERYSQYT",
+          1
+        ]
+      ],
+      "total_unique": 9998
+    },
+    "middleinitial": {
+      "min_length": 0,
+      "max_length": 0,
+      "avg_length": 0,
+      "top_values": [],
+      "total_unique": 0
+    },
+    "street": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          " ",
+          10000
+        ]
+      ],
+      "total_unique": 1
+    },
+    "city": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          " ",
+          10000
+        ]
+      ],
+      "total_unique": 1
+    },
+    "state_prov": {
+      "min_length": 0,
+      "max_length": 0,
+      "avg_length": 0,
+      "top_values": [],
+      "total_unique": 0
+    },
+    "country": {
+      "min_length": 0,
+      "max_length": 0,
+      "avg_length": 0,
+      "top_values": [],
+      "total_unique": 0
+    },
+    "mail_code": {
+      "min_length": 0,
+      "max_length": 0,
+      "avg_length": 0,
+      "top_values": [],
+      "total_unique": 0
+    },
+    "phone_no": {
+      "min_length": 0,
+      "max_length": 0,
+      "avg_length": 0,
+      "top_values": [],
+      "total_unique": 0
+    },
+    "member_code": {
+      "min_length": 0,
+      "max_length": 0,
+      "avg_length": 0,
+      "top_values": [],
+      "total_unique": 0
+    }
+  },
+  "region": {
+    "region_name": {
+      "min_length": 5,
+      "max_length": 15,
+      "avg_length": 11.222222222222221,
+      "top_values": [
+        [
+          "South American",
+          1
+        ],
+        [
+          "Mid East / Sout",
+          1
+        ],
+        [
+          "China",
+          1
+        ],
+        [
+          "Western Europea",
+          1
+        ],
+        [
+          "Eastern Europea",
+          1
+        ],
+        [
+          "Scandanavian",
+          1
+        ],
+        [
+          "Japan",
+          1
+        ],
+        [
+          "Africa",
+          1
+        ],
+        [
+          "North American",
+          1
+        ]
+      ],
+      "total_unique": 9
+    },
+    "street": {
+      "min_length": 9,
+      "max_length": 15,
+      "avg_length": 13.222222222222221,
+      "top_values": [
+        [
+          "222 Second St.",
+          1
+        ],
+        [
+          "666 Sixth",
+          1
+        ],
+        [
+          "999 Ninth St.",
+          1
+        ],
+        [
+          "333 Third St.",
+          1
+        ],
+        [
+          "444 Fourth St.",
+          1
+        ],
+        [
+          "555 Fifth St St",
+          1
+        ],
+        [
+          "777 Seventh St",
+          1
+        ],
+        [
+          "888 Eighth St.",
+          1
+        ],
+        [
+          "111 First St.",
+          1
+        ]
+      ],
+      "total_unique": 9
+    },
+    "city": {
+      "min_length": 5,
+      "max_length": 9,
+      "avg_length": 7.333333333333333,
+      "top_values": [
+        [
+          "Brussels",
+          1
+        ],
+        [
+          "Sao Paulo",
+          1
+        ],
+        [
+          "Budapest",
+          1
+        ],
+        [
+          "Goteborg",
+          1
+        ],
+        [
+          "Tokyo",
+          1
+        ],
+        [
+          "Madras",
+          1
+        ],
+        [
+          "Mombassa",
+          1
+        ],
+        [
+          "Beijing",
+          1
+        ],
+        [
+          "Toronto",
+          1
+        ]
+      ],
+      "total_unique": 9
+    },
+    "state_prov": {
+      "min_length": 2,
+      "max_length": 2,
+      "avg_length": 2.0,
+      "top_values": [
+        [
+          "ON",
+          1
+        ]
+      ],
+      "total_unique": 1
+    },
+    "country": {
+      "min_length": 2,
+      "max_length": 2,
+      "avg_length": 2.0,
+      "top_values": [
+        [
+          "Ca",
+          1
+        ],
+        [
+          "Sw",
+          1
+        ],
+        [
+          "Ja",
+          1
+        ],
+        [
+          "Ke",
+          1
+        ],
+        [
+          "Br",
+          1
+        ]
+      ],
+      "total_unique": 5
+    },
+    "mail_code": {
+      "min_length": 0,
+      "max_length": 0,
+      "avg_length": 0,
+      "top_values": [],
+      "total_unique": 0
+    },
+    "phone_no": {
+      "min_length": 0,
+      "max_length": 0,
+      "avg_length": 0,
+      "top_values": [],
+      "total_unique": 0
+    },
+    "region_code": {
+      "min_length": 0,
+      "max_length": 0,
+      "avg_length": 0,
+      "top_values": [],
+      "total_unique": 0
+    }
+  }
+}

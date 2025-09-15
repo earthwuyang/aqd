@@ -1,0 +1,130 @@
+{
+  "departments": {
+    "dept_no": {
+      "words": [
+        "d009",
+        "d004",
+        "d001",
+        "d007",
+        "d005",
+        "d008",
+        "d003",
+        "d002",
+        "d006"
+      ]
+    },
+    "dept_name": {
+      "words": [
+        "marketing",
+        "development",
+        "quality",
+        "resources",
+        "service",
+        "research",
+        "production",
+        "customer",
+        "management",
+        "finance",
+        "human",
+        "sales"
+      ]
+    }
+  },
+  "dept_emp": {
+    "dept_no": {
+      "words": [
+        "d009",
+        "d004",
+        "d001",
+        "d007",
+        "d005",
+        "d008",
+        "d003",
+        "d002",
+        "d006"
+      ]
+    }
+  },
+  "dept_manager": {
+    "dept_no": {
+      "words": [
+        "d009",
+        "d004",
+        "d007",
+        "d001",
+        "d005",
+        "d008",
+        "d003",
+        "d002",
+        "d006"
+      ]
+    }
+  },
+  "employees": {
+    "first_name": {
+      "words": [
+        "abdelghani",
+        "aloys",
+        "abdulla",
+        "alain",
+        "abdelkader",
+        "adit",
+        "aleksandar",
+        "aleksander",
+        "alejandro",
+        "alselm",
+        "aemilian",
+        "aamer",
+        "alenka",
+        "amstein",
+        "abdelwaheb",
+        "abdulah",
+        "adin",
+        "anestis",
+        "adamantios",
+        "aloke"
+      ]
+    },
+    "last_name": {
+      "words": [
+        "ananiadou",
+        "anily",
+        "akaboshi",
+        "asrin",
+        "anger",
+        "argence",
+        "assaf",
+        "alpay",
+        "alpin",
+        "auria",
+        "anick",
+        "alencar",
+        "attimonelli",
+        "alvarado",
+        "aloisi",
+        "asmuth",
+        "asser",
+        "aseltine",
+        "albarhamtoshy",
+        "arlazarov"
+      ]
+    },
+    "gender": {
+      "words": []
+    }
+  },
+  "salaries": {},
+  "titles": {
+    "title": {
+      "words": [
+        "technique",
+        "staff",
+        "leader",
+        "manager",
+        "engineer",
+        "senior",
+        "assistant"
+      ]
+    }
+  }
+}

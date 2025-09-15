@@ -1,0 +1,25 @@
+{
+  "timestamp": "2025-09-15T19:42:36.655894",
+  "methodology": "Advanced Benchmark Generation",
+  "databases_processed": 2,
+  "databases_attempted": 2,
+  "databases": [
+    "tpch_sf1",
+    "tpcds_sf1"
+  ],
+  "ap_queries_per_db": 10000,
+  "tp_queries_per_db": 10000,
+  "total_queries": 40000,
+  "generation_time_seconds": 585.2829451560974,
+  "output_directory": "/home/wuy/DB/pg_duckdb_postgres/advanced_benchmark_queries",
+  "features": {
+    "complex_predicates_with_and_or": true,
+    "max_joins_per_query": 3,
+    "data_driven_literal_sampling": true,
+    "having_clauses": true,
+    "order_by_clauses": true,
+    "limit_clauses": true,
+    "aggregate_functions": true,
+    "realistic_workloads": true
+  }
+}

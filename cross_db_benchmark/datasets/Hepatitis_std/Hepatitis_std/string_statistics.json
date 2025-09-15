@@ -1,0 +1,61 @@
+{
+  "Bio": {
+    "fibros": {
+      "words": []
+    },
+    "activity": {
+      "words": []
+    }
+  },
+  "dispat": {
+    "sex": {
+      "words": []
+    },
+    "age": {
+      "words": []
+    },
+    "Type": {
+      "words": []
+    }
+  },
+  "indis": {
+    "got": {
+      "words": []
+    },
+    "gpt": {
+      "words": []
+    },
+    "alb": {
+      "words": []
+    },
+    "tbil": {
+      "words": []
+    },
+    "dbil": {
+      "words": []
+    },
+    "che": {
+      "words": []
+    },
+    "ttt": {
+      "words": []
+    },
+    "ztt": {
+      "words": []
+    },
+    "tcho": {
+      "words": []
+    },
+    "tp": {
+      "words": []
+    }
+  },
+  "inf": {
+    "dur": {
+      "words": []
+    }
+  },
+  "rel11": {},
+  "rel12": {},
+  "rel13": {}
+}

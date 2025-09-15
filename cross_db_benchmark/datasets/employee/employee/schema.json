@@ -1,0 +1,137 @@
+{
+  "tables": {
+    "departments": [
+      {
+        "name": "dept_no",
+        "type": "character",
+        "nullable": false
+      },
+      {
+        "name": "dept_name",
+        "type": "character varying",
+        "nullable": true
+      }
+    ],
+    "dept_emp": [
+      {
+        "name": "emp_no",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "dept_no",
+        "type": "character",
+        "nullable": false
+      },
+      {
+        "name": "from_date",
+        "type": "date",
+        "nullable": true
+      },
+      {
+        "name": "to_date",
+        "type": "date",
+        "nullable": true
+      }
+    ],
+    "dept_manager": [
+      {
+        "name": "dept_no",
+        "type": "character",
+        "nullable": false
+      },
+      {
+        "name": "emp_no",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "from_date",
+        "type": "date",
+        "nullable": true
+      },
+      {
+        "name": "to_date",
+        "type": "date",
+        "nullable": true
+      }
+    ],
+    "employees": [
+      {
+        "name": "emp_no",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "birth_date",
+        "type": "date",
+        "nullable": true
+      },
+      {
+        "name": "first_name",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "last_name",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "gender",
+        "type": "text",
+        "nullable": true
+      },
+      {
+        "name": "hire_date",
+        "type": "date",
+        "nullable": true
+      }
+    ],
+    "salaries": [
+      {
+        "name": "emp_no",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "salary",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "from_date",
+        "type": "date",
+        "nullable": false
+      },
+      {
+        "name": "to_date",
+        "type": "date",
+        "nullable": true
+      }
+    ],
+    "titles": [
+      {
+        "name": "emp_no",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "title",
+        "type": "character varying",
+        "nullable": false
+      },
+      {
+        "name": "from_date",
+        "type": "date",
+        "nullable": false
+      },
+      {
+        "name": "to_date",
+        "type": "date",
+        "nullable": true
+      }
+    ]
+  },
+  "relationships": []
+}

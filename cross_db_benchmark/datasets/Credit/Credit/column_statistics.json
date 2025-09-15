@@ -1,0 +1,1181 @@
+{
+  "category": {
+    "category_no": {
+      "datatype": "integer",
+      "total_count": 10,
+      "non_null_count": 10,
+      "unique_count": 10,
+      "null_frac": 0.0,
+      "min": 1.0,
+      "max": 10.0,
+      "mean": 5.5,
+      "percentiles": [
+        1.0,
+        3.25,
+        5.5,
+        7.75,
+        10.0
+      ]
+    },
+    "category_desc": {
+      "datatype": "categorical",
+      "total_count": 10,
+      "non_null_count": 10,
+      "unique_count": 10,
+      "null_frac": 0.0,
+      "unique_values": [
+        "Entertainment",
+        "Meals",
+        "Electronics",
+        "Groceries",
+        "Travel",
+        "Lodging",
+        "Misc",
+        "Home Supplies",
+        "Clothing",
+        "Communication"
+      ]
+    },
+    "category_code": {
+      "datatype": "categorical",
+      "total_count": 10,
+      "non_null_count": 0,
+      "unique_count": 0,
+      "null_frac": 1.0,
+      "unique_values": []
+    }
+  },
+  "charge": {
+    "charge_no": {
+      "datatype": "integer",
+      "total_count": 1600000,
+      "non_null_count": 1600000,
+      "unique_count": 1600000,
+      "null_frac": 0.0,
+      "min": 1.0,
+      "max": 2000000.0,
+      "mean": 1175000.5,
+      "percentiles": [
+        1.0,
+        800000.75,
+        1200000.5,
+        1600000.25,
+        2000000.0
+      ]
+    },
+    "member_no": {
+      "datatype": "integer",
+      "total_count": 1600000,
+      "non_null_count": 1600000,
+      "unique_count": 9114,
+      "null_frac": 0.0,
+      "min": 63.0,
+      "max": 10000.0,
+      "mean": 7486.01225,
+      "percentiles": [
+        63.0,
+        6162.0,
+        8117.0,
+        9315.0,
+        10000.0
+      ]
+    },
+    "provider_no": {
+      "datatype": "integer",
+      "total_count": 1600000,
+      "non_null_count": 1600000,
+      "unique_count": 455,
+      "null_frac": 0.0,
+      "min": 24.0,
+      "max": 500.0,
+      "mean": 438.13594,
+      "percentiles": [
+        24.0,
+        411.0,
+        466.0,
+        491.0,
+        500.0
+      ]
+    },
+    "category_no": {
+      "datatype": "integer",
+      "total_count": 1600000,
+      "non_null_count": 1600000,
+      "unique_count": 10,
+      "null_frac": 0.0,
+      "min": 1.0,
+      "max": 10.0,
+      "mean": 5.99572,
+      "percentiles": [
+        1.0,
+        4.0,
+        6.0,
+        8.0,
+        10.0
+      ]
+    },
+    "charge_dt": {
+      "datatype": "datetime",
+      "total_count": 1600000,
+      "non_null_count": 1600000,
+      "unique_count": 45866,
+      "null_frac": 0.0
+    },
+    "charge_amt": {
+      "datatype": "numeric",
+      "total_count": 1600000,
+      "non_null_count": 1600000,
+      "unique_count": 5001,
+      "null_frac": 0.0,
+      "min": 1.0,
+      "max": 5001.0,
+      "mean": 2501.95189,
+      "percentiles": [
+        1.0,
+        1258.0,
+        2506.0,
+        3748.0,
+        5001.0
+      ]
+    },
+    "statement_no": {
+      "datatype": "integer",
+      "total_count": 1600000,
+      "non_null_count": 1600000,
+      "unique_count": 22667,
+      "null_frac": 0.0,
+      "min": 0.0,
+      "max": 30000.0,
+      "mean": 15002.63656,
+      "percentiles": [
+        0.0,
+        8108.0,
+        12503.5,
+        19998.25,
+        30000.0
+      ]
+    },
+    "charge_code": {
+      "datatype": "categorical",
+      "total_count": 1600000,
+      "non_null_count": 0,
+      "unique_count": 0,
+      "null_frac": 1.0,
+      "unique_values": []
+    }
+  },
+  "corporation": {
+    "corp_no": {
+      "datatype": "integer",
+      "total_count": 500,
+      "non_null_count": 500,
+      "unique_count": 500,
+      "null_frac": 0.0,
+      "min": 1.0,
+      "max": 500.0,
+      "mean": 250.5,
+      "percentiles": [
+        1.0,
+        125.75,
+        250.5,
+        375.25,
+        500.0
+      ]
+    },
+    "corp_name": {
+      "datatype": "categorical",
+      "total_count": 500,
+      "non_null_count": 500,
+      "unique_count": 500,
+      "null_frac": 0.0,
+      "unique_values": [
+        "Corp. Just MachineryLtd.",
+        "Corp. Humble TransitCorp.",
+        "Corp. Apex TransitAg.",
+        "Corp. Famous PetroleumLtd.",
+        "Corp. Computer Sail MakersInc.",
+        "Corp. Giant NeedleworkLtd.",
+        "Corp. Apex NeedleworkLtd.",
+        "Corp. Giant QuestsCo.",
+        "Corp. Driven OperaLtd.",
+        "Corp. Computer Key StonesCo.",
+        "Corp. Computer Key StonesCorp.",
+        "Corp. Expert PetroleumCorp.",
+        "Corp. Famous RestaurantsInc.",
+        "Corp. Just PetroleumCorp.",
+        "Corp. Boston QuestsCorp.",
+        "Corp. Giant OperaCo.",
+        "Corp. Imperial TransitCorp.",
+        "Corp. Computer RestaurantsCorp.",
+        "Corp. Just Key StonesCo.",
+        "Corp. Apex MachineryAg.",
+        "Corp. Computer MachineryInc.",
+        "Corp. Giant MachineryLtd.",
+        "Corp. Apex OperaCorp.",
+        "Corp. Giant NeedleworkCorp.",
+        "Corp. Just RestaurantsAg.",
+        "Corp. Humble OperaLtd.",
+        "Corp. Just Key StonesInc.",
+        "Corp. Expert Sail MakersAg.",
+        "Corp. Just OperaInc.",
+        "Corp. Just PetroleumCo.",
+        "Corp. Famous LightingAg.",
+        "Corp. Imperial Key StonesAg.",
+        "Corp. Boston TransitCorp.",
+        "Corp. Boston MachineryAg.",
+        "Corp. Apex TransitCo.",
+        "Corp. Computer RestaurantsCo.",
+        "Corp. Giant Key StonesInc.",
+        "Corp. Famous TransitLtd.",
+        "Corp. Driven PetroleumCorp.",
+        "Corp. Expert RestaurantsInc.",
+        "Corp. Expert MachineryCorp.",
+        "Corp. Just Sail MakersLtd.",
+        "Corp. Computer LightingCo.",
+        "Corp. Driven TransitCo.",
+        "Corp. Imperial QuestsLtd.",
+        "Corp. Giant TransitCo.",
+        "Corp. Computer Key StonesInc.",
+        "Corp. Imperial RestaurantsLtd.",
+        "Corp. Humble Sail MakersInc.",
+        "Corp. Just LightingInc.",
+        "Corp. Imperial PetroleumLtd.",
+        "Corp. Famous NeedleworkLtd.",
+        "Corp. Driven TransitAg.",
+        "Corp. Boston TransitInc.",
+        "Corp. Computer RestaurantsAg.",
+        "Corp. Famous TransitAg.",
+        "Corp. Expert OperaInc.",
+        "Corp. Just RestaurantsCorp.",
+        "Corp. Driven QuestsInc.",
+        "Corp. Expert NeedleworkInc.",
+        "Corp. Computer PetroleumAg.",
+        "Corp. Driven MachineryCo.",
+        "Corp. Imperial Key StonesCorp.",
+        "Corp. Expert NeedleworkAg.",
+        "Corp. Giant OperaLtd.",
+        "Corp. Expert RestaurantsCo.",
+        "Corp. Humble NeedleworkCo.",
+        "Corp. Apex Key StonesCo.",
+        "Corp. Humble NeedleworkLtd.",
+        "Corp. Computer NeedleworkInc.",
+        "Corp. Humble OperaCorp.",
+        "Corp. Famous OperaCorp.",
+        "Corp. Famous TransitCo.",
+        "Corp. Famous RestaurantsAg.",
+        "Corp. Imperial PetroleumInc.",
+        "Corp. Apex LightingCo.",
+        "Corp. Humble Sail MakersCo.",
+        "Corp. Famous OperaInc.",
+        "Corp. Boston PetroleumCo.",
+        "Corp. Just NeedleworkAg.",
+        "Corp. Expert OperaCorp.",
+        "Corp. Famous Key StonesCo.",
+        "Corp. Computer NeedleworkCorp.",
+        "Corp. Imperial LightingAg.",
+        "Corp. Apex RestaurantsCo.",
+        "Corp. Apex LightingLtd.",
+        "Corp. Famous MachineryCorp.",
+        "Corp. Just TransitLtd.",
+        "Corp. Imperial MachineryCorp.",
+        "Corp. Computer NeedleworkCo.",
+        "Corp. Humble RestaurantsCo.",
+        "Corp. Apex Key StonesInc.",
+        "Corp. Boston RestaurantsInc.",
+        "Corp. Giant Key StonesAg.",
+        "Corp. Driven Key StonesCorp.",
+        "Corp. Humble RestaurantsInc.",
+        "Corp. Apex QuestsLtd.",
+        "Corp. Driven PetroleumInc.",
+        "Corp. Expert PetroleumAg.",
+        "Corp. Famous PetroleumCorp."
+      ]
+    },
+    "street": {
+      "datatype": "categorical",
+      "total_count": 500,
+      "non_null_count": 500,
+      "unique_count": 1,
+      "null_frac": 0.0,
+      "unique_values": [
+        " "
+      ]
+    },
+    "city": {
+      "datatype": "categorical",
+      "total_count": 500,
+      "non_null_count": 500,
+      "unique_count": 1,
+      "null_frac": 0.0,
+      "unique_values": [
+        " "
+      ]
+    },
+    "state_prov": {
+      "datatype": "categorical",
+      "total_count": 500,
+      "non_null_count": 0,
+      "unique_count": 0,
+      "null_frac": 1.0,
+      "unique_values": []
+    },
+    "country": {
+      "datatype": "categorical",
+      "total_count": 500,
+      "non_null_count": 0,
+      "unique_count": 0,
+      "null_frac": 1.0,
+      "unique_values": []
+    },
+    "mail_code": {
+      "datatype": "categorical",
+      "total_count": 500,
+      "non_null_count": 0,
+      "unique_count": 0,
+      "null_frac": 1.0,
+      "unique_values": []
+    },
+    "phone_no": {
+      "datatype": "categorical",
+      "total_count": 500,
+      "non_null_count": 0,
+      "unique_count": 0,
+      "null_frac": 1.0,
+      "unique_values": []
+    },
+    "expr_dt": {
+      "datatype": "datetime",
+      "total_count": 500,
+      "non_null_count": 500,
+      "unique_count": 1,
+      "null_frac": 0.0
+    },
+    "region_no": {
+      "datatype": "integer",
+      "total_count": 500,
+      "non_null_count": 500,
+      "unique_count": 8,
+      "null_frac": 0.0,
+      "min": 1.0,
+      "max": 8.0,
+      "mean": 4.374,
+      "percentiles": [
+        1.0,
+        2.0,
+        4.0,
+        6.0,
+        8.0
+      ]
+    },
+    "corp_code": {
+      "datatype": "categorical",
+      "total_count": 500,
+      "non_null_count": 0,
+      "unique_count": 0,
+      "null_frac": 1.0,
+      "unique_values": []
+    }
+  },
+  "member": {
+    "member_no": {
+      "datatype": "integer",
+      "total_count": 10000,
+      "non_null_count": 10000,
+      "unique_count": 10000,
+      "null_frac": 0.0,
+      "min": 1.0,
+      "max": 10000.0,
+      "mean": 5000.5,
+      "percentiles": [
+        1.0,
+        2500.75,
+        5000.5,
+        7500.25,
+        10000.0
+      ]
+    },
+    "lastname": {
+      "datatype": "categorical",
+      "total_count": 10000,
+      "non_null_count": 10000,
+      "unique_count": 26,
+      "null_frac": 0.0,
+      "unique_values": [
+        "XAVIER",
+        "KAHRMANN",
+        "WOLFMULE",
+        "STEIN",
+        "EFLIN",
+        "DORR",
+        "ANDERSON",
+        "TOLSKY",
+        "MAKAI",
+        "ZUCKER",
+        "VANN",
+        "QUINT",
+        "OLPHANT",
+        "INFANTE",
+        "RYAN",
+        "HAHN",
+        "GOHAN",
+        "FLORINI",
+        "CHEN",
+        "NELSON",
+        "LING",
+        "UNAKLET",
+        "BARR",
+        "PAYNTER",
+        "JONES",
+        "YEONG"
+      ]
+    },
+    "firstname": {
+      "datatype": "categorical",
+      "total_count": 10000,
+      "non_null_count": 10000,
+      "unique_count": 9998,
+      "null_frac": 0.0,
+      "unique_values": [
+        "URHSRQYDFIKBTL",
+        "MIJPZUHGCCNABD",
+        "RPKHUTGOHJHQVS",
+        "WZERYSQYT",
+        "SXQBFHNEEXFJZJ",
+        "CFLMMAMLWBQCGK",
+        "SWXWGQTQLQOIYP",
+        "HETOUOXJCHXSWO",
+        "HPOUWLMEO",
+        "VIJXLTAUR",
+        "EIEBZBSVYFCKVH",
+        "TFALXDPNQTAITG",
+        "MTQH",
+        "KVDHJTJCOGWEDA",
+        "USOVNCKGNNGSDK",
+        "VGTKABUTENJRS",
+        "GLNT",
+        "NRHNCYXJGMRPWG",
+        "NGIJVRLQRRUJMK",
+        "LIKSB",
+        "KXWFFGYYLYT",
+        "WOFKVCNCCHOGHA",
+        "UANYBGKYNIVWHO",
+        "UZBVJJOHAIC",
+        "CIYC",
+        "OVWDTQMG",
+        "XEIGGVQV",
+        "JKHWYUEOPCBHKN",
+        "DWUEIECOGFIONI",
+        "FMSZQ",
+        "XHCTVGYBUEKBSJ",
+        "WMFB",
+        "VODHQVCIUWJDIW",
+        "LBEI",
+        "KFMCIDGFGDROM",
+        "OBEIGMKYHJVLYS",
+        "NEJUM",
+        "UUI",
+        "WMTSMHTJQNYTVF",
+        "SXRSRM",
+        "CXLRI",
+        "NJLJVGVHQYLPXX",
+        "LDENMACOAHILO",
+        "BMCOWFP",
+        "TJGKJPTXLSMMEN",
+        "ROPUWGQHYLIFKX",
+        "MCEMRXINEPRLQE",
+        "FOXXLYCOSFUBHS",
+        "WIJFXNHWRYRC",
+        "TNGTBECQ",
+        "VJOBQCBEXEWUVX",
+        "UZOTQYOKBJ",
+        "PNGOX",
+        "JJIIPPDYNPYLXP",
+        "PJLRDELJRLDLDU",
+        "DJYPUQBMXFPHGG",
+        "SYOEWWX",
+        "MIPQPVJEBLQVFJ",
+        "CCVLYLUZJOSYOD",
+        "IELYXPGKCFJHDL",
+        "MRYLQ",
+        "RTARRMIQSWJLC",
+        "GDOPMMVBCVGLDI",
+        "EIJBCOSISDJTYO",
+        "KPVJVUGQ",
+        "CAYKSPIKD",
+        "OBRURGHEXRARUO",
+        "HTKPJFHKSSILGR",
+        "AHSRBGLJFEEABX",
+        "WMTOLFSGOUERCO",
+        "XOJYEDADBLKIBC",
+        "CBIRQSAQAL",
+        "GHHJ",
+        "EUNFBWUOPGZVEY",
+        "EFZWDGYCN",
+        "PYWWVQSN",
+        "LMIMOOCRHBKLPW",
+        "JQPDE",
+        "YRLFGYELXUSKSX",
+        "ORGMRVQKIFZHOT",
+        "ETJ",
+        "HGQZMPYRLVGBLR",
+        "TMRVJLDCRGVU",
+        "WYZNRLGDLKWOD",
+        "LRBJBPVZBO",
+        "CBKJBTVDOV",
+        "KEJC",
+        "JGUBKMFJRHONEP",
+        "OHTWJTSOBDHBLQ",
+        "WJNWUNFKCS",
+        "FTXVSGGC",
+        "LBABIBTLUKDAE",
+        "OVJBCSMEP",
+        "QXLNFSGF",
+        "MYKFVSRSMU",
+        "DDQKPVL",
+        "FBMH",
+        "MNMDB",
+        "KCQJIV",
+        "BJTZUXZ"
+      ]
+    },
+    "middleinitial": {
+      "datatype": "categorical",
+      "total_count": 10000,
+      "non_null_count": 0,
+      "unique_count": 0,
+      "null_frac": 1.0,
+      "unique_values": []
+    },
+    "street": {
+      "datatype": "categorical",
+      "total_count": 10000,
+      "non_null_count": 10000,
+      "unique_count": 1,
+      "null_frac": 0.0,
+      "unique_values": [
+        " "
+      ]
+    },
+    "city": {
+      "datatype": "categorical",
+      "total_count": 10000,
+      "non_null_count": 10000,
+      "unique_count": 1,
+      "null_frac": 0.0,
+      "unique_values": [
+        " "
+      ]
+    },
+    "state_prov": {
+      "datatype": "categorical",
+      "total_count": 10000,
+      "non_null_count": 0,
+      "unique_count": 0,
+      "null_frac": 1.0,
+      "unique_values": []
+    },
+    "country": {
+      "datatype": "categorical",
+      "total_count": 10000,
+      "non_null_count": 0,
+      "unique_count": 0,
+      "null_frac": 1.0,
+      "unique_values": []
+    },
+    "mail_code": {
+      "datatype": "categorical",
+      "total_count": 10000,
+      "non_null_count": 0,
+      "unique_count": 0,
+      "null_frac": 1.0,
+      "unique_values": []
+    },
+    "phone_no": {
+      "datatype": "categorical",
+      "total_count": 10000,
+      "non_null_count": 0,
+      "unique_count": 0,
+      "null_frac": 1.0,
+      "unique_values": []
+    },
+    "photograph": {
+      "datatype": "categorical",
+      "total_count": 10000,
+      "non_null_count": 0,
+      "unique_count": 0,
+      "null_frac": 1.0
+    },
+    "issue_dt": {
+      "datatype": "datetime",
+      "total_count": 10000,
+      "non_null_count": 10000,
+      "unique_count": 126,
+      "null_frac": 0.0
+    },
+    "expr_dt": {
+      "datatype": "datetime",
+      "total_count": 10000,
+      "non_null_count": 10000,
+      "unique_count": 126,
+      "null_frac": 0.0
+    },
+    "region_no": {
+      "datatype": "integer",
+      "total_count": 10000,
+      "non_null_count": 10000,
+      "unique_count": 8,
+      "null_frac": 0.0,
+      "min": 2.0,
+      "max": 9.0,
+      "mean": 5.5083,
+      "percentiles": [
+        2.0,
+        4.0,
+        5.0,
+        8.0,
+        9.0
+      ]
+    },
+    "corp_no": {
+      "datatype": "integer",
+      "total_count": 10000,
+      "non_null_count": 1502,
+      "unique_count": 399,
+      "null_frac": 0.8498,
+      "min": 5.0,
+      "max": 500.0,
+      "mean": 341.5665778961385,
+      "percentiles": [
+        5.0,
+        263.0,
+        360.5,
+        438.75,
+        500.0
+      ]
+    },
+    "prev_balance": {
+      "datatype": "numeric",
+      "total_count": 10000,
+      "non_null_count": 10000,
+      "unique_count": 1,
+      "null_frac": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "mean": 0,
+      "percentiles": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "curr_balance": {
+      "datatype": "numeric",
+      "total_count": 10000,
+      "non_null_count": 10000,
+      "unique_count": 1,
+      "null_frac": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "mean": 0,
+      "percentiles": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "member_code": {
+      "datatype": "categorical",
+      "total_count": 10000,
+      "non_null_count": 0,
+      "unique_count": 0,
+      "null_frac": 1.0,
+      "unique_values": []
+    }
+  },
+  "payment": {
+    "payment_no": {
+      "datatype": "integer",
+      "total_count": 15554,
+      "non_null_count": 15554,
+      "unique_count": 15554,
+      "null_frac": 0.0,
+      "min": 1.0,
+      "max": 15554.0,
+      "mean": 7777.5,
+      "percentiles": [
+        1.0,
+        3889.25,
+        7777.5,
+        11665.75,
+        15554.0
+      ]
+    },
+    "member_no": {
+      "datatype": "integer",
+      "total_count": 15554,
+      "non_null_count": 15554,
+      "unique_count": 8848,
+      "null_frac": 0.0,
+      "min": 80.0,
+      "max": 10000.0,
+      "mean": 5890.533046161759,
+      "percentiles": [
+        80.0,
+        3889.25,
+        6063.5,
+        8052.75,
+        10000.0
+      ]
+    },
+    "payment_dt": {
+      "datatype": "datetime",
+      "total_count": 15554,
+      "non_null_count": 15554,
+      "unique_count": 2,
+      "null_frac": 0.0
+    },
+    "payment_amt": {
+      "datatype": "numeric",
+      "total_count": 15554,
+      "non_null_count": 15554,
+      "unique_count": 11517,
+      "null_frac": 0.0,
+      "min": 1.0,
+      "max": 129829.0,
+      "mean": 11919.79021473576,
+      "percentiles": [
+        1.0,
+        4063.5,
+        8288.5,
+        15912.0,
+        129829.0
+      ]
+    },
+    "statement_no": {
+      "datatype": "integer",
+      "total_count": 15554,
+      "non_null_count": 15554,
+      "unique_count": 1,
+      "null_frac": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "mean": 0,
+      "percentiles": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "payment_code": {
+      "datatype": "categorical",
+      "total_count": 15554,
+      "non_null_count": 0,
+      "unique_count": 0,
+      "null_frac": 1.0,
+      "unique_values": []
+    }
+  },
+  "provider": {
+    "provider_no": {
+      "datatype": "integer",
+      "total_count": 500,
+      "non_null_count": 500,
+      "unique_count": 500,
+      "null_frac": 0.0,
+      "min": 1.0,
+      "max": 500.0,
+      "mean": 250.5,
+      "percentiles": [
+        1.0,
+        125.75,
+        250.5,
+        375.25,
+        500.0
+      ]
+    },
+    "provider_name": {
+      "datatype": "categorical",
+      "total_count": 500,
+      "non_null_count": 500,
+      "unique_count": 82,
+      "null_frac": 0.0,
+      "unique_values": [
+        "Prov. Famous Ma",
+        "Prov. Expert Re",
+        "Prov. Boston Ma",
+        "Prov. Just Rest",
+        "Prov. Expert Op",
+        "Prov. Boston Li",
+        "Prov. Famous Li",
+        "Prov. Just Need",
+        "Prov. Apex Key",
+        "Prov. Apex Need",
+        "Prov. Humble Re",
+        "Prov. Boston Sa",
+        "Prov. Giant Res",
+        "Prov. Giant Ope",
+        "Prov. Driven Ne",
+        "Prov. Driven Ma",
+        "Prov. Boston Qu",
+        "Prov. Just Tran",
+        "Prov. Boston Tr",
+        "Prov. Just Sail",
+        "Prov. Giant Lig",
+        "Prov. Famous Ke",
+        "Prov. Boston Ke",
+        "Prov. Just Mach",
+        "Prov. Apex Ques",
+        "Prov. Giant Pet",
+        "Prov. Famous Ne",
+        "Prov. Just Ligh",
+        "Prov. Just Ques",
+        "Prov. Expert Qu",
+        "Prov. Computer",
+        "Prov. Apex Rest",
+        "Prov. Famous Op",
+        "Prov. Driven Ke",
+        "Prov. Expert Ne",
+        "Prov. Giant Que",
+        "Prov. Apex Mach",
+        "Prov. Driven Sa",
+        "Prov. Apex Petr",
+        "Prov. Humble Ke",
+        "Prov. Apex Tran",
+        "Prov. Famous Pe",
+        "Prov. Expert Ke",
+        "Prov. Humble Pe",
+        "Prov. Giant Sai",
+        "Prov. Driven Tr",
+        "Prov. Humble Tr",
+        "Prov. Humble Ma",
+        "Prov. Famous Sa",
+        "Prov. Giant Nee",
+        "Prov. Imperial",
+        "Prov. Giant Tra",
+        "Prov. Giant Mac",
+        "Prov. Boston Pe",
+        "Prov. Boston Ne",
+        "Prov. Driven Li",
+        "Prov. Famous Re",
+        "Prov. Apex Ligh",
+        "Prov. Expert Tr",
+        "Prov. Driven Re",
+        "Prov. Apex Sail",
+        "Prov. Humble Qu",
+        "Prov. Driven Pe",
+        "Prov. Apex Oper",
+        "Prov. Just Key",
+        "Prov. Expert Sa",
+        "Prov. Expert Li",
+        "Prov. Just Oper",
+        "Prov. Expert Pe",
+        "Prov. Boston Op",
+        "Prov. Humble Li",
+        "Prov. Boston Re",
+        "Prov. Famous Tr",
+        "Prov. Expert Ma",
+        "Prov. Humble Op",
+        "Prov. Giant Key",
+        "Prov. Famous Qu",
+        "Prov. Driven Qu",
+        "Prov. Driven Op",
+        "Prov. Humble Ne",
+        "Prov. Just Petr",
+        "Prov. Humble Sa"
+      ]
+    },
+    "street": {
+      "datatype": "categorical",
+      "total_count": 500,
+      "non_null_count": 500,
+      "unique_count": 1,
+      "null_frac": 0.0,
+      "unique_values": [
+        " "
+      ]
+    },
+    "city": {
+      "datatype": "categorical",
+      "total_count": 500,
+      "non_null_count": 500,
+      "unique_count": 1,
+      "null_frac": 0.0,
+      "unique_values": [
+        " "
+      ]
+    },
+    "state_prov": {
+      "datatype": "categorical",
+      "total_count": 500,
+      "non_null_count": 0,
+      "unique_count": 0,
+      "null_frac": 1.0,
+      "unique_values": []
+    },
+    "mail_code": {
+      "datatype": "categorical",
+      "total_count": 500,
+      "non_null_count": 0,
+      "unique_count": 0,
+      "null_frac": 1.0,
+      "unique_values": []
+    },
+    "country": {
+      "datatype": "categorical",
+      "total_count": 500,
+      "non_null_count": 0,
+      "unique_count": 0,
+      "null_frac": 1.0,
+      "unique_values": []
+    },
+    "phone_no": {
+      "datatype": "categorical",
+      "total_count": 500,
+      "non_null_count": 0,
+      "unique_count": 0,
+      "null_frac": 1.0,
+      "unique_values": []
+    },
+    "issue_dt": {
+      "datatype": "datetime",
+      "total_count": 500,
+      "non_null_count": 500,
+      "unique_count": 7,
+      "null_frac": 0.0
+    },
+    "expr_dt": {
+      "datatype": "datetime",
+      "total_count": 500,
+      "non_null_count": 500,
+      "unique_count": 7,
+      "null_frac": 0.0
+    },
+    "region_no": {
+      "datatype": "integer",
+      "total_count": 500,
+      "non_null_count": 500,
+      "unique_count": 7,
+      "null_frac": 0.0,
+      "min": 3.0,
+      "max": 9.0,
+      "mean": 7.76,
+      "percentiles": [
+        3.0,
+        7.0,
+        8.0,
+        9.0,
+        9.0
+      ]
+    },
+    "provider_code": {
+      "datatype": "categorical",
+      "total_count": 500,
+      "non_null_count": 0,
+      "unique_count": 0,
+      "null_frac": 1.0,
+      "unique_values": []
+    }
+  },
+  "region": {
+    "region_no": {
+      "datatype": "integer",
+      "total_count": 9,
+      "non_null_count": 9,
+      "unique_count": 9,
+      "null_frac": 0.0,
+      "min": 1.0,
+      "max": 9.0,
+      "mean": 5.0,
+      "percentiles": [
+        1.0,
+        3.0,
+        5.0,
+        7.0,
+        9.0
+      ]
+    },
+    "region_name": {
+      "datatype": "categorical",
+      "total_count": 9,
+      "non_null_count": 9,
+      "unique_count": 9,
+      "null_frac": 0.0,
+      "unique_values": [
+        "South American",
+        "Mid East / Sout",
+        "China",
+        "Western Europea",
+        "Eastern Europea",
+        "Scandanavian",
+        "Japan",
+        "Africa",
+        "North American"
+      ]
+    },
+    "street": {
+      "datatype": "categorical",
+      "total_count": 9,
+      "non_null_count": 9,
+      "unique_count": 9,
+      "null_frac": 0.0,
+      "unique_values": [
+        "222 Second St.",
+        "666 Sixth",
+        "999 Ninth St.",
+        "333 Third St.",
+        "444 Fourth St.",
+        "555 Fifth St St",
+        "777 Seventh St",
+        "888 Eighth St.",
+        "111 First St."
+      ]
+    },
+    "city": {
+      "datatype": "categorical",
+      "total_count": 9,
+      "non_null_count": 9,
+      "unique_count": 9,
+      "null_frac": 0.0,
+      "unique_values": [
+        "Brussels",
+        "Sao Paulo",
+        "Budapest",
+        "Goteborg",
+        "Tokyo",
+        "Madras",
+        "Mombassa",
+        "Beijing",
+        "Toronto"
+      ]
+    },
+    "state_prov": {
+      "datatype": "categorical",
+      "total_count": 9,
+      "non_null_count": 1,
+      "unique_count": 1,
+      "null_frac": 0.8888888888888888,
+      "unique_values": [
+        "ON"
+      ]
+    },
+    "country": {
+      "datatype": "categorical",
+      "total_count": 9,
+      "non_null_count": 5,
+      "unique_count": 5,
+      "null_frac": 0.4444444444444444,
+      "unique_values": [
+        "Ca",
+        "Sw",
+        "Ja",
+        "Ke",
+        "Br"
+      ]
+    },
+    "mail_code": {
+      "datatype": "categorical",
+      "total_count": 9,
+      "non_null_count": 0,
+      "unique_count": 0,
+      "null_frac": 1.0,
+      "unique_values": []
+    },
+    "phone_no": {
+      "datatype": "categorical",
+      "total_count": 9,
+      "non_null_count": 0,
+      "unique_count": 0,
+      "null_frac": 1.0,
+      "unique_values": []
+    },
+    "region_code": {
+      "datatype": "categorical",
+      "total_count": 9,
+      "non_null_count": 0,
+      "unique_count": 0,
+      "null_frac": 1.0,
+      "unique_values": []
+    }
+  },
+  "statement": {
+    "statement_no": {
+      "datatype": "integer",
+      "total_count": 20000,
+      "non_null_count": 20000,
+      "unique_count": 20000,
+      "null_frac": 0.0,
+      "min": 1.0,
+      "max": 20000.0,
+      "mean": 10000.5,
+      "percentiles": [
+        1.0,
+        5000.75,
+        10000.5,
+        15000.25,
+        20000.0
+      ]
+    },
+    "member_no": {
+      "datatype": "integer",
+      "total_count": 20000,
+      "non_null_count": 20000,
+      "unique_count": 10000,
+      "null_frac": 0.0,
+      "min": 1.0,
+      "max": 10000.0,
+      "mean": 5000.5,
+      "percentiles": [
+        1.0,
+        2500.75,
+        5000.5,
+        7500.25,
+        10000.0
+      ]
+    },
+    "statement_dt": {
+      "datatype": "datetime",
+      "total_count": 20000,
+      "non_null_count": 20000,
+      "unique_count": 2,
+      "null_frac": 0.0
+    },
+    "due_dt": {
+      "datatype": "datetime",
+      "total_count": 20000,
+      "non_null_count": 20000,
+      "unique_count": 2,
+      "null_frac": 0.0
+    },
+    "statement_amt": {
+      "datatype": "numeric",
+      "total_count": 20000,
+      "non_null_count": 20000,
+      "unique_count": 11518,
+      "null_frac": 0.0,
+      "min": 0.0,
+      "max": 129829.0,
+      "mean": 9270.02085,
+      "percentiles": [
+        0.0,
+        803.75,
+        5444.5,
+        13036.5,
+        129829.0
+      ]
+    },
+    "statement_code": {
+      "datatype": "categorical",
+      "total_count": 20000,
+      "non_null_count": 0,
+      "unique_count": 0,
+      "null_frac": 1.0,
+      "unique_values": []
+    }
+  }
+}

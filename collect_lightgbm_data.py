@@ -1,526 +1,451 @@
 #!/usr/bin/env python3
 """
-Collect lightweight feature data for training LightGBM routing model.
-This script executes queries on both PostgreSQL and DuckDB engines,
-extracts simple features, and saves to CSV format for incremental training.
+LightGBM Data Collection Script - Advanced Benchmark Queries
+Processes datasets from advanced_benchmark_queries directory
+Uses expanded feature set (50 features) for improved routing accuracy
 """
 
-import csv
-import psycopg2
-import time
 import os
 import sys
-import argparse
-import random
-from datetime import datetime
-from typing import Dict, List, Tuple, Optional
+import csv
+import json
+import time
+import psycopg2
 import numpy as np
+import argparse
 import logging
+from datetime import datetime
+import glob
+import random
+from pathlib import Path
 
-# Configure logging
-logger = logging.getLogger(__name__)
+# Expanded feature names - must match kernel exactly (v2.0.0 schema)
+FEATURE_NAMES = [
+    # Original 25 features
+    "num_tables", "num_joins", "query_depth", "complexity_score",
+    "has_aggregates", "has_group_by", "has_order_by", "has_limit", "has_distinct",
+    "has_window_functions", "has_outer_joins", "estimated_join_complexity",
+    "has_subqueries", "has_correlated_subqueries", "has_large_tables", "all_tables_small",
+    "has_complex_expressions", "has_user_functions", "has_text_operations", "has_numeric_heavy_ops",
+    "num_aggregate_funcs", "analytical_pattern", "transactional_pattern", "etl_pattern", "command_type",
 
-class LightGBMDataCollector:
-    def __init__(self, db_config: Dict, output_dir: str = "lightgbm_training_data", flush_interval: int = 50):
-        """
-        Initialize the LightGBM data collector.
-        
-        Args:
-            db_config: Database connection configuration
-            output_dir: Directory to store collected CSV data
-            flush_interval: Number of queries before flushing to disk
-        """
-        self.db_config = db_config
-        self.output_dir = output_dir
-        self.postgres_conn = None
-        self.flush_interval = flush_interval
-        
-        # Create output directory
-        os.makedirs(output_dir, exist_ok=True)
-        
-        # Stats tracking
-        self.total_queries = 0
-        self.successful_queries = 0
-        self.failed_queries = 0
-        self.postgres_timeouts = 0
-        self.duckdb_timeouts = 0
-        
-        # CSV writers and files
-        self.csv_files = {}
-        self.csv_writers = {}
-        
-        # Define CSV columns - matching LightGBM feature extraction
-        self.csv_columns = [
-            'timestamp',
-            'dataset',
-            'query_type',
-            'query_index',
-            'query_hash',
-            # Basic query structure features
-            'num_tables',
-            'num_joins', 
-            'query_depth',
-            'complexity_score',
-            # Boolean features
-            'has_aggregates',
-            'has_group_by',
-            'has_order_by',
-            'has_limit',
-            'has_distinct',
-            'has_window_functions',
-            # Join features
-            'has_outer_joins',
-            'estimated_join_complexity',
-            # Subquery features
-            'has_subqueries',
-            'has_correlated_subqueries',
-            # Table characteristics
-            'has_large_tables',
-            'all_tables_small',
-            # Operation complexity
-            'has_complex_expressions',
-            'has_user_functions',
-            'has_text_operations',
-            'has_numeric_heavy_ops',
-            # Aggregate function count
-            'num_aggregate_funcs',
-            # Pattern scores
-            'analytical_pattern',
-            'transactional_pattern',
-            'etl_pattern',
-            # Command type
-            'command_type',
-            # Execution times and target
-            'postgres_time_ms',
-            'duckdb_time_ms',
-            'log_time_difference',
-            'optimal_engine',
-            'speedup_ratio'
-        ]
-        
-    def connect(self):
-        """Establish database connections."""
+    # Phase 1 expansion - 25 new features
+    "join_type_inner", "join_type_left", "join_type_right", "join_type_full", "join_type_cross",
+    "predicate_simple_eq", "predicate_range", "predicate_like", "predicate_in", "predicate_exists",
+    "has_parameters", "num_cte", "max_subquery_depth", "has_recursive_cte", "has_lateral_join",
+    "selectivity_high", "selectivity_medium", "selectivity_low", "cardinality_large", "cardinality_medium",
+    "index_usage_likely", "partition_pruning_likely", "parallel_safe", "has_volatile_funcs", "cost_estimate_high"
+]
+
+def setup_logging(level=logging.INFO):
+    """Setup logging configuration"""
+    logging.basicConfig(
+        level=level,
+        format='%(asctime)s - [%(processName)s] - %(levelname)s - %(message)s'
+    )
+    return logging.getLogger(__name__)
+
+def extract_features_manually(query):
+    """Fallback manual feature extraction from query text"""
+    query_lower = query.lower()
+
+    # Original 25 features
+    features = {
+        'num_tables': query_lower.count(' from ') + query_lower.count(' join '),
+        'num_joins': query_lower.count(' join '),
+        'query_depth': min(query_lower.count('('), 5),
+        'complexity_score': len(query) // 100,
+        'has_aggregates': 1 if any(agg in query_lower for agg in ['sum(', 'avg(', 'count(', 'max(', 'min(']) else 0,
+        'has_group_by': 1 if ' group by ' in query_lower else 0,
+        'has_order_by': 1 if ' order by ' in query_lower else 0,
+        'has_limit': 1 if ' limit ' in query_lower else 0,
+        'has_distinct': 1 if ' distinct ' in query_lower else 0,
+        'has_window_functions': 1 if ' over(' in query_lower or ' over (' in query_lower else 0,
+        'has_outer_joins': 1 if any(join in query_lower for join in [' left join', ' right join', ' full join']) else 0,
+        'estimated_join_complexity': query_lower.count(' join ') * 2,
+        'has_subqueries': 1 if 'select' in query_lower[10:] else 0,
+        'has_correlated_subqueries': 0,
+        'has_large_tables': 0,
+        'all_tables_small': 0,
+        'has_complex_expressions': 1 if 'case when' in query_lower else 0,
+        'has_user_functions': 0,
+        'has_text_operations': 1 if any(op in query_lower for op in ['like ', 'ilike ', '|| ']) else 0,
+        'has_numeric_heavy_ops': 1 if any(op in query_lower for op in ['sum(', 'avg(', 'stddev(', 'variance(']) else 0,
+        'num_aggregate_funcs': sum(1 for agg in ['sum(', 'avg(', 'count(', 'max(', 'min('] if agg in query_lower),
+        'analytical_pattern': 1 if ('group by' in query_lower and 'sum(' in query_lower) else 0,
+        'transactional_pattern': 1 if 'where' in query_lower and 'limit 1' in query_lower else 0,
+        'etl_pattern': 0,
+        'command_type': 0
+    }
+
+    # Phase 1 expansion features (heuristic approximations)
+    # Join type analysis
+    features.update({
+        'join_type_inner': query_lower.count(' inner join ') + query_lower.count(' join ') - query_lower.count(' left join ') - query_lower.count(' right join ') - query_lower.count(' full join '),
+        'join_type_left': query_lower.count(' left join '),
+        'join_type_right': query_lower.count(' right join '),
+        'join_type_full': query_lower.count(' full join '),
+        'join_type_cross': query_lower.count(' cross join '),
+
+        # Predicate type analysis
+        'predicate_simple_eq': 1 if ' = ' in query_lower else 0,
+        'predicate_range': 1 if any(op in query_lower for op in [' > ', ' < ', ' >= ', ' <= ', ' between ']) else 0,
+        'predicate_like': 1 if any(op in query_lower for op in [' like ', ' ilike ']) else 0,
+        'predicate_in': 1 if ' in (' in query_lower else 0,
+        'predicate_exists': 1 if ' exists(' in query_lower else 0,
+
+        # Parameter and CTE analysis
+        'has_parameters': 1 if '$' in query else 0,
+        'num_cte': query_lower.count(' with '),
+        'max_subquery_depth': min(query_lower.count('select') - 1, 3) if query_lower.count('select') > 1 else 0,
+        'has_recursive_cte': 1 if 'recursive' in query_lower else 0,
+        'has_lateral_join': 1 if 'lateral' in query_lower else 0,
+
+        # Selectivity and cardinality estimates (heuristic)
+        'selectivity_high': 1 if (' = ' in query_lower and query_lower.count(' and ') >= 2) else 0,
+        'selectivity_medium': 1 if (' = ' in query_lower or any(op in query_lower for op in [' > ', ' < '])) else 0,
+        'selectivity_low': 1 if ('select *' in query_lower and ' where ' not in query_lower) else 0,
+        'cardinality_large': 1 if (query_lower.count(' join ') > 2 and ' group by ' not in query_lower) else 0,
+        'cardinality_medium': 1 if (query_lower.count(' join ') > 0 or query_lower.count(' from ') > 1) else 0,
+
+        # Optimization hints (heuristic)
+        'index_usage_likely': 1 if (' = ' in query_lower and ' where ' in query_lower) else 0,
+        'partition_pruning_likely': 1 if any(op in query_lower for op in [' > ', ' < ', ' between ']) else 0,
+        'parallel_safe': 1 if ('random()' not in query_lower and 'now()' not in query_lower) else 0,
+        'has_volatile_funcs': 1 if any(func in query_lower for func in ['random()', 'now()', 'current_timestamp']) else 0,
+        'cost_estimate_high': 1 if (query_lower.count(' join ') > 3 or query_lower.count(' from ') > 4) else 0
+    })
+
+    # Ensure all values are valid
+    for key in features:
+        if features[key] is None:
+            features[key] = 0
+        elif key.startswith('join_type_inner') and features[key] < 0:
+            features[key] = 0
+
+    return features
+
+def load_advanced_benchmark_queries(benchmark_dir, dataset_name):
+    """Load queries from advanced_benchmark_queries directory structure"""
+    dataset_path = Path(benchmark_dir) / dataset_name
+    queries = []
+
+    # Load AP queries
+    ap_file = dataset_path / 'advanced_ap_queries.sql'
+    if ap_file.exists():
+        with open(ap_file, 'r') as f:
+            content = f.read()
+            # Split by semicolon and newline to get complete SQL statements
+            raw_queries = content.split(';\n')
+            for i, query in enumerate(raw_queries):
+                query = query.strip()
+                if query and not query.startswith('--'):
+                    queries.append((f"{dataset_name}_ap_{i+1}", query))
+
+    # Load TP queries
+    tp_file = dataset_path / 'advanced_tp_queries.sql'
+    if tp_file.exists():
+        with open(tp_file, 'r') as f:
+            content = f.read()
+            # Split by semicolon and newline to get complete SQL statements
+            raw_queries = content.split(';\n')
+            for i, query in enumerate(raw_queries):
+                query = query.strip()
+                if query and not query.startswith('--'):
+                    queries.append((f"{dataset_name}_tp_{i+1}", query))
+
+    return queries
+
+def process_dataset(dataset_name, db_name, queries, user, host, port, output_dir):
+    """Process all queries for a single dataset sequentially, writing results immediately"""
+
+    logger = setup_logging()
+    logger.info(f"Processing {len(queries)} queries for dataset {dataset_name}")
+
+    # Open CSV file for writing immediately
+    output_file = os.path.join(output_dir, f"training_data_{dataset_name}.csv")
+    csv_file = open(output_file, 'w', newline='')
+    writer = csv.writer(csv_file)
+
+    # Write header
+    header = ['query_id', 'query_length'] + FEATURE_NAMES + \
+            ['pg_time_ms', 'duck_time_ms', 'optimal_engine']
+    writer.writerow(header)
+    csv_file.flush()  # Ensure header is written immediately
+
+    results_count = 0
+
+    # Create a single connection for this dataset
+    conn = None
+    try:
+        conn = psycopg2.connect(
+            dbname=db_name,
+            user=user,
+            host=host,
+            port=port
+        )
+        conn.autocommit = False
+
+        # Warm up connection
+        with conn.cursor() as cur:
+            for _ in range(3):
+                cur.execute("SELECT 1")
+                cur.fetchone()
+        conn.commit()
+
+        # Process each query
+        for i, (query_id, query) in enumerate(queries):
+            if i % 50 == 0:
+                logger.info(f"[{dataset_name}] Progress: {i}/{len(queries)}")
+
+            try:
+                # Extract features using kernel v2.0.0 features
+                features = {}
+                with conn.cursor() as cur:
+                    try:
+                        cur.execute(f"EXPLAIN {query}")
+                        # Try to get features from GUC if available
+                        try:
+                            cur.execute("SHOW lgbm.last_features_json")
+                            features_json = cur.fetchone()[0]
+                            if features_json and features_json != '{}':
+                                features = json.loads(features_json)
+                                # Validate we have the v2.0.0 feature set
+                                if 'join_type_inner' not in features:
+                                    # Fallback to manual extraction for old schema
+                                    features = extract_features_manually(query)
+                            else:
+                                features = extract_features_manually(query)
+                        except:
+                            features = extract_features_manually(query)
+                    except:
+                        features = extract_features_manually(query)
+                conn.rollback()
+
+                # Measure PostgreSQL performance
+                pg_time = -1
+                try:
+                    with conn.cursor() as cur:
+                        cur.execute("SET LOCAL duckdb.force_execution = false")
+                        try:
+                            cur.execute("SET LOCAL lightgbm.enabled = false")
+                        except:
+                            pass
+                        cur.execute("SET LOCAL statement_timeout = 60000")
+
+                        start_time = time.perf_counter()
+                        cur.execute(query)
+                        results_pg = cur.fetchall()
+                        end_time = time.perf_counter()
+                        pg_time = (end_time - start_time) * 1000
+                except:
+                    pass
+                conn.rollback()
+
+                # Small delay
+                time.sleep(0.05)
+
+                # Measure DuckDB performance
+                duck_time = -1
+                try:
+                    with conn.cursor() as cur:
+                        cur.execute("SET LOCAL duckdb.force_execution = true")
+                        try:
+                            cur.execute("SET LOCAL lightgbm.enabled = false")
+                        except:
+                            pass
+                        cur.execute("SET LOCAL statement_timeout = 60000")
+
+                        start_time = time.perf_counter()
+                        cur.execute(query)
+                        results_duck = cur.fetchall()
+                        end_time = time.perf_counter()
+                        duck_time = (end_time - start_time) * 1000
+                except:
+                    pass
+                conn.rollback()
+
+                # Determine optimal engine
+                if pg_time > 0 and duck_time > 0:
+                    optimal_engine = 'duckdb' if duck_time < pg_time else 'postgres'
+                else:
+                    optimal_engine = 'unknown'
+
+                # Create result row with all 50 features
+                row = [query_id, len(query)]
+                for feature_name in FEATURE_NAMES:
+                    row.append(features.get(feature_name, 0))
+                row.extend([pg_time, duck_time, optimal_engine])
+
+                # Write row immediately to CSV
+                writer.writerow(row)
+                csv_file.flush()  # Ensure data is written to disk
+                results_count += 1
+
+                # Log progress every 10 queries
+                if results_count % 10 == 0:
+                    logger.info(f"[{dataset_name}] Saved {results_count} samples so far...")
+
+            except Exception as e:
+                logger.error(f"Error processing query {query_id}: {e}")
+                continue
+
+        logger.info(f"Completed {dataset_name}: collected {results_count} samples")
+
+    except Exception as e:
+        logger.error(f"Failed to process dataset {dataset_name}: {e}")
+    finally:
+        # Close CSV file
+        if 'csv_file' in locals():
+            csv_file.close()
+
+        # Close database connection
+        if conn:
+            try:
+                conn.close()
+            except:
+                pass
+
+    return dataset_name, results_count
+
+def write_results_to_file(output_file, results, mode='w'):
+    """Write results to CSV file"""
+    with open(output_file, mode, newline='') as f:
+        writer = csv.writer(f)
+
+        if mode == 'w':
+            # Write header with all 50 features
+            header = ['query_id', 'query_length'] + FEATURE_NAMES + \
+                    ['pg_time_ms', 'duck_time_ms', 'optimal_engine']
+            writer.writerow(header)
+
+        # Write data rows
+        writer.writerows(results)
+
+def combine_csv_files(output_dir, combined_file, dataset_names):
+    """Combine individual dataset CSV files into a single combined file"""
+    logger = setup_logging()
+
+    with open(combined_file, 'w', newline='') as combined_f:
+        writer = csv.writer(combined_f)
+
+        # Write header (same as individual files)
+        header = ['query_id', 'query_length'] + FEATURE_NAMES + \
+                ['pg_time_ms', 'duck_time_ms', 'optimal_engine']
+        writer.writerow(header)
+
+        # Combine data from all individual CSV files
+        total_rows = 0
+        for dataset_name in dataset_names:
+            individual_file = os.path.join(output_dir, f"training_data_{dataset_name}.csv")
+            if os.path.exists(individual_file):
+                with open(individual_file, 'r') as dataset_f:
+                    reader = csv.reader(dataset_f)
+                    next(reader)  # Skip header
+                    for row in reader:
+                        writer.writerow(row)
+                        total_rows += 1
+
+        logger.info(f"Combined {total_rows} total rows from {len(dataset_names)} datasets")
+
+def collect_from_advanced_benchmark_queries(benchmark_dir="advanced_benchmark_queries",
+                                           output_dir="lightgbm_training_data",
+                                           max_queries_per_dataset=100,
+                                           user="wuy",
+                                           host="localhost",
+                                           port=5432):
+    """Collect data from advanced_benchmark_queries directory"""
+
+    logger = setup_logging()
+
+    # Create output directory
+    os.makedirs(output_dir, exist_ok=True)
+
+    logger.info(f"Starting LightGBM data collection from advanced benchmark queries")
+    logger.info(f"Using expanded feature set: {len(FEATURE_NAMES)} features")
+
+    # Find all dataset directories
+    benchmark_path = Path(benchmark_dir)
+    if not benchmark_path.exists():
+        logger.error(f"Benchmark directory {benchmark_dir} does not exist")
+        return
+
+    dataset_dirs = [d.name for d in benchmark_path.iterdir()
+                   if d.is_dir() and not d.name.startswith('.')]
+
+    logger.info(f"Found {len(dataset_dirs)} datasets to process: {', '.join(dataset_dirs)}")
+
+    # Process datasets sequentially
+    all_results = {}
+
+    for dataset_name in dataset_dirs:
+        logger.info(f"Processing dataset: {dataset_name}")
+
+        # Load queries from advanced benchmark structure
+        all_queries = load_advanced_benchmark_queries(benchmark_dir, dataset_name)
+
+        if not all_queries:
+            logger.warning(f"No queries found for dataset {dataset_name}")
+            continue
+
+        # Limit queries if specified
+        if max_queries_per_dataset and len(all_queries) > max_queries_per_dataset:
+            all_queries = random.sample(all_queries, max_queries_per_dataset)
+
+        # Determine database name (dataset name should match database name)
+        db_name = dataset_name
+
+        # Process dataset
         try:
-            # Connect to PostgreSQL
-            self.postgres_conn = psycopg2.connect(
-                host=self.db_config.get('host', 'localhost'),
-                port=self.db_config.get('port', 5432),
-                user=self.db_config.get('user', os.environ.get('USER')),
-                password=self.db_config.get('password', ''),
-                database=self.db_config.get('database', 'postgres')
+            dataset_name_result, results_count = process_dataset(
+                dataset_name, db_name, all_queries, user, host, port, output_dir
             )
-            self.postgres_conn.autocommit = True
-            
-            logger.info("Connected to PostgreSQL")
-            
-        except Exception as e:
-            logger.error(f"Failed to connect to database: {e}")
-            raise
-    
-    def disconnect(self):
-        """Close database connections and CSV files."""
-        if self.postgres_conn:
-            self.postgres_conn.close()
-        
-        # Close CSV files
-        for file_handle in self.csv_files.values():
-            file_handle.close()
-    
-    def get_csv_writer(self, dataset: str):
-        """Get or create CSV writer for dataset."""
-        if dataset not in self.csv_writers:
-            filename = f"{dataset}_features.csv"
-            filepath = os.path.join(self.output_dir, filename)
-            
-            # Check if file exists to determine if we need to write headers
-            file_exists = os.path.exists(filepath)
-            
-            # Open file in append mode
-            file_handle = open(filepath, 'a', newline='', encoding='utf-8')
-            csv_writer = csv.writer(file_handle)
-            
-            # Write header if new file
-            if not file_exists:
-                csv_writer.writerow(self.csv_columns)
-                logger.info(f"Created new CSV file: {filepath}")
-            else:
-                logger.info(f"Appending to existing CSV file: {filepath}")
-            
-            self.csv_files[dataset] = file_handle
-            self.csv_writers[dataset] = csv_writer
-            
-        return self.csv_writers[dataset]
-    
-    def extract_lightweight_features(self, query: str) -> Dict:
-        """
-        Extract lightweight features from query using PostgreSQL parser.
-        This mimics what the query_analyzer.c does in the kernel.
-        """
-        cur = self.postgres_conn.cursor()
-        features = {}
-        
-        try:
-            # Enable feature extraction mode
-            cur.execute("SET gnn.feature_extraction_enabled = on")
-            
-            # Get EXPLAIN output to trigger feature extraction
-            # This will internally use the query analyzer
-            cur.execute(f"EXPLAIN (FORMAT JSON) {query}")
-            plan_result = cur.fetchone()
-            
-            # For now, we'll extract simple heuristic features
-            # In a full implementation, this would call the C function
-            features.update(self._extract_heuristic_features(query))
-            
-            return features
-            
-        except Exception as e:
-            logger.debug(f"Feature extraction error: {str(e)[:200]}")
-            # Return default features if extraction fails
-            return self._get_default_features()
-        finally:
-            cur.close()
-    
-    def _extract_heuristic_features(self, query: str) -> Dict:
-        """Extract simple heuristic features from query text."""
-        query_upper = query.upper()
-        
-        # Count basic elements
-        num_joins = (query_upper.count(' JOIN ') + 
-                    query_upper.count(' LEFT ') + 
-                    query_upper.count(' RIGHT ') + 
-                    query_upper.count(' FULL ') +
-                    query_upper.count(' INNER '))
-        
-        num_tables = max(1, query_upper.count(' FROM ') + num_joins)
-        
-        # Extract features
-        features = {
-            'num_tables': num_tables,
-            'num_joins': num_joins,
-            'query_depth': query_upper.count('(') + 1,  # Rough nesting estimate
-            'has_aggregates': any(agg in query_upper for agg in ['SUM(', 'COUNT(', 'AVG(', 'MIN(', 'MAX(']),
-            'has_group_by': 'GROUP BY' in query_upper,
-            'has_order_by': 'ORDER BY' in query_upper,
-            'has_limit': 'LIMIT ' in query_upper,
-            'has_distinct': 'DISTINCT' in query_upper,
-            'has_window_functions': 'OVER (' in query_upper,
-            'has_outer_joins': any(join in query_upper for join in ['LEFT JOIN', 'RIGHT JOIN', 'FULL JOIN']),
-            'has_subqueries': query_upper.count('SELECT') > 1,
-            'has_correlated_subqueries': 'EXISTS (' in query_upper,
-            'has_complex_expressions': any(op in query_upper for op in ['CASE ', 'COALESCE', 'CAST(']),
-            'has_user_functions': '()' in query and any(func in query_upper for func in ['SUBSTRING', 'REGEXP', 'EXTRACT']),
-            'has_text_operations': any(op in query_upper for op in ['LIKE ', 'ILIKE ', '~', 'REGEXP']),
-            'has_numeric_heavy_ops': any(op in query_upper for op in ['*', '/', '+', '-']) and 'SELECT' in query_upper,
-            'num_aggregate_funcs': sum(query_upper.count(agg) for agg in ['SUM(', 'COUNT(', 'AVG(', 'MIN(', 'MAX(']),
-        }
-        
-        # Estimate table characteristics (simplified)
-        features['has_large_tables'] = num_tables > 3  # Heuristic
-        features['all_tables_small'] = num_tables <= 2  # Heuristic
-        
-        # Estimate complexity
-        complexity = (num_tables * 2 + num_joins * 3 + 
-                     features['num_aggregate_funcs'] * 2 +
-                     (5 if features['has_window_functions'] else 0))
-        features['complexity_score'] = complexity
-        
-        # Pattern detection
-        features['analytical_pattern'] = (features['has_aggregates'] and 
-                                        (features['has_group_by'] or features['has_window_functions']))
-        features['transactional_pattern'] = (num_tables <= 2 and num_joins <= 1 and 
-                                           not features['has_aggregates'])
-        features['etl_pattern'] = (num_tables > 5 or 'INSERT' in query_upper or 'UPDATE' in query_upper)
-        
-        # Command type (simplified)
-        if 'SELECT' in query_upper:
-            features['command_type'] = 1  # CMD_SELECT
-        elif 'INSERT' in query_upper:
-            features['command_type'] = 3  # CMD_INSERT  
-        elif 'UPDATE' in query_upper:
-            features['command_type'] = 2  # CMD_UPDATE
-        elif 'DELETE' in query_upper:
-            features['command_type'] = 4  # CMD_DELETE
-        else:
-            features['command_type'] = 0  # CMD_UNKNOWN
-        
-        # Set remaining features with estimates
-        features['estimated_join_complexity'] = num_joins
-        
-        return features
-    
-    def _get_default_features(self) -> Dict:
-        """Return default feature values."""
-        return {col: 0 for col in self.csv_columns[5:30]}  # Feature columns
-    
-    def execute_postgres_query(self, query: str, timeout: int = 120) -> float:
-        """Execute query on PostgreSQL and return execution time."""
-        cur = self.postgres_conn.cursor()
-        
-        try:
-            # Set statement timeout
-            cur.execute(f"SET statement_timeout = {timeout * 1000}")
-            
-            # Execute query and measure time
-            start_time = time.perf_counter()
-            cur.execute(query)
-            _ = cur.fetchall()  # Fetch all results
-            end_time = time.perf_counter()
-            
-            execution_time_ms = (end_time - start_time) * 1000
-            return execution_time_ms
-            
-        except psycopg2.errors.QueryCanceled:
-            logger.warning(f"PostgreSQL query timeout: {query[:100]}...")
-            self.postgres_timeouts += 1
-            return timeout * 1000
-        except psycopg2.errors.GroupingError as e:
-            logger.debug(f"Query GROUP BY error: {str(e)[:100]}")
-            return -1
-        except Exception as e:
-            logger.debug(f"PostgreSQL execution error: {str(e)[:100]}")
-            return -1
-        finally:
-            cur.close()
-    
-    def execute_duckdb_query(self, query: str, timeout: int = 120) -> float:
-        """Execute query on DuckDB through pg_duckdb extension."""
-        cur = self.postgres_conn.cursor()
-        
-        try:
-            # Set statement timeout
-            cur.execute(f"SET statement_timeout = {timeout * 1000}")
-            
-            # Force DuckDB execution
-            cur.execute("SET duckdb.force_execution = true")
-            
-            # Execute query and measure time
-            start_time = time.perf_counter()
-            cur.execute(query)
-            _ = cur.fetchall()  # Fetch all results
-            end_time = time.perf_counter()
-            
-            # Reset to PostgreSQL execution
-            cur.execute("SET duckdb.force_execution = false")
-            
-            execution_time_ms = (end_time - start_time) * 1000
-            return execution_time_ms
-            
-        except psycopg2.errors.QueryCanceled:
-            logger.warning(f"DuckDB query timeout: {query[:100]}...")
-            self.duckdb_timeouts += 1
-            return timeout * 1000
-        except Exception as e:
-            logger.debug(f"DuckDB execution error: {str(e)[:100]}")
-            return -1
-        finally:
-            cur.close()
-    
-    def collect_query_data(self, query: str, dataset: str, query_type: str, 
-                          query_index: int) -> bool:
-        """
-        Collect lightweight features and execution data for a single query.
-        
-        Returns:
-            True if successful, False otherwise
-        """
-        self.total_queries += 1
-        
-        try:
-            # Extract lightweight features
-            features = self.extract_lightweight_features(query)
-            
-            # Execute on both engines
-            postgres_time = self.execute_postgres_query(query)
-            if postgres_time < 0:
-                self.failed_queries += 1
-                return False
-            
-            duckdb_time = self.execute_duckdb_query(query)
-            if duckdb_time < 0:
-                self.failed_queries += 1
-                return False
-            
-            # Calculate target values
-            if postgres_time > 0 and duckdb_time > 0:
-                log_time_diff = np.log(postgres_time / duckdb_time)
-                optimal_engine = 'duckdb' if duckdb_time < postgres_time else 'postgres'
-                speedup_ratio = max(postgres_time, duckdb_time) / min(postgres_time, duckdb_time)
-            else:
-                log_time_diff = 0.0
-                optimal_engine = 'postgres'
-                speedup_ratio = 1.0
-            
-            # Create CSV row
-            row_data = [
-                datetime.now().isoformat(),
-                dataset,
-                query_type,
-                query_index,
-                hash(query) % 1000000,  # Simple query hash
-            ]
-            
-            # Add feature values in order
-            for col in self.csv_columns[5:30]:  # Feature columns
-                row_data.append(features.get(col, 0))
-            
-            # Add execution results
-            row_data.extend([
-                postgres_time,
-                duckdb_time,
-                log_time_diff,
-                optimal_engine,
-                speedup_ratio
-            ])
-            
-            # Write to CSV
-            csv_writer = self.get_csv_writer(dataset)
-            csv_writer.writerow(row_data)
-            
-            # Flush periodically
-            if self.successful_queries % self.flush_interval == 0:
-                self.csv_files[dataset].flush()
-            
-            self.successful_queries += 1
-            
-            # Log progress
-            if self.successful_queries % 25 == 0:
-                logger.info(f"Collected {self.successful_queries}/{self.total_queries} queries")
-                self.print_stats()
-            
-            return True
-            
-        except Exception as e:
-            logger.error(f"Error collecting data for query: {e}")
-            self.failed_queries += 1
-            return False
-    
-    def collect_from_sql_files(self, ap_file: str, tp_file: str, dataset: str, 
-                              sample_size: Optional[int] = None):
-        """
-        Collect feature data from SQL query files.
-        
-        Args:
-            ap_file: Path to AP queries SQL file
-            tp_file: Path to TP queries SQL file
-            dataset: Dataset name
-            sample_size: Optional number of queries to sample
-        """
-        # Process AP queries
-        if os.path.exists(ap_file):
-            with open(ap_file, 'r') as f:
-                ap_queries = [q.strip() for q in f.read().split('\n') if q.strip()]
-            
-            if sample_size and len(ap_queries) > sample_size // 2:
-                ap_queries = random.sample(ap_queries, sample_size // 2)
-            
-            logger.info(f"Processing {len(ap_queries)} AP queries from {dataset}")
-            for i, query in enumerate(ap_queries):
-                self.collect_query_data(query, dataset, 'AP', i)
-        else:
-            logger.warning(f"AP queries file not found: {ap_file}")
-        
-        # Process TP queries
-        if os.path.exists(tp_file):
-            with open(tp_file, 'r') as f:
-                tp_queries = [q.strip() for q in f.read().split('\n') if q.strip()]
-            
-            if sample_size and len(tp_queries) > sample_size // 2:
-                tp_queries = random.sample(tp_queries, sample_size // 2)
-            
-            logger.info(f"Processing {len(tp_queries)} TP queries from {dataset}")
-            for i, query in enumerate(tp_queries):
-                self.collect_query_data(query, dataset, 'TP', i)
-        else:
-            logger.warning(f"TP queries file not found: {tp_file}")
-        
-        # Final flush
-        if dataset in self.csv_files:
-            self.csv_files[dataset].flush()
-    
-    def print_stats(self):
-        """Print collection statistics."""
-        success_rate = (self.successful_queries / self.total_queries * 100) if self.total_queries > 0 else 0
-        logger.info(f"Stats: {self.successful_queries}/{self.total_queries} successful ({success_rate:.1f}%), "
-                   f"PG timeouts: {self.postgres_timeouts}, DuckDB timeouts: {self.duckdb_timeouts}")
+            all_results[dataset_name] = results_count
 
+            # Results are already written to individual CSV files
+            logger.info(f"Dataset {dataset_name} completed with {results_count} samples")
+
+        except Exception as e:
+            logger.error(f"Dataset {dataset_name} failed: {e}")
+            continue
+
+    # Summary
+    total_samples = sum(count for count in all_results.values())
+    logger.info(f"\nCollection complete!")
+    logger.info(f"Total datasets processed: {len(all_results)}")
+    logger.info(f"Total samples collected: {total_samples}")
+    logger.info(f"Feature vector size: {len(FEATURE_NAMES)} features")
+
+    # Combine all individual CSV files into single file
+    combined_file = os.path.join(output_dir, "training_data_combined.csv")
+    combine_csv_files(output_dir, combined_file, all_results.keys())
+    logger.info(f"Combined data saved to {combined_file}")
 
 def main():
-    parser = argparse.ArgumentParser(description='Collect lightweight features for LightGBM training')
-    parser.add_argument('--queries-dir', default='benchmark_queries',
-                       help='Directory containing query SQL files')
+    parser = argparse.ArgumentParser(description='Collect LightGBM training data from advanced benchmark queries')
+    parser.add_argument('--benchmark-dir', default='advanced_benchmark_queries',
+                       help='Directory containing advanced benchmark queries')
     parser.add_argument('--output-dir', default='lightgbm_training_data',
-                       help='Output directory for CSV files')
-    parser.add_argument('--datasets', nargs='+',
-                       default=['tpch_sf1', 'tpcds_sf1', 'Airline', 'financial', 'Carcinogenesis', 'Credit', 'employee', 'Hepatitis_std', 'geneea'],
-                       help='Datasets to process')
-    parser.add_argument('--sample-size', type=int,
-                       help='Number of queries to sample per dataset')
-    parser.add_argument('--timeout', type=int, default=30,
-                       help='Query timeout in seconds')
+                       help='Output directory for training data')
+    parser.add_argument('--max-queries', type=int, default=10000,
+                       help='Maximum queries per dataset')
+    parser.add_argument('--user', default='wuy',
+                       help='Database user')
     parser.add_argument('--host', default='localhost',
-                       help='PostgreSQL host')
+                       help='Database host')
     parser.add_argument('--port', type=int, default=5432,
-                       help='PostgreSQL port')
-    parser.add_argument('--user', default=os.environ.get('USER'),
-                       help='PostgreSQL user')
-    parser.add_argument('--flush-interval', type=int, default=50,
-                       help='Number of queries before flushing to disk (default: 50)')
-    parser.add_argument('--debug', action='store_true',
-                       help='Enable debug logging')
-    
+                       help='Database port')
+
     args = parser.parse_args()
-    
-    # Configure logging
-    logging.basicConfig(
-        level=logging.DEBUG if args.debug else logging.INFO,
-        format='%(asctime)s - %(levelname)s - %(message)s'
+
+    collect_from_advanced_benchmark_queries(
+        benchmark_dir=args.benchmark_dir,
+        output_dir=args.output_dir,
+        max_queries_per_dataset=args.max_queries,
+        user=args.user,
+        host=args.host,
+        port=args.port
     )
-    
-    # Process each dataset
-    for dataset in args.datasets:
-        logger.info(f"\n{'='*60}")
-        logger.info(f"Processing dataset: {dataset}")
-        logger.info(f"{'='*60}")
-        
-        # Database configuration
-        db_config = {
-            'host': args.host,
-            'port': args.port,
-            'user': args.user,
-            'database': dataset
-        }
-        
-        # Initialize collector
-        collector = LightGBMDataCollector(db_config, args.output_dir, args.flush_interval)
-        
-        try:
-            # Connect to database
-            collector.connect()
-            
-            # Look for query files
-            dataset_dir = os.path.join(args.queries_dir, dataset)
-            ap_file = os.path.join(dataset_dir, 'workload_ap_queries.sql')
-            tp_file = os.path.join(dataset_dir, 'workload_tp_queries.sql')
-            
-            if not os.path.exists(dataset_dir):
-                logger.warning(f"Query directory not found: {dataset_dir}")
-                continue
-            
-            # Collect data to CSV
-            collector.collect_from_sql_files(ap_file, tp_file, dataset, args.sample_size)
-            
-            # Print final stats
-            logger.info(f"\nFinal stats for {dataset}:")
-            collector.print_stats()
-            
-        except Exception as e:
-            logger.error(f"Error processing dataset {dataset}: {e}")
-        finally:
-            collector.disconnect()
-    
-    logger.info("\nData collection completed. CSV files are ready for LightGBM training.")
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

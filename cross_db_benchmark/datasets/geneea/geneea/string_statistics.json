@@ -1,0 +1,1252 @@
+{
+  "bod_schuze": {
+    "id_tisk": {
+      "words": [
+        "38953",
+        "1212",
+        "32131",
+        "3445",
+        "5027",
+        "31313",
+        "26991",
+        "247",
+        "8957",
+        "38711",
+        "38705",
+        "1124",
+        "2658",
+        "27267",
+        "4834",
+        "31408",
+        "32757",
+        "27137",
+        "38718",
+        "2629"
+      ]
+    },
+    "id_typ": {
+      "words": []
+    },
+    "uplny_naz": {
+      "words": [
+        "rozpo\u010dtov\u00fdch",
+        "kanadou",
+        "183/2006",
+        "1966",
+        "tiskov\u00e9",
+        "usnad\u0148ov\u00e1n\u00ed",
+        "zabr\u00e1n\u011bn\u00ed",
+        "byla",
+        "samospr\u00e1vn\u00fdm",
+        "\u00fakol\u016f",
+        "dopl\u0148uje",
+        "rozto\u010dila,",
+        "rezignace",
+        "exeku\u010dn\u00ed",
+        "pr\u00e1vo",
+        "n\u00e1vrh",
+        "1994",
+        "\u00fazemn\u00ed",
+        "117/1995",
+        "23."
+      ]
+    },
+    "uplny_kon": {
+      "words": [
+        "986/",
+        "570,",
+        "540/",
+        "749/",
+        "1192/3/",
+        "818/",
+        "tisky",
+        "1080/",
+        "1092/",
+        "777/",
+        "1274/",
+        "136/",
+        "/sn\u011bmovn\u00ed",
+        "1792/",
+        "70/",
+        "569/",
+        "936,",
+        "815,",
+        "252/",
+        "14/"
+      ]
+    },
+    "poznamka": {
+      "words": [
+        "23.9.-5.bod",
+        "23.10.-1.bod",
+        "1.bod",
+        "30.11.-5.bod",
+        "27.11.-2.bod",
+        "26.3.-2.bod",
+        "19.6.-",
+        "3.2.-7.bod",
+        "18.2.-1.bod",
+        "26.3.-1.bod",
+        "odro\u010deno",
+        "27.4.-6.bod",
+        "29.10.-",
+        "25.4.-6.bod",
+        "31.1.-2.bod",
+        "26.4.-1.bod",
+        "7.5.-2.bod",
+        "6.12.-1.bod",
+        "sch\u016fze",
+        "6.5.-14.00"
+      ]
+    },
+    "pozvanka": {
+      "words": []
+    },
+    "rj": {
+      "words": []
+    },
+    "pozn2": {
+      "words": [
+        "12.",
+        "1.\u010dt.",
+        "11.",
+        "5.&nbsp;2.,",
+        "bod",
+        "dopoledne",
+        "bod;",
+        "14.&nbsp;2.,",
+        "hodin",
+        "8.&nbsp;2.,",
+        "5.&nbsp;9.,",
+        "n\u00e1vrhy",
+        "9.&nbsp;4.,",
+        "17.&nbsp;6.,",
+        "23.&nbsp;9.,",
+        "16.&nbsp;4.,",
+        "zpr\u00e1vy",
+        "30.&nbsp;9.,",
+        "26.&nbsp;9.,",
+        "7.&nbsp;2.,"
+      ]
+    },
+    "druh_bodu": {
+      "words": []
+    },
+    "id_sd": {
+      "words": [
+        "7990",
+        "7823",
+        "7426",
+        "3339",
+        "3653",
+        "4805",
+        "554",
+        "5466",
+        "5405",
+        "4958",
+        "7161",
+        "4462",
+        "4665",
+        "6055",
+        "4957",
+        "5991",
+        "4799",
+        "5463",
+        "5811",
+        "7671"
+      ]
+    },
+    "zkratka": {
+      "words": [
+        "sfdi-r.09",
+        "kom.burza,cen.pap\u00edry",
+        "p\u0159echod",
+        "r.13",
+        "r.05",
+        "silni\u010dn\u00ed",
+        "rozpo\u010det",
+        "(2)",
+        "os\u0159,obchod.z.",
+        "r.06",
+        "r.00",
+        "vl.-stav",
+        "majetku",
+        "milovice",
+        "zpr.-vys\u00edl\u00e1n\u00ed",
+        "voz",
+        "sfrb",
+        "rtv-r.03",
+        "st.dluhopis.program",
+        "ru\u0161en\u00ed"
+      ]
+    }
+  },
+  "bod_stav": {
+    "popis": {
+      "words": [
+        "projedn\u00e1n",
+        "jiz",
+        "pr\u00e1v\u011b",
+        "neprojedn\u00e1n",
+        "odro\u010den",
+        "projednan",
+        "projedn\u00e1van\u00fd",
+        "neprojednateln\u00fd",
+        "p\u0159eru\u0161en"
+      ]
+    }
+  },
+  "funkce": {
+    "nazev_funkce_cz": {
+      "words": [
+        "zem\u011b",
+        "podv\u00fdboru",
+        "klubu",
+        "st\u00e1ty",
+        "rps",
+        "\u010dmss",
+        "aseanu",
+        "delegace",
+        "vvs",
+        "z\u00e9land",
+        "skupiny",
+        "vkps",
+        "austr\u00e1lie",
+        "iscp",
+        "tajemn\u00edk-ov\u011b\u0159.",
+        "kypr",
+        "p\u0159\u00e1tel",
+        "zem\u011bd\u011blstv\u00ed",
+        "prost\u0159ed\u00ed",
+        "vkpk"
+      ]
+    }
+  },
+  "hl_check": {
+    "id_h2": {
+      "words": [
+        "59614",
+        "58746",
+        "61679",
+        "60940",
+        "61162",
+        "59703",
+        "58744",
+        "61059",
+        "59712",
+        "59195",
+        "60876",
+        "61026",
+        "59318",
+        "59716",
+        "60123",
+        "61724",
+        "61658",
+        "60001",
+        "59382",
+        "58503"
+      ]
+    },
+    "id_h3": {
+      "words": [
+        "60069",
+        "60941",
+        "61719",
+        "61060",
+        "60877",
+        "60002",
+        "58504",
+        "61027",
+        "59847",
+        "59008",
+        "60165",
+        "61163",
+        "58350",
+        "61725",
+        "61680",
+        "58881",
+        "59704",
+        "61406",
+        "59007",
+        "59382"
+      ]
+    }
+  },
+  "hl_hlasovani": {
+    "druh_hlasovani": {
+      "words": []
+    },
+    "vysledek": {
+      "words": []
+    },
+    "nazev_dlouhy": {
+      "words": [
+        "stropnick\u00e9ho",
+        "interpelace",
+        "zkr\u00e1cen\u00ed",
+        "vz\u00e1jemn\u00e9",
+        "na\u0159\u00edzen\u00ed",
+        "tisku",
+        "dan\u00edch",
+        "poji\u0161\u0165ov\u00e1n\u00ed",
+        "mezi",
+        "ubytov\u00e1n",
+        "z\u00e1v\u011bre\u010dn\u00e1",
+        "2012",
+        "kalamity",
+        "dienstbiera",
+        "ustaven\u00ed",
+        "potr.",
+        "bendla",
+        "obc\u00ed",
+        "statutu",
+        "zem."
+      ]
+    },
+    "nazev_kratky": {
+      "words": [
+        "p\u0159edseda",
+        "lh\u016fta",
+        "v\u00fdboru",
+        "340"
+      ]
+    }
+  },
+  "hl_poslanec": {
+    "vysledek": {
+      "words": []
+    }
+  },
+  "hl_vazby": {},
+  "hl_zposlanec": {},
+  "omluvy": {
+    "den": {
+      "words": [
+        "08.12.2011",
+        "29.09.2006",
+        "27.02.2004",
+        "19.02.2013",
+        "07.12.2011",
+        "23.09.2005",
+        "10.02.2006",
+        "19.09.2014",
+        "07.03.2006",
+        "30.09.2009",
+        "09.05.2012",
+        "21.10.2014",
+        "30.11.2005",
+        "21.10.2005",
+        "29.06.2004",
+        "03.02.2012",
+        "07.07.2015",
+        "02.05.2007",
+        "06.09.2011",
+        "12.02.2014"
+      ]
+    },
+    "od": {
+      "words": [
+        "10:45",
+        "18:50",
+        "14:15",
+        "23:15",
+        "11:30",
+        "13:39",
+        "09:45",
+        "14:50",
+        "17:15",
+        "11:45",
+        "13:45",
+        "19:45",
+        "17:12",
+        "15:03",
+        "19:50",
+        "17:35",
+        "09:15",
+        "12:00",
+        "10:15",
+        "16:15"
+      ]
+    },
+    "do": {
+      "words": [
+        "15:40",
+        "10:50",
+        "14:15",
+        "13:39",
+        "09:45",
+        "18:15",
+        "15:45",
+        "18:30",
+        "14:50",
+        "19:05",
+        "23:59",
+        "10:00",
+        "13:45",
+        "16:05",
+        "13:20",
+        "21:00",
+        "13:05",
+        "10:30",
+        "14:45",
+        "18:00"
+      ]
+    }
+  },
+  "organy": {
+    "zkratka": {
+      "words": [
+        "pj\u0159",
+        "tpis",
+        "p\u010ddcs",
+        "cnr5",
+        "esp",
+        "xas",
+        "vebo",
+        "skvo",
+        "dkjus",
+        "nsrc",
+        "pps",
+        "peozsp",
+        "proc",
+        "opsbs",
+        "ano2011",
+        "pzp",
+        "drpf",
+        "phso",
+        "pmsvzch",
+        "pkpfa\u010dr"
+      ]
+    },
+    "nazev_organu_cz": {
+      "words": [
+        "oblasti",
+        "moravy",
+        "nez\u00e1visl\u00ed",
+        "letectv\u00ed",
+        "l\u00e9kovou",
+        "n\u00e1rodn\u00e1",
+        "banka",
+        "v\u011bdu",
+        "fond\u016f",
+        "\u00fania",
+        "soci\u00e1ln\u011b",
+        "rada",
+        "imunitn\u00ed",
+        "verejnost",
+        "slovensk\u00e1",
+        "spr\u00e1vu",
+        "investi\u010dn\u00ed",
+        "n\u00e1rodn\u00edho",
+        "moldavsk\u00e1",
+        "rozvojovou"
+      ]
+    },
+    "nazev_organu_en": {
+      "words": [
+        "nato",
+        "health",
+        "trade",
+        "policy",
+        "prevention",
+        "employment",
+        "movement",
+        "republic",
+        "heraldy",
+        "relations",
+        "defence",
+        "military",
+        "prisons",
+        "commission",
+        "colombia,",
+        "ireland",
+        "western",
+        "customs",
+        "bolivia,",
+        "veterinary"
+      ]
+    },
+    "od_organ": {
+      "words": [
+        "09.12.2005",
+        "26.11.2014",
+        "31.01.2007",
+        "19.12.2000",
+        "04.11.1998",
+        "23.07.1998",
+        "08.11.2006",
+        "30.09.2010",
+        "25.11.2002",
+        "01.10.2003",
+        "25.10.2008",
+        "26.10.2013",
+        "09.05.2012",
+        "24.09.1998",
+        "23.06.1998",
+        "13.05.1999",
+        "03.02.2012",
+        "21.10.1945",
+        "01.01.1992",
+        "12.02.2014"
+      ]
+    },
+    "do_organ": {
+      "words": [
+        "06.06.1996",
+        "27.02.1996",
+        "27.12.1994",
+        "22.03.1945",
+        "31.03.2005",
+        "30.11.2011",
+        "09.01.2007",
+        "11.06.1960",
+        "01.01.2010",
+        "20.10.1921",
+        "15.04.1920",
+        "19.06.1998",
+        "01.12.2000",
+        "10.07.2013",
+        "18.12.2000",
+        "28.08.2013",
+        "20.06.2014",
+        "19.02.2004",
+        "08.12.1999",
+        "22.07.2003"
+      ]
+    },
+    "priorita": {
+      "words": [
+        "108",
+        "119",
+        "370",
+        "180",
+        "320",
+        "166",
+        "250",
+        "121",
+        "113",
+        "181",
+        "1000",
+        "202",
+        "1010",
+        "161",
+        "158",
+        "140",
+        "183",
+        "1003",
+        "340",
+        "201"
+      ]
+    }
+  },
+  "osoby": {
+    "pred": {
+      "words": [
+        "akad",
+        "pplk.",
+        "ing.,prof,",
+        "judr.",
+        "prof.mudr.",
+        "doc.,",
+        "mudr.",
+        "dr.",
+        "judr.phdr.",
+        "phdr.",
+        "akad.",
+        "phdr.doc.",
+        "doc.rsdr.",
+        "akad.arch.",
+        "peadr.",
+        "arch.",
+        "rndr.",
+        "mudr",
+        "judr.,doc.",
+        "prom.ped."
+      ]
+    },
+    "jmeno": {
+      "words": [
+        "sedl\u00e1\u010dek",
+        "mandovec",
+        "d\u011bdi\u010d",
+        "les\u00e1k",
+        "pavela",
+        "ture\u010dkov\u00e1",
+        "pojer",
+        "koy\u0161",
+        "bartel",
+        "bal\u00e1nov\u00e1",
+        "vodslo\u0148",
+        "galovi\u010d",
+        "kaka\u010dka",
+        "pap\u00e1\u010dek",
+        "zischka",
+        "s\u00e1rk\u00f6zyov\u00e1",
+        "ekert",
+        "koudelka",
+        "b\u00edna",
+        "kram\u00e1\u0159"
+      ]
+    },
+    "prijmeni": {
+      "words": [
+        "zby\u0161ek",
+        "gizela",
+        "justin",
+        "lothar",
+        "rudolf",
+        "emil",
+        "ign\u00e1c",
+        "zden\u011bk",
+        "du\u0161an",
+        "veronika",
+        "herbert",
+        "\u00e1bel",
+        "koloman",
+        "radomil",
+        "estera",
+        "ludv\u00edk",
+        "drahom\u00edra",
+        "betty",
+        "tibor",
+        "ilarion"
+      ]
+    },
+    "za": {
+      "words": [
+        "msgre.",
+        "prom.pr\u00e1v.",
+        "genplk.",
+        "pplk.",
+        "zasl.",
+        "d.e.a.",
+        "ph.d",
+        "drsc.akad.",
+        "dr.",
+        "akad.",
+        "zasl.um.",
+        "fcma",
+        "prof",
+        "csc.",
+        "arch.",
+        "genmjr.",
+        "drsc.prof.",
+        "ph.d.,",
+        "dis.",
+        "drsc.phmr."
+      ]
+    },
+    "narozeni": {
+      "words": [
+        "08.03.1922",
+        "14.07.1882",
+        "13.01.1889",
+        "07.01.1948",
+        "23.01.1904",
+        "04.02.1919",
+        "10.10.1950",
+        "15.08.1908",
+        "22.02.1879",
+        "18.12.1911",
+        "25.06.1950",
+        "05.09.1860",
+        "15.07.1869",
+        "23.02.1903",
+        "30.05.1913",
+        "31.10.1911",
+        "06.03.1926",
+        "28.07.1921",
+        "04.01.1929",
+        "14.09.1889"
+      ]
+    },
+    "pohlavi": {
+      "words": []
+    },
+    "zmena": {
+      "words": [
+        "23.10.1976",
+        "09.12.1998",
+        "26.11.1999",
+        "01.06.2000",
+        "19.05.1935",
+        "27.10.1929",
+        "27.11.1971",
+        "06.12.1999",
+        "01.03.2000",
+        "09.06.1999",
+        "26.05.1946",
+        "26.01.2000",
+        "12.06.1960",
+        "29.06.2000",
+        "25.04.1920",
+        "08.12.1999",
+        "07.04.2000",
+        "18.09.2001",
+        "21.10.1945",
+        "31.01.2000"
+      ]
+    },
+    "umrti": {
+      "words": [
+        "19.03.1977",
+        "28.03.1949",
+        "07.01.1948",
+        "05.01.1996",
+        "02.04.1944",
+        "26.05.1937",
+        "14.03.1953",
+        "19.03.1972",
+        "13.12.1979",
+        "17.05.1966",
+        "21.01.1972",
+        "12.04.1937",
+        "09.12.1976",
+        "08.07.1979",
+        "01.03.2010",
+        "08.10.1980",
+        "21.05.1946",
+        "18.04.1947",
+        "09.10.1931",
+        "29.07.1942"
+      ]
+    }
+  },
+  "pkgps": {
+    "adresa": {
+      "words": [
+        "nisou;",
+        "35801",
+        "114;",
+        "ostrava;",
+        "kl\u00e1\u0161tersk\u00e1",
+        "1688;",
+        "dominik\u00e1nsk\u00e9",
+        "jihlava;",
+        "k\u0159enov\u00e1",
+        "opava;",
+        "37701",
+        "16/2;",
+        "malostransk\u00e9",
+        "142;",
+        "sadov\u00e1",
+        "p\u0159\u00edkop\u011b",
+        "lannova",
+        "403/12;",
+        "\u00fast\u00ed",
+        "kate\u0159insk\u00e1"
+      ]
+    }
+  },
+  "poslanec": {
+    "web": {
+      "words": [
+        "http://www.mladek.eu",
+        "http://www.gabal.cz/",
+        "http://www.marekbenda.cz/",
+        "http://www.lubomirzaoralek.cz/",
+        "http://www.danielherman.cz/",
+        "http://tomaspodivinsky.cz/",
+        "http://bohuslav-chalupa.blog.cz/",
+        "http://www.radimholecek.cz/",
+        "http://www.stanjura.eu/",
+        "http://www.leosheger.cz/",
+        "http://www.jirimihola.cz/",
+        "http://www.karamazov.cz/",
+        "http://www.josefkott.cz",
+        "http://www.jaroslav-klaska.cz/",
+        "http://www.janfarsky.cz",
+        "http://vahalova.cz/",
+        "http://www.chalankova.cz/",
+        "http://zuzanakailova.cz/",
+        "http://adolfbeznoska.cz/",
+        "http://www.vyzula.cz/"
+      ]
+    },
+    "ulice": {
+      "words": [
+        "hobl\u00edkova",
+        "661",
+        "dominik\u00e1nsk\u00e9",
+        "2078/12",
+        "158",
+        "1438",
+        "15/1696",
+        "607/15",
+        "sadov\u00e1",
+        "1688",
+        "201",
+        "175",
+        "\u0161antova",
+        "vrchlick\u00e9ho",
+        "1579/4",
+        "hlav\u00e1\u010dkovo",
+        "1570",
+        "soukenn\u00e9",
+        "2117",
+        "husovo"
+      ]
+    },
+    "obec": {
+      "words": [
+        "kr\u00e1lov\u00e9",
+        "klatovy",
+        "orlov\u00e1",
+        "uhersk\u00e9",
+        "fry\u0161t\u00e1t",
+        "hradi\u0161t\u011b",
+        "t\u0159inec",
+        "hradec",
+        "s\u00e1zavou",
+        "brod",
+        "louny",
+        "bene\u0161ov",
+        "labem",
+        "p\u0159erov",
+        "b\u0159e\u017eany",
+        "praha",
+        "jind\u0159ich\u016fv",
+        "\u010desk\u00e9",
+        "nad",
+        "lutyn\u011b"
+      ]
+    },
+    "psc": {
+      "words": [
+        "73961",
+        "67401",
+        "68601",
+        "35801",
+        "56802",
+        "13000",
+        "46601",
+        "50003",
+        "76001",
+        "53701",
+        "12000",
+        "37701",
+        "65778",
+        "73401",
+        "40001",
+        "40502",
+        "74101",
+        "37001",
+        "25001",
+        "70200"
+      ]
+    },
+    "email": {
+      "words": [
+        "skalickyj@psp.cz",
+        "benesiko@psp.cz",
+        "farskyj@psp.cz",
+        "plisekm@psp.cz",
+        "valentaj@psp.cz",
+        "cernochovaj@psp.cz",
+        "koubekj@psp.cz",
+        "bohdalovav@psp.cz",
+        "kolovratnikm@psp.cz",
+        "fialap@psp.cz",
+        "prochazkar@psp.cz",
+        "vondracekr@psp.cz",
+        "novotnym@psp.cz",
+        "vahalovad@psp.cz",
+        "kudelap@psp.cz",
+        "pilnyi@psp.cz",
+        "sramekp@psp.cz",
+        "fiedlerk@psp.cz",
+        "gazdikp@psp.cz",
+        "balastikovam@psp.cz"
+      ]
+    },
+    "telefon": {
+      "words": [
+        "255790811",
+        "852",
+        "602721229",
+        "601560352",
+        "+420",
+        "776",
+        "900",
+        "435",
+        "057",
+        "775"
+      ]
+    },
+    "fax": {
+      "words": []
+    },
+    "psp_telefon": {
+      "words": [
+        "2097"
+      ]
+    },
+    "facebook": {
+      "words": [
+        "https://www.facebook.com/miroslava.nemcova",
+        "https://www.facebook.com/jureckamarian",
+        "http://www.facebook.com/anoolomouc",
+        "https://www.facebook.com/pages/karel-rais/163920643812298",
+        "https://www.facebook.com/pages/mudr-gabriela-peckov\u00e1-top-09/113755299053",
+        "http://www.facebook.com/anna.putnova",
+        "http://www.facebook.com/helena.langsadlova",
+        "http://www.facebook.com/pages/adam-rykala/142355647957",
+        "http://www.facebook.com/josef.senfeld.7",
+        "https://www.facebook.com/ladislavvelebny",
+        "https://www.facebook.com/vera.kovarovazelezna",
+        "https://www.facebook.com/kalousek.miroslav",
+        "https://www.facebook.com/herbertpavera",
+        "https://www.facebook.com/hamacekjan",
+        "https://www.facebook.com/jana.cernochova",
+        "https://www.facebook.com/bartosekkdu",
+        "https://www.facebook.com/petr.bendl.92",
+        "https://www.facebook.com/ladislav.sincl",
+        "http://www.facebook.com/heger.leos",
+        "https://www.facebook.com/martin.novotny.144"
+      ]
+    }
+  },
+  "schuze": {
+    "od_schuze": {
+      "words": [
+        "2015-09-15",
+        "1997-02-26",
+        "2004-02-24",
+        "2005-05-03",
+        "2007-12-06",
+        "2001-10-16",
+        "2013-08-07",
+        "2015-10-06",
+        "2011-10-25",
+        "2009-09-15",
+        "2000-06-27",
+        "2001-02-20",
+        "1997-09-30",
+        "2007-02-07",
+        "2007-04-24",
+        "2008-04-01",
+        "2010-02-11",
+        "2000-09-14",
+        "2011-11-04",
+        "1998-02-03"
+      ]
+    },
+    "do_schuze": {
+      "words": [
+        "2014-12-05",
+        "1995-11-03",
+        "2014-08-27",
+        "2008-11-11",
+        "1994-09-29",
+        "2009-11-06",
+        "1997-02-28",
+        "2009-06-07",
+        "1998-02-26",
+        "2004-07-01",
+        "2009-11-13",
+        "2000-05-30",
+        "2011-11-06",
+        "2009-09-15",
+        "2011-11-09",
+        "2011-11-03",
+        "2013-05-17",
+        "2008-04-01",
+        "2001-07-13",
+        "1998-09-17"
+      ]
+    },
+    "aktualizace": {
+      "words": [
+        "16:07",
+        "2011-06-21",
+        "10:04",
+        "2000-06-26",
+        "2002-07-18",
+        "12:00",
+        "2006-03-21",
+        "2011-03-24",
+        "2004-11-26",
+        "2015-11-24",
+        "2000-10-27",
+        "2014-10-01",
+        "11:38",
+        "2002-05-09",
+        "15:00",
+        "2014-10-15",
+        "09:53",
+        "2004-01-14",
+        "2011-06-16",
+        "11:49"
+      ]
+    }
+  },
+  "schuze_stav": {
+    "typ": {
+      "words": []
+    },
+    "text_dt": {
+      "words": [
+        "43.",
+        "12.",
+        "57.",
+        "2015,",
+        "11.",
+        "11:30",
+        "18:15",
+        "prosince,",
+        "14.",
+        "hodin",
+        "sch\u016fze",
+        "28.",
+        "33.",
+        "p\u0159edchoz\u00ed",
+        "po\u0159adu",
+        "21.",
+        "26.",
+        "20.",
+        "\u0159\u00edjna",
+        "30."
+      ]
+    },
+    "text_st": {
+      "words": [
+        "ve\u0159ejn\u00e9ho",
+        "nebyla",
+        "schv\u00e1len",
+        "hodin",
+        "vl\u00e1d\u011b",
+        "vl\u00e1dy",
+        "sch\u016fze",
+        "stavu",
+        "byla",
+        "vysloven\u00ed",
+        "ned\u016fv\u011bry",
+        "republiky",
+        "legislativn\u00ed",
+        "ned\u016fv\u011bra",
+        "\u017e\u00e1dost",
+        "n\u00e1vrh\u016f",
+        "projedn\u00e1v\u00e1n\u00ed",
+        "volba",
+        "sta\u017eena",
+        "n\u00e1vrh"
+      ]
+    },
+    "tm_line": {
+      "words": [
+        "sch\u016fze",
+        "byla",
+        "p\u0159eru\u0161eno.",
+        "hodin.",
+        "svol\u00e1n\u00ed",
+        "\u017e\u00e1dost",
+        "p\u0159eru\u0161eno",
+        "sta\u017eena.",
+        "25.",
+        "listopadu",
+        "st\u0159edy"
+      ]
+    }
+  },
+  "typ_funkce": {
+    "typ_funkce_cz": {
+      "words": [
+        "deleg\u00e1t",
+        "hospod\u00e1\u0159stv\u00ed",
+        "arbitr",
+        "klubu",
+        "spoj\u016f",
+        "p\u0159edsednictva",
+        "zahrani\u010dn\u00edch",
+        "pozorovatel",
+        "arbitra",
+        "delegace",
+        "zdravotnictv\u00ed",
+        "spravedlnosti",
+        "inspektor",
+        "veden\u00ed",
+        "z\u00e1le\u017eitosti",
+        "dopravy",
+        "zapisovatel",
+        "garan\u010dn\u00ed",
+        "evropsk\u00e9",
+        "zem\u011bd\u011blstv\u00ed"
+      ]
+    },
+    "typ_funkce_en": {
+      "words": [
+        "internal",
+        "chairman",
+        "president",
+        "committee",
+        "delegation",
+        "head",
+        "secretary",
+        "vice-chairman",
+        "observer",
+        "alternate",
+        "member",
+        "auditor",
+        "chairperson",
+        "vice-chairperson",
+        "verifier",
+        "commission"
+      ]
+    }
+  },
+  "typ_organu": {
+    "typ_id_typ_org": {
+      "words": []
+    },
+    "nazev_typ_org_cz": {
+      "words": [
+        "skupina",
+        "nato",
+        "org\u00e1ny",
+        "\u010deskoslovensk\u00e9",
+        "republika",
+        "r\u00e1mci",
+        "prozatimn\u00ed",
+        "delegace",
+        "federativn\u00ed",
+        "sen\u00e1tu",
+        "evropsk\u00fd",
+        "slovensk\u00e9",
+        "sen\u00e1tosk\u00fd",
+        "registru",
+        "mpu",
+        "sch\u016fze",
+        "feder\u00e1ln\u00ed",
+        "vl\u00e1dy",
+        "\u010desk\u00e9",
+        "spr\u00e1vn\u00ed"
+      ]
+    },
+    "nazev_typ_org_en": {
+      "words": [
+        "delegation",
+        "interparliamentary",
+        "group",
+        "europena",
+        "working",
+        "region",
+        "political",
+        "czech",
+        "party",
+        "republic",
+        "institution",
+        "international",
+        "commission",
+        "committee",
+        "bank",
+        "organizations",
+        "assembly",
+        "federal",
+        "government",
+        "national"
+      ]
+    },
+    "typ_org_obecny": {
+      "words": []
+    }
+  },
+  "zarazeni": {
+    "od_o": {
+      "words": [
+        "2006-01-20",
+        "2005-01-20",
+        "2004-07-02",
+        "2012-05-02",
+        "2014-01-23",
+        "2011-03-25",
+        "2012-11-07",
+        "1998-06-25",
+        "2014-01-21",
+        "1995-05-25",
+        "1993-11-16",
+        "2011-09-05",
+        "1993-12-05",
+        "1948-07-19",
+        "2006-03-21",
+        "2014-02-19",
+        "2007-05-17",
+        "1998-01-15",
+        "2014-03-01",
+        "1995-01-19"
+      ]
+    },
+    "do_o": {
+      "words": [
+        "2006-01-20",
+        "2004-07-02",
+        "2014-04-29",
+        "2002-12-03",
+        "1990-01-08",
+        "2001-10-16",
+        "1997-06-30",
+        "2011-03-25",
+        "2002-09-18",
+        "2012-11-07",
+        "2003-06-05",
+        "1998-11-16",
+        "2009-05-29",
+        "2015-04-04",
+        "1952-10-30",
+        "1994-01-24",
+        "2010-08-19",
+        "1947-11-25",
+        "2003-05-25",
+        "2013-05-20"
+      ]
+    },
+    "od_f": {
+      "words": [
+        "09.12.2005",
+        "14.02.2007",
+        "02.02.1998",
+        "05.04.2015",
+        "04.11.2005",
+        "06.04.2004",
+        "17.10.2002",
+        "18.12.2000",
+        "22.05.2003",
+        "27.07.2015",
+        "07.03.2008",
+        "11.03.2015",
+        "15.05.2003",
+        "13.02.2014",
+        "01.03.2008",
+        "24.10.2014",
+        "18.02.2014",
+        "07.03.2003",
+        "01.12.2009",
+        "15.07.1993"
+      ]
+    },
+    "do_f": {
+      "words": [
+        "24.05.2021",
+        "02.08.2016",
+        "16.12.2017",
+        "01.12.2012",
+        "28.05.2009",
+        "18.12.2006",
+        "20.09.2008",
+        "16.06.2020",
+        "11.06.2038",
+        "05.04.2017",
+        "02.04.2015",
+        "27.08.2009",
+        "03.05.2027",
+        "01.12.2015",
+        "15.03.2012",
+        "07.03.2008",
+        "06.11.2025",
+        "01.05.2026",
+        "05.06.2016",
+        "25.03.2014"
+      ]
+    }
+  },
+  "zmatecne": {}
+}

@@ -1,0 +1,422 @@
+{
+  "Bio": {
+    "fibros": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          "1",
+          8
+        ],
+        [
+          "2",
+          7
+        ],
+        [
+          "4",
+          7
+        ],
+        [
+          "3",
+          7
+        ],
+        [
+          "0",
+          3
+        ]
+      ],
+      "total_unique": 5
+    },
+    "activity": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          "1",
+          9
+        ],
+        [
+          "2",
+          8
+        ],
+        [
+          "3",
+          8
+        ],
+        [
+          "4",
+          5
+        ],
+        [
+          "0",
+          2
+        ]
+      ],
+      "total_unique": 5
+    }
+  },
+  "dispat": {
+    "sex": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          "0",
+          355
+        ],
+        [
+          "1",
+          145
+        ]
+      ],
+      "total_unique": 2
+    },
+    "age": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          "5",
+          278
+        ],
+        [
+          "6",
+          71
+        ],
+        [
+          "3",
+          44
+        ],
+        [
+          "4",
+          40
+        ],
+        [
+          "2",
+          32
+        ],
+        [
+          "1",
+          28
+        ],
+        [
+          "0",
+          7
+        ]
+      ],
+      "total_unique": 7
+    },
+    "Type": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          "1",
+          294
+        ],
+        [
+          "0",
+          206
+        ]
+      ],
+      "total_unique": 2
+    }
+  },
+  "indis": {
+    "got": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          "1",
+          1762
+        ],
+        [
+          "3",
+          1756
+        ],
+        [
+          "2",
+          1714
+        ],
+        [
+          "0",
+          426
+        ],
+        [
+          "4",
+          33
+        ]
+      ],
+      "total_unique": 5
+    },
+    "gpt": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          "2",
+          2699
+        ],
+        [
+          "1",
+          2506
+        ],
+        [
+          "0",
+          366
+        ],
+        [
+          "3",
+          120
+        ]
+      ],
+      "total_unique": 4
+    },
+    "alb": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          "0",
+          3970
+        ],
+        [
+          "1",
+          1721
+        ]
+      ],
+      "total_unique": 2
+    },
+    "tbil": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          "1",
+          4844
+        ],
+        [
+          "0",
+          847
+        ]
+      ],
+      "total_unique": 2
+    },
+    "dbil": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          "0",
+          3325
+        ],
+        [
+          "1",
+          2366
+        ]
+      ],
+      "total_unique": 2
+    },
+    "che": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          "6",
+          3998
+        ],
+        [
+          "5",
+          692
+        ],
+        [
+          "7",
+          601
+        ],
+        [
+          "1",
+          141
+        ],
+        [
+          "8",
+          105
+        ],
+        [
+          "4",
+          64
+        ],
+        [
+          "2",
+          51
+        ],
+        [
+          "9",
+          26
+        ],
+        [
+          "0",
+          7
+        ],
+        [
+          "3",
+          6
+        ]
+      ],
+      "total_unique": 10
+    },
+    "ttt": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          "5",
+          2431
+        ],
+        [
+          "3",
+          892
+        ],
+        [
+          "4",
+          886
+        ],
+        [
+          "2",
+          822
+        ],
+        [
+          "1",
+          331
+        ],
+        [
+          "0",
+          329
+        ]
+      ],
+      "total_unique": 6
+    },
+    "ztt": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          "5",
+          1696
+        ],
+        [
+          "1",
+          1272
+        ],
+        [
+          "3",
+          1206
+        ],
+        [
+          "4",
+          823
+        ],
+        [
+          "2",
+          543
+        ],
+        [
+          "0",
+          151
+        ]
+      ],
+      "total_unique": 6
+    },
+    "tcho": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          "1",
+          2799
+        ],
+        [
+          "2",
+          1469
+        ],
+        [
+          "0",
+          828
+        ],
+        [
+          "3",
+          595
+        ]
+      ],
+      "total_unique": 4
+    },
+    "tp": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          "1",
+          2319
+        ],
+        [
+          "2",
+          1433
+        ],
+        [
+          "3",
+          1073
+        ],
+        [
+          "0",
+          866
+        ]
+      ],
+      "total_unique": 4
+    }
+  },
+  "inf": {
+    "dur": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          "4",
+          40
+        ],
+        [
+          "3",
+          39
+        ],
+        [
+          "0",
+          39
+        ],
+        [
+          "2",
+          39
+        ],
+        [
+          "1",
+          39
+        ]
+      ],
+      "total_unique": 5
+    }
+  }
+}

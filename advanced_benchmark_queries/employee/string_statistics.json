@@ -1,0 +1,416 @@
+{
+  "departments": {
+    "dept_no": {
+      "min_length": 4,
+      "max_length": 4,
+      "avg_length": 4.0,
+      "top_values": [
+        [
+          "d009",
+          1
+        ],
+        [
+          "d005",
+          1
+        ],
+        [
+          "d002",
+          1
+        ],
+        [
+          "d006",
+          1
+        ],
+        [
+          "d003",
+          1
+        ],
+        [
+          "d004",
+          1
+        ],
+        [
+          "d001",
+          1
+        ],
+        [
+          "d008",
+          1
+        ],
+        [
+          "d007",
+          1
+        ]
+      ],
+      "total_unique": 9
+    },
+    "dept_name": {
+      "min_length": 5,
+      "max_length": 18,
+      "avg_length": 11.0,
+      "top_values": [
+        [
+          "Research",
+          1
+        ],
+        [
+          "Marketing",
+          1
+        ],
+        [
+          "Finance",
+          1
+        ],
+        [
+          "Human Resources",
+          1
+        ],
+        [
+          "Development",
+          1
+        ],
+        [
+          "Quality Management",
+          1
+        ],
+        [
+          "Sales",
+          1
+        ],
+        [
+          "Customer Service",
+          1
+        ],
+        [
+          "Production",
+          1
+        ]
+      ],
+      "total_unique": 9
+    }
+  },
+  "dept_emp": {
+    "dept_no": {
+      "min_length": 4,
+      "max_length": 4,
+      "avg_length": 4.0,
+      "top_values": [
+        [
+          "d005",
+          85707
+        ],
+        [
+          "d004",
+          73485
+        ],
+        [
+          "d007",
+          52245
+        ],
+        [
+          "d009",
+          23580
+        ],
+        [
+          "d008",
+          21126
+        ],
+        [
+          "d001",
+          20211
+        ],
+        [
+          "d006",
+          20117
+        ],
+        [
+          "d003",
+          17786
+        ],
+        [
+          "d002",
+          17346
+        ]
+      ],
+      "total_unique": 9
+    }
+  },
+  "dept_manager": {
+    "dept_no": {
+      "min_length": 4,
+      "max_length": 4,
+      "avg_length": 4.0,
+      "top_values": [
+        [
+          "d009",
+          4
+        ],
+        [
+          "d004",
+          4
+        ],
+        [
+          "d006",
+          4
+        ],
+        [
+          "d007",
+          2
+        ],
+        [
+          "d001",
+          2
+        ],
+        [
+          "d003",
+          2
+        ],
+        [
+          "d002",
+          2
+        ],
+        [
+          "d008",
+          2
+        ],
+        [
+          "d005",
+          2
+        ]
+      ],
+      "total_unique": 9
+    }
+  },
+  "employees": {
+    "first_name": {
+      "min_length": 3,
+      "max_length": 14,
+      "avg_length": 6.215719409113937,
+      "top_values": [
+        [
+          "Shahab",
+          295
+        ],
+        [
+          "Tetsushi",
+          291
+        ],
+        [
+          "Elgin",
+          279
+        ],
+        [
+          "Anyuan",
+          278
+        ],
+        [
+          "Huican",
+          276
+        ],
+        [
+          "Make",
+          275
+        ],
+        [
+          "Panayotis",
+          272
+        ],
+        [
+          "Sreekrishna",
+          272
+        ],
+        [
+          "Hatem",
+          271
+        ],
+        [
+          "Vitali",
+          270
+        ],
+        [
+          "Shen",
+          270
+        ],
+        [
+          "Xuedong",
+          270
+        ],
+        [
+          "Giri",
+          270
+        ],
+        [
+          "Ewing",
+          269
+        ],
+        [
+          "Eldridge",
+          269
+        ],
+        [
+          "Berry",
+          269
+        ],
+        [
+          "Sariel",
+          269
+        ],
+        [
+          "Pranav",
+          269
+        ],
+        [
+          "Mansur",
+          268
+        ],
+        [
+          "Monique",
+          268
+        ]
+      ],
+      "total_unique": 1275
+    },
+    "last_name": {
+      "min_length": 4,
+      "max_length": 16,
+      "avg_length": 7.153877689784817,
+      "top_values": [
+        [
+          "Baba",
+          226
+        ],
+        [
+          "Coorg",
+          223
+        ],
+        [
+          "Gelosh",
+          223
+        ],
+        [
+          "Farris",
+          222
+        ],
+        [
+          "Sudbeck",
+          222
+        ],
+        [
+          "Adachi",
+          221
+        ],
+        [
+          "Osgood",
+          220
+        ],
+        [
+          "Mandell",
+          218
+        ],
+        [
+          "Masada",
+          218
+        ],
+        [
+          "Neiman",
+          218
+        ],
+        [
+          "Boudaillier",
+          217
+        ],
+        [
+          "Wendorf",
+          217
+        ],
+        [
+          "Pettis",
+          216
+        ],
+        [
+          "Mahnke",
+          216
+        ],
+        [
+          "Cummings",
+          216
+        ],
+        [
+          "Solares",
+          216
+        ],
+        [
+          "Kulisch",
+          215
+        ],
+        [
+          "Maksimenko",
+          215
+        ],
+        [
+          "Emmart",
+          215
+        ],
+        [
+          "Collette",
+          215
+        ]
+      ],
+      "total_unique": 1637
+    },
+    "gender": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          "M",
+          179973
+        ],
+        [
+          "F",
+          120051
+        ]
+      ],
+      "total_unique": 2
+    }
+  },
+  "titles": {
+    "title": {
+      "min_length": 5,
+      "max_length": 18,
+      "avg_length": 10.269340954821478,
+      "top_values": [
+        [
+          "Engineer",
+          115003
+        ],
+        [
+          "Staff",
+          107391
+        ],
+        [
+          "Senior Engineer",
+          97750
+        ],
+        [
+          "Senior Staff",
+          92853
+        ],
+        [
+          "Technique Leader",
+          15159
+        ],
+        [
+          "Assistant Engineer",
+          15128
+        ],
+        [
+          "Manager",
+          24
+        ]
+      ],
+      "total_unique": 7
+    }
+  }
+}

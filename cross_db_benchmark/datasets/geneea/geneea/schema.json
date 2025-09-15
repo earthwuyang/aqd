@@ -1,0 +1,683 @@
+{
+  "tables": {
+    "bod_schuze": [
+      {
+        "name": "id_bod",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "id_schuze",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "id_tisk",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "id_typ",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "bod",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "uplny_naz",
+        "type": "text",
+        "nullable": true
+      },
+      {
+        "name": "uplny_kon",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "poznamka",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "id_bod_stav",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "pozvanka",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "rj",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "pozn2",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "druh_bodu",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "id_sd",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "zkratka",
+        "type": "character varying",
+        "nullable": true
+      }
+    ],
+    "bod_stav": [
+      {
+        "name": "id_bod_stav",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "popis",
+        "type": "character varying",
+        "nullable": true
+      }
+    ],
+    "funkce": [
+      {
+        "name": "id_funkce",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "id_organ",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "id_typ_funkce",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "nazev_funkce_cz",
+        "type": "text",
+        "nullable": true
+      },
+      {
+        "name": "priorita",
+        "type": "integer",
+        "nullable": true
+      }
+    ],
+    "hl_check": [
+      {
+        "name": "id_hlasovani",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "turn",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "mode",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "id_h2",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "id_h3",
+        "type": "character varying",
+        "nullable": true
+      }
+    ],
+    "hl_hlasovani": [
+      {
+        "name": "id_hlasovani",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "id_organ",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "schuze",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "cislo",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "bod",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "datum",
+        "type": "date",
+        "nullable": true
+      },
+      {
+        "name": "cas",
+        "type": "time without time zone",
+        "nullable": true
+      },
+      {
+        "name": "pro",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "proti",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "zdrzel",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "nehlasoval",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "prihlaseno",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "kvorum",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "druh_hlasovani",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "vysledek",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "nazev_dlouhy",
+        "type": "text",
+        "nullable": true
+      },
+      {
+        "name": "nazev_kratky",
+        "type": "character varying",
+        "nullable": true
+      }
+    ],
+    "hl_poslanec": [
+      {
+        "name": "id_poslanec",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "id_hlasovani",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "vysledek",
+        "type": "character varying",
+        "nullable": true
+      }
+    ],
+    "hl_vazby": [
+      {
+        "name": "id_hlasovani",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "turn",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "typ",
+        "type": "integer",
+        "nullable": true
+      }
+    ],
+    "hl_zposlanec": [
+      {
+        "name": "id_hlasovani",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "id_osoba",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "mode",
+        "type": "integer",
+        "nullable": true
+      }
+    ],
+    "omluvy": [
+      {
+        "name": "id_organ",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "id_poslanec",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "den",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "od",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "do",
+        "type": "character varying",
+        "nullable": true
+      }
+    ],
+    "organy": [
+      {
+        "name": "id_organ",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "organ_id_organ",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "id_typ_organu",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "zkratka",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "nazev_organu_cz",
+        "type": "text",
+        "nullable": true
+      },
+      {
+        "name": "nazev_organu_en",
+        "type": "text",
+        "nullable": true
+      },
+      {
+        "name": "od_organ",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "do_organ",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "priorita",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "cl_organ_base",
+        "type": "integer",
+        "nullable": true
+      }
+    ],
+    "osoby": [
+      {
+        "name": "id_osoba",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "pred",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "jmeno",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "prijmeni",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "za",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "narozeni",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "pohlavi",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "zmena",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "umrti",
+        "type": "character varying",
+        "nullable": true
+      }
+    ],
+    "pkgps": [
+      {
+        "name": "id_poslanec",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "adresa",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "sirka",
+        "type": "real",
+        "nullable": true
+      },
+      {
+        "name": "delka",
+        "type": "real",
+        "nullable": true
+      }
+    ],
+    "poslanec": [
+      {
+        "name": "id_poslanec",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "id_osoba",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "id_kraj",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "id_kandidatka",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "id_obdobi",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "web",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "ulice",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "obec",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "psc",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "email",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "telefon",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "fax",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "psp_telefon",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "facebook",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "foto",
+        "type": "integer",
+        "nullable": true
+      }
+    ],
+    "schuze": [
+      {
+        "name": "id_schuze",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "id_organ",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "schuze",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "od_schuze",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "do_schuze",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "aktualizace",
+        "type": "character varying",
+        "nullable": true
+      }
+    ],
+    "schuze_stav": [
+      {
+        "name": "id_schuze",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "stav",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "typ",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "text_dt",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "text_st",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "tm_line",
+        "type": "character varying",
+        "nullable": true
+      }
+    ],
+    "typ_funkce": [
+      {
+        "name": "id_typ_funkce",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "id_typ_org",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "typ_funkce_cz",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "typ_funkce_en",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "priorita",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "typ_funkce_obecny",
+        "type": "integer",
+        "nullable": true
+      }
+    ],
+    "typ_organu": [
+      {
+        "name": "id_typ_org",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "typ_id_typ_org",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "nazev_typ_org_cz",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "nazev_typ_org_en",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "typ_org_obecny",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "priorita",
+        "type": "integer",
+        "nullable": true
+      }
+    ],
+    "zarazeni": [
+      {
+        "name": "id_osoba",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "id_of",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "cl_funkce",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "od_o",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "do_o",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "od_f",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "do_f",
+        "type": "character varying",
+        "nullable": true
+      }
+    ],
+    "zmatecne": [
+      {
+        "name": "id_hlasovani",
+        "type": "integer",
+        "nullable": true
+      }
+    ]
+  },
+  "relationships": []
+}

@@ -1,0 +1,159 @@
+{
+  "L_AIRLINE_ID": {
+    "Code": "int",
+    "Description": "char"
+  },
+  "L_AIRPORT": {
+    "Code": "char",
+    "Description": "char"
+  },
+  "L_AIRPORT_ID": {
+    "Code": "int",
+    "Description": "char"
+  },
+  "L_AIRPORT_SEQ_ID": {
+    "Code": "int",
+    "Description": "char"
+  },
+  "L_CANCELLATION": {
+    "Code": "char",
+    "Description": "char"
+  },
+  "L_CITY_MARKET_ID": {
+    "Code": "int",
+    "Description": "char"
+  },
+  "L_DEPARRBLK": {
+    "Code": "char",
+    "Description": "char"
+  },
+  "L_DISTANCE_GROUP_250": {
+    "Code": "int",
+    "Description": "char"
+  },
+  "L_DIVERSIONS": {
+    "Code": "int",
+    "Description": "char"
+  },
+  "L_MONTHS": {
+    "Code": "int",
+    "Description": "char"
+  },
+  "L_ONTIME_DELAY_GROUPS": {
+    "Code": "int",
+    "Description": "char"
+  },
+  "L_QUARTERS": {
+    "Code": "int",
+    "Description": "char"
+  },
+  "L_STATE_ABR_AVIATION": {
+    "Code": "char",
+    "Description": "char"
+  },
+  "L_STATE_FIPS": {
+    "Code": "int",
+    "Description": "char"
+  },
+  "L_UNIQUE_CARRIERS": {
+    "Code": "char",
+    "Description": "char"
+  },
+  "L_WEEKDAYS": {
+    "Code": "int",
+    "Description": "char"
+  },
+  "L_WORLD_AREA_CODES": {
+    "Code": "int",
+    "Description": "char"
+  },
+  "L_YESNO_RESP": {
+    "Code": "int",
+    "Description": "char"
+  },
+  "On_Time_On_Time_Performance_2016_1": {
+    "Year": "int",
+    "Quarter": "int",
+    "Month": "int",
+    "DayofMonth": "int",
+    "DayOfWeek": "int",
+    "FlightDate": "date",
+    "UniqueCarrier": "char",
+    "AirlineID": "int",
+    "Carrier": "char",
+    "TailNum": "char",
+    "FlightNum": "int",
+    "OriginAirportID": "int",
+    "OriginAirportSeqID": "int",
+    "OriginCityMarketID": "int",
+    "Origin": "char",
+    "OriginCityName": "char",
+    "OriginState": "char",
+    "OriginStateFips": "int",
+    "OriginStateName": "char",
+    "OriginWac": "int",
+    "DestAirportID": "int",
+    "DestAirportSeqID": "int",
+    "DestCityMarketID": "int",
+    "Dest": "char",
+    "DestCityName": "char",
+    "DestState": "char",
+    "DestStateFips": "int",
+    "DestStateName": "char",
+    "DestWac": "int",
+    "CRSDepTime": "int",
+    "DepTime": "int",
+    "DepDelay": "float",
+    "DepDelayMinutes": null,
+    "DepDel15": "int",
+    "DepartureDelayGroups": "int",
+    "DepTimeBlk": "char",
+    "TaxiOut": null,
+    "WheelsOff": "int",
+    "WheelsOn": "int",
+    "TaxiIn": null,
+    "CRSArrTime": "int",
+    "ArrTime": "int",
+    "ArrDelay": "float",
+    "ArrDelayMinutes": null,
+    "ArrDel15": "int",
+    "ArrivalDelayGroups": "int",
+    "ArrTimeBlk": "char",
+    "Cancelled": "int",
+    "CancellationCode": "char",
+    "Diverted": "int",
+    "CRSElapsedTime": null,
+    "ActualElapsedTime": null,
+    "AirTime": null,
+    "Flights": null,
+    "Distance": null,
+    "DistanceGroup": "int",
+    "CarrierDelay": "float",
+    "WeatherDelay": "float",
+    "NASDelay": "float",
+    "SecurityDelay": "float",
+    "LateAircraftDelay": "float",
+    "FirstDepTime": "float",
+    "TotalAddGTime": "float",
+    "LongestAddGTime": "float",
+    "DivAirportLandings": "int",
+    "DivReachedDest": "float",
+    "DivActualElapsedTime": "float",
+    "DivArrDelay": "float",
+    "DivDistance": "float",
+    "Div1Airport": "char",
+    "Div1AirportID": "int",
+    "Div1AirportSeqID": "int",
+    "Div1WheelsOn": "float",
+    "Div1TotalGTime": "float",
+    "Div1LongestGTime": "float",
+    "Div1WheelsOff": "float",
+    "Div1TailNum": "char",
+    "Div2Airport": "char",
+    "Div2AirportID": "int",
+    "Div2AirportSeqID": "int",
+    "Div2WheelsOn": "float",
+    "Div2TotalGTime": "float",
+    "Div2LongestGTime": "float"
+  }
+}

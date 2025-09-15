@@ -1,0 +1,15 @@
+{
+  "key": {
+    "store_nbr": "int",
+    "station_nbr": "int"
+  },
+  "station": {
+    "station_nbr": "int"
+  },
+  "train": {
+    "date": "char",
+    "store_nbr": "int",
+    "item_nbr": "int",
+    "units": "int"
+  }
+}

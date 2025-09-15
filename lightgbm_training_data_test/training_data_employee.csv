@@ -1,6 +1,0 @@
-query_id,query_length,num_tables,num_joins,query_depth,complexity_score,has_aggregates,has_group_by,has_order_by,has_limit,has_distinct,has_window_functions,has_outer_joins,estimated_join_complexity,has_subqueries,has_correlated_subqueries,has_large_tables,all_tables_small,has_complex_expressions,has_user_functions,has_text_operations,has_numeric_heavy_ops,num_aggregate_funcs,analytical_pattern,transactional_pattern,etl_pattern,command_type,pg_time_ms,duck_time_ms,optimal_engine
-employee_8777,112,1,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0.36023196298629045,53.278313018381596,postgres
-employee_4520,81,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0.7686630124226213,12.820759904570878,postgres
-employee_5333,102,1,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0.31271902844309807,14.236732036806643,postgres
-employee_669,136,1,0,0,1,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0.31637807842344046,12.281817966140807,postgres
-employee_6231,445,4,3,3,4,1,1,1,1,0,0,1,6,0,0,0,0,0,0,0,1,1,0,1,0,0,-1,-1,unknown

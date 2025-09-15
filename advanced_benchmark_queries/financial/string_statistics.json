@@ -1,0 +1,474 @@
+{
+  "trans": {
+    "type": {
+      "min_length": 5,
+      "max_length": 6,
+      "avg_length": 5.383485118146017,
+      "top_values": [
+        [
+          "VYDAJ",
+          634571
+        ],
+        [
+          "PRIJEM",
+          405083
+        ],
+        [
+          "VYBER",
+          16666
+        ]
+      ],
+      "total_unique": 3
+    },
+    "operation": {
+      "min_length": 5,
+      "max_length": 14,
+      "avg_length": 7.808738144263782,
+      "top_values": [
+        [
+          "VYBER",
+          434918
+        ],
+        [
+          "PREVOD NA UCET",
+          208283
+        ],
+        [
+          "VKLAD",
+          156743
+        ],
+        [
+          "PREVOD Z UCTU",
+          65226
+        ],
+        [
+          "VYBER KARTOU",
+          8036
+        ]
+      ],
+      "total_unique": 5
+    },
+    "k_symbol": {
+      "min_length": 1,
+      "max_length": 11,
+      "avg_length": 4.517165443154103,
+      "top_values": [
+        [
+          "UROK",
+          183114
+        ],
+        [
+          "SLUZBY",
+          155832
+        ],
+        [
+          "SIPO",
+          118065
+        ],
+        [
+          " ",
+          53433
+        ],
+        [
+          "DUCHOD",
+          30338
+        ],
+        [
+          "POJISTNE",
+          18500
+        ],
+        [
+          "UVER",
+          13580
+        ],
+        [
+          "SANKC. UROK",
+          1577
+        ]
+      ],
+      "total_unique": 8
+    },
+    "bank": {
+      "min_length": 2,
+      "max_length": 2,
+      "avg_length": 2.0,
+      "top_values": [
+        [
+          "QR",
+          22285
+        ],
+        [
+          "AB",
+          21720
+        ],
+        [
+          "ST",
+          21711
+        ],
+        [
+          "YZ",
+          21582
+        ],
+        [
+          "GH",
+          21499
+        ],
+        [
+          "EF",
+          21293
+        ],
+        [
+          "KL",
+          21234
+        ],
+        [
+          "UV",
+          21167
+        ],
+        [
+          "OP",
+          21094
+        ],
+        [
+          "IJ",
+          20525
+        ],
+        [
+          "WX",
+          20178
+        ],
+        [
+          "MN",
+          19623
+        ],
+        [
+          "CD",
+          19597
+        ]
+      ],
+      "total_unique": 13
+    }
+  },
+  "district": {
+    "A2": {
+      "min_length": 4,
+      "max_length": 19,
+      "avg_length": 9.103896103896103,
+      "top_values": [
+        [
+          "Litomerice",
+          1
+        ],
+        [
+          "Rakovnik",
+          1
+        ],
+        [
+          "Rychnov nad Kneznou",
+          1
+        ],
+        [
+          "Zdar nad Sazavou",
+          1
+        ],
+        [
+          "Benesov",
+          1
+        ],
+        [
+          "Hradec Kralove",
+          1
+        ],
+        [
+          "Kolin",
+          1
+        ],
+        [
+          "Sumperk",
+          1
+        ],
+        [
+          "Klatovy",
+          1
+        ],
+        [
+          "Tachov",
+          1
+        ],
+        [
+          "Tabor",
+          1
+        ],
+        [
+          "Cheb",
+          1
+        ],
+        [
+          "Chrudim",
+          1
+        ],
+        [
+          "Most",
+          1
+        ],
+        [
+          "Breclav",
+          1
+        ],
+        [
+          "Prerov",
+          1
+        ],
+        [
+          "Uherske Hradiste",
+          1
+        ],
+        [
+          "Louny",
+          1
+        ],
+        [
+          "Znojmo",
+          1
+        ],
+        [
+          "Karlovy Vary",
+          1
+        ]
+      ],
+      "total_unique": 77
+    },
+    "A3": {
+      "min_length": 6,
+      "max_length": 15,
+      "avg_length": 12.948051948051948,
+      "top_values": [
+        [
+          "south Moravia",
+          14
+        ],
+        [
+          "central Bohemia",
+          12
+        ],
+        [
+          "east Bohemia",
+          11
+        ],
+        [
+          "north Moravia",
+          11
+        ],
+        [
+          "north Bohemia",
+          10
+        ],
+        [
+          "west Bohemia",
+          10
+        ],
+        [
+          "south Bohemia",
+          8
+        ],
+        [
+          "Prague",
+          1
+        ]
+      ],
+      "total_unique": 8
+    }
+  },
+  "account": {
+    "frequency": {
+      "min_length": 14,
+      "max_length": 18,
+      "avg_length": 15.934666666666667,
+      "top_values": [
+        [
+          "POPLATEK MESICNE",
+          4167
+        ],
+        [
+          "POPLATEK TYDNE",
+          240
+        ],
+        [
+          "POPLATEK PO OBRATU",
+          93
+        ]
+      ],
+      "total_unique": 3
+    }
+  },
+  "loan": {
+    "status": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          "C",
+          403
+        ],
+        [
+          "A",
+          203
+        ],
+        [
+          "D",
+          45
+        ],
+        [
+          "B",
+          31
+        ]
+      ],
+      "total_unique": 4
+    }
+  },
+  "card": {
+    "type": {
+      "min_length": 4,
+      "max_length": 7,
+      "avg_length": 6.541479820627803,
+      "top_values": [
+        [
+          "classic",
+          659
+        ],
+        [
+          "junior",
+          145
+        ],
+        [
+          "gold",
+          88
+        ]
+      ],
+      "total_unique": 3
+    }
+  },
+  "client": {
+    "gender": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          "M",
+          2724
+        ],
+        [
+          "F",
+          2645
+        ]
+      ],
+      "total_unique": 2
+    }
+  },
+  "disp": {
+    "type": {
+      "min_length": 5,
+      "max_length": 9,
+      "avg_length": 5.647420376233936,
+      "top_values": [
+        [
+          "OWNER",
+          4500
+        ],
+        [
+          "DISPONENT",
+          869
+        ]
+      ],
+      "total_unique": 2
+    }
+  },
+  "order": {
+    "bank_to": {
+      "min_length": 2,
+      "max_length": 2,
+      "avg_length": 2.0,
+      "top_values": [
+        [
+          "QR",
+          531
+        ],
+        [
+          "YZ",
+          521
+        ],
+        [
+          "AB",
+          519
+        ],
+        [
+          "WX",
+          515
+        ],
+        [
+          "ST",
+          511
+        ],
+        [
+          "KL",
+          500
+        ],
+        [
+          "UV",
+          499
+        ],
+        [
+          "IJ",
+          496
+        ],
+        [
+          "GH",
+          487
+        ],
+        [
+          "OP",
+          485
+        ],
+        [
+          "EF",
+          483
+        ],
+        [
+          "MN",
+          466
+        ],
+        [
+          "CD",
+          458
+        ]
+      ],
+      "total_unique": 13
+    },
+    "k_symbol": {
+      "min_length": 4,
+      "max_length": 8,
+      "avg_length": 4.6188138256087985,
+      "top_values": [
+        [
+          "SIPO",
+          3502
+        ],
+        [
+          "UVER",
+          717
+        ],
+        [
+          "POJISTNE",
+          532
+        ],
+        [
+          "LEASING",
+          341
+        ]
+      ],
+      "total_unique": 4
+    }
+  }
+}

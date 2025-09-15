@@ -1,0 +1,296 @@
+{
+  "tables": {
+    "account": [
+      {
+        "name": "account_id",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "district_id",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "frequency",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "date",
+        "type": "date",
+        "nullable": true
+      }
+    ],
+    "card": [
+      {
+        "name": "card_id",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "disp_id",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "type",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "issued",
+        "type": "date",
+        "nullable": true
+      }
+    ],
+    "client": [
+      {
+        "name": "client_id",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "gender",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "birth_date",
+        "type": "date",
+        "nullable": true
+      },
+      {
+        "name": "district_id",
+        "type": "integer",
+        "nullable": true
+      }
+    ],
+    "disp": [
+      {
+        "name": "disp_id",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "client_id",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "account_id",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "type",
+        "type": "character varying",
+        "nullable": true
+      }
+    ],
+    "district": [
+      {
+        "name": "district_id",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "A2",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "A3",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "A4",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "A5",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "A6",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "A7",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "A8",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "A9",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "A10",
+        "type": "numeric",
+        "nullable": true
+      },
+      {
+        "name": "A11",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "A12",
+        "type": "numeric",
+        "nullable": true
+      },
+      {
+        "name": "A13",
+        "type": "numeric",
+        "nullable": true
+      },
+      {
+        "name": "A14",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "A15",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "A16",
+        "type": "integer",
+        "nullable": true
+      }
+    ],
+    "loan": [
+      {
+        "name": "loan_id",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "account_id",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "date",
+        "type": "date",
+        "nullable": true
+      },
+      {
+        "name": "amount",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "duration",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "payments",
+        "type": "numeric",
+        "nullable": true
+      },
+      {
+        "name": "status",
+        "type": "character varying",
+        "nullable": true
+      }
+    ],
+    "order": [
+      {
+        "name": "order_id",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "account_id",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "bank_to",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "account_to",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "amount",
+        "type": "numeric",
+        "nullable": true
+      },
+      {
+        "name": "k_symbol",
+        "type": "character varying",
+        "nullable": true
+      }
+    ],
+    "trans": [
+      {
+        "name": "trans_id",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "account_id",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "date",
+        "type": "date",
+        "nullable": true
+      },
+      {
+        "name": "type",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "operation",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "amount",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "balance",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "k_symbol",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "bank",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "account",
+        "type": "bigint",
+        "nullable": true
+      }
+    ]
+  },
+  "relationships": []
+}

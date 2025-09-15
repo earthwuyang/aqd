@@ -1,0 +1,944 @@
+{
+  "account": {
+    "account_id": {
+      "datatype": "integer",
+      "total_count": 4500,
+      "non_null_count": 4500,
+      "unique_count": 4500,
+      "null_frac": 0.0,
+      "min": 1.0,
+      "max": 11382.0,
+      "mean": 2786.0675555555554,
+      "percentiles": [
+        1.0,
+        1182.75,
+        2368.0,
+        3552.25,
+        11382.0
+      ]
+    },
+    "district_id": {
+      "datatype": "integer",
+      "total_count": 4500,
+      "non_null_count": 4500,
+      "unique_count": 77,
+      "null_frac": 0.0,
+      "min": 1.0,
+      "max": 77.0,
+      "mean": 37.31044444444444,
+      "percentiles": [
+        1.0,
+        13.0,
+        38.0,
+        60.0,
+        77.0
+      ]
+    },
+    "frequency": {
+      "datatype": "categorical",
+      "total_count": 4500,
+      "non_null_count": 4500,
+      "unique_count": 3,
+      "null_frac": 0.0,
+      "unique_values": [
+        "POPLATEK PO OBRATU",
+        "POPLATEK TYDNE",
+        "POPLATEK MESICNE"
+      ]
+    },
+    "date": {
+      "datatype": "date",
+      "total_count": 4500,
+      "non_null_count": 4500,
+      "unique_count": 1535,
+      "null_frac": 0.0
+    }
+  },
+  "card": {
+    "card_id": {
+      "datatype": "integer",
+      "total_count": 892,
+      "non_null_count": 892,
+      "unique_count": 892,
+      "null_frac": 0.0,
+      "min": 1.0,
+      "max": 1247.0,
+      "mean": 480.85538116591925,
+      "percentiles": [
+        1.0,
+        229.75,
+        456.5,
+        684.25,
+        1247.0
+      ]
+    },
+    "disp_id": {
+      "datatype": "integer",
+      "total_count": 892,
+      "non_null_count": 892,
+      "unique_count": 892,
+      "null_frac": 0.0,
+      "min": 9.0,
+      "max": 13660.0,
+      "mean": 3511.8621076233185,
+      "percentiles": [
+        9.0,
+        1387.0,
+        2938.5,
+        4459.5,
+        13660.0
+      ]
+    },
+    "type": {
+      "datatype": "categorical",
+      "total_count": 892,
+      "non_null_count": 892,
+      "unique_count": 3,
+      "null_frac": 0.0,
+      "unique_values": [
+        "classic",
+        "junior",
+        "gold"
+      ]
+    },
+    "issued": {
+      "datatype": "date",
+      "total_count": 892,
+      "non_null_count": 892,
+      "unique_count": 607,
+      "null_frac": 0.0
+    }
+  },
+  "client": {
+    "client_id": {
+      "datatype": "integer",
+      "total_count": 5369,
+      "non_null_count": 5369,
+      "unique_count": 5369,
+      "null_frac": 0.0,
+      "min": 1.0,
+      "max": 13998.0,
+      "mean": 3359.0119202831065,
+      "percentiles": [
+        1.0,
+        1418.0,
+        2839.0,
+        4257.0,
+        13998.0
+      ]
+    },
+    "gender": {
+      "datatype": "categorical",
+      "total_count": 5369,
+      "non_null_count": 5369,
+      "unique_count": 2,
+      "null_frac": 0.0,
+      "unique_values": [
+        "M",
+        "F"
+      ]
+    },
+    "birth_date": {
+      "datatype": "date",
+      "total_count": 5369,
+      "non_null_count": 5369,
+      "unique_count": 4738,
+      "null_frac": 0.0
+    },
+    "district_id": {
+      "datatype": "integer",
+      "total_count": 5369,
+      "non_null_count": 5369,
+      "unique_count": 77,
+      "null_frac": 0.0,
+      "min": 1.0,
+      "max": 77.0,
+      "mean": 37.31011361519836,
+      "percentiles": [
+        1.0,
+        14.0,
+        38.0,
+        60.0,
+        77.0
+      ]
+    }
+  },
+  "disp": {
+    "disp_id": {
+      "datatype": "integer",
+      "total_count": 5369,
+      "non_null_count": 5369,
+      "unique_count": 5369,
+      "null_frac": 0.0,
+      "min": 1.0,
+      "max": 13690.0,
+      "mean": 3337.0979698267834,
+      "percentiles": [
+        1.0,
+        1418.0,
+        2839.0,
+        4257.0,
+        13690.0
+      ]
+    },
+    "client_id": {
+      "datatype": "integer",
+      "total_count": 5369,
+      "non_null_count": 5369,
+      "unique_count": 5369,
+      "null_frac": 0.0,
+      "min": 1.0,
+      "max": 13998.0,
+      "mean": 3359.0119202831065,
+      "percentiles": [
+        1.0,
+        1418.0,
+        2839.0,
+        4257.0,
+        13998.0
+      ]
+    },
+    "account_id": {
+      "datatype": "integer",
+      "total_count": 5369,
+      "non_null_count": 5369,
+      "unique_count": 4500,
+      "null_frac": 0.0,
+      "min": 1.0,
+      "max": 11382.0,
+      "mean": 2767.4969268020113,
+      "percentiles": [
+        1.0,
+        1178.0,
+        2349.0,
+        3526.0,
+        11382.0
+      ]
+    },
+    "type": {
+      "datatype": "categorical",
+      "total_count": 5369,
+      "non_null_count": 5369,
+      "unique_count": 2,
+      "null_frac": 0.0,
+      "unique_values": [
+        "DISPONENT",
+        "OWNER"
+      ]
+    }
+  },
+  "district": {
+    "district_id": {
+      "datatype": "integer",
+      "total_count": 77,
+      "non_null_count": 77,
+      "unique_count": 77,
+      "null_frac": 0.0,
+      "min": 1.0,
+      "max": 77.0,
+      "mean": 39.0,
+      "percentiles": [
+        1.0,
+        20.0,
+        39.0,
+        58.0,
+        77.0
+      ]
+    },
+    "A2": {
+      "datatype": "categorical",
+      "total_count": 77,
+      "non_null_count": 77,
+      "unique_count": 77,
+      "null_frac": 0.0,
+      "unique_values": [
+        "Karlovy Vary",
+        "Litomerice",
+        "Rakovnik",
+        "Rychnov nad Kneznou",
+        "Zdar nad Sazavou",
+        "Benesov",
+        "Hradec Kralove",
+        "Kolin",
+        "Sumperk",
+        "Klatovy",
+        "Tachov",
+        "Tabor",
+        "Cheb",
+        "Chrudim",
+        "Most",
+        "Breclav",
+        "Prerov",
+        "Uherske Hradiste",
+        "Louny",
+        "Znojmo",
+        "Beroun",
+        "Pardubice",
+        "Prostejov",
+        "Usti nad Labem",
+        "Prachatice",
+        "Zlin",
+        "Nachod",
+        "Decin",
+        "Vsetin",
+        "Blansko",
+        "Usti nad Orlici",
+        "Novy Jicin",
+        "Pisek",
+        "Kladno",
+        "Jesenik",
+        "Plzen - mesto",
+        "Jihlava",
+        "Trutnov",
+        "Nymburk",
+        "Semily",
+        "Plzen - sever",
+        "Sokolov",
+        "Karvina",
+        "Jicin",
+        "Ceska Lipa",
+        "Kromeriz",
+        "Brno - venkov",
+        "Teplice",
+        "Domazlice",
+        "Brno - mesto",
+        "Svitavy",
+        "Strakonice",
+        "Bruntal",
+        "Ceske Budejovice",
+        "Hodonin",
+        "Rokycany",
+        "Jindrichuv Hradec",
+        "Liberec",
+        "Melnik",
+        "Chomutov",
+        "Plzen - jih",
+        "Olomouc",
+        "Havlickuv Brod",
+        "Praha - vychod",
+        "Cesky Krumlov",
+        "Opava",
+        "Pelhrimov",
+        "Ostrava - mesto",
+        "Jablonec n. Nisou",
+        "Kutna Hora",
+        "Frydek - Mistek",
+        "Vyskov",
+        "Trebic",
+        "Mlada Boleslav",
+        "Pribram",
+        "Hl.m. Praha",
+        "Praha - zapad"
+      ]
+    },
+    "A3": {
+      "datatype": "categorical",
+      "total_count": 77,
+      "non_null_count": 77,
+      "unique_count": 8,
+      "null_frac": 0.0,
+      "unique_values": [
+        "north Bohemia",
+        "south Moravia",
+        "west Bohemia",
+        "south Bohemia",
+        "east Bohemia",
+        "central Bohemia",
+        "north Moravia",
+        "Prague"
+      ]
+    },
+    "A4": {
+      "datatype": "integer",
+      "total_count": 77,
+      "non_null_count": 77,
+      "unique_count": 77,
+      "null_frac": 0.0,
+      "min": 42821.0,
+      "max": 1204953.0,
+      "mean": 133884.8961038961,
+      "percentiles": [
+        42821.0,
+        85852.0,
+        108871.0,
+        139012.0,
+        1204953.0
+      ]
+    },
+    "A5": {
+      "datatype": "integer",
+      "total_count": 77,
+      "non_null_count": 77,
+      "unique_count": 53,
+      "null_frac": 0.0,
+      "min": 0.0,
+      "max": 151.0,
+      "mean": 48.62337662337662,
+      "percentiles": [
+        0.0,
+        22.0,
+        49.0,
+        71.0,
+        151.0
+      ]
+    },
+    "A6": {
+      "datatype": "integer",
+      "total_count": 77,
+      "non_null_count": 77,
+      "unique_count": 36,
+      "null_frac": 0.0,
+      "min": 0.0,
+      "max": 70.0,
+      "mean": 24.324675324675326,
+      "percentiles": [
+        0.0,
+        16.0,
+        25.0,
+        32.0,
+        70.0
+      ]
+    },
+    "A7": {
+      "datatype": "integer",
+      "total_count": 77,
+      "non_null_count": 77,
+      "unique_count": 17,
+      "null_frac": 0.0,
+      "min": 0.0,
+      "max": 20.0,
+      "mean": 6.2727272727272725,
+      "percentiles": [
+        0.0,
+        4.0,
+        6.0,
+        8.0,
+        20.0
+      ]
+    },
+    "A8": {
+      "datatype": "integer",
+      "total_count": 77,
+      "non_null_count": 77,
+      "unique_count": 6,
+      "null_frac": 0.0,
+      "min": 0.0,
+      "max": 5.0,
+      "mean": 1.7272727272727273,
+      "percentiles": [
+        0.0,
+        1.0,
+        2.0,
+        2.0,
+        5.0
+      ]
+    },
+    "A9": {
+      "datatype": "integer",
+      "total_count": 77,
+      "non_null_count": 77,
+      "unique_count": 11,
+      "null_frac": 0.0,
+      "min": 1.0,
+      "max": 11.0,
+      "mean": 6.259740259740259,
+      "percentiles": [
+        1.0,
+        5.0,
+        6.0,
+        8.0,
+        11.0
+      ]
+    },
+    "A10": {
+      "datatype": "numeric",
+      "total_count": 77,
+      "non_null_count": 77,
+      "unique_count": 70,
+      "null_frac": 0.0,
+      "min": 33.9,
+      "max": 100.0,
+      "mean": 63.03506493506494,
+      "percentiles": [
+        33.9,
+        51.9,
+        59.8,
+        73.5,
+        100.0
+      ]
+    },
+    "A11": {
+      "datatype": "integer",
+      "total_count": 77,
+      "non_null_count": 77,
+      "unique_count": 76,
+      "null_frac": 0.0,
+      "min": 8110.0,
+      "max": 12541.0,
+      "mean": 9031.675324675325,
+      "percentiles": [
+        8110.0,
+        8512.0,
+        8814.0,
+        9317.0,
+        12541.0
+      ]
+    },
+    "A12": {
+      "datatype": "numeric",
+      "total_count": 77,
+      "non_null_count": 76,
+      "unique_count": 41,
+      "null_frac": 0.012987012987012991,
+      "min": 0.2,
+      "max": 7.3,
+      "mean": 3.0723684210526314,
+      "percentiles": [
+        0.2,
+        1.7,
+        2.8,
+        3.8499999999999996,
+        7.3
+      ]
+    },
+    "A13": {
+      "datatype": "numeric",
+      "total_count": 77,
+      "non_null_count": 77,
+      "unique_count": 73,
+      "null_frac": 0.0,
+      "min": 0.43,
+      "max": 9.4,
+      "mean": 3.787012987012987,
+      "percentiles": [
+        0.43,
+        2.31,
+        3.6,
+        4.79,
+        9.4
+      ]
+    },
+    "A14": {
+      "datatype": "integer",
+      "total_count": 77,
+      "non_null_count": 77,
+      "unique_count": 44,
+      "null_frac": 0.0,
+      "min": 81.0,
+      "max": 167.0,
+      "mean": 116.12987012987013,
+      "percentiles": [
+        81.0,
+        105.0,
+        113.0,
+        126.0,
+        167.0
+      ]
+    },
+    "A15": {
+      "datatype": "integer",
+      "total_count": 77,
+      "non_null_count": 76,
+      "unique_count": 75,
+      "null_frac": 0.012987012987012991,
+      "min": 818.0,
+      "max": 85677.0,
+      "mean": 4850.315789473684,
+      "percentiles": [
+        818.0,
+        2029.75,
+        2932.0,
+        4525.5,
+        85677.0
+      ]
+    },
+    "A16": {
+      "datatype": "integer",
+      "total_count": 77,
+      "non_null_count": 77,
+      "unique_count": 76,
+      "null_frac": 0.0,
+      "min": 888.0,
+      "max": 99107.0,
+      "mean": 5030.831168831169,
+      "percentiles": [
+        888.0,
+        2122.0,
+        3040.0,
+        4595.0,
+        99107.0
+      ]
+    }
+  },
+  "loan": {
+    "loan_id": {
+      "datatype": "integer",
+      "total_count": 682,
+      "non_null_count": 682,
+      "unique_count": 682,
+      "null_frac": 0.0,
+      "min": 4959.0,
+      "max": 7308.0,
+      "mean": 6172.466275659824,
+      "percentiles": [
+        4959.0,
+        5577.5,
+        6176.5,
+        6752.5,
+        7308.0
+      ]
+    },
+    "account_id": {
+      "datatype": "integer",
+      "total_count": 682,
+      "non_null_count": 682,
+      "unique_count": 682,
+      "null_frac": 0.0,
+      "min": 2.0,
+      "max": 11362.0,
+      "mean": 5824.162756598241,
+      "percentiles": [
+        2.0,
+        2967.0,
+        5738.5,
+        8686.0,
+        11362.0
+      ]
+    },
+    "date": {
+      "datatype": "date",
+      "total_count": 682,
+      "non_null_count": 682,
+      "unique_count": 559,
+      "null_frac": 0.0
+    },
+    "amount": {
+      "datatype": "integer",
+      "total_count": 682,
+      "non_null_count": 682,
+      "unique_count": 645,
+      "null_frac": 0.0,
+      "min": 4980.0,
+      "max": 590820.0,
+      "mean": 151410.1759530792,
+      "percentiles": [
+        4980.0,
+        66732.0,
+        116928.0,
+        210654.0,
+        590820.0
+      ]
+    },
+    "duration": {
+      "datatype": "integer",
+      "total_count": 682,
+      "non_null_count": 682,
+      "unique_count": 5,
+      "null_frac": 0.0,
+      "min": 12.0,
+      "max": 60.0,
+      "mean": 36.49266862170088,
+      "percentiles": [
+        12.0,
+        24.0,
+        36.0,
+        48.0,
+        60.0
+      ]
+    },
+    "payments": {
+      "datatype": "numeric",
+      "total_count": 682,
+      "non_null_count": 682,
+      "unique_count": 577,
+      "null_frac": 0.0,
+      "min": 304.0,
+      "max": 9910.0,
+      "mean": 4190.6642228739,
+      "percentiles": [
+        304.0,
+        2477.0,
+        3934.0,
+        5813.5,
+        9910.0
+      ]
+    },
+    "status": {
+      "datatype": "categorical",
+      "total_count": 682,
+      "non_null_count": 682,
+      "unique_count": 4,
+      "null_frac": 0.0,
+      "unique_values": [
+        "D",
+        "A",
+        "C",
+        "B"
+      ]
+    }
+  },
+  "order": {
+    "order_id": {
+      "datatype": "integer",
+      "total_count": 6471,
+      "non_null_count": 6471,
+      "unique_count": 6471,
+      "null_frac": 0.0,
+      "min": 29401.0,
+      "max": 46338.0,
+      "mean": 33778.197496522946,
+      "percentiles": [
+        29401.0,
+        31187.5,
+        32988.0,
+        34785.5,
+        46338.0
+      ]
+    },
+    "account_id": {
+      "datatype": "integer",
+      "total_count": 6471,
+      "non_null_count": 6471,
+      "unique_count": 3758,
+      "null_frac": 0.0,
+      "min": 1.0,
+      "max": 11362.0,
+      "mean": 2962.302889816103,
+      "percentiles": [
+        1.0,
+        1223.0,
+        2433.0,
+        3645.5,
+        11362.0
+      ]
+    },
+    "bank_to": {
+      "datatype": "categorical",
+      "total_count": 6471,
+      "non_null_count": 6471,
+      "unique_count": 13,
+      "null_frac": 0.0,
+      "unique_values": [
+        "MN",
+        "UV",
+        "QR",
+        "WX",
+        "GH",
+        "YZ",
+        "EF",
+        "AB",
+        "IJ",
+        "ST",
+        "KL",
+        "OP",
+        "CD"
+      ]
+    },
+    "account_to": {
+      "datatype": "integer",
+      "total_count": 6471,
+      "non_null_count": 6471,
+      "unique_count": 6446,
+      "null_frac": 0.0,
+      "min": 399.0,
+      "max": 99994199.0,
+      "mean": 49399036.8511822,
+      "percentiles": [
+        399.0,
+        24159184.0,
+        49756062.0,
+        74000447.5,
+        99994199.0
+      ]
+    },
+    "amount": {
+      "datatype": "numeric",
+      "total_count": 6471,
+      "non_null_count": 6471,
+      "unique_count": 4412,
+      "null_frac": 0.0,
+      "min": 1.0,
+      "max": 14882.0,
+      "mean": 3280.6356977283262,
+      "percentiles": [
+        1.0,
+        1241.5,
+        2596.0,
+        4613.5,
+        14882.0
+      ]
+    },
+    "k_symbol": {
+      "datatype": "categorical",
+      "total_count": 6471,
+      "non_null_count": 5092,
+      "unique_count": 4,
+      "null_frac": 0.21310462061505175,
+      "unique_values": [
+        "POJISTNE",
+        "LEASING",
+        "SIPO",
+        "UVER"
+      ]
+    }
+  },
+  "trans": {
+    "trans_id": {
+      "datatype": "integer",
+      "total_count": 1056320,
+      "non_null_count": 1056320,
+      "unique_count": 1056320,
+      "null_frac": 0.0,
+      "min": 1.0,
+      "max": 3682987.0,
+      "mean": 1335310.7043301272,
+      "percentiles": [
+        1.0,
+        430262.75,
+        858506.5,
+        2060979.25,
+        3682987.0
+      ]
+    },
+    "account_id": {
+      "datatype": "integer",
+      "total_count": 1056320,
+      "non_null_count": 1056320,
+      "unique_count": 4500,
+      "null_frac": 0.0,
+      "min": 1.0,
+      "max": 11382.0,
+      "mean": 2936.8672902150865,
+      "percentiles": [
+        1.0,
+        1204.0,
+        2434.0,
+        3660.0,
+        11382.0
+      ]
+    },
+    "date": {
+      "datatype": "date",
+      "total_count": 1056320,
+      "non_null_count": 1056320,
+      "unique_count": 2191,
+      "null_frac": 0.0
+    },
+    "type": {
+      "datatype": "categorical",
+      "total_count": 1056320,
+      "non_null_count": 1056320,
+      "unique_count": 3,
+      "null_frac": 0.0,
+      "unique_values": [
+        "PRIJEM",
+        "VYBER",
+        "VYDAJ"
+      ]
+    },
+    "operation": {
+      "datatype": "categorical",
+      "total_count": 1056320,
+      "non_null_count": 873206,
+      "unique_count": 5,
+      "null_frac": 0.1733508785216601,
+      "unique_values": [
+        "PREVOD NA UCET",
+        "PREVOD Z UCTU",
+        "VKLAD",
+        "VYBER",
+        "VYBER KARTOU"
+      ]
+    },
+    "amount": {
+      "datatype": "integer",
+      "total_count": 1056320,
+      "non_null_count": 1056320,
+      "unique_count": 35890,
+      "null_frac": 0.0,
+      "min": 0.0,
+      "max": 87400.0,
+      "mean": 5924.210653021812,
+      "percentiles": [
+        0.0,
+        136.0,
+        2100.0,
+        6800.0,
+        87400.0
+      ]
+    },
+    "balance": {
+      "datatype": "integer",
+      "total_count": 1056320,
+      "non_null_count": 1056320,
+      "unique_count": 111042,
+      "null_frac": 0.0,
+      "min": -41126.0,
+      "max": 209637.0,
+      "mean": 38518.37913416389,
+      "percentiles": [
+        -41126.0,
+        22403.0,
+        33143.0,
+        49604.0,
+        209637.0
+      ]
+    },
+    "k_symbol": {
+      "datatype": "categorical",
+      "total_count": 1056320,
+      "non_null_count": 574439,
+      "unique_count": 8,
+      "null_frac": 0.45618846561647985,
+      "unique_values": [
+        " ",
+        "DUCHOD",
+        "POJISTNE",
+        "SANKC. UROK",
+        "SIPO",
+        "SLUZBY",
+        "UROK",
+        "UVER"
+      ]
+    },
+    "bank": {
+      "datatype": "categorical",
+      "total_count": 1056320,
+      "non_null_count": 273508,
+      "unique_count": 13,
+      "null_frac": 0.7410746743411087,
+      "unique_values": [
+        "AB",
+        "CD",
+        "EF",
+        "GH",
+        "IJ",
+        "KL",
+        "MN",
+        "OP",
+        "QR",
+        "ST",
+        "UV",
+        "WX",
+        "YZ"
+      ]
+    },
+    "account": {
+      "datatype": "integer",
+      "total_count": 1056320,
+      "non_null_count": 295389,
+      "unique_count": 7665,
+      "null_frac": 0.7203603074825811,
+      "min": 0.0,
+      "max": 99994199.0,
+      "mean": 45670919.374915786,
+      "percentiles": [
+        0.0,
+        17828584.0,
+        45750951.0,
+        72013407.0,
+        99994199.0
+      ]
+    }
+  }
+}

@@ -1,0 +1,2900 @@
+{
+  "L_CANCELLATION": {
+    "Code": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          "B",
+          1
+        ],
+        [
+          "C",
+          1
+        ],
+        [
+          "D",
+          1
+        ],
+        [
+          "A",
+          1
+        ]
+      ],
+      "total_unique": 4
+    },
+    "Description": {
+      "min_length": 7,
+      "max_length": 19,
+      "avg_length": 10.25,
+      "top_values": [
+        [
+          "Security",
+          1
+        ],
+        [
+          "Weather",
+          1
+        ],
+        [
+          "National Air System",
+          1
+        ],
+        [
+          "Carrier",
+          1
+        ]
+      ],
+      "total_unique": 4
+    }
+  },
+  "L_WEEKDAYS": {
+    "Description": {
+      "min_length": 6,
+      "max_length": 9,
+      "avg_length": 7.125,
+      "top_values": [
+        [
+          "Unknown",
+          1
+        ],
+        [
+          "Thursday",
+          1
+        ],
+        [
+          "Friday",
+          1
+        ],
+        [
+          "Tuesday",
+          1
+        ],
+        [
+          "Saturday",
+          1
+        ],
+        [
+          "Sunday",
+          1
+        ],
+        [
+          "Wednesday",
+          1
+        ],
+        [
+          "Monday",
+          1
+        ]
+      ],
+      "total_unique": 8
+    }
+  },
+  "L_CITY_MARKET_ID": {
+    "Description": {
+      "min_length": 7,
+      "max_length": 63,
+      "avg_length": 16.552933009371745,
+      "top_values": [
+        [
+          "Pendleton, OR",
+          1
+        ],
+        [
+          "Fort Dauphin, Madagascar",
+          1
+        ],
+        [
+          "Bradley Lake, AK",
+          1
+        ],
+        [
+          "Zuni Pueblo, NM",
+          1
+        ],
+        [
+          "San Ignacio de Velasco, Bolivia",
+          1
+        ],
+        [
+          "Nowra, Australia",
+          1
+        ],
+        [
+          "Quesnel, Canada",
+          1
+        ],
+        [
+          "Kokoro, Papua New Guinea",
+          1
+        ],
+        [
+          "Calabar, Nigeria",
+          1
+        ],
+        [
+          "Kattiniq, Canada",
+          1
+        ],
+        [
+          "Tapini, Papua New Guinea",
+          1
+        ],
+        [
+          "Obock, Djibouti",
+          1
+        ],
+        [
+          "Granville, France",
+          1
+        ],
+        [
+          "La Serena, Chile",
+          1
+        ],
+        [
+          "Smyrna, TN",
+          1
+        ],
+        [
+          "Resolute Bay, Canada",
+          1
+        ],
+        [
+          "San Felipe, Venezuela",
+          1
+        ],
+        [
+          "Maiana, Kiribati",
+          1
+        ],
+        [
+          "Clintonville, WI",
+          1
+        ],
+        [
+          "Esquel, Argentina",
+          1
+        ]
+      ],
+      "total_unique": 5762
+    }
+  },
+  "L_STATE_FIPS": {
+    "Description": {
+      "min_length": 4,
+      "max_length": 50,
+      "avg_length": 13.22972972972973,
+      "top_values": [
+        [
+          "U.S. Minor Outlying Islands",
+          2
+        ],
+        [
+          "Nevada",
+          1
+        ],
+        [
+          "Ohio",
+          1
+        ],
+        [
+          "New York",
+          1
+        ],
+        [
+          "West Virginia",
+          1
+        ],
+        [
+          "South Carolina",
+          1
+        ],
+        [
+          "New Mexico",
+          1
+        ],
+        [
+          "Hawaii",
+          1
+        ],
+        [
+          "Arkansas",
+          1
+        ],
+        [
+          "Palau (Fips Pub 55-3)",
+          1
+        ],
+        [
+          "Missouri",
+          1
+        ],
+        [
+          "Johnston Atoll",
+          1
+        ],
+        [
+          "South Dakota",
+          1
+        ],
+        [
+          "District of Columbia",
+          1
+        ],
+        [
+          "Midway Islands",
+          1
+        ],
+        [
+          "States With Population <2,000,000 (Npts)",
+          1
+        ],
+        [
+          "Marshall Islands (Fips Pub 55-3)",
+          1
+        ],
+        [
+          "Not Applicable",
+          1
+        ],
+        [
+          "Minnesota",
+          1
+        ],
+        [
+          "Vermont",
+          1
+        ]
+      ],
+      "total_unique": 73
+    }
+  },
+  "L_STATE_ABR_AVIATION": {
+    "Code": {
+      "min_length": 2,
+      "max_length": 2,
+      "avg_length": 2.0,
+      "top_values": [
+        [
+          "ND",
+          1
+        ],
+        [
+          "NV",
+          1
+        ],
+        [
+          "OH",
+          1
+        ],
+        [
+          "NY",
+          1
+        ],
+        [
+          "NS",
+          1
+        ],
+        [
+          "HI",
+          1
+        ],
+        [
+          "NL",
+          1
+        ],
+        [
+          "QC",
+          1
+        ],
+        [
+          "IN",
+          1
+        ],
+        [
+          "BC",
+          1
+        ],
+        [
+          "WV",
+          1
+        ],
+        [
+          "NE",
+          1
+        ],
+        [
+          "FL",
+          1
+        ],
+        [
+          "ME",
+          1
+        ],
+        [
+          "AR",
+          1
+        ],
+        [
+          "CT",
+          1
+        ],
+        [
+          "SD",
+          1
+        ],
+        [
+          "YT",
+          1
+        ],
+        [
+          "WY",
+          1
+        ],
+        [
+          "PE",
+          1
+        ]
+      ],
+      "total_unique": 67
+    },
+    "Description": {
+      "min_length": 4,
+      "max_length": 46,
+      "avg_length": 11.940298507462687,
+      "top_values": [
+        [
+          "Alberta, Canada",
+          1
+        ],
+        [
+          "Vermont",
+          1
+        ],
+        [
+          "Nevada",
+          1
+        ],
+        [
+          "Saskatchewan, Canada",
+          1
+        ],
+        [
+          "New York",
+          1
+        ],
+        [
+          "New Brunswick, Canada",
+          1
+        ],
+        [
+          "West Virginia",
+          1
+        ],
+        [
+          "South Carolina",
+          1
+        ],
+        [
+          "New Mexico",
+          1
+        ],
+        [
+          "Hawaii",
+          1
+        ],
+        [
+          "Arkansas",
+          1
+        ],
+        [
+          "Missouri",
+          1
+        ],
+        [
+          "South Dakota",
+          1
+        ],
+        [
+          "Northwest Territories, Canada",
+          1
+        ],
+        [
+          "District of Columbia",
+          1
+        ],
+        [
+          "Ohio",
+          1
+        ],
+        [
+          "Minnesota",
+          1
+        ],
+        [
+          "Washington",
+          1
+        ],
+        [
+          "Kentucky",
+          1
+        ],
+        [
+          "Oklahoma",
+          1
+        ]
+      ],
+      "total_unique": 67
+    }
+  },
+  "L_DISTANCE_GROUP_250": {
+    "Description": {
+      "min_length": 13,
+      "max_length": 22,
+      "avg_length": 15.454545454545455,
+      "top_values": [
+        [
+          "500-749 Miles",
+          1
+        ],
+        [
+          "1250-1499 Miles",
+          1
+        ],
+        [
+          "1750-1999 Miles",
+          1
+        ],
+        [
+          "2500 Miles and Greater",
+          1
+        ],
+        [
+          "250-499 Miles",
+          1
+        ],
+        [
+          "2250-2499 Miles",
+          1
+        ],
+        [
+          "1500-1749 Miles",
+          1
+        ],
+        [
+          "Less Than 250 Miles",
+          1
+        ],
+        [
+          "750-999 Miles",
+          1
+        ],
+        [
+          "1000-1249 Miles",
+          1
+        ],
+        [
+          "2000-2249 Miles",
+          1
+        ]
+      ],
+      "total_unique": 11
+    }
+  },
+  "L_AIRLINE_ID": {
+    "Description": {
+      "min_length": 8,
+      "max_length": 87,
+      "avg_length": 25.009316770186334,
+      "top_values": [
+        [
+          "Lloyd Aereo Boliviano S. A.: LB",
+          1
+        ],
+        [
+          "Aeronaves De Puerto Rico: XBQ",
+          1
+        ],
+        [
+          "Jet Aviation Business Jets AG: PP",
+          1
+        ],
+        [
+          "Mall Airways Inc.: SOA",
+          1
+        ],
+        [
+          "Lineas Aereas La-Tur Sa: LUQ",
+          1
+        ],
+        [
+          "Kar-Air Oy: KR (1)",
+          1
+        ],
+        [
+          "Five Star Airlines: FFQ",
+          1
+        ],
+        [
+          "Amerijet International: M6",
+          1
+        ],
+        [
+          "Ghana Airways Corporation: GH",
+          1
+        ],
+        [
+          "Vanguard Airlines Inc.: NJ",
+          1
+        ],
+        [
+          "Virgin Atlantic Airways: VS",
+          1
+        ],
+        [
+          "Air Pennsylvania: PER",
+          1
+        ],
+        [
+          "Hyannis Aviation: HYA",
+          1
+        ],
+        [
+          "Sedalia Marshall Boonvl Stg: STG",
+          1
+        ],
+        [
+          "Volga-Dnepr Airlines: VIQ",
+          1
+        ],
+        [
+          "Soonair Lines Inc.: SOL",
+          1
+        ],
+        [
+          "Lake Union Air Service: LAS",
+          1
+        ],
+        [
+          "Temsco Airlines: TYE",
+          1
+        ],
+        [
+          "Westates Airlines: WTA",
+          1
+        ],
+        [
+          "Air South: ASH",
+          1
+        ]
+      ],
+      "total_unique": 1610
+    }
+  },
+  "L_DIVERSIONS": {
+    "Description": {
+      "min_length": 22,
+      "max_length": 70,
+      "avg_length": 34.285714285714285,
+      "top_values": [
+        [
+          "Three Diverted Airport Landings",
+          1
+        ],
+        [
+          "Five Diverted Airport Landings",
+          1
+        ],
+        [
+          "Four Diverted Airport Landings",
+          1
+        ],
+        [
+          "Two Diverted Airport Landings",
+          1
+        ],
+        [
+          "One Diverted Airport Landing",
+          1
+        ],
+        [
+          "Flight is not Diverted",
+          1
+        ],
+        [
+          "Air Return to Origin Airport where the Flight was Ultimately Cancelled",
+          1
+        ]
+      ],
+      "total_unique": 7
+    }
+  },
+  "L_UNIQUE_CARRIERS": {
+    "Code": {
+      "min_length": 2,
+      "max_length": 7,
+      "avg_length": 2.8335403726708077,
+      "top_values": [
+        [
+          "XDE",
+          1
+        ],
+        [
+          "CLF",
+          1
+        ],
+        [
+          "NEC",
+          1
+        ],
+        [
+          "FAC",
+          1
+        ],
+        [
+          "CMQ",
+          1
+        ],
+        [
+          "GMA",
+          1
+        ],
+        [
+          "4S (1)",
+          1
+        ],
+        [
+          "SN",
+          1
+        ],
+        [
+          "BEY",
+          1
+        ],
+        [
+          "V4",
+          1
+        ],
+        [
+          "IW",
+          1
+        ],
+        [
+          "0BQ",
+          1
+        ],
+        [
+          "ZX",
+          1
+        ],
+        [
+          "VV (2)",
+          1
+        ],
+        [
+          "RCA",
+          1
+        ],
+        [
+          "2BQ",
+          1
+        ],
+        [
+          "WGQ",
+          1
+        ],
+        [
+          "CCA",
+          1
+        ],
+        [
+          "BFQ",
+          1
+        ],
+        [
+          "NPT",
+          1
+        ]
+      ],
+      "total_unique": 1610
+    },
+    "Description": {
+      "min_length": 3,
+      "max_length": 82,
+      "avg_length": 20.13416149068323,
+      "top_values": [
+        [
+          "Service Aviation Inc.",
+          1
+        ],
+        [
+          "Air Central Inc.",
+          1
+        ],
+        [
+          "Island Airlines",
+          1
+        ],
+        [
+          "Colgan Airways Inc.",
+          1
+        ],
+        [
+          "Brower Airways Inc.",
+          1
+        ],
+        [
+          "Hawkins And Powers Aviation",
+          1
+        ],
+        [
+          "Buffalo Airways Inc.",
+          1
+        ],
+        [
+          "Helitrans",
+          1
+        ],
+        [
+          "Sun Pacific International",
+          1
+        ],
+        [
+          "Iran National Airlines Corp",
+          1
+        ],
+        [
+          "Iraqi Airways",
+          1
+        ],
+        [
+          "California Seaboard",
+          1
+        ],
+        [
+          "Air-Lift Associates Inc.",
+          1
+        ],
+        [
+          "Sun Country Airlines d/b/a MN Airlines",
+          1
+        ],
+        [
+          "Air Tahiti Nui",
+          1
+        ],
+        [
+          "Southeast Airlines Inc.",
+          1
+        ],
+        [
+          "Sky King Inc.",
+          1
+        ],
+        [
+          "Channel Flying Inc.",
+          1
+        ],
+        [
+          "Southern Jersey Airways",
+          1
+        ],
+        [
+          "Pacific International Airlines",
+          1
+        ]
+      ],
+      "total_unique": 1610
+    }
+  },
+  "L_AIRPORT": {
+    "Code": {
+      "min_length": 3,
+      "max_length": 3,
+      "avg_length": 3.0,
+      "top_values": [
+        [
+          "NPT",
+          1
+        ],
+        [
+          "ETH",
+          1
+        ],
+        [
+          "UUS",
+          1
+        ],
+        [
+          "BIX",
+          1
+        ],
+        [
+          "CLF",
+          1
+        ],
+        [
+          "CJI",
+          1
+        ],
+        [
+          "GUD",
+          1
+        ],
+        [
+          "VZX",
+          1
+        ],
+        [
+          "TKS",
+          1
+        ],
+        [
+          "RGA",
+          1
+        ],
+        [
+          "PWT",
+          1
+        ],
+        [
+          "OGD",
+          1
+        ],
+        [
+          "BEF",
+          1
+        ],
+        [
+          "YGQ",
+          1
+        ],
+        [
+          "MFE",
+          1
+        ],
+        [
+          "LQK",
+          1
+        ],
+        [
+          "PUU",
+          1
+        ],
+        [
+          "YLH",
+          1
+        ],
+        [
+          "HFF",
+          1
+        ],
+        [
+          "TSS",
+          1
+        ]
+      ],
+      "total_unique": 6385
+    },
+    "Description": {
+      "min_length": 17,
+      "max_length": 81,
+      "avg_length": 36.082380579483164,
+      "top_values": [
+        [
+          "Barrow, AK: Ice Strip",
+          3
+        ],
+        [
+          "Iwakuni, Japan: Iwakuni MCAS",
+          3
+        ],
+        [
+          "Doha, Qatar: Al Udeid Air Base",
+          3
+        ],
+        [
+          "Mulhouse, France: EuroAirport",
+          2
+        ],
+        [
+          "Comayagua, Honduras: Coronel Enrique Soto Cano AB",
+          2
+        ],
+        [
+          "Peach Springs, AZ: Grand Canyon West",
+          2
+        ],
+        [
+          "Bartletts, AK: Bartletts Airport",
+          2
+        ],
+        [
+          "Ugashik, AK: Ugashik Airport",
+          2
+        ],
+        [
+          "Burnie, Australia: Wynyard",
+          2
+        ],
+        [
+          "Austin, TX: Austin - Bergstrom International",
+          2
+        ],
+        [
+          "Eastsound, WA: Waldronaire",
+          2
+        ],
+        [
+          "Lyndonville, VT: Caledonia County",
+          2
+        ],
+        [
+          "Camp Springs, MD: Joint Base Andrews",
+          2
+        ],
+        [
+          "Tarbes/Lourdes/Pyrenees, France: Tarbes-Lourdes-Pyrenees",
+          2
+        ],
+        [
+          "Santa Ynez, CA: Santa Ynez Airport",
+          2
+        ],
+        [
+          "Yuma, AZ: Yuma MCAS/Yuma International",
+          2
+        ],
+        [
+          "Warroad, MN: Warroad International Memorial",
+          2
+        ],
+        [
+          "Challis, ID: Challis Airport",
+          2
+        ],
+        [
+          "Wasilla, AK: Wasilla Airport",
+          2
+        ],
+        [
+          "Goa, India: Goa Airport",
+          2
+        ]
+      ],
+      "total_unique": 6342
+    }
+  },
+  "L_MONTHS": {
+    "Description": {
+      "min_length": 3,
+      "max_length": 9,
+      "avg_length": 6.166666666666667,
+      "top_values": [
+        [
+          "March",
+          1
+        ],
+        [
+          "September",
+          1
+        ],
+        [
+          "May",
+          1
+        ],
+        [
+          "August",
+          1
+        ],
+        [
+          "December",
+          1
+        ],
+        [
+          "April",
+          1
+        ],
+        [
+          "July",
+          1
+        ],
+        [
+          "November",
+          1
+        ],
+        [
+          "June",
+          1
+        ],
+        [
+          "February",
+          1
+        ],
+        [
+          "January",
+          1
+        ],
+        [
+          "October",
+          1
+        ]
+      ],
+      "total_unique": 12
+    }
+  },
+  "L_ONTIME_DELAY_GROUPS": {
+    "Description": {
+      "min_length": 19,
+      "max_length": 32,
+      "avg_length": 29.466666666666665,
+      "top_values": [
+        [
+          "Delay between 75 to 89 minutes",
+          1
+        ],
+        [
+          "Delay >= 180 minutes",
+          1
+        ],
+        [
+          "Delay between 120 to 134 minutes",
+          1
+        ],
+        [
+          "Delay between 135 to 149 minutes",
+          1
+        ],
+        [
+          "Delay between 105 to 119 minutes",
+          1
+        ],
+        [
+          "Delay between 165 to 179 minutes",
+          1
+        ],
+        [
+          "Delay between 150 to 164 minutes",
+          1
+        ],
+        [
+          "Delay between 30 to 44 minutes",
+          1
+        ],
+        [
+          "Delay between -15 and -1 minutes",
+          1
+        ],
+        [
+          "Delay between 45 to 59 minutes",
+          1
+        ],
+        [
+          "Delay between 60 to 74 minutes",
+          1
+        ],
+        [
+          "Delay between 15 to 29 minutes",
+          1
+        ],
+        [
+          "Delay < -15 minutes",
+          1
+        ],
+        [
+          "Delay between 90 to 104 minutes",
+          1
+        ],
+        [
+          "Delay between 0 and 14 minutes",
+          1
+        ]
+      ],
+      "total_unique": 15
+    }
+  },
+  "L_AIRPORT_ID": {
+    "Description": {
+      "min_length": 17,
+      "max_length": 81,
+      "avg_length": 36.066875981161694,
+      "top_values": [
+        [
+          "Barrow, AK: Ice Strip",
+          3
+        ],
+        [
+          "Marietta, GA: Dobbins ARB",
+          2
+        ],
+        [
+          "Wasilla, AK: Wasilla Airport",
+          2
+        ],
+        [
+          "Oslo, Norway: Gardermoen",
+          2
+        ],
+        [
+          "Port Frederick, AK: Port Frederick Airport",
+          2
+        ],
+        [
+          "Three Forks, MT: Three Forks Airport",
+          2
+        ],
+        [
+          "Mulhouse, France: EuroAirport",
+          2
+        ],
+        [
+          "Peach Springs, AZ: Grand Canyon West",
+          2
+        ],
+        [
+          "Lake Havasu City, AZ: Lake Havasu City Airport",
+          2
+        ],
+        [
+          "Avalon, CA: Catalina",
+          2
+        ],
+        [
+          "New Bight, The Bahamas: New Bight Airport",
+          2
+        ],
+        [
+          "Alpine, AK: Alpine Airstrip",
+          2
+        ],
+        [
+          "Biloela, Australia: Biloela (Thangool)",
+          2
+        ],
+        [
+          "Bacolod, Philippines: Bacolod Airport",
+          2
+        ],
+        [
+          "Yuma, AZ: Yuma MCAS/Yuma International",
+          2
+        ],
+        [
+          "Ugashik, AK: Ugashik Airport",
+          2
+        ],
+        [
+          "Camp Springs, MD: Joint Base Andrews",
+          2
+        ],
+        [
+          "Tarbes/Lourdes/Pyrenees, France: Tarbes-Lourdes-Pyrenees",
+          2
+        ],
+        [
+          "Houston, TX: Transco Tower Galleria Heliport",
+          1
+        ],
+        [
+          "Lahr, Germany: Lahr Airport",
+          1
+        ]
+      ],
+      "total_unique": 6351
+    }
+  },
+  "L_WORLD_AREA_CODES": {
+    "Description": {
+      "min_length": 4,
+      "max_length": 46,
+      "avg_length": 10.591591591591591,
+      "top_values": [
+        [
+          "Puerto Rico",
+          2
+        ],
+        [
+          "Marshall Islands",
+          2
+        ],
+        [
+          "Georgia",
+          2
+        ],
+        [
+          "U.S. Virgin Islands",
+          2
+        ],
+        [
+          "Saint Martin",
+          1
+        ],
+        [
+          "Costa Rica",
+          1
+        ],
+        [
+          "Nepal",
+          1
+        ],
+        [
+          "Haiti",
+          1
+        ],
+        [
+          "Greenland",
+          1
+        ],
+        [
+          "Samoa",
+          1
+        ],
+        [
+          "People's Democratic Republic of Yemen",
+          1
+        ],
+        [
+          "Equatorial Guinea",
+          1
+        ],
+        [
+          "Antigua and Barbuda",
+          1
+        ],
+        [
+          "Somalia",
+          1
+        ],
+        [
+          "Bangladesh",
+          1
+        ],
+        [
+          "Gibraltar",
+          1
+        ],
+        [
+          "Wake Island",
+          1
+        ],
+        [
+          "Nevada",
+          1
+        ],
+        [
+          "Mayotte",
+          1
+        ],
+        [
+          "Andorra",
+          1
+        ]
+      ],
+      "total_unique": 329
+    }
+  },
+  "L_YESNO_RESP": {
+    "Description": {
+      "min_length": 2,
+      "max_length": 3,
+      "avg_length": 2.5,
+      "top_values": [
+        [
+          "No",
+          1
+        ],
+        [
+          "Yes",
+          1
+        ]
+      ],
+      "total_unique": 2
+    }
+  },
+  "L_AIRPORT_SEQ_ID": {
+    "Description": {
+      "min_length": 17,
+      "max_length": 81,
+      "avg_length": 35.86513726965025,
+      "top_values": [
+        [
+          "Cotulla, TX: Cotulla-La Salle County",
+          6
+        ],
+        [
+          "Mulhouse, France: EuroAirport",
+          6
+        ],
+        [
+          "Seletar, Singapore: Seletar Airport",
+          6
+        ],
+        [
+          "Canon City, CO: Fremont County",
+          6
+        ],
+        [
+          "Thandwe, Burma: Thandwe Airport",
+          5
+        ],
+        [
+          "Akiachak, AK: Akiachak Airport",
+          5
+        ],
+        [
+          "Luang Phabang, Laos: Luang Phabang International",
+          5
+        ],
+        [
+          "North Adams, MA: Harriman-and-West",
+          5
+        ],
+        [
+          "Bantry, Ireland: Bantry Airport",
+          5
+        ],
+        [
+          "Chakhcharan, Afghanistan: Chakhcharan Airport",
+          5
+        ],
+        [
+          "Harrogate, United Kingdom: Linton-On-Ouse",
+          5
+        ],
+        [
+          "Vava'u, Tonga: Vava'u International",
+          5
+        ],
+        [
+          "Nha-Trang, Vietnam: Nha Trang",
+          5
+        ],
+        [
+          "New Bern/Morehead/Beaufort, NC: Coastal Carolina Regional",
+          5
+        ],
+        [
+          "Chiayi, Taiwan: Chiayi Airport",
+          5
+        ],
+        [
+          "Garoua, Cameroon: Garoua Airport",
+          5
+        ],
+        [
+          "Lagos, Nigeria: Murtala Muhammed",
+          5
+        ],
+        [
+          "Peach Springs, AZ: Grand Canyon West",
+          5
+        ],
+        [
+          "Karachi, Pakistan: Jinnah International",
+          5
+        ],
+        [
+          "Can Tho, Vietnam: Can Tho Airport",
+          5
+        ]
+      ],
+      "total_unique": 7876
+    }
+  },
+  "L_QUARTERS": {
+    "Description": {
+      "min_length": 24,
+      "max_length": 30,
+      "avg_length": 27.25,
+      "top_values": [
+        [
+          "Quarter2:April 1-June 30",
+          1
+        ],
+        [
+          "Quarter3:July 1-September 30",
+          1
+        ],
+        [
+          "Quarter1:January 1-March 31",
+          1
+        ],
+        [
+          "Quarter4:October 1-December 31",
+          1
+        ]
+      ],
+      "total_unique": 4
+    }
+  },
+  "On_Time_On_Time_Performance_2016_1": {
+    "UniqueCarrier": {
+      "min_length": 2,
+      "max_length": 2,
+      "avg_length": 2.0,
+      "top_values": [
+        [
+          "WN",
+          104154
+        ],
+        [
+          "AA",
+          75580
+        ],
+        [
+          "DL",
+          69711
+        ],
+        [
+          "OO",
+          47619
+        ],
+        [
+          "EV",
+          41970
+        ],
+        [
+          "UA",
+          39761
+        ],
+        [
+          "B6",
+          23018
+        ],
+        [
+          "AS",
+          14205
+        ],
+        [
+          "NK",
+          11047
+        ],
+        [
+          "F9",
+          7099
+        ],
+        [
+          "HA",
+          6279
+        ],
+        [
+          "VX",
+          5384
+        ]
+      ],
+      "total_unique": 12
+    },
+    "Carrier": {
+      "min_length": 2,
+      "max_length": 2,
+      "avg_length": 2.0,
+      "top_values": [
+        [
+          "WN",
+          104154
+        ],
+        [
+          "AA",
+          75580
+        ],
+        [
+          "DL",
+          69711
+        ],
+        [
+          "OO",
+          47619
+        ],
+        [
+          "EV",
+          41970
+        ],
+        [
+          "UA",
+          39761
+        ],
+        [
+          "B6",
+          23018
+        ],
+        [
+          "AS",
+          14205
+        ],
+        [
+          "NK",
+          11047
+        ],
+        [
+          "F9",
+          7099
+        ],
+        [
+          "HA",
+          6279
+        ],
+        [
+          "VX",
+          5384
+        ]
+      ],
+      "total_unique": 12
+    },
+    "TailNum": {
+      "min_length": 5,
+      "max_length": 6,
+      "avg_length": 5.996926965032621,
+      "top_values": [
+        [
+          "N489HA",
+          358
+        ],
+        [
+          "N488HA",
+          354
+        ],
+        [
+          "N490HA",
+          340
+        ],
+        [
+          "N479HA",
+          337
+        ],
+        [
+          "N484HA",
+          335
+        ],
+        [
+          "N491HA",
+          332
+        ],
+        [
+          "N481HA",
+          296
+        ],
+        [
+          "N492HA",
+          294
+        ],
+        [
+          "N486HA",
+          283
+        ],
+        [
+          "N487HA",
+          277
+        ],
+        [
+          "N485HA",
+          274
+        ],
+        [
+          "N476HA",
+          266
+        ],
+        [
+          "N524SW",
+          266
+        ],
+        [
+          "N477HA",
+          260
+        ],
+        [
+          "N478HA",
+          254
+        ],
+        [
+          "N520SW",
+          253
+        ],
+        [
+          "N475HA",
+          250
+        ],
+        [
+          "N523SW",
+          246
+        ],
+        [
+          "N525SW",
+          245
+        ],
+        [
+          "N514SW",
+          243
+        ]
+      ],
+      "total_unique": 4238
+    },
+    "Origin": {
+      "min_length": 3,
+      "max_length": 3,
+      "avg_length": 3.0,
+      "top_values": [
+        [
+          "ATL",
+          29870
+        ],
+        [
+          "ORD",
+          18610
+        ],
+        [
+          "DEN",
+          17519
+        ],
+        [
+          "DFW",
+          16565
+        ],
+        [
+          "LAX",
+          16427
+        ],
+        [
+          "SFO",
+          13207
+        ],
+        [
+          "PHX",
+          13024
+        ],
+        [
+          "LAS",
+          12246
+        ],
+        [
+          "IAH",
+          11660
+        ],
+        [
+          "MCO",
+          10739
+        ],
+        [
+          "SEA",
+          9749
+        ],
+        [
+          "MSP",
+          9581
+        ],
+        [
+          "DTW",
+          9489
+        ],
+        [
+          "CLT",
+          9213
+        ],
+        [
+          "BOS",
+          9088
+        ],
+        [
+          "SLC",
+          8684
+        ],
+        [
+          "EWR",
+          8526
+        ],
+        [
+          "LGA",
+          8028
+        ],
+        [
+          "JFK",
+          8027
+        ],
+        [
+          "FLL",
+          7678
+        ]
+      ],
+      "total_unique": 294
+    },
+    "OriginCityName": {
+      "min_length": 8,
+      "max_length": 34,
+      "avg_length": 13.005827372500992,
+      "top_values": [
+        [
+          "Atlanta, GA",
+          29870
+        ],
+        [
+          "Chicago, IL",
+          25289
+        ],
+        [
+          "Denver, CO",
+          17519
+        ],
+        [
+          "Dallas/Fort Worth, TX",
+          16565
+        ],
+        [
+          "Los Angeles, CA",
+          16427
+        ],
+        [
+          "Houston, TX",
+          16200
+        ],
+        [
+          "New York, NY",
+          16055
+        ],
+        [
+          "San Francisco, CA",
+          13207
+        ],
+        [
+          "Phoenix, AZ",
+          13024
+        ],
+        [
+          "Las Vegas, NV",
+          12246
+        ],
+        [
+          "Orlando, FL",
+          10739
+        ],
+        [
+          "Seattle, WA",
+          9749
+        ],
+        [
+          "Minneapolis, MN",
+          9581
+        ],
+        [
+          "Detroit, MI",
+          9489
+        ],
+        [
+          "Charlotte, NC",
+          9213
+        ],
+        [
+          "Boston, MA",
+          9088
+        ],
+        [
+          "Washington, DC",
+          8984
+        ],
+        [
+          "Salt Lake City, UT",
+          8684
+        ],
+        [
+          "Newark, NJ",
+          8526
+        ],
+        [
+          "Fort Lauderdale, FL",
+          7678
+        ]
+      ],
+      "total_unique": 290
+    },
+    "OriginState": {
+      "min_length": 2,
+      "max_length": 2,
+      "avg_length": 2.0,
+      "top_values": [
+        [
+          "CA",
+          56245
+        ],
+        [
+          "TX",
+          48181
+        ],
+        [
+          "FL",
+          40042
+        ],
+        [
+          "GA",
+          30927
+        ],
+        [
+          "IL",
+          25987
+        ],
+        [
+          "NY",
+          20535
+        ],
+        [
+          "CO",
+          19742
+        ],
+        [
+          "AZ",
+          14777
+        ],
+        [
+          "NV",
+          13300
+        ],
+        [
+          "NC",
+          12908
+        ],
+        [
+          "MI",
+          11728
+        ],
+        [
+          "VA",
+          11426
+        ],
+        [
+          "WA",
+          10999
+        ],
+        [
+          "MN",
+          10082
+        ],
+        [
+          "MA",
+          9148
+        ],
+        [
+          "NJ",
+          9004
+        ],
+        [
+          "UT",
+          8888
+        ],
+        [
+          "PA",
+          8282
+        ],
+        [
+          "HI",
+          8266
+        ],
+        [
+          "MO",
+          7934
+        ]
+      ],
+      "total_unique": 52
+    },
+    "OriginStateName": {
+      "min_length": 4,
+      "max_length": 46,
+      "avg_length": 8.05139437494813,
+      "top_values": [
+        [
+          "California",
+          56245
+        ],
+        [
+          "Texas",
+          48181
+        ],
+        [
+          "Florida",
+          40042
+        ],
+        [
+          "Georgia",
+          30927
+        ],
+        [
+          "Illinois",
+          25987
+        ],
+        [
+          "New York",
+          20535
+        ],
+        [
+          "Colorado",
+          19742
+        ],
+        [
+          "Arizona",
+          14777
+        ],
+        [
+          "Nevada",
+          13300
+        ],
+        [
+          "North Carolina",
+          12908
+        ],
+        [
+          "Michigan",
+          11728
+        ],
+        [
+          "Virginia",
+          11426
+        ],
+        [
+          "Washington",
+          10999
+        ],
+        [
+          "Minnesota",
+          10082
+        ],
+        [
+          "Massachusetts",
+          9148
+        ],
+        [
+          "New Jersey",
+          9004
+        ],
+        [
+          "Utah",
+          8888
+        ],
+        [
+          "Pennsylvania",
+          8282
+        ],
+        [
+          "Hawaii",
+          8266
+        ],
+        [
+          "Missouri",
+          7934
+        ]
+      ],
+      "total_unique": 52
+    },
+    "Dest": {
+      "min_length": 3,
+      "max_length": 3,
+      "avg_length": 3.0,
+      "top_values": [
+        [
+          "ATL",
+          29854
+        ],
+        [
+          "ORD",
+          18605
+        ],
+        [
+          "DEN",
+          17527
+        ],
+        [
+          "DFW",
+          16572
+        ],
+        [
+          "LAX",
+          16406
+        ],
+        [
+          "SFO",
+          13206
+        ],
+        [
+          "PHX",
+          13035
+        ],
+        [
+          "LAS",
+          12245
+        ],
+        [
+          "IAH",
+          11642
+        ],
+        [
+          "MCO",
+          10730
+        ],
+        [
+          "SEA",
+          9739
+        ],
+        [
+          "MSP",
+          9585
+        ],
+        [
+          "DTW",
+          9463
+        ],
+        [
+          "CLT",
+          9224
+        ],
+        [
+          "BOS",
+          9100
+        ],
+        [
+          "SLC",
+          8699
+        ],
+        [
+          "EWR",
+          8536
+        ],
+        [
+          "LGA",
+          8035
+        ],
+        [
+          "JFK",
+          8014
+        ],
+        [
+          "FLL",
+          7665
+        ]
+      ],
+      "total_unique": 294
+    },
+    "DestCityName": {
+      "min_length": 8,
+      "max_length": 34,
+      "avg_length": 13.005813914365886,
+      "top_values": [
+        [
+          "Atlanta, GA",
+          29854
+        ],
+        [
+          "Chicago, IL",
+          25281
+        ],
+        [
+          "Denver, CO",
+          17527
+        ],
+        [
+          "Dallas/Fort Worth, TX",
+          16572
+        ],
+        [
+          "Los Angeles, CA",
+          16406
+        ],
+        [
+          "Houston, TX",
+          16188
+        ],
+        [
+          "New York, NY",
+          16049
+        ],
+        [
+          "San Francisco, CA",
+          13206
+        ],
+        [
+          "Phoenix, AZ",
+          13035
+        ],
+        [
+          "Las Vegas, NV",
+          12245
+        ],
+        [
+          "Orlando, FL",
+          10730
+        ],
+        [
+          "Seattle, WA",
+          9739
+        ],
+        [
+          "Minneapolis, MN",
+          9585
+        ],
+        [
+          "Detroit, MI",
+          9463
+        ],
+        [
+          "Charlotte, NC",
+          9224
+        ],
+        [
+          "Boston, MA",
+          9100
+        ],
+        [
+          "Washington, DC",
+          8988
+        ],
+        [
+          "Salt Lake City, UT",
+          8699
+        ],
+        [
+          "Newark, NJ",
+          8536
+        ],
+        [
+          "Fort Lauderdale, FL",
+          7665
+        ]
+      ],
+      "total_unique": 290
+    },
+    "DestState": {
+      "min_length": 2,
+      "max_length": 2,
+      "avg_length": 2.0,
+      "top_values": [
+        [
+          "CA",
+          56225
+        ],
+        [
+          "TX",
+          48190
+        ],
+        [
+          "FL",
+          40000
+        ],
+        [
+          "GA",
+          30912
+        ],
+        [
+          "IL",
+          25984
+        ],
+        [
+          "NY",
+          20531
+        ],
+        [
+          "CO",
+          19748
+        ],
+        [
+          "AZ",
+          14788
+        ],
+        [
+          "NV",
+          13299
+        ],
+        [
+          "NC",
+          12923
+        ],
+        [
+          "MI",
+          11712
+        ],
+        [
+          "VA",
+          11433
+        ],
+        [
+          "WA",
+          10990
+        ],
+        [
+          "MN",
+          10087
+        ],
+        [
+          "MA",
+          9162
+        ],
+        [
+          "NJ",
+          9013
+        ],
+        [
+          "UT",
+          8903
+        ],
+        [
+          "PA",
+          8296
+        ],
+        [
+          "HI",
+          8266
+        ],
+        [
+          "MO",
+          7939
+        ]
+      ],
+      "total_unique": 52
+    },
+    "DestStateName": {
+      "min_length": 4,
+      "max_length": 46,
+      "avg_length": 8.051744286460892,
+      "top_values": [
+        [
+          "California",
+          56225
+        ],
+        [
+          "Texas",
+          48190
+        ],
+        [
+          "Florida",
+          40000
+        ],
+        [
+          "Georgia",
+          30912
+        ],
+        [
+          "Illinois",
+          25984
+        ],
+        [
+          "New York",
+          20531
+        ],
+        [
+          "Colorado",
+          19748
+        ],
+        [
+          "Arizona",
+          14788
+        ],
+        [
+          "Nevada",
+          13299
+        ],
+        [
+          "North Carolina",
+          12923
+        ],
+        [
+          "Michigan",
+          11712
+        ],
+        [
+          "Virginia",
+          11433
+        ],
+        [
+          "Washington",
+          10990
+        ],
+        [
+          "Minnesota",
+          10087
+        ],
+        [
+          "Massachusetts",
+          9162
+        ],
+        [
+          "New Jersey",
+          9013
+        ],
+        [
+          "Utah",
+          8903
+        ],
+        [
+          "Pennsylvania",
+          8296
+        ],
+        [
+          "Hawaii",
+          8266
+        ],
+        [
+          "Missouri",
+          7939
+        ]
+      ],
+      "total_unique": 52
+    },
+    "DepTimeBlk": {
+      "min_length": 9,
+      "max_length": 9,
+      "avg_length": 9.0,
+      "top_values": [
+        [
+          "1700-1759",
+          30922
+        ],
+        [
+          "0600-0659",
+          30138
+        ],
+        [
+          "0700-0759",
+          29511
+        ],
+        [
+          "1300-1359",
+          28401
+        ],
+        [
+          "0800-0859",
+          28370
+        ],
+        [
+          "1500-1559",
+          28367
+        ],
+        [
+          "1100-1159",
+          28067
+        ],
+        [
+          "0900-0959",
+          27996
+        ],
+        [
+          "1000-1059",
+          27382
+        ],
+        [
+          "1200-1259",
+          27081
+        ],
+        [
+          "1600-1659",
+          26070
+        ],
+        [
+          "1400-1459",
+          25724
+        ],
+        [
+          "1900-1959",
+          25538
+        ],
+        [
+          "1800-1859",
+          25022
+        ],
+        [
+          "2000-2059",
+          19034
+        ],
+        [
+          "2100-2159",
+          13731
+        ],
+        [
+          "0001-0559",
+          11646
+        ],
+        [
+          "2200-2259",
+          8992
+        ],
+        [
+          "2300-2359",
+          3835
+        ]
+      ],
+      "total_unique": 19
+    },
+    "ArrTimeBlk": {
+      "min_length": 9,
+      "max_length": 9,
+      "avg_length": 9.0,
+      "top_values": [
+        [
+          "1600-1659",
+          31553
+        ],
+        [
+          "1800-1859",
+          28676
+        ],
+        [
+          "2000-2059",
+          28344
+        ],
+        [
+          "1400-1459",
+          27607
+        ],
+        [
+          "2100-2159",
+          27554
+        ],
+        [
+          "1000-1059",
+          27471
+        ],
+        [
+          "1300-1359",
+          27364
+        ],
+        [
+          "1100-1159",
+          26452
+        ],
+        [
+          "1200-1259",
+          26449
+        ],
+        [
+          "1900-1959",
+          26356
+        ],
+        [
+          "1700-1759",
+          26232
+        ],
+        [
+          "1500-1559",
+          25824
+        ],
+        [
+          "0900-0959",
+          24331
+        ],
+        [
+          "2200-2259",
+          22183
+        ],
+        [
+          "0800-0859",
+          20903
+        ],
+        [
+          "2300-2359",
+          18264
+        ],
+        [
+          "0700-0759",
+          13931
+        ],
+        [
+          "0001-0559",
+          10819
+        ],
+        [
+          "0600-0659",
+          5514
+        ]
+      ],
+      "total_unique": 19
+    },
+    "CancellationCode": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          "B",
+          9054
+        ],
+        [
+          "A",
+          1423
+        ],
+        [
+          "C",
+          1188
+        ]
+      ],
+      "total_unique": 3
+    },
+    "Div1Airport": {
+      "min_length": 3,
+      "max_length": 3,
+      "avg_length": 3.0,
+      "top_values": [
+        [
+          "TWF",
+          41
+        ],
+        [
+          "DEN",
+          37
+        ],
+        [
+          "ATL",
+          30
+        ],
+        [
+          "TPA",
+          28
+        ],
+        [
+          "DFW",
+          27
+        ],
+        [
+          "SLC",
+          26
+        ],
+        [
+          "PDX",
+          25
+        ],
+        [
+          "MCO",
+          22
+        ],
+        [
+          "GJT",
+          21
+        ],
+        [
+          "LAX",
+          21
+        ],
+        [
+          "PHX",
+          20
+        ],
+        [
+          "ORD",
+          20
+        ],
+        [
+          "LAS",
+          17
+        ],
+        [
+          "CLE",
+          17
+        ],
+        [
+          "SAT",
+          16
+        ],
+        [
+          "SJC",
+          16
+        ],
+        [
+          "SEA",
+          15
+        ],
+        [
+          "MSP",
+          14
+        ],
+        [
+          "IAH",
+          14
+        ],
+        [
+          "RSW",
+          14
+        ]
+      ],
+      "total_unique": 147
+    },
+    "Div1TailNum": {
+      "min_length": 5,
+      "max_length": 6,
+      "avg_length": 5.998407643312102,
+      "top_values": [
+        [
+          "N877AS",
+          4
+        ],
+        [
+          "N617SW",
+          4
+        ],
+        [
+          "N365SW",
+          3
+        ],
+        [
+          "N508AS",
+          3
+        ],
+        [
+          "N4YTAA",
+          3
+        ],
+        [
+          "N459SW",
+          2
+        ],
+        [
+          "N448SW",
+          2
+        ],
+        [
+          "N519JB",
+          2
+        ],
+        [
+          "N3AYAA",
+          2
+        ],
+        [
+          "N364SW",
+          2
+        ],
+        [
+          "N438SW",
+          2
+        ],
+        [
+          "N443SW",
+          2
+        ],
+        [
+          "N411UA",
+          2
+        ],
+        [
+          "N216AG",
+          2
+        ],
+        [
+          "N14570",
+          2
+        ],
+        [
+          "N14121",
+          2
+        ],
+        [
+          "N12564",
+          2
+        ],
+        [
+          "N21154",
+          2
+        ],
+        [
+          "N16559",
+          2
+        ],
+        [
+          "N33182",
+          2
+        ]
+      ],
+      "total_unique": 583
+    },
+    "Div2Airport": {
+      "min_length": 3,
+      "max_length": 3,
+      "avg_length": 3.0,
+      "top_values": [
+        [
+          "LAS",
+          2
+        ],
+        [
+          "BOS",
+          1
+        ],
+        [
+          "DTW",
+          1
+        ],
+        [
+          "MSP",
+          1
+        ],
+        [
+          "SEA",
+          1
+        ]
+      ],
+      "total_unique": 5
+    }
+  },
+  "L_DEPARRBLK": {
+    "Code": {
+      "min_length": 9,
+      "max_length": 9,
+      "avg_length": 9.0,
+      "top_values": [
+        [
+          "1000-1059",
+          1
+        ],
+        [
+          "0800-0859",
+          1
+        ],
+        [
+          "1900-1959",
+          1
+        ],
+        [
+          "0900-0959",
+          1
+        ],
+        [
+          "1100-1159",
+          1
+        ],
+        [
+          "1800-1859",
+          1
+        ],
+        [
+          "0001-0559",
+          1
+        ],
+        [
+          "1600-1659",
+          1
+        ],
+        [
+          "2300-2359",
+          1
+        ],
+        [
+          "2200-2259",
+          1
+        ],
+        [
+          "1300-1359",
+          1
+        ],
+        [
+          "2100-2159",
+          1
+        ],
+        [
+          "1500-1559",
+          1
+        ],
+        [
+          "0600-0659",
+          1
+        ],
+        [
+          "1200-1259",
+          1
+        ],
+        [
+          "0700-0759",
+          1
+        ],
+        [
+          "1700-1759",
+          1
+        ],
+        [
+          "2000-2059",
+          1
+        ],
+        [
+          "1400-1459",
+          1
+        ]
+      ],
+      "total_unique": 19
+    },
+    "Description": {
+      "min_length": 16,
+      "max_length": 18,
+      "avg_length": 16.57894736842105,
+      "top_values": [
+        [
+          "4:00PM to 4:59PM",
+          1
+        ],
+        [
+          "11:00PM to 11:59PM",
+          1
+        ],
+        [
+          "1:00PM to 1:59PM",
+          1
+        ],
+        [
+          "3:00PM to 3:59PM",
+          1
+        ],
+        [
+          "5:00PM to 5:59PM",
+          1
+        ],
+        [
+          "7:00AM to 7:59AM",
+          1
+        ],
+        [
+          "2:00PM to 2:59PM",
+          1
+        ],
+        [
+          "8:00AM to 8:59AM",
+          1
+        ],
+        [
+          "8:00PM to 8:59PM",
+          1
+        ],
+        [
+          "6:00PM to 6:59PM",
+          1
+        ],
+        [
+          "12:00PM to 12:59PM",
+          1
+        ],
+        [
+          "11:00AM to 11:59AM",
+          1
+        ],
+        [
+          "6:00AM to 6:59AM",
+          1
+        ],
+        [
+          "7:00PM to 7:59PM",
+          1
+        ],
+        [
+          "9:00PM to 9:59PM",
+          1
+        ],
+        [
+          "10:00AM to 10:59AM",
+          1
+        ],
+        [
+          "9:00AM to 9:59AM",
+          1
+        ],
+        [
+          "12:00AM to 5:59AM",
+          1
+        ],
+        [
+          "10:00PM to 10:59PM",
+          1
+        ]
+      ],
+      "total_unique": 19
+    }
+  }
+}

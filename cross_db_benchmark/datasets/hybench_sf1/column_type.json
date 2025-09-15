@@ -1,0 +1,86 @@
+{
+    "customer": {
+      "custID": "int",
+      "companyID": "int",
+      "gender": "char",
+      "name": "char",
+      "age": "int",
+      "phone": "char",
+      "province": "char",
+      "city": "char",
+      "loan_balance": "float",
+      "saving_credit": "int",
+      "checking_credit": "int",
+      "loan_credit": "int",
+      "Isblocked": "int",
+      "created_date": "date",
+      "last_update_timestamp": "date"
+    },
+    "company": {
+      "companyID": "int",
+      "name": "char",
+      "category": "char",
+      "staff_size": "int",
+      "loan_balance": "float",
+      "phone": "char",
+      "province": "char",
+      "city": "char",
+      "saving_credit": "int",
+      "checking_credit": "int",
+      "loan_credit": "int",
+      "Isblocked": "int",
+      "created_date": "date",
+      "last_update_timestamp": "date"
+    },
+    "savingAccount": {
+      "accountID": "int",
+      "userID": "int",
+      "balance": "float",
+      "Isblocked": "int",
+      "savingAccount_ts": "date"
+    },
+    "checkingAccount": {
+      "accountID": "int",
+      "userID": "int",
+      "balance": "float",
+      "Isblocked": "int",
+      "checkingAccount_ts": "date"
+    },
+    "transfer": {
+      "id": "bigint",
+      "sourceID": "int",
+      "targetID": "int",
+      "amount": "float",
+      "type": "char",
+      "transfer_ts": "date",
+      "fresh_ts": "date"
+    },
+    "checking": {
+      "id": "int",
+      "sourceID": "int",
+      "targetID": "int",
+      "amount": "float",
+      "type": "char",
+      "checking_ts": "date"
+    },
+    "loanapps": {
+      "id": "int",
+      "applicantID": "int",
+      "amount": "float",
+      "duration": "int",
+      "status": "char",
+      "loanapps_ts": "date"
+    },
+    "loantrans": {
+      "id": "int",
+      "applicantID": "int",
+      "appID": "int",
+      "amount": "float",
+      "status": "char",
+      "loantrans_ts": "date",
+      "duration": "int",
+      "contract_timestamp": "date",
+      "delinquency": "int"
+    }
+  }
+  

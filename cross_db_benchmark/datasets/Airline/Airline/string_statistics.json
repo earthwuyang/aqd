@@ -1,0 +1,762 @@
+{
+  "L_AIRLINE_ID": {
+    "Description": {
+      "words": [
+        "west",
+        "airlines:",
+        "northcoast",
+        "cargo",
+        "aeronaves",
+        "xbq",
+        "jet",
+        "plc",
+        "air",
+        "amerijet",
+        "aerovias",
+        "purolator",
+        "atlantic",
+        "(1)",
+        "(1):",
+        "lloyd",
+        "aereo",
+        "kong",
+        "ata",
+        "lineas"
+      ]
+    }
+  },
+  "L_AIRPORT": {
+    "Code": {
+      "words": [
+        "a21",
+        "a36",
+        "8f3",
+        "06a",
+        "a08",
+        "04a",
+        "1g4",
+        "a02",
+        "a16",
+        "a20",
+        "08a",
+        "a07",
+        "a30",
+        "1ny",
+        "03a",
+        "a15",
+        "07a",
+        "a23",
+        "a34",
+        "a31"
+      ]
+    },
+    "Description": {
+      "words": [
+        "bishop",
+        "bandundu,",
+        "dourados,",
+        "lakeport,",
+        "caicos",
+        "providenciales",
+        "babe",
+        "desroches",
+        "delhi",
+        "palmas,",
+        "islands",
+        "bremerton",
+        "(kinshasa):",
+        "falls",
+        "wa:",
+        "stevens",
+        "renton,",
+        "mercedes",
+        "air",
+        "venezuela:"
+      ]
+    }
+  },
+  "L_AIRPORT_ID": {
+    "Description": {
+      "words": [
+        "bishop",
+        "bandundu,",
+        "dourados,",
+        "lakeport,",
+        "caicos",
+        "providenciales",
+        "babe",
+        "desroches",
+        "delhi",
+        "palmas,",
+        "islands",
+        "bremerton",
+        "(kinshasa):",
+        "falls",
+        "wa:",
+        "stevens",
+        "renton,",
+        "mercedes",
+        "venezuela:",
+        "yuma,"
+      ]
+    }
+  },
+  "L_AIRPORT_SEQ_ID": {
+    "Description": {
+      "words": [
+        "bandundu,",
+        "greece:",
+        "grayling",
+        "taboada",
+        "skopje",
+        "desroches",
+        "falls",
+        "anglet",
+        "joli,",
+        "maracay",
+        "wa:",
+        "indonesia:",
+        "naf",
+        "air",
+        "mercedes",
+        "kithira",
+        "nuiqsut,",
+        "jose",
+        "lampung,",
+        "venezuela:"
+      ]
+    }
+  },
+  "L_CANCELLATION": {
+    "Code": {
+      "words": []
+    },
+    "Description": {
+      "words": [
+        "security",
+        "national",
+        "air",
+        "system",
+        "carrier",
+        "weather"
+      ]
+    }
+  },
+  "L_CITY_MARKET_ID": {
+    "Description": {
+      "words": [
+        "nowra,",
+        "serena,",
+        "bertoua,",
+        "pascagoula,",
+        "kokoro,",
+        "joli,",
+        "bradley",
+        "canada",
+        "portland,",
+        "papua",
+        "madagascar",
+        "miraflores,",
+        "dauphin,",
+        "cruces,",
+        "tulsa,",
+        "japan",
+        "cotulla,",
+        "island,",
+        "mont",
+        "felipe,"
+      ]
+    }
+  },
+  "L_DEPARRBLK": {
+    "Code": {
+      "words": [
+        "1300-1359",
+        "2300-2359",
+        "1700-1759",
+        "2200-2259",
+        "1000-1059",
+        "1100-1159",
+        "1900-1959",
+        "0700-0759",
+        "1400-1459",
+        "1200-1259",
+        "1500-1559",
+        "2000-2059",
+        "1800-1859",
+        "1600-1659",
+        "2100-2159",
+        "0600-0659",
+        "0800-0859",
+        "0001-0559",
+        "0900-0959"
+      ]
+    },
+    "Description": {
+      "words": [
+        "7:59pm",
+        "5:59am",
+        "10:00pm",
+        "2:00pm",
+        "8:59am",
+        "11:59am",
+        "7:59am",
+        "4:59pm",
+        "11:00pm",
+        "7:00pm",
+        "1:59pm",
+        "7:00am",
+        "11:00am",
+        "6:00pm",
+        "8:00am",
+        "9:00pm",
+        "11:59pm",
+        "2:59pm",
+        "4:00pm",
+        "6:59am"
+      ]
+    }
+  },
+  "L_DISTANCE_GROUP_250": {
+    "Description": {
+      "words": [
+        "1000-1249",
+        "2500",
+        "1250-1499",
+        "500-749",
+        "250-499",
+        "1500-1749",
+        "1750-1999",
+        "miles",
+        "2250-2499",
+        "250",
+        "2000-2249",
+        "less",
+        "750-999",
+        "and",
+        "than",
+        "greater"
+      ]
+    }
+  },
+  "L_DIVERSIONS": {
+    "Description": {
+      "words": [
+        "five",
+        "four",
+        "the",
+        "ultimately",
+        "three",
+        "flight",
+        "air",
+        "where",
+        "not",
+        "was",
+        "landing",
+        "airport",
+        "return",
+        "two",
+        "one",
+        "diverted",
+        "landings",
+        "origin",
+        "cancelled"
+      ]
+    }
+  },
+  "L_MONTHS": {
+    "Description": {
+      "words": [
+        "february",
+        "november",
+        "october",
+        "april",
+        "august",
+        "march",
+        "may",
+        "september",
+        "july",
+        "december",
+        "june",
+        "january"
+      ]
+    }
+  },
+  "L_ONTIME_DELAY_GROUPS": {
+    "Description": {
+      "words": [
+        "149",
+        "179",
+        "105",
+        "119",
+        "135",
+        "180",
+        "120",
+        "164",
+        "104",
+        "minutes",
+        "between",
+        "165",
+        "150",
+        "-15",
+        "134",
+        "and",
+        "delay"
+      ]
+    }
+  },
+  "L_QUARTERS": {
+    "Description": {
+      "words": [
+        "1-december",
+        "quarter1:january",
+        "1-september",
+        "1-march",
+        "quarter2:april",
+        "quarter3:july",
+        "quarter4:october",
+        "1-june"
+      ]
+    }
+  },
+  "L_STATE_ABR_AVIATION": {
+    "Code": {
+      "words": []
+    },
+    "Description": {
+      "words": [
+        "louisiana",
+        "mexico",
+        "west",
+        "rico",
+        "wyoming",
+        "virginia",
+        "york",
+        "north",
+        "nebraska",
+        "ontario,",
+        "scotia,",
+        "idaho",
+        "tennessee",
+        "jersey",
+        "new",
+        "u.s.",
+        "islands",
+        "alabama",
+        "iowa",
+        "northwest"
+      ]
+    }
+  },
+  "L_STATE_FIPS": {
+    "Description": {
+      "words": [
+        "with",
+        "louisiana",
+        "guam",
+        "mexico",
+        "west",
+        "population",
+        "palau",
+        "atoll",
+        "rico",
+        "wyoming",
+        "virginia",
+        "york",
+        "north",
+        "nebraska",
+        "idaho",
+        "tennessee",
+        "pub",
+        "jersey",
+        "new",
+        "samoa"
+      ]
+    }
+  },
+  "L_UNIQUE_CARRIERS": {
+    "Code": {
+      "words": [
+        "1aq",
+        "1xq",
+        "1hq",
+        "1bq",
+        "0bq",
+        "0vq",
+        "1dq",
+        "02q",
+        "1iq",
+        "1lq",
+        "0tq",
+        "1mq",
+        "0gq",
+        "0qq",
+        "0rq",
+        "17q",
+        "1eq",
+        "0mq",
+        "0lq",
+        "0jq"
+      ]
+    },
+    "Description": {
+      "words": [
+        "limited",
+        "tatonduk",
+        "320",
+        "dragonair",
+        "cargo",
+        "carrier",
+        "co.",
+        "jalways",
+        "air",
+        "britt",
+        "colgan",
+        "crga",
+        "aerotransportes",
+        "southeast",
+        "transmeridian",
+        "antilles",
+        "(1)",
+        "one",
+        "kong",
+        "aereos"
+      ]
+    }
+  },
+  "L_WEEKDAYS": {
+    "Description": {
+      "words": [
+        "thursday",
+        "tuesday",
+        "friday",
+        "sunday",
+        "monday",
+        "unknown",
+        "saturday",
+        "wednesday"
+      ]
+    }
+  },
+  "L_WORLD_AREA_CODES": {
+    "Description": {
+      "words": [
+        "principe",
+        "mexico",
+        "canary",
+        "yemen",
+        "democratic",
+        "saint",
+        "antigua",
+        "dominican",
+        "malta",
+        "nepal",
+        "new",
+        "samoa",
+        "sao",
+        "somalia",
+        "czech",
+        "martin",
+        "tonga",
+        "greenland",
+        "tanzania",
+        "bangladesh"
+      ]
+    }
+  },
+  "L_YESNO_RESP": {
+    "Description": {
+      "words": [
+        "yes"
+      ]
+    }
+  },
+  "On_Time_On_Time_Performance_2016_1": {
+    "UniqueCarrier": {
+      "words": []
+    },
+    "Carrier": {
+      "words": []
+    },
+    "TailNum": {
+      "words": [
+        "7819a",
+        "n022aa",
+        "n102uw",
+        "n026aa",
+        "n031aa",
+        "n103us",
+        "n107us",
+        "n019aa",
+        "n105sy",
+        "n002aa",
+        "n005aa",
+        "n106sy",
+        "n029aa",
+        "n105uw",
+        "n025aa",
+        "n021aa",
+        "n014aa",
+        "n001aa",
+        "n109sy",
+        "n016aa"
+      ]
+    },
+    "Origin": {
+      "words": [
+        "brd",
+        "bfl",
+        "bos",
+        "aex",
+        "bmi",
+        "bzn",
+        "aby",
+        "alb",
+        "bgm",
+        "aus",
+        "avp",
+        "bpt",
+        "ama",
+        "bdl",
+        "bgr",
+        "bqk",
+        "bhm",
+        "bji",
+        "brw",
+        "adq"
+      ]
+    },
+    "OriginCityName": {
+      "words": [
+        "bangor,",
+        "bozeman,",
+        "albuquerque,",
+        "atlanta,",
+        "bend/redmond,",
+        "cedar",
+        "alexandria,",
+        "billings,",
+        "burlington,",
+        "baton",
+        "burbank,",
+        "charleston/dunbar,",
+        "butte,",
+        "boston,",
+        "aspen,",
+        "brainerd,",
+        "city/kingsport,",
+        "birmingham,",
+        "bemidji,",
+        "allentown/bethlehem/easton,"
+      ]
+    },
+    "OriginState": {
+      "words": []
+    },
+    "OriginStateName": {
+      "words": [
+        "louisiana",
+        "alaska",
+        "mexico",
+        "rico",
+        "west",
+        "kansas",
+        "virginia",
+        "york",
+        "nebraska",
+        "north",
+        "idaho",
+        "tennessee",
+        "jersey",
+        "new",
+        "u.s.",
+        "islands",
+        "alabama",
+        "iowa",
+        "georgia",
+        "arizona"
+      ]
+    },
+    "Dest": {
+      "words": [
+        "brd",
+        "bfl",
+        "bos",
+        "aex",
+        "bmi",
+        "bzn",
+        "aby",
+        "alb",
+        "bgm",
+        "aus",
+        "avp",
+        "bpt",
+        "ama",
+        "bdl",
+        "bgr",
+        "bqk",
+        "bhm",
+        "bji",
+        "brw",
+        "adq"
+      ]
+    },
+    "DestCityName": {
+      "words": [
+        "bangor,",
+        "bozeman,",
+        "albuquerque,",
+        "atlanta,",
+        "bend/redmond,",
+        "cedar",
+        "alexandria,",
+        "billings,",
+        "burlington,",
+        "baton",
+        "burbank,",
+        "charleston/dunbar,",
+        "butte,",
+        "boston,",
+        "aspen,",
+        "brainerd,",
+        "city/kingsport,",
+        "birmingham,",
+        "bemidji,",
+        "allentown/bethlehem/easton,"
+      ]
+    },
+    "DestState": {
+      "words": []
+    },
+    "DestStateName": {
+      "words": [
+        "louisiana",
+        "alaska",
+        "mexico",
+        "rico",
+        "west",
+        "kansas",
+        "virginia",
+        "york",
+        "nebraska",
+        "north",
+        "idaho",
+        "tennessee",
+        "jersey",
+        "new",
+        "u.s.",
+        "islands",
+        "alabama",
+        "iowa",
+        "georgia",
+        "arizona"
+      ]
+    },
+    "DepTimeBlk": {
+      "words": [
+        "1300-1359",
+        "2300-2359",
+        "1700-1759",
+        "2200-2259",
+        "1000-1059",
+        "1100-1159",
+        "1900-1959",
+        "0700-0759",
+        "1400-1459",
+        "1200-1259",
+        "1500-1559",
+        "2000-2059",
+        "1800-1859",
+        "1600-1659",
+        "2100-2159",
+        "0600-0659",
+        "0800-0859",
+        "0001-0559",
+        "0900-0959"
+      ]
+    },
+    "ArrTimeBlk": {
+      "words": [
+        "1300-1359",
+        "2300-2359",
+        "1700-1759",
+        "2200-2259",
+        "1000-1059",
+        "1100-1159",
+        "1900-1959",
+        "0700-0759",
+        "1400-1459",
+        "1200-1259",
+        "1500-1559",
+        "2000-2059",
+        "1800-1859",
+        "1600-1659",
+        "2100-2159",
+        "0600-0659",
+        "0800-0859",
+        "0001-0559",
+        "0900-0959"
+      ]
+    },
+    "CancellationCode": {
+      "words": []
+    },
+    "Div1Airport": {
+      "words": [
+        "fwa",
+        "cle",
+        "bos",
+        "far",
+        "aex",
+        "bfi",
+        "clt",
+        "alb",
+        "dal",
+        "avp",
+        "aus",
+        "eau",
+        "bdl",
+        "cvg",
+        "bhm",
+        "dsm",
+        "atl",
+        "cak",
+        "btv",
+        "day"
+      ]
+    },
+    "Div1TailNum": {
+      "words": [
+        "n11199",
+        "n144sy",
+        "n13550",
+        "n14731",
+        "n14231",
+        "n117uw",
+        "n12564",
+        "n128uw",
+        "n12921",
+        "n029aa",
+        "n11127",
+        "n11194",
+        "n12136",
+        "n14177",
+        "n13903",
+        "n14118",
+        "n13995",
+        "n135ev",
+        "n13538",
+        "n11551"
+      ]
+    },
+    "Div2Airport": {
+      "words": [
+        "sea",
+        "bos",
+        "dtw",
+        "msp",
+        "las"
+      ]
+    }
+  }
+}

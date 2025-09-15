@@ -1,0 +1,123 @@
+{
+  "account": {
+    "frequency": {
+      "words": [
+        "mesicne",
+        "poplatek",
+        "obratu",
+        "tydne"
+      ]
+    }
+  },
+  "card": {
+    "type": {
+      "words": [
+        "classic",
+        "gold",
+        "junior"
+      ]
+    }
+  },
+  "client": {
+    "gender": {
+      "words": []
+    }
+  },
+  "disp": {
+    "type": {
+      "words": [
+        "owner",
+        "disponent"
+      ]
+    }
+  },
+  "district": {
+    "A2": {
+      "words": [
+        "vary",
+        "sazavou",
+        "plzen",
+        "mesto",
+        "trutnov",
+        "novy",
+        "tachov",
+        "uherske",
+        "litomerice",
+        "jicin",
+        "decin",
+        "sokolov",
+        "most",
+        "hradiste",
+        "kolin",
+        "prostejov",
+        "zlin",
+        "orlici",
+        "prerov",
+        "blansko"
+      ]
+    },
+    "A3": {
+      "words": [
+        "east",
+        "prague",
+        "south",
+        "north",
+        "bohemia",
+        "west",
+        "central",
+        "moravia"
+      ]
+    }
+  },
+  "loan": {
+    "status": {
+      "words": []
+    }
+  },
+  "order": {
+    "bank_to": {
+      "words": []
+    },
+    "k_symbol": {
+      "words": [
+        "uver",
+        "sipo",
+        "leasing",
+        "pojistne"
+      ]
+    }
+  },
+  "trans": {
+    "type": {
+      "words": [
+        "vydaj",
+        "vyber",
+        "prijem"
+      ]
+    },
+    "operation": {
+      "words": [
+        "vyber",
+        "prevod",
+        "uctu",
+        "kartou",
+        "vklad",
+        "ucet"
+      ]
+    },
+    "k_symbol": {
+      "words": [
+        "urok",
+        "uver",
+        "sipo",
+        "sluzby",
+        "pojistne",
+        "duchod",
+        "sankc."
+      ]
+    },
+    "bank": {
+      "words": []
+    }
+  }
+}

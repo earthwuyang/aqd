@@ -1,0 +1,1946 @@
+{
+  "nation": {
+    "n_name": {
+      "min_length": 4,
+      "max_length": 14,
+      "avg_length": 7.08,
+      "top_values": [
+        [
+          "VIETNAM                  ",
+          1
+        ],
+        [
+          "PERU                     ",
+          1
+        ],
+        [
+          "ALGERIA                  ",
+          1
+        ],
+        [
+          "ARGENTINA                ",
+          1
+        ],
+        [
+          "JAPAN                    ",
+          1
+        ],
+        [
+          "IRAQ                     ",
+          1
+        ],
+        [
+          "CANADA                   ",
+          1
+        ],
+        [
+          "INDONESIA                ",
+          1
+        ],
+        [
+          "FRANCE                   ",
+          1
+        ],
+        [
+          "JORDAN                   ",
+          1
+        ],
+        [
+          "MOROCCO                  ",
+          1
+        ],
+        [
+          "ROMANIA                  ",
+          1
+        ],
+        [
+          "IRAN                     ",
+          1
+        ],
+        [
+          "EGYPT                    ",
+          1
+        ],
+        [
+          "RUSSIA                   ",
+          1
+        ],
+        [
+          "SAUDI ARABIA             ",
+          1
+        ],
+        [
+          "BRAZIL                   ",
+          1
+        ],
+        [
+          "UNITED STATES            ",
+          1
+        ],
+        [
+          "CHINA                    ",
+          1
+        ],
+        [
+          "GERMANY                  ",
+          1
+        ]
+      ],
+      "total_unique": 25
+    },
+    "n_comment": {
+      "min_length": 31,
+      "max_length": 114,
+      "avg_length": 74.28,
+      "top_values": [
+        [
+          "eans boost carefully special requests. accounts are. carefull",
+          1
+        ],
+        [
+          "y alongside of the pending deposits. carefully special packages are about the ironic forges. slyly special ",
+          1
+        ],
+        [
+          " requests against the platelets use never according to the quickly regular pint",
+          1
+        ],
+        [
+          "ss excuses cajole slyly across the packages. deposits print aroun",
+          1
+        ],
+        [
+          "hely enticingly express accounts. even, final ",
+          1
+        ],
+        [
+          "rns. blithely bold courts among the closely regular packages use furiously bold platelets?",
+          1
+        ],
+        [
+          " pending excuses haggle furiously deposits. pending, express pinto beans wake fluffily past t",
+          1
+        ],
+        [
+          "ic deposits are blithely about the carefully regular pa",
+          1
+        ],
+        [
+          "ts. silent requests haggle. closely express packages sleep across the blithely",
+          1
+        ],
+        [
+          "ven packages wake quickly. regu",
+          1
+        ],
+        [
+          "eas hang ironic, silent packages. slyly regular packages are furiously over the tithes. fluffily bold",
+          1
+        ],
+        [
+          "refully final requests. regular, ironi",
+          1
+        ],
+        [
+          "ular asymptotes are about the furious multipliers. express dependencies nag above the ironically ironic account",
+          1
+        ],
+        [
+          " haggle. carefully final deposits detect slyly agai",
+          1
+        ],
+        [
+          "c dependencies. furiously express notornis sleep slyly regular accounts. ideas sleep. depos",
+          1
+        ],
+        [
+          "y above the carefully unusual theodolites. final dugouts are quickly across the furiously regular d",
+          1
+        ],
+        [
+          " slyly express asymptotes. regular deposits haggle slyly. carefully ironic hockey players sleep blithely. carefull",
+          1
+        ],
+        [
+          "l platelets. regular accounts x-ray: unusual, regular acco",
+          1
+        ],
+        [
+          "platelets. blithely pending dependencies use fluffily across the even pinto beans. carefully silent accoun",
+          1
+        ],
+        [
+          "y final packages. slow foxes cajole quickly. quickly silent platelets breach ironic accounts. unusual pinto be",
+          1
+        ]
+      ],
+      "total_unique": 25
+    }
+  },
+  "supplier": {
+    "s_name": {
+      "min_length": 18,
+      "max_length": 18,
+      "avg_length": 18.0,
+      "top_values": [
+        [
+          "Supplier#000003950       ",
+          1
+        ],
+        [
+          "Supplier#000008765       ",
+          1
+        ],
+        [
+          "Supplier#000008397       ",
+          1
+        ],
+        [
+          "Supplier#000003823       ",
+          1
+        ],
+        [
+          "Supplier#000000315       ",
+          1
+        ],
+        [
+          "Supplier#000007387       ",
+          1
+        ],
+        [
+          "Supplier#000005060       ",
+          1
+        ],
+        [
+          "Supplier#000005728       ",
+          1
+        ],
+        [
+          "Supplier#000008133       ",
+          1
+        ],
+        [
+          "Supplier#000005031       ",
+          1
+        ],
+        [
+          "Supplier#000008037       ",
+          1
+        ],
+        [
+          "Supplier#000006668       ",
+          1
+        ],
+        [
+          "Supplier#000005682       ",
+          1
+        ],
+        [
+          "Supplier#000005515       ",
+          1
+        ],
+        [
+          "Supplier#000009025       ",
+          1
+        ],
+        [
+          "Supplier#000003832       ",
+          1
+        ],
+        [
+          "Supplier#000002578       ",
+          1
+        ],
+        [
+          "Supplier#000009958       ",
+          1
+        ],
+        [
+          "Supplier#000007814       ",
+          1
+        ],
+        [
+          "Supplier#000007236       ",
+          1
+        ]
+      ],
+      "total_unique": 10000
+    },
+    "s_address": {
+      "min_length": 10,
+      "max_length": 40,
+      "avg_length": 24.9771,
+      "top_values": [
+        [
+          "AbFEkk5348s",
+          1
+        ],
+        [
+          "NvNMxu5S3qtWWRG3gSOCdimN 6s5VxWIj",
+          1
+        ],
+        [
+          " c94VMQ1bm31dgFeeda5P5fmWah,kcNG",
+          1
+        ],
+        [
+          "8Qv7RjLQSFfyt5JpH8fsTf0",
+          1
+        ],
+        [
+          "MpOduzdNQVLn3l2K,fDBjoC0",
+          1
+        ],
+        [
+          "dsmwQ616A2Fg7frTRzWtXys54mXmb",
+          1
+        ],
+        [
+          "6YZe90,pRYjhIxqq4mS9vlr4Am5 BInGPdF",
+          1
+        ],
+        [
+          "Ho8kbrr7BjnPLDZWY3H2bjT51EHL3KfwqE4o",
+          1
+        ],
+        [
+          "vmVadCZ xHPbQQA2fLxr68T1YhmjVSuRUJKCrcq6",
+          1
+        ],
+        [
+          ",eN75B9Wo,VoklFVVnt4",
+          1
+        ],
+        [
+          "e0AmK5Spfib dgbwokqeuiFuxn2lOVnrup",
+          1
+        ],
+        [
+          "rgdjJRVgZQ2zadNW5QcvG5AayIuMh8",
+          1
+        ],
+        [
+          "Vq0LLMinZe,pYmrW",
+          1
+        ],
+        [
+          "4o,E0cY32jMVQ",
+          1
+        ],
+        [
+          "8P71Pj89GiBowF,bvouOI vLK74vOCllIy1GYUJ1",
+          1
+        ],
+        [
+          "ZkAmi98  D80jbq,z2GcN8",
+          1
+        ],
+        [
+          "R8OX2nsjpHwLU0E3MH,Gvu15AGCG6alrW",
+          1
+        ],
+        [
+          ",dE1anEjKQGZfgquYfkx2fkGcXH",
+          1
+        ],
+        [
+          "9pkHLNCjv6v5Np7NrXK3SGxCzjZ3,wFHpHgfAqg",
+          1
+        ],
+        [
+          "BmPKP5ZotUl2k8lR0J5VNovROzp HFD",
+          1
+        ]
+      ],
+      "total_unique": 10000
+    },
+    "s_phone": {
+      "min_length": 15,
+      "max_length": 15,
+      "avg_length": 15.0,
+      "top_values": [
+        [
+          "31-324-183-9738",
+          1
+        ],
+        [
+          "18-850-494-6565",
+          1
+        ],
+        [
+          "34-432-304-5232",
+          1
+        ],
+        [
+          "19-138-384-2442",
+          1
+        ],
+        [
+          "30-322-776-7259",
+          1
+        ],
+        [
+          "30-345-489-2347",
+          1
+        ],
+        [
+          "21-313-729-9222",
+          1
+        ],
+        [
+          "22-523-651-4190",
+          1
+        ],
+        [
+          "18-862-727-2661",
+          1
+        ],
+        [
+          "22-190-359-2449",
+          1
+        ],
+        [
+          "14-581-872-9823",
+          1
+        ],
+        [
+          "17-950-885-6667",
+          1
+        ],
+        [
+          "22-602-344-5759",
+          1
+        ],
+        [
+          "17-341-611-2596",
+          1
+        ],
+        [
+          "27-188-234-9881",
+          1
+        ],
+        [
+          "11-348-761-5898",
+          1
+        ],
+        [
+          "20-573-215-2745",
+          1
+        ],
+        [
+          "12-408-322-9002",
+          1
+        ],
+        [
+          "23-886-649-9731",
+          1
+        ],
+        [
+          "21-502-733-8098",
+          1
+        ]
+      ],
+      "total_unique": 10000
+    },
+    "s_comment": {
+      "min_length": 25,
+      "max_length": 100,
+      "avg_length": 62.5695,
+      "top_values": [
+        [
+          " affix fluffily along the excuses. quickly ironic accounts wak",
+          1
+        ],
+        [
+          "ven accounts. foxes try to wake furiously",
+          1
+        ],
+        [
+          "arefully even theodolites. carefully final asymptotes are slyly final ",
+          1
+        ],
+        [
+          "ntly ironic requests. fluffily quiet depe",
+          1
+        ],
+        [
+          "furiously ironic, fluffy requests. carefully special excu",
+          1
+        ],
+        [
+          "ake carefully about the blithely express pinto beans. express packages sleep. packages wake c",
+          1
+        ],
+        [
+          "g about the carefully final courts. fluff",
+          1
+        ],
+        [
+          " solve furiously. blithely ironic instructions haggle quickly alongside of the ruthless theodolites.",
+          1
+        ],
+        [
+          "ccounts. special, regular packages boost slyly. somas sleep thinly across the fu",
+          1
+        ],
+        [
+          "es haggle sometimes at the carefully ",
+          1
+        ],
+        [
+          "ites. instructions detect blit",
+          1
+        ],
+        [
+          "quests? unusual platelets print slyly among the slyly silent excuses. s",
+          1
+        ],
+        [
+          "accounts. ironic attainments after the deposits lose inside the re",
+          1
+        ],
+        [
+          "st the accounts; ruthlessly final deposits ca",
+          1
+        ],
+        [
+          "uests breach blithely ironic deposi",
+          1
+        ],
+        [
+          "ly carefully express excuses. slyly regular platelets sleep carefully final packages. slyly reg",
+          1
+        ],
+        [
+          "ept the regular, final packages. bold dependencies cajole blithely about the furiously ir",
+          1
+        ],
+        [
+          "ckages. unusual, regular attainments",
+          1
+        ],
+        [
+          "luffily final theodolites haggle slyly pending platelets. speci",
+          1
+        ],
+        [
+          "gular ideas detect furiously pending theodolites. pending, re",
+          1
+        ]
+      ],
+      "total_unique": 10000
+    }
+  },
+  "part": {
+    "p_name": {
+      "min_length": 21,
+      "max_length": 50,
+      "avg_length": 32.751105,
+      "top_values": [
+        [
+          "blush burlywood red blanched olive",
+          2
+        ],
+        [
+          "azure lime rosy peru powder",
+          2
+        ],
+        [
+          "aquamarine frosted tomato medium navy",
+          2
+        ],
+        [
+          "ivory salmon maroon cornsilk almond",
+          1
+        ],
+        [
+          "ivory green dark deep chiffon",
+          1
+        ],
+        [
+          "linen spring saddle mint yellow",
+          1
+        ],
+        [
+          "misty burnished powder wheat blue",
+          1
+        ],
+        [
+          "papaya powder khaki puff rosy",
+          1
+        ],
+        [
+          "goldenrod brown dim navajo linen",
+          1
+        ],
+        [
+          "frosted grey maroon steel black",
+          1
+        ],
+        [
+          "metallic burnished gainsboro almond dim",
+          1
+        ],
+        [
+          "khaki moccasin mint plum tomato",
+          1
+        ],
+        [
+          "saddle yellow cyan maroon wheat",
+          1
+        ],
+        [
+          "bisque antique orange misty pale",
+          1
+        ],
+        [
+          "puff chocolate midnight saddle dim",
+          1
+        ],
+        [
+          "saddle lavender khaki steel olive",
+          1
+        ],
+        [
+          "wheat green medium bisque cyan",
+          1
+        ],
+        [
+          "puff metallic papaya gainsboro cornsilk",
+          1
+        ],
+        [
+          "beige floral dark lavender light",
+          1
+        ],
+        [
+          "red bisque aquamarine misty beige",
+          1
+        ]
+      ],
+      "total_unique": 199997
+    },
+    "p_mfgr": {
+      "min_length": 14,
+      "max_length": 14,
+      "avg_length": 14.0,
+      "top_values": [
+        [
+          "Manufacturer#3           ",
+          40304
+        ],
+        [
+          "Manufacturer#5           ",
+          40135
+        ],
+        [
+          "Manufacturer#1           ",
+          40084
+        ],
+        [
+          "Manufacturer#4           ",
+          39841
+        ],
+        [
+          "Manufacturer#2           ",
+          39636
+        ]
+      ],
+      "total_unique": 5
+    },
+    "p_brand": {
+      "min_length": 8,
+      "max_length": 8,
+      "avg_length": 8.0,
+      "top_values": [
+        [
+          "Brand#35  ",
+          8233
+        ],
+        [
+          "Brand#12  ",
+          8167
+        ],
+        [
+          "Brand#52  ",
+          8158
+        ],
+        [
+          "Brand#33  ",
+          8141
+        ],
+        [
+          "Brand#53  ",
+          8088
+        ],
+        [
+          "Brand#14  ",
+          8053
+        ],
+        [
+          "Brand#55  ",
+          8031
+        ],
+        [
+          "Brand#44  ",
+          8031
+        ],
+        [
+          "Brand#34  ",
+          8014
+        ],
+        [
+          "Brand#41  ",
+          8006
+        ],
+        [
+          "Brand#15  ",
+          7999
+        ],
+        [
+          "Brand#21  ",
+          7991
+        ],
+        [
+          "Brand#13  ",
+          7989
+        ],
+        [
+          "Brand#22  ",
+          7978
+        ],
+        [
+          "Brand#45  ",
+          7978
+        ],
+        [
+          "Brand#24  ",
+          7975
+        ],
+        [
+          "Brand#31  ",
+          7968
+        ],
+        [
+          "Brand#32  ",
+          7948
+        ],
+        [
+          "Brand#54  ",
+          7938
+        ],
+        [
+          "Brand#51  ",
+          7920
+        ]
+      ],
+      "total_unique": 25
+    },
+    "p_type": {
+      "min_length": 16,
+      "max_length": 25,
+      "avg_length": 20.59973,
+      "top_values": [
+        [
+          "ECONOMY ANODIZED STEEL",
+          1451
+        ],
+        [
+          "LARGE PLATED STEEL",
+          1434
+        ],
+        [
+          "PROMO BRUSHED BRASS",
+          1420
+        ],
+        [
+          "MEDIUM BURNISHED COPPER",
+          1415
+        ],
+        [
+          "LARGE PLATED BRASS",
+          1415
+        ],
+        [
+          "SMALL BRUSHED TIN",
+          1413
+        ],
+        [
+          "MEDIUM ANODIZED TIN",
+          1405
+        ],
+        [
+          "SMALL POLISHED NICKEL",
+          1403
+        ],
+        [
+          "STANDARD ANODIZED TIN",
+          1399
+        ],
+        [
+          "PROMO POLISHED TIN",
+          1398
+        ],
+        [
+          "LARGE POLISHED COPPER",
+          1397
+        ],
+        [
+          "LARGE ANODIZED TIN",
+          1395
+        ],
+        [
+          "ECONOMY BURNISHED COPPER",
+          1387
+        ],
+        [
+          "STANDARD BRUSHED TIN",
+          1387
+        ],
+        [
+          "ECONOMY PLATED BRASS",
+          1383
+        ],
+        [
+          "STANDARD ANODIZED COPPER",
+          1382
+        ],
+        [
+          "SMALL BURNISHED BRASS",
+          1381
+        ],
+        [
+          "ECONOMY ANODIZED NICKEL",
+          1378
+        ],
+        [
+          "SMALL POLISHED TIN",
+          1378
+        ],
+        [
+          "PROMO ANODIZED NICKEL",
+          1378
+        ]
+      ],
+      "total_unique": 150
+    },
+    "p_container": {
+      "min_length": 6,
+      "max_length": 10,
+      "avg_length": 7.574855,
+      "top_values": [
+        [
+          "SM DRUM   ",
+          5153
+        ],
+        [
+          "JUMBO JAR ",
+          5115
+        ],
+        [
+          "LG JAR    ",
+          5103
+        ],
+        [
+          "LG BOX    ",
+          5096
+        ],
+        [
+          "LG PACK   ",
+          5091
+        ],
+        [
+          "MED CAN   ",
+          5091
+        ],
+        [
+          "MED JAR   ",
+          5083
+        ],
+        [
+          "MED DRUM  ",
+          5077
+        ],
+        [
+          "MED CASE  ",
+          5064
+        ],
+        [
+          "JUMBO CAN ",
+          5062
+        ],
+        [
+          "SM BOX    ",
+          5055
+        ],
+        [
+          "WRAP JAR  ",
+          5049
+        ],
+        [
+          "WRAP CASE ",
+          5045
+        ],
+        [
+          "MED BOX   ",
+          5043
+        ],
+        [
+          "JUMBO BAG ",
+          5024
+        ],
+        [
+          "JUMBO PKG ",
+          5013
+        ],
+        [
+          "WRAP BAG  ",
+          5008
+        ],
+        [
+          "JUMBO PACK",
+          5001
+        ],
+        [
+          "MED BAG   ",
+          5000
+        ],
+        [
+          "SM PACK   ",
+          4993
+        ]
+      ],
+      "total_unique": 40
+    },
+    "p_comment": {
+      "min_length": 5,
+      "max_length": 22,
+      "avg_length": 13.51219,
+      "top_values": [
+        [
+          " the ",
+          123
+        ],
+        [
+          " furio",
+          73
+        ],
+        [
+          "carefu",
+          71
+        ],
+        [
+          " regula",
+          71
+        ],
+        [
+          "slyly",
+          71
+        ],
+        [
+          "fully ",
+          70
+        ],
+        [
+          " regular ",
+          70
+        ],
+        [
+          " carefully",
+          70
+        ],
+        [
+          " regular",
+          68
+        ],
+        [
+          "lyly ",
+          68
+        ],
+        [
+          "efully",
+          67
+        ],
+        [
+          "uriously ",
+          66
+        ],
+        [
+          "thely",
+          65
+        ],
+        [
+          "arefull",
+          65
+        ],
+        [
+          "careful",
+          64
+        ],
+        [
+          "refull",
+          64
+        ],
+        [
+          "iously",
+          64
+        ],
+        [
+          " regul",
+          64
+        ],
+        [
+          "arefu",
+          63
+        ],
+        [
+          "egular",
+          63
+        ]
+      ],
+      "total_unique": 131753
+    }
+  },
+  "partsupp": {
+    "ps_comment": {
+      "min_length": 49,
+      "max_length": 198,
+      "avg_length": 123.61497875,
+      "top_values": [
+        [
+          "accounts. furiously silent packages are blithely whithout ",
+          2
+        ],
+        [
+          " after the regular deposits. dependencies hang. furiously even deposits wake? furiously special theodolites al",
+          2
+        ],
+        [
+          " according to the quickly even instructions. ironic instructions affix furiously regular packages. accounts would solve against the express courts? furiously regu",
+          2
+        ],
+        [
+          "accounts cajole fluffily according to the special, even pinto beans. regular deposits ",
+          2
+        ],
+        [
+          "across the carefully close instructions. daringly silent foxes sleep. silent, ironic excuses according to the spe",
+          2
+        ],
+        [
+          " after the carefully even deposits. ironically even packages wake slyly bold packages. furiously even ideas boost fu",
+          2
+        ],
+        [
+          " about the pending instructions. pending instructions sleep blithely requests. blithely even deposits haggle after the slyly final ideas. idly pending theodolites nag spe",
+          2
+        ],
+        [
+          "according to the bold, bold attainments sublate furiously final packages. regular, regular notornis use according to the quickly special accounts. furi",
+          2
+        ],
+        [
+          "accounts after the quickly silent sheaves sleep blithel",
+          2
+        ],
+        [
+          "accounts boost carefully above the carefully ironic accounts. ironic i",
+          2
+        ],
+        [
+          "accounts. ideas around the carefully ironic pinto beans may haggle about the furiously final braids. braids alongside of the reg",
+          2
+        ],
+        [
+          "accounts poach fluffily ironic requests. slyly ironic dolphins across the furiously regular ideas sleep according to the quickly regular ideas. furiously even pains haggl",
+          2
+        ],
+        [
+          "across the quickly regular ideas. quickly final accounts across the asymptotes need to wake slyly along the blithely ironic ideas. express dependencies cajole carefully carefully special packages. s",
+          2
+        ],
+        [
+          "affix quickly carefully express frets. fluffily pending dolphins above the carefully brave warhorses impress",
+          2
+        ],
+        [
+          "about the final deposits. slyly permanent deposits haggle. slyly special ideas about the final deposits haggle fluffily blithely bold ideas. packages haggle. special, iron",
+          2
+        ],
+        [
+          " about the ironic, ironic deposits boost furiously across the carefully special requests. slyly special hockey players haggle furiously about the packages. final",
+          2
+        ],
+        [
+          " about the pinto beans? even, bold warthogs wake slyly. finally express packages ",
+          2
+        ],
+        [
+          "above the final accounts. slyly ironic deposits cajole carefully. fluffily ironic platelets should have to serve furiously furiously ironic foxes! fu",
+          2
+        ],
+        [
+          "accounts about the furiously ironic platelets sleep fluffily after the even deposits. furiously special foxes wake carefully ironic escapades. carefully even accounts ",
+          2
+        ],
+        [
+          " against the final theodolites. quickly even ideas sleep",
+          2
+        ]
+      ],
+      "total_unique": 799124
+    }
+  },
+  "customer": {
+    "c_name": {
+      "min_length": 18,
+      "max_length": 18,
+      "avg_length": 18.0,
+      "top_values": [
+        [
+          "Customer#000015064",
+          1
+        ],
+        [
+          "Customer#000042495",
+          1
+        ],
+        [
+          "Customer#000035194",
+          1
+        ],
+        [
+          "Customer#000028077",
+          1
+        ],
+        [
+          "Customer#000006063",
+          1
+        ],
+        [
+          "Customer#000053842",
+          1
+        ],
+        [
+          "Customer#000038676",
+          1
+        ],
+        [
+          "Customer#000015318",
+          1
+        ],
+        [
+          "Customer#000023043",
+          1
+        ],
+        [
+          "Customer#000040148",
+          1
+        ],
+        [
+          "Customer#000013749",
+          1
+        ],
+        [
+          "Customer#000031019",
+          1
+        ],
+        [
+          "Customer#000045631",
+          1
+        ],
+        [
+          "Customer#000054383",
+          1
+        ],
+        [
+          "Customer#000021495",
+          1
+        ],
+        [
+          "Customer#000017479",
+          1
+        ],
+        [
+          "Customer#000001367",
+          1
+        ],
+        [
+          "Customer#000040131",
+          1
+        ],
+        [
+          "Customer#000022020",
+          1
+        ],
+        [
+          "Customer#000000303",
+          1
+        ]
+      ],
+      "total_unique": 150000
+    },
+    "c_address": {
+      "min_length": 10,
+      "max_length": 40,
+      "avg_length": 25.053706666666667,
+      "top_values": [
+        [
+          "ufZiSsYfnnpIbwq",
+          1
+        ],
+        [
+          "bcOc2Wt,mKxb8QZq1",
+          1
+        ],
+        [
+          "xCGPu37lFslsHdLrJ2isTCE96tH hgteiW",
+          1
+        ],
+        [
+          "dTNlDpI4 OrzEg60h",
+          1
+        ],
+        [
+          "LgeLlAmfMF0zMRDey",
+          1
+        ],
+        [
+          ",mikLWmfxv1q98iwudupum3AcvOYimmXp eHcNoV",
+          1
+        ],
+        [
+          "SyvxODXTywzDQoFHfDHwBGJXCPm",
+          1
+        ],
+        [
+          "BjZr1Pv97pCYYe wgWMmXJD0haJX8",
+          1
+        ],
+        [
+          "qZL9JXQhs6bBChHgFoQ6bnWuIrw,Rk",
+          1
+        ],
+        [
+          "vXL7siCq6WWt1Shjiny",
+          1
+        ],
+        [
+          "5l,sIIFQVnUUtzs1",
+          1
+        ],
+        [
+          "ikeT,r,IS5",
+          1
+        ],
+        [
+          "cMfO2t5VMvA0IcGA6L,k13cMMruGiHJo,mtZg",
+          1
+        ],
+        [
+          "vegGPnk9Na",
+          1
+        ],
+        [
+          "37JdDKLU7Gxo",
+          1
+        ],
+        [
+          "2zQr4J ZaFYWpRDotclC1nQVJA Jis,z44VeE5a3",
+          1
+        ],
+        [
+          "ueKQH,005k,2,6Im4Bm5",
+          1
+        ],
+        [
+          "1rV5IxU9MGCvuuU5FXpNaGd8Xa70,gENlRggc ",
+          1
+        ],
+        [
+          " PaCm25La8GtSn",
+          1
+        ],
+        [
+          "DmH5S6gE2Tl71v",
+          1
+        ]
+      ],
+      "total_unique": 150000
+    },
+    "c_phone": {
+      "min_length": 15,
+      "max_length": 15,
+      "avg_length": 15.0,
+      "top_values": [
+        [
+          "23-332-610-1593",
+          1
+        ],
+        [
+          "25-383-898-7899",
+          1
+        ],
+        [
+          "14-910-585-7100",
+          1
+        ],
+        [
+          "20-140-230-4214",
+          1
+        ],
+        [
+          "29-287-997-8889",
+          1
+        ],
+        [
+          "11-317-939-3158",
+          1
+        ],
+        [
+          "25-319-203-3682",
+          1
+        ],
+        [
+          "26-394-202-2377",
+          1
+        ],
+        [
+          "22-509-958-1071",
+          1
+        ],
+        [
+          "17-201-791-1894",
+          1
+        ],
+        [
+          "32-913-744-2856",
+          1
+        ],
+        [
+          "28-665-350-7955",
+          1
+        ],
+        [
+          "18-970-722-1204",
+          1
+        ],
+        [
+          "31-825-465-7964",
+          1
+        ],
+        [
+          "24-129-941-2985",
+          1
+        ],
+        [
+          "30-535-770-5681",
+          1
+        ],
+        [
+          "11-979-876-7133",
+          1
+        ],
+        [
+          "25-374-708-4228",
+          1
+        ],
+        [
+          "23-380-108-3158",
+          1
+        ],
+        [
+          "14-602-499-7208",
+          1
+        ]
+      ],
+      "total_unique": 150000
+    },
+    "c_mktsegment": {
+      "min_length": 8,
+      "max_length": 10,
+      "avg_length": 8.9974,
+      "top_values": [
+        [
+          "HOUSEHOLD ",
+          30189
+        ],
+        [
+          "BUILDING  ",
+          30142
+        ],
+        [
+          "FURNITURE ",
+          29968
+        ],
+        [
+          "MACHINERY ",
+          29949
+        ],
+        [
+          "AUTOMOBILE",
+          29752
+        ]
+      ],
+      "total_unique": 5
+    },
+    "c_comment": {
+      "min_length": 29,
+      "max_length": 116,
+      "avg_length": 72.50732666666667,
+      "top_values": [
+        [
+          "ise. blithely final excuses detect carefully foxes. furiously ironic",
+          2
+        ],
+        [
+          " pending courts haggle carefully beneath the fluffily ironic packages. furiously ",
+          2
+        ],
+        [
+          "ess foxes wake. quickly final orbits use unusual ",
+          2
+        ],
+        [
+          "iously. furiously pending asymptotes wake",
+          2
+        ],
+        [
+          "lyly according to the boldly unusual theodolites. blithely regul",
+          2
+        ],
+        [
+          "orbits. slyly regular pinto bea",
+          2
+        ],
+        [
+          "e carefully express instructions. silent, regular decoys ar",
+          2
+        ],
+        [
+          "en accounts alongside of the blithely regular requests cajole carefully blithely regular pinto beans. ",
+          2
+        ],
+        [
+          "final, regular packages. requ",
+          2
+        ],
+        [
+          " ideas. quickly idle foxes nag carefully ",
+          2
+        ],
+        [
+          "latelets. silent packages wake quickly doggedly pending foxes. idly even foxes haggle ironic accounts. carefull",
+          2
+        ],
+        [
+          "l requests breach furiously about the expres",
+          2
+        ],
+        [
+          "ly special requests x-ray final deposits. bravely silent deposits wake furiously unu",
+          2
+        ],
+        [
+          "ng to the blithely idle packages. quickly even instructions grow pending, ironic accounts",
+          2
+        ],
+        [
+          "ckly even courts. slyly ironic deposits are ",
+          2
+        ],
+        [
+          "e carefully according to the ",
+          2
+        ],
+        [
+          "ecial pinto beans cajole quickly final deposits. daringly special pack",
+          2
+        ],
+        [
+          "e instructions. packages haggle furiously above the ironic accounts. ",
+          2
+        ],
+        [
+          "ffily bold ideas. ironic pinto beans nag sly",
+          2
+        ],
+        [
+          "p furiously. blithely even theodolites use unusual deposits. careful accounts promise slyly ironic accounts. sly",
+          2
+        ]
+      ],
+      "total_unique": 149968
+    }
+  },
+  "orders": {
+    "o_orderstatus": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          "O",
+          732044
+        ],
+        [
+          "F",
+          729413
+        ],
+        [
+          "P",
+          38543
+        ]
+      ],
+      "total_unique": 3
+    },
+    "o_orderpriority": {
+      "min_length": 5,
+      "max_length": 15,
+      "avg_length": 8.399886,
+      "top_values": [
+        [
+          "5-LOW          ",
+          300589
+        ],
+        [
+          "1-URGENT       ",
+          300343
+        ],
+        [
+          "4-NOT SPECIFIED",
+          300254
+        ],
+        [
+          "2-HIGH         ",
+          300091
+        ],
+        [
+          "3-MEDIUM       ",
+          298723
+        ]
+      ],
+      "total_unique": 5
+    },
+    "o_clerk": {
+      "min_length": 15,
+      "max_length": 15,
+      "avg_length": 15.0,
+      "top_values": [
+        [
+          "Clerk#000000542",
+          1618
+        ],
+        [
+          "Clerk#000000081",
+          1615
+        ],
+        [
+          "Clerk#000000901",
+          1612
+        ],
+        [
+          "Clerk#000000828",
+          1610
+        ],
+        [
+          "Clerk#000000902",
+          1607
+        ],
+        [
+          "Clerk#000000141",
+          1606
+        ],
+        [
+          "Clerk#000000759",
+          1603
+        ],
+        [
+          "Clerk#000000629",
+          1598
+        ],
+        [
+          "Clerk#000000847",
+          1597
+        ],
+        [
+          "Clerk#000000825",
+          1597
+        ],
+        [
+          "Clerk#000000023",
+          1595
+        ],
+        [
+          "Clerk#000000436",
+          1594
+        ],
+        [
+          "Clerk#000000486",
+          1593
+        ],
+        [
+          "Clerk#000000694",
+          1590
+        ],
+        [
+          "Clerk#000000939",
+          1588
+        ],
+        [
+          "Clerk#000000719",
+          1588
+        ],
+        [
+          "Clerk#000000185",
+          1587
+        ],
+        [
+          "Clerk#000000369",
+          1585
+        ],
+        [
+          "Clerk#000000305",
+          1583
+        ],
+        [
+          "Clerk#000000471",
+          1581
+        ]
+      ],
+      "total_unique": 1000
+    },
+    "o_comment": {
+      "min_length": 19,
+      "max_length": 78,
+      "avg_length": 48.513872,
+      "top_values": [
+        [
+          " carefully regular ",
+          17
+        ],
+        [
+          "regular theodolites",
+          15
+        ],
+        [
+          "s according to the ",
+          15
+        ],
+        [
+          "y according to the ",
+          12
+        ],
+        [
+          "ly regular packages",
+          12
+        ],
+        [
+          " furiously regular ",
+          12
+        ],
+        [
+          " furiously unusual ",
+          11
+        ],
+        [
+          "s. furiously regular ",
+          11
+        ],
+        [
+          "egular dependencies",
+          10
+        ],
+        [
+          "accounts. furiously",
+          10
+        ],
+        [
+          ". furiously ironic ",
+          10
+        ],
+        [
+          " furiously express ",
+          10
+        ],
+        [
+          "ly according to the",
+          9
+        ],
+        [
+          " packages. carefully",
+          9
+        ],
+        [
+          "he carefully regular",
+          9
+        ],
+        [
+          ". carefully regular ",
+          9
+        ],
+        [
+          " the furiously regular",
+          9
+        ],
+        [
+          ". carefully regular",
+          9
+        ],
+        [
+          " regular packages. ",
+          9
+        ],
+        [
+          " according to the carefull",
+          9
+        ]
+      ],
+      "total_unique": 1482071
+    }
+  },
+  "region": {
+    "r_name": {
+      "min_length": 4,
+      "max_length": 11,
+      "avg_length": 6.8,
+      "top_values": [
+        [
+          "MIDDLE EAST              ",
+          1
+        ],
+        [
+          "AMERICA                  ",
+          1
+        ],
+        [
+          "ASIA                     ",
+          1
+        ],
+        [
+          "EUROPE                   ",
+          1
+        ],
+        [
+          "AFRICA                   ",
+          1
+        ]
+      ],
+      "total_unique": 5
+    },
+    "r_comment": {
+      "min_length": 31,
+      "max_length": 115,
+      "avg_length": 66.0,
+      "top_values": [
+        [
+          "hs use ironic, even requests. s",
+          1
+        ],
+        [
+          "uickly special accounts cajole carefully blithely close requests. carefully final asymptotes haggle furiousl",
+          1
+        ],
+        [
+          "ly final courts cajole furiously final excuse",
+          1
+        ],
+        [
+          "lar deposits. blithely final packages cajole. regular waters are final requests. regular accounts are according to ",
+          1
+        ],
+        [
+          "ges. thinly even pinto beans ca",
+          1
+        ]
+      ],
+      "total_unique": 5
+    }
+  },
+  "lineitem": {
+    "l_returnflag": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          "N",
+          3043852
+        ],
+        [
+          "R",
+          1478870
+        ],
+        [
+          "A",
+          1478493
+        ]
+      ],
+      "total_unique": 3
+    },
+    "l_linestatus": {
+      "min_length": 1,
+      "max_length": 1,
+      "avg_length": 1.0,
+      "top_values": [
+        [
+          "O",
+          3004998
+        ],
+        [
+          "F",
+          2996217
+        ]
+      ],
+      "total_unique": 2
+    },
+    "l_shipinstruct": {
+      "min_length": 4,
+      "max_length": 17,
+      "avg_length": 11.998638442382084,
+      "top_values": [
+        [
+          "NONE                     ",
+          1500862
+        ],
+        [
+          "COLLECT COD              ",
+          1500547
+        ],
+        [
+          "DELIVER IN PERSON        ",
+          1500048
+        ],
+        [
+          "TAKE BACK RETURN         ",
+          1499758
+        ]
+      ],
+      "total_unique": 4
+    },
+    "l_shipmode": {
+      "min_length": 3,
+      "max_length": 7,
+      "avg_length": 4.285304559160103,
+      "top_values": [
+        [
+          "AIR       ",
+          858104
+        ],
+        [
+          "SHIP      ",
+          858036
+        ],
+        [
+          "MAIL      ",
+          857401
+        ],
+        [
+          "FOB       ",
+          857324
+        ],
+        [
+          "TRUCK     ",
+          856998
+        ],
+        [
+          "REG AIR   ",
+          856868
+        ],
+        [
+          "RAIL      ",
+          856484
+        ]
+      ],
+      "total_unique": 7
+    },
+    "l_comment": {
+      "min_length": 10,
+      "max_length": 43,
+      "avg_length": 26.494169763956133,
+      "top_values": [
+        [
+          " furiously",
+          943
+        ],
+        [
+          " carefully",
+          893
+        ],
+        [
+          " carefully ",
+          875
+        ],
+        [
+          "carefully ",
+          854
+        ],
+        [
+          " furiously ",
+          845
+        ],
+        [
+          "furiously ",
+          824
+        ],
+        [
+          " blithely ",
+          651
+        ],
+        [
+          "ly regular",
+          641
+        ],
+        [
+          "y regular ",
+          568
+        ],
+        [
+          "ly regular ",
+          564
+        ],
+        [
+          " deposits ",
+          441
+        ],
+        [
+          " packages ",
+          439
+        ],
+        [
+          "ly ironic ",
+          436
+        ],
+        [
+          "e carefull",
+          429
+        ],
+        [
+          " accounts ",
+          422
+        ],
+        [
+          " requests ",
+          416
+        ],
+        [
+          "e furiousl",
+          397
+        ],
+        [
+          "e carefully",
+          396
+        ],
+        [
+          "e carefully ",
+          385
+        ],
+        [
+          "e furiously",
+          377
+        ]
+      ],
+      "total_unique": 4580667
+    }
+  }
+}

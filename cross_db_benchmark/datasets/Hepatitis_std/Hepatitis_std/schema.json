@@ -1,0 +1,149 @@
+{
+  "tables": {
+    "Bio": [
+      {
+        "name": "fibros",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "activity",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "b_id",
+        "type": "bigint",
+        "nullable": false
+      }
+    ],
+    "dispat": [
+      {
+        "name": "m_id",
+        "type": "bigint",
+        "nullable": false
+      },
+      {
+        "name": "sex",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "age",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "Type",
+        "type": "character varying",
+        "nullable": true
+      }
+    ],
+    "indis": [
+      {
+        "name": "got",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "gpt",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "alb",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "tbil",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "dbil",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "che",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "ttt",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "ztt",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "tcho",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "tp",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "in_id",
+        "type": "bigint",
+        "nullable": false
+      }
+    ],
+    "inf": [
+      {
+        "name": "dur",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "a_id",
+        "type": "bigint",
+        "nullable": false
+      }
+    ],
+    "rel11": [
+      {
+        "name": "b_id",
+        "type": "bigint",
+        "nullable": false
+      },
+      {
+        "name": "m_id",
+        "type": "bigint",
+        "nullable": false
+      }
+    ],
+    "rel12": [
+      {
+        "name": "in_id",
+        "type": "bigint",
+        "nullable": false
+      },
+      {
+        "name": "m_id",
+        "type": "bigint",
+        "nullable": false
+      }
+    ],
+    "rel13": [
+      {
+        "name": "a_id",
+        "type": "bigint",
+        "nullable": false
+      },
+      {
+        "name": "m_id",
+        "type": "bigint",
+        "nullable": false
+      }
+    ]
+  },
+  "relationships": []
+}

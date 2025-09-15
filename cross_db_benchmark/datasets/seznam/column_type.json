@@ -1,0 +1,24 @@
+{
+  "client": {
+    "client_id": "int",
+    "kraj": "char",
+    "obor": "char"
+  },
+  "dobito": {
+    "client_id": "int",
+    "month_year_datum_transakce": "char",
+    "sluzba": "char",
+    "kc_dobito": "float"
+  },
+  "probehnuto": {
+    "client_id": "int",
+    "month_year_datum_transakce": "char",
+    "sluzba": "char",
+    "kc_proklikano": "float"
+  },
+  "probehnuto_mimo_penezenku": {
+    "client_id": "int",
+    "Month/Year": "char",
+    "probehla_inzerce_mimo_penezenku": "char"
+  }
+}

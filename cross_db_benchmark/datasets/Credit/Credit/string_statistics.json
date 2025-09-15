@@ -1,0 +1,204 @@
+{
+  "category": {
+    "category_desc": {
+      "words": [
+        "meals",
+        "electronics",
+        "entertainment",
+        "groceries",
+        "clothing",
+        "communication",
+        "home",
+        "travel",
+        "supplies",
+        "lodging",
+        "misc"
+      ]
+    }
+  },
+  "charge": {},
+  "corporation": {
+    "corp_name": {
+      "words": [
+        "transitltd.",
+        "corp.",
+        "petroleumco.",
+        "apex",
+        "machineryltd.",
+        "key",
+        "operaco.",
+        "makersltd.",
+        "machinerycorp.",
+        "boston",
+        "machineryinc.",
+        "transitcorp.",
+        "questsco.",
+        "stonescorp.",
+        "lightingco.",
+        "operainc.",
+        "restaurantsco.",
+        "lightinginc.",
+        "restaurantscorp.",
+        "computer"
+      ]
+    },
+    "street": {
+      "words": []
+    },
+    "city": {
+      "words": []
+    }
+  },
+  "member": {
+    "lastname": {
+      "words": [
+        "vann",
+        "paynter",
+        "gohan",
+        "yeong",
+        "unaklet",
+        "hahn",
+        "wolfmule",
+        "ling",
+        "zucker",
+        "jones",
+        "tolsky",
+        "chen",
+        "anderson",
+        "makai",
+        "kahrmann",
+        "ryan",
+        "xavier",
+        "florini",
+        "dorr",
+        "nelson"
+      ]
+    },
+    "firstname": {
+      "words": [
+        "uanybgkynivwho",
+        "cflmmamlwbqcgk",
+        "mtqh",
+        "glnt",
+        "uui",
+        "obeigmkyhjvlys",
+        "ropuwgqhylifkx",
+        "dwueiecogfioni",
+        "nejum",
+        "swxwgqtqlqoiyp",
+        "rpkhutgohjhqvs",
+        "kvdhjtjcogweda",
+        "tfalxdpnqtaitg",
+        "sxqbfhneexfjzj",
+        "wmfb",
+        "tngtbecq",
+        "cxlri",
+        "fmszq",
+        "lbei",
+        "bmcowfp"
+      ]
+    },
+    "street": {
+      "words": []
+    },
+    "city": {
+      "words": []
+    }
+  },
+  "payment": {},
+  "provider": {
+    "provider_name": {
+      "words": [
+        "nee",
+        "prov.",
+        "ligh",
+        "tran",
+        "apex",
+        "key",
+        "petr",
+        "ope",
+        "boston",
+        "ques",
+        "res",
+        "expert",
+        "computer",
+        "just",
+        "driven",
+        "giant",
+        "need",
+        "lig",
+        "pet",
+        "sai"
+      ]
+    },
+    "street": {
+      "words": []
+    },
+    "city": {
+      "words": []
+    }
+  },
+  "region": {
+    "region_name": {
+      "words": [
+        "american",
+        "europea",
+        "east",
+        "western",
+        "south",
+        "north",
+        "mid",
+        "scandanavian",
+        "africa",
+        "japan",
+        "sout",
+        "eastern",
+        "china"
+      ]
+    },
+    "street": {
+      "words": [
+        "888",
+        "sixth",
+        "222",
+        "third",
+        "eighth",
+        "111",
+        "st.",
+        "ninth",
+        "first",
+        "999",
+        "444",
+        "666",
+        "fourth",
+        "seventh",
+        "second",
+        "777",
+        "555",
+        "fifth",
+        "333"
+      ]
+    },
+    "city": {
+      "words": [
+        "brussels",
+        "beijing",
+        "paulo",
+        "budapest",
+        "madras",
+        "mombassa",
+        "toronto",
+        "tokyo",
+        "goteborg",
+        "sao"
+      ]
+    },
+    "state_prov": {
+      "words": []
+    },
+    "country": {
+      "words": []
+    }
+  },
+  "statement": {}
+}

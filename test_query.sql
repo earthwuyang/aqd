@@ -1,0 +1,1 @@
+SELECT COUNT(*) FROM departments WHERE dept_name = 'Finance' AND dept_no != 'd009';

@@ -1,0 +1,386 @@
+{
+  "tables": {
+    "category": [
+      {
+        "name": "category_no",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "category_desc",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "category_code",
+        "type": "character",
+        "nullable": true
+      }
+    ],
+    "charge": [
+      {
+        "name": "charge_no",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "member_no",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "provider_no",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "category_no",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "charge_dt",
+        "type": "timestamp without time zone",
+        "nullable": true
+      },
+      {
+        "name": "charge_amt",
+        "type": "numeric",
+        "nullable": true
+      },
+      {
+        "name": "statement_no",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "charge_code",
+        "type": "character",
+        "nullable": true
+      }
+    ],
+    "corporation": [
+      {
+        "name": "corp_no",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "corp_name",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "street",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "city",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "state_prov",
+        "type": "character",
+        "nullable": true
+      },
+      {
+        "name": "country",
+        "type": "character",
+        "nullable": true
+      },
+      {
+        "name": "mail_code",
+        "type": "character",
+        "nullable": true
+      },
+      {
+        "name": "phone_no",
+        "type": "character",
+        "nullable": true
+      },
+      {
+        "name": "expr_dt",
+        "type": "timestamp without time zone",
+        "nullable": true
+      },
+      {
+        "name": "region_no",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "corp_code",
+        "type": "character",
+        "nullable": true
+      }
+    ],
+    "member": [
+      {
+        "name": "member_no",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "lastname",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "firstname",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "middleinitial",
+        "type": "character",
+        "nullable": true
+      },
+      {
+        "name": "street",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "city",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "state_prov",
+        "type": "character",
+        "nullable": true
+      },
+      {
+        "name": "country",
+        "type": "character",
+        "nullable": true
+      },
+      {
+        "name": "mail_code",
+        "type": "character",
+        "nullable": true
+      },
+      {
+        "name": "phone_no",
+        "type": "character",
+        "nullable": true
+      },
+      {
+        "name": "photograph",
+        "type": "bytea",
+        "nullable": true
+      },
+      {
+        "name": "issue_dt",
+        "type": "timestamp without time zone",
+        "nullable": true
+      },
+      {
+        "name": "expr_dt",
+        "type": "timestamp without time zone",
+        "nullable": true
+      },
+      {
+        "name": "region_no",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "corp_no",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "prev_balance",
+        "type": "numeric",
+        "nullable": true
+      },
+      {
+        "name": "curr_balance",
+        "type": "numeric",
+        "nullable": true
+      },
+      {
+        "name": "member_code",
+        "type": "character",
+        "nullable": true
+      }
+    ],
+    "payment": [
+      {
+        "name": "payment_no",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "member_no",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "payment_dt",
+        "type": "timestamp without time zone",
+        "nullable": true
+      },
+      {
+        "name": "payment_amt",
+        "type": "numeric",
+        "nullable": true
+      },
+      {
+        "name": "statement_no",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "payment_code",
+        "type": "character",
+        "nullable": true
+      }
+    ],
+    "provider": [
+      {
+        "name": "provider_no",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "provider_name",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "street",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "city",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "state_prov",
+        "type": "character",
+        "nullable": true
+      },
+      {
+        "name": "mail_code",
+        "type": "character",
+        "nullable": true
+      },
+      {
+        "name": "country",
+        "type": "character",
+        "nullable": true
+      },
+      {
+        "name": "phone_no",
+        "type": "character",
+        "nullable": true
+      },
+      {
+        "name": "issue_dt",
+        "type": "timestamp without time zone",
+        "nullable": true
+      },
+      {
+        "name": "expr_dt",
+        "type": "timestamp without time zone",
+        "nullable": true
+      },
+      {
+        "name": "region_no",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "provider_code",
+        "type": "character",
+        "nullable": true
+      }
+    ],
+    "region": [
+      {
+        "name": "region_no",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "region_name",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "street",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "city",
+        "type": "character varying",
+        "nullable": true
+      },
+      {
+        "name": "state_prov",
+        "type": "character",
+        "nullable": true
+      },
+      {
+        "name": "country",
+        "type": "character",
+        "nullable": true
+      },
+      {
+        "name": "mail_code",
+        "type": "character",
+        "nullable": true
+      },
+      {
+        "name": "phone_no",
+        "type": "character",
+        "nullable": true
+      },
+      {
+        "name": "region_code",
+        "type": "character",
+        "nullable": true
+      }
+    ],
+    "statement": [
+      {
+        "name": "statement_no",
+        "type": "integer",
+        "nullable": false
+      },
+      {
+        "name": "member_no",
+        "type": "integer",
+        "nullable": true
+      },
+      {
+        "name": "statement_dt",
+        "type": "timestamp without time zone",
+        "nullable": true
+      },
+      {
+        "name": "due_dt",
+        "type": "timestamp without time zone",
+        "nullable": true
+      },
+      {
+        "name": "statement_amt",
+        "type": "numeric",
+        "nullable": true
+      },
+      {
+        "name": "statement_code",
+        "type": "character",
+        "nullable": true
+      }
+    ]
+  },
+  "relationships": []
+}

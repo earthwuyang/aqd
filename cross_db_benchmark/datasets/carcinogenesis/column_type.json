@@ -1,0 +1,37 @@
+{
+  "atom": {
+    "atomid": "char",
+    "drug": "char",
+    "atomtype": "char",
+    "charge": "char",
+    "name": "char"
+  },
+  "canc": {
+    "drug_id": "char",
+    "class": "char"
+  },
+  "sbond_1": {
+    "id": "int",
+    "drug": "char",
+    "atomid": "char",
+    "atomid_2": "char"
+  },
+  "sbond_2": {
+    "id": "int",
+    "drug": "char",
+    "atomid": "char",
+    "atomid_2": "char"
+  },
+  "sbond_3": {
+    "id": "int",
+    "drug": "char",
+    "atomid": "char",
+    "atomid_2": "char"
+  },
+  "sbond_7": {
+    "id": "int",
+    "drug": "char",
+    "atomid": "char",
+    "atomid_2": "char"
+  }
+}

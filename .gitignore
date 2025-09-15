@@ -7,6 +7,10 @@ data/
 dual_execution_data
 logfile
 
+lightgbm_training_data
+lightgbm_models
+plan_logger
+
 # pg_duckdb build artifacts
 pg_duckdb/third_party/duckdb/build/
 pg_duckdb/*.o

@@ -1,0 +1,51 @@
+{
+  "nesreca": {
+    "id_nesreca": "char",
+    "klas_nesreca": "char",
+    "upravna_enota": "char",
+    "cas_nesreca": "char",
+    "naselje_ali_izven": "char",
+    "kategorija_cesta": "char",
+    "oznaka_cesta_ali_naselje": "char",
+    "tekst_cesta_ali_naselje": "char",
+    "oznaka_odsek_ali_ulica": "char",
+    "tekst_odsek_ali_ulica": "char",
+    "stacionazna_ali_hisna_st": "char",
+    "opis_prizorisce": "char",
+    "vzrok_nesreca": "char",
+    "tip_nesreca": "char",
+    "vreme_nesreca": "char",
+    "stanje_promet": "char",
+    "stanje_vozisce": "char",
+    "stanje_povrsina_vozisce": "char",
+    "x": "int",
+    "y": "int",
+    "x_wgs84": "float",
+    "y_wgs84": "float"
+  },
+  "oseba": {
+    "id_nesreca": "char",
+    "povzrocitelj_ali_udelezenec": "char",
+    "starost": "int",
+    "spol": "char",
+    "upravna_enota": "char",
+    "drzavljanstvo": "char",
+    "poskodba": "char",
+    "vrsta_udelezenca": "char",
+    "varnostni_pas_ali_celada": "char",
+    "vozniski_staz_LL": "int",
+    "vozniski_staz_MM": "int",
+    "alkotest": "float",
+    "strokovni_pregled": "float",
+    "starost_d": "char",
+    "vozniski_staz_d": "char",
+    "alkotest_d": "char",
+    "strokovni_pregled_d": "char"
+  },
+  "upravna_enota": {
+    "id_upravna_enota": "char",
+    "ime_upravna_enota": "char",
+    "st_prebivalcev": "int",
+    "povrsina": "int"
+  }
+}
