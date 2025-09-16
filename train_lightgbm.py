@@ -45,6 +45,10 @@ class LightGBMTrainer:
         self.model_dir = model_dir
         self.model = None
         self.threshold = 0.0  # Fixed threshold
+        self.num_epochs = 3
+        self.trees_per_epoch = 400
+        self.base_learning_rate = 0.045
+        self.runtime_alpha = 0.5
 
         # Setup logging
         logging.basicConfig(
@@ -118,30 +122,112 @@ class LightGBMTrainer:
         self.logger.info(f"Feature vector size: {len(FEATURE_NAMES)} features")
         return df
 
+    @staticmethod
+    def _infer_dataset(row):
+        """Best-effort dataset inference from query identifiers."""
+        query_id = str(row.get('query_id', ''))
+        query_type = str(row.get('query_type', '')).lower()
+
+        if query_type in {'ap', 'tp'}:
+            marker = f"_{query_type}_"
+            if marker in query_id:
+                return query_id.split(marker)[0]
+
+        # Fallback: take everything before the last underscore+number suffix
+        parts = query_id.split('_')
+        if len(parts) > 2:
+            return '_'.join(parts[:-2])
+        if len(parts) > 1:
+            return parts[0]
+        return 'unknown'
+
     def prepare_features(self, df):
-        """Prepare features and regression target"""
-        # Extract features (all 50 features)
-        X = df[FEATURE_NAMES].values
+        """Augment dataframe with targets, labels, and weighting metadata."""
+        df = df.copy()
 
-        # Create regression target: log(pg_time / duck_time)
-        # Positive values mean DuckDB is faster
-        # Negative values mean PostgreSQL is faster
-        eps = 0.001  # Small epsilon to avoid log(0)
-        y_regression = np.log((df['pg_time_ms'].values + eps) / (df['duck_time_ms'].values + eps))
+        eps = 1e-3  # Small epsilon to avoid division by zero
+        df['target'] = np.log((df['pg_time_ms'].values + eps) / (df['duck_time_ms'].values + eps))
+        df['class_label'] = (df['target'] > 0).astype(int)
+        df['relative_gap'] = np.abs(df['target'])
+        df['regret'] = np.abs(df['pg_time_ms'] - df['duck_time_ms'])
+        df['min_runtime'] = np.minimum(df['pg_time_ms'], df['duck_time_ms']) + eps
+        df['dataset'] = df.apply(self._infer_dataset, axis=1)
 
-        # Also store raw times for threshold calibration
-        pg_times = df['pg_time_ms'].values
-        duck_times = df['duck_time_ms'].values
+        # Log summary statistics for visibility
+        self.logger.info(
+            "Prepared features: mean target=%.3f, std target=%.3f, positive ratio=%.2f",
+            df['target'].mean(),
+            df['target'].std(),
+            df['class_label'].mean(),
+        )
 
-        # Add sample weights based on query cost (expensive queries matter more)
-        weights = np.maximum(pg_times, duck_times)
-        weights = weights / weights.mean()  # Normalize
+        return df
 
-        self.logger.info(f"Feature shape: {X.shape}")
-        self.logger.info(f"Target stats: mean={y_regression.mean():.3f}, std={y_regression.std():.3f}")
-        self.logger.info(f"Positive targets (DuckDB faster): {(y_regression > 0).sum()}/{len(y_regression)}")
+    def _compute_sample_weights(self, df_subset, predictions, dataset_counts, epoch):
+        """Compute self-paced Taylor-weighted boosting weights."""
+        if df_subset.empty:
+            return np.array([])
 
-        return X, y_regression, pg_times, duck_times, weights
+        total = len(df_subset)
+        class_counts = df_subset['class_label'].value_counts()
+        class_factor = df_subset['class_label'].map(
+            lambda lbl: total / (2.0 * max(class_counts.get(lbl, 1), 1))
+        ).to_numpy()
+
+        gap_factor = df_subset['relative_gap'].to_numpy() + 1e-3
+        dataset_factor = df_subset['dataset'].map(
+            lambda ds: 1.0 / np.sqrt(max(dataset_counts.get(ds, total), 1))
+        ).to_numpy()
+        regret_factor = df_subset['regret'].to_numpy() + 1e-3
+        runtime_factor = np.power(df_subset['min_runtime'].to_numpy(), self.runtime_alpha)
+
+        if predictions is None or len(predictions) == 0:
+            prob = np.full(total, 0.5)
+        else:
+            prob = 1.0 / (1.0 + np.exp(-predictions))
+        focal_factor = np.square(1.0 - 2.0 * np.abs(prob - 0.5)) + 1e-3
+
+        weights = (
+            class_factor
+            * gap_factor
+            * dataset_factor
+            * regret_factor
+            * runtime_factor
+            * focal_factor
+        )
+
+        # Gradient compression for near-ties (log gap < 5%)
+        small_gap = np.log(1.05)
+        near_ties = df_subset['relative_gap'].to_numpy() < small_gap
+        weights[near_ties] *= 0.3
+
+        # Soft clipping with gradually widening bounds
+        clip_low = 0.05 / np.sqrt(epoch + 1)
+        clip_high = 50.0 * (1.0 + 0.5 * epoch)
+        weights = np.clip(weights, clip_low, clip_high)
+
+        # Normalize to keep numerical scale stable
+        weights /= np.mean(weights)
+        return weights
+
+    @staticmethod
+    def _calibrate_threshold(predictions, pg_times, duck_times):
+        """Find routing threshold that minimizes total latency on validation set."""
+        if len(predictions) == 0:
+            return 0.0
+
+        candidate_thresholds = np.linspace(-0.5, 0.5, 101)
+        best_threshold = 0.0
+        best_latency = float('inf')
+
+        for thr in candidate_thresholds:
+            routed_duck = predictions > thr
+            total_latency = np.sum(np.where(routed_duck, duck_times, pg_times))
+            if total_latency < best_latency:
+                best_latency = total_latency
+                best_threshold = thr
+
+        return best_threshold
 
     def evaluate_routing(self, model, X_val, pg_times_val, duck_times_val, threshold=0):
         """Evaluate routing decisions with classification metrics"""
@@ -237,74 +323,124 @@ class LightGBMTrainer:
 
         return accuracy, precision, recall, conf_matrix
 
-    def train(self, X, y, pg_times, duck_times, weights):
-        """Train LightGBM regression model with cross-validation"""
-        # Split data
-        X_train, X_val, y_train, y_val, pg_train, pg_val, duck_train, duck_val, w_train, w_val = \
-            train_test_split(X, y, pg_times, duck_times, weights, test_size=0.2, random_state=42)
+    def train(self, prepared_df):
+        """Train LightGBM regression model with self-paced boosting."""
+        dataset_counts = prepared_df['dataset'].value_counts()
 
-        # Create LightGBM datasets
-        train_data = lgb.Dataset(X_train, label=y_train, weight=w_train, feature_name=FEATURE_NAMES)
-        val_data = lgb.Dataset(X_val, label=y_val, weight=w_val, feature_name=FEATURE_NAMES, reference=train_data)
-
-        # Parameters for regression (optimized for expanded features)
-        params = {
-            'objective': 'regression',
-            'metric': 'rmse',
-            'boosting_type': 'gbdt',
-            'num_leaves': 127,  # Increased for more features
-            'learning_rate': 0.05,
-            'feature_fraction': 0.8,
-            'bagging_fraction': 0.8,
-            'bagging_freq': 5,
-            'min_child_samples': 20,
-            'verbosity': 1,
-            'num_threads': -1,
-            'seed': 42
-        }
-
-        # Train with early stopping
-        self.logger.info("Training LightGBM regression model with expanded features...")
-        evals_result = {}
-        self.model = lgb.train(
-            params,
-            train_data,
-            num_boost_round=500,
-            valid_sets=[val_data],
-            valid_names=['val'],
-            callbacks=[
-                lgb.early_stopping(20),
-                lgb.log_evaluation(20),
-                lgb.record_evaluation(evals_result)
-            ]
+        # Stratified split to maintain class balance
+        indices = prepared_df.index.to_numpy()
+        stratify_series = prepared_df['class_label']
+        stratify_arg = stratify_series.to_numpy() if stratify_series.nunique() > 1 else None
+        train_idx, val_idx = train_test_split(
+            indices,
+            test_size=0.2,
+            stratify=stratify_arg,
+            random_state=42,
         )
 
-        # Evaluate on validation set
-        val_pred = self.model.predict(X_val, num_iteration=self.model.best_iteration)
-        val_rmse = np.sqrt(mean_squared_error(y_val, val_pred))
-        val_mae = mean_absolute_error(y_val, val_pred)
-        val_r2 = r2_score(y_val, val_pred)
+        train_df = prepared_df.loc[train_idx].reset_index(drop=True)
+        val_df = prepared_df.loc[val_idx].reset_index(drop=True)
 
-        self.logger.info(f"Validation metrics:")
+        X_train = train_df[FEATURE_NAMES].values
+        y_train = train_df['target'].values
+        X_val = val_df[FEATURE_NAMES].values
+        y_val = val_df['target'].values
+
+        train_preds = np.zeros(len(train_df))
+        val_preds = np.zeros(len(val_df))
+        booster = None
+
+        self.logger.info(
+            "Training with self-paced Taylor-weighted boosting: %d epochs × %d trees",
+            self.num_epochs,
+            self.trees_per_epoch,
+        )
+
+        for epoch in range(self.num_epochs):
+            lr = self.base_learning_rate * (0.75 ** epoch)
+            params = {
+                'objective': 'regression',
+                'metric': 'rmse',
+                'boosting_type': 'goss',
+                'num_leaves': 256,
+                'max_depth': 18,
+                'learning_rate': lr,
+                'feature_fraction': 0.8,
+                'bagging_fraction': 1.0,
+                'bagging_freq': 0,
+                'min_child_samples': 20,
+                'lambda_l2': 1.0,
+                'verbosity': -1,
+                'num_threads': -1,
+                'seed': 42,
+            }
+
+            train_weights = self._compute_sample_weights(train_df, train_preds, dataset_counts, epoch)
+            val_weights = self._compute_sample_weights(val_df, val_preds, dataset_counts, epoch)
+
+            train_data = lgb.Dataset(
+                X_train,
+                label=y_train,
+                weight=train_weights,
+                feature_name=FEATURE_NAMES,
+                free_raw_data=False,
+            )
+            val_data = lgb.Dataset(
+                X_val,
+                label=y_val,
+                weight=val_weights,
+                feature_name=FEATURE_NAMES,
+                reference=train_data,
+                free_raw_data=False,
+            )
+
+            booster = lgb.train(
+                params,
+                train_data,
+                num_boost_round=self.trees_per_epoch,
+                init_model=booster,
+                valid_sets=[val_data],
+                valid_names=['val'],
+                keep_training_booster=True,
+                callbacks=[
+                    lgb.early_stopping(100, first_metric_only=True),
+                    lgb.log_evaluation(100),
+                ],
+            )
+
+            train_preds = booster.predict(X_train)
+            val_preds = booster.predict(X_val)
+
+        self.model = booster
+
+        val_rmse = np.sqrt(mean_squared_error(y_val, val_preds))
+        val_mae = mean_absolute_error(y_val, val_preds)
+        val_r2 = r2_score(y_val, val_preds)
+
+        self.logger.info("Validation metrics after self-paced training:")
         self.logger.info(f"  RMSE: {val_rmse:.4f}")
         self.logger.info(f"  MAE: {val_mae:.4f}")
         self.logger.info(f"  R²: {val_r2:.4f}")
 
-        # Use fixed threshold = 0 (no calibration)
         self.threshold = 0.0
+        self.logger.info("Using fixed routing threshold: %.4f", self.threshold)
 
-        # Evaluate routing with classification metrics
-        self.evaluate_routing(self.model, X_val, pg_val, duck_val, threshold=self.threshold)
+        self.evaluate_routing(
+            self.model,
+            X_val,
+            val_df['pg_time_ms'].to_numpy(),
+            val_df['duck_time_ms'].to_numpy(),
+            threshold=self.threshold,
+        )
 
-        # Feature importance
         importance = self.model.feature_importance(importance_type='gain')
         feature_imp = pd.DataFrame({
             'feature': FEATURE_NAMES,
-            'importance': importance
+            'importance': importance,
         }).sort_values('importance', ascending=False)
 
         self.logger.info(f"\nTop 15 most important features (out of {len(FEATURE_NAMES)}):")
-        for idx, row in feature_imp.head(15).iterrows():
+        for _, row in feature_imp.head(15).iterrows():
             self.logger.info(f"  {row['feature']}: {row['importance']:.1f}")
 
     def save_model(self, name_suffix=""):
@@ -360,11 +496,11 @@ def main():
     trainer = LightGBMTrainer(data_dir=args.data_dir, model_dir=args.model_dir)
 
     # Load and prepare data
-    df = trainer.load_data(args.data_file)
-    X, y, pg_times, duck_times, weights = trainer.prepare_features(df)
+    df_raw = trainer.load_data(args.data_file)
+    prepared_df = trainer.prepare_features(df_raw)
 
     # Train model
-    trainer.train(X, y, pg_times, duck_times, weights)
+    trainer.train(prepared_df)
 
     # Save model
     model_path = trainer.save_model(args.suffix)

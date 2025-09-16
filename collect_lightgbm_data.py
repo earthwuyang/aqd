@@ -125,10 +125,11 @@ def extract_features_manually(query):
 
     return features
 
-def load_advanced_benchmark_queries(benchmark_dir, dataset_name):
+def load_advanced_benchmark_queries(benchmark_dir, dataset_name, max_ap_queries=10000, max_tp_queries=10000):
     """Load queries from advanced_benchmark_queries directory structure"""
     dataset_path = Path(benchmark_dir) / dataset_name
-    queries = []
+    ap_queries = []
+    tp_queries = []
 
     # Load AP queries
     ap_file = dataset_path / 'advanced_ap_queries.sql'
@@ -140,7 +141,9 @@ def load_advanced_benchmark_queries(benchmark_dir, dataset_name):
             for i, query in enumerate(raw_queries):
                 query = query.strip()
                 if query and not query.startswith('--'):
-                    queries.append((f"{dataset_name}_ap_{i+1}", query))
+                    ap_queries.append((f"{dataset_name}_ap_{i+1}", query, 'ap'))
+                    if len(ap_queries) >= max_ap_queries:
+                        break
 
     # Load TP queries
     tp_file = dataset_path / 'advanced_tp_queries.sql'
@@ -152,9 +155,36 @@ def load_advanced_benchmark_queries(benchmark_dir, dataset_name):
             for i, query in enumerate(raw_queries):
                 query = query.strip()
                 if query and not query.startswith('--'):
-                    queries.append((f"{dataset_name}_tp_{i+1}", query))
+                    tp_queries.append((f"{dataset_name}_tp_{i+1}", query, 'tp'))
+                    if len(tp_queries) >= max_tp_queries:
+                        break
 
-    return queries
+    # If we don't have enough unique queries, repeat them with different IDs
+    while len(ap_queries) < max_ap_queries and ap_queries:
+        base_queries = ap_queries[:]
+        for i, (_, query, query_type) in enumerate(base_queries):
+            if len(ap_queries) >= max_ap_queries:
+                break
+            cycle_num = len(ap_queries) // len(base_queries) + 1
+            new_id = f"{dataset_name}_ap_{len(ap_queries) + 1}_cycle{cycle_num}"
+            ap_queries.append((new_id, query, query_type))
+
+    while len(tp_queries) < max_tp_queries and tp_queries:
+        base_queries = tp_queries[:]
+        for i, (_, query, query_type) in enumerate(base_queries):
+            if len(tp_queries) >= max_tp_queries:
+                break
+            cycle_num = len(tp_queries) // len(base_queries) + 1
+            new_id = f"{dataset_name}_tp_{len(tp_queries) + 1}_cycle{cycle_num}"
+            tp_queries.append((new_id, query, query_type))
+
+    combined_queries = ap_queries + tp_queries
+
+    # Mix AP and TP queries so execution order alternates between workloads
+    if combined_queries:
+        random.shuffle(combined_queries)
+
+    return combined_queries
 
 def process_dataset(dataset_name, db_name, queries, user, host, port, output_dir):
     """Process all queries for a single dataset sequentially, writing results immediately"""
@@ -168,7 +198,7 @@ def process_dataset(dataset_name, db_name, queries, user, host, port, output_dir
     writer = csv.writer(csv_file)
 
     # Write header
-    header = ['query_id', 'query_length'] + FEATURE_NAMES + \
+    header = ['query_id', 'query_type', 'query_length'] + FEATURE_NAMES + \
             ['pg_time_ms', 'duck_time_ms', 'optimal_engine']
     writer.writerow(header)
     csv_file.flush()  # Ensure header is written immediately
@@ -194,7 +224,7 @@ def process_dataset(dataset_name, db_name, queries, user, host, port, output_dir
         conn.commit()
 
         # Process each query
-        for i, (query_id, query) in enumerate(queries):
+        for i, (query_id, query, query_type) in enumerate(queries):
             if i % 50 == 0:
                 logger.info(f"[{dataset_name}] Progress: {i}/{len(queries)}")
 
@@ -206,7 +236,7 @@ def process_dataset(dataset_name, db_name, queries, user, host, port, output_dir
                         cur.execute(f"EXPLAIN {query}")
                         # Try to get features from GUC if available
                         try:
-                            cur.execute("SHOW lgbm.last_features_json")
+                            cur.execute("SHOW lightgbm.last_features_json")
                             features_json = cur.fetchone()[0]
                             if features_json and features_json != '{}':
                                 features = json.loads(features_json)
@@ -272,7 +302,7 @@ def process_dataset(dataset_name, db_name, queries, user, host, port, output_dir
                     optimal_engine = 'unknown'
 
                 # Create result row with all 50 features
-                row = [query_id, len(query)]
+                row = [query_id, query_type, len(query)]
                 for feature_name in FEATURE_NAMES:
                     row.append(features.get(feature_name, 0))
                 row.extend([pg_time, duck_time, optimal_engine])
@@ -315,7 +345,7 @@ def write_results_to_file(output_file, results, mode='w'):
 
         if mode == 'w':
             # Write header with all 50 features
-            header = ['query_id', 'query_length'] + FEATURE_NAMES + \
+            header = ['query_id', 'query_type', 'query_length'] + FEATURE_NAMES + \
                     ['pg_time_ms', 'duck_time_ms', 'optimal_engine']
             writer.writerow(header)
 
@@ -326,11 +356,14 @@ def combine_csv_files(output_dir, combined_file, dataset_names):
     """Combine individual dataset CSV files into a single combined file"""
     logger = setup_logging()
 
+    # Increase CSV field size limit for large queries
+    csv.field_size_limit(sys.maxsize)
+
     with open(combined_file, 'w', newline='') as combined_f:
         writer = csv.writer(combined_f)
 
         # Write header (same as individual files)
-        header = ['query_id', 'query_length'] + FEATURE_NAMES + \
+        header = ['query_id', 'query_type', 'query_length'] + FEATURE_NAMES + \
                 ['pg_time_ms', 'duck_time_ms', 'optimal_engine']
         writer.writerow(header)
 
@@ -348,9 +381,40 @@ def combine_csv_files(output_dir, combined_file, dataset_names):
 
         logger.info(f"Combined {total_rows} total rows from {len(dataset_names)} datasets")
 
+def check_existing_data(output_dir, dataset_name, target_ap=10000, target_tp=10000):
+    """Check if dataset already has enough data collected"""
+    output_file = os.path.join(output_dir, f"training_data_{dataset_name}.csv")
+    if not os.path.exists(output_file):
+        return 0, 0, False
+
+    # Increase CSV field size limit for large queries
+    csv.field_size_limit(sys.maxsize)
+
+    ap_count = 0
+    tp_count = 0
+
+    try:
+        with open(output_file, 'r') as f:
+            reader = csv.reader(f)
+            next(reader)  # Skip header
+            for row in reader:
+                if len(row) > 1:
+                    query_type = row[1]  # query_type is second column
+                    if query_type == 'ap':
+                        ap_count += 1
+                    elif query_type == 'tp':
+                        tp_count += 1
+    except Exception as e:
+        return 0, 0, False
+
+    # Check if we have enough data
+    has_enough = ap_count >= target_ap and tp_count >= target_tp
+    return ap_count, tp_count, has_enough
+
 def collect_from_advanced_benchmark_queries(benchmark_dir="advanced_benchmark_queries",
                                            output_dir="lightgbm_training_data",
-                                           max_queries_per_dataset=100,
+                                           max_ap_per_dataset=10000,
+                                           max_tp_per_dataset=10000,
                                            user="wuy",
                                            host="localhost",
                                            port=5432):
@@ -381,16 +445,24 @@ def collect_from_advanced_benchmark_queries(benchmark_dir="advanced_benchmark_qu
     for dataset_name in dataset_dirs:
         logger.info(f"Processing dataset: {dataset_name}")
 
+        # Check if we already have enough data for this dataset
+        ap_count, tp_count, has_enough = check_existing_data(output_dir, dataset_name, max_ap_per_dataset, max_tp_per_dataset)
+
+        if has_enough:
+            logger.info(f"Dataset {dataset_name} already has sufficient data: {ap_count} AP queries, {tp_count} TP queries. Skipping.")
+            all_results[dataset_name] = ap_count + tp_count
+            continue
+
+        logger.info(f"Dataset {dataset_name} needs more data: has {ap_count}/{max_ap_per_dataset} AP, {tp_count}/{max_tp_per_dataset} TP")
+
         # Load queries from advanced benchmark structure
-        all_queries = load_advanced_benchmark_queries(benchmark_dir, dataset_name)
+        all_queries = load_advanced_benchmark_queries(benchmark_dir, dataset_name, max_ap_per_dataset, max_tp_per_dataset)
 
         if not all_queries:
             logger.warning(f"No queries found for dataset {dataset_name}")
             continue
 
-        # Limit queries if specified
-        if max_queries_per_dataset and len(all_queries) > max_queries_per_dataset:
-            all_queries = random.sample(all_queries, max_queries_per_dataset)
+        logger.info(f"Loaded {len(all_queries)} queries for {dataset_name} (target: {max_ap_per_dataset} AP + {max_tp_per_dataset} TP = {max_ap_per_dataset + max_tp_per_dataset} total)")
 
         # Determine database name (dataset name should match database name)
         db_name = dataset_name
@@ -427,8 +499,10 @@ def main():
                        help='Directory containing advanced benchmark queries')
     parser.add_argument('--output-dir', default='lightgbm_training_data',
                        help='Output directory for training data')
-    parser.add_argument('--max-queries', type=int, default=10000,
-                       help='Maximum queries per dataset')
+    parser.add_argument('--max-ap-queries', type=int, default=10000,
+                       help='Maximum AP queries per dataset')
+    parser.add_argument('--max-tp-queries', type=int, default=10000,
+                       help='Maximum TP queries per dataset')
     parser.add_argument('--user', default='wuy',
                        help='Database user')
     parser.add_argument('--host', default='localhost',
@@ -441,7 +515,8 @@ def main():
     collect_from_advanced_benchmark_queries(
         benchmark_dir=args.benchmark_dir,
         output_dir=args.output_dir,
-        max_queries_per_dataset=args.max_queries,
+        max_ap_per_dataset=args.max_ap_queries,
+        max_tp_per_dataset=args.max_tp_queries,
         user=args.user,
         host=args.host,
         port=args.port
