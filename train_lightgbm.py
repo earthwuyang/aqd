@@ -45,7 +45,7 @@ class LightGBMTrainer:
         self.model_dir = model_dir
         self.model = None
         self.threshold = 0.0  # Fixed threshold
-        self.num_epochs = 3
+        self.num_epochs = 10
         self.trees_per_epoch = 400
         self.base_learning_rate = 0.045
         self.runtime_alpha = 0.5
