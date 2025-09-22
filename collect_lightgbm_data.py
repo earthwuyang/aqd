@@ -443,6 +443,8 @@ def collect_from_advanced_benchmark_queries(benchmark_dir="advanced_benchmark_qu
     all_results = {}
 
     for dataset_name in dataset_dirs:
+        if dataset_name == 'tpch_sf1': # FOR DEBUG
+            continue
         logger.info(f"Processing dataset: {dataset_name}")
 
         # Check if we already have enough data for this dataset
