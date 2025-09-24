@@ -154,8 +154,9 @@ class PerformanceTestRunner:
                     cur.execute("SET LOCAL duckdb.force_execution = true")
                     cur.execute("SET LOCAL lightgbm.enabled = false")
                 elif execution_mode == 'lightgbm':
-                    cur.execute("SET LOCAL lightgbm.enabled = true")
-                    # Don't set duckdb.force_execution, let LightGBM decide
+                    cur.execute("SET lightgbm.enabled = true")  # Use SET instead of SET LOCAL
+                    cur.execute("SET duckdb.force_execution = false")  # Ensure DuckDB isn't forced
+                    # Let LightGBM decide the routing
 
                 cur.execute(f"SET LOCAL statement_timeout = {query_timeout * 1000}")
 
@@ -173,11 +174,34 @@ class PerformanceTestRunner:
                 # For LightGBM mode, try to get routing decision
                 if execution_mode == 'lightgbm':
                     try:
+                        # First check if LightGBM is actually enabled
+                        cur.execute("SHOW lightgbm.enabled")
+                        enabled = cur.fetchone()
+
                         cur.execute("SHOW lightgbm.last_decision")
                         decision = cur.fetchone()
-                        result['routed_to'] = decision[0] if decision else 'unknown'
-                    except:
+                        decision_value = decision[0] if decision else None
+
+                        # Debug: Print for first few queries
+                        import threading
+                        with self._lock:
+                            if query_id.endswith(("_1", "_2", "_tp_1", "_ap_1")):
+                                print(f"DEBUG [{query_id}]: lightgbm.enabled={enabled[0] if enabled else 'N/A'}, last_decision='{decision_value}'")
+
+                        # Map the decision to a standard value
+                        if decision_value and decision_value.lower() in ['postgres', 'postgresql']:
+                            result['routed_to'] = 'postgres'
+                        elif decision_value and decision_value.lower() in ['duckdb']:
+                            result['routed_to'] = 'duckdb'
+                        elif decision_value == 'none' or not decision_value:
+                            result['routed_to'] = 'unknown'
+                            # The routing might not have been triggered
+                        else:
+                            result['routed_to'] = 'unknown'
+                            print(f"DEBUG: Unexpected routing decision value: '{decision_value}' for query {query_id}")
+                    except Exception as e:
                         result['routed_to'] = 'unknown'
+                        print(f"ERROR: Could not get routing decision for {query_id}: {e}")
 
         except Exception as e:
             result['time_ms'] = -1

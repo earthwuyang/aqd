@@ -1,0 +1,64 @@
+{
+  "postgres": {
+    "queries": [
+      {
+        "query_id": "tpch_sf1_ap_5118",
+        "query": "SELECT \"part\".\"p_container\", \"supplier\".\"s_acctbal\", AVG(\"part\".\"p_retailprice\")\nFROM \"supplier\" JOIN \"partsupp\" ON \"supplier\".\"s_suppkey\" = \"partsupp\".\"ps_suppkey\" LEFT JOIN \"part\" ON \"partsupp\".\"ps_partkey\" = \"part\".\"p_partkey\" WHERE \"partsupp\".\"ps_availqty\" > 2286 AND \"partsupp\".\"ps_suppkey\" = 3947 GROUP BY \"part\".\"p_container\", \"supplier\".\"s_acctbal\" ORDER BY \"part\".\"p_container\" DESC, AVG(\"part\".\"p_retailprice\") DESC",
+        "type": "ap",
+        "dataset": "tpch_sf1",
+        "execution_mode": "postgres",
+        "time_ms": 6.3888610020512715,
+        "rows": 33,
+        "success": true
+      }
+    ],
+    "batch_wall_time_ms": 14.309517995570786,
+    "successful_count": 1,
+    "failed_count": 0,
+    "total_query_time_ms": 6.3888610020512715,
+    "avg_query_time_ms": 6.3888610020512715,
+    "total_rows": 33
+  },
+  "duckdb": {
+    "queries": [
+      {
+        "query_id": "tpch_sf1_ap_5118",
+        "query": "SELECT \"part\".\"p_container\", \"supplier\".\"s_acctbal\", AVG(\"part\".\"p_retailprice\")\nFROM \"supplier\" JOIN \"partsupp\" ON \"supplier\".\"s_suppkey\" = \"partsupp\".\"ps_suppkey\" LEFT JOIN \"part\" ON \"partsupp\".\"ps_partkey\" = \"part\".\"p_partkey\" WHERE \"partsupp\".\"ps_availqty\" > 2286 AND \"partsupp\".\"ps_suppkey\" = 3947 GROUP BY \"part\".\"p_container\", \"supplier\".\"s_acctbal\" ORDER BY \"part\".\"p_container\" DESC, AVG(\"part\".\"p_retailprice\") DESC",
+        "type": "ap",
+        "dataset": "tpch_sf1",
+        "execution_mode": "duckdb",
+        "time_ms": 139.46423400193453,
+        "rows": 33,
+        "success": true
+      }
+    ],
+    "batch_wall_time_ms": 148.69931399880443,
+    "successful_count": 1,
+    "failed_count": 0,
+    "total_query_time_ms": 139.46423400193453,
+    "avg_query_time_ms": 139.46423400193453,
+    "total_rows": 33
+  },
+  "lightgbm": {
+    "queries": [
+      {
+        "query_id": "tpch_sf1_ap_5118",
+        "query": "SELECT \"part\".\"p_container\", \"supplier\".\"s_acctbal\", AVG(\"part\".\"p_retailprice\")\nFROM \"supplier\" JOIN \"partsupp\" ON \"supplier\".\"s_suppkey\" = \"partsupp\".\"ps_suppkey\" LEFT JOIN \"part\" ON \"partsupp\".\"ps_partkey\" = \"part\".\"p_partkey\" WHERE \"partsupp\".\"ps_availqty\" > 2286 AND \"partsupp\".\"ps_suppkey\" = 3947 GROUP BY \"part\".\"p_container\", \"supplier\".\"s_acctbal\" ORDER BY \"part\".\"p_container\" DESC, AVG(\"part\".\"p_retailprice\") DESC",
+        "type": "ap",
+        "dataset": "tpch_sf1",
+        "execution_mode": "lightgbm",
+        "time_ms": -1,
+        "rows": -1,
+        "success": false,
+        "error": "server closed the connection unexpectedly\n\tThis probably means the server terminated abnormally\n\tbefore or while processing the request.\n",
+        "routed_to": "error"
+      }
+    ],
+    "batch_wall_time_ms": 174.51360599079635,
+    "successful_count": 0,
+    "failed_count": 1,
+    "total_query_time_ms": 0,
+    "avg_query_time_ms": 0,
+    "total_rows": 0
+  }
+}
