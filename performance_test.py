@@ -12,6 +12,7 @@ import logging
 import argparse
 import random
 import json
+import statistics
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
@@ -116,7 +117,7 @@ class PerformanceTestRunner:
 
         Args:
             query_data: Dictionary with query information
-            execution_mode: 'postgres', 'duckdb', or 'lightgbm'
+            execution_mode: 'postgres', 'duckdb', 'lightgbm', or 'threshold_<value>'
             query_timeout: Query timeout in seconds
 
         Returns:
@@ -124,6 +125,7 @@ class PerformanceTestRunner:
         """
         query_id = query_data['id']
         query = query_data['query']
+        threshold_value = None
 
         result = {
             'query_id': query_id,
@@ -153,8 +155,21 @@ class PerformanceTestRunner:
                 elif execution_mode == 'duckdb':
                     cur.execute("SET LOCAL duckdb.force_execution = true")
                     cur.execute("SET LOCAL lightgbm.enabled = false")
+                elif execution_mode.startswith('threshold'):
+                    try:
+                        threshold_value = float(execution_mode.split('_', 1)[1])
+                    except (IndexError, ValueError):
+                        threshold_value = None
+                        self.logger.warning(f"Could not parse threshold from mode {execution_mode}, using existing cost threshold")
+                    cur.execute("SET lightgbm.enabled = true")
+                    cur.execute("SET lightgbm.routing_strategy = 'threshold'")
+                    if threshold_value is not None:
+                        cur.execute(f"SET lightgbm.cost_threshold = {threshold_value}")
+                    result['threshold_value'] = threshold_value
+                    cur.execute("SET duckdb.force_execution = false")
                 elif execution_mode == 'lightgbm':
                     cur.execute("SET lightgbm.enabled = true")  # Use SET instead of SET LOCAL
+                    cur.execute("SET lightgbm.routing_strategy = 'lightgbm'")
                     cur.execute("SET duckdb.force_execution = false")  # Ensure DuckDB isn't forced
                     # Let LightGBM decide the routing
 
@@ -171,10 +186,9 @@ class PerformanceTestRunner:
                 result['rows'] = len(rows)
                 result['success'] = True
 
-                # For LightGBM mode, try to get routing decision
-                if execution_mode == 'lightgbm':
+                # For adaptive routing modes, capture the routing decision
+                if execution_mode == 'lightgbm' or execution_mode.startswith('threshold'):
                     try:
-                        # First check if LightGBM is actually enabled
                         cur.execute("SHOW lightgbm.enabled")
                         enabled = cur.fetchone()
 
@@ -182,25 +196,41 @@ class PerformanceTestRunner:
                         decision = cur.fetchone()
                         decision_value = decision[0] if decision else None
 
-                        # Debug: Print for first few queries
-                        import threading
+                        cur.execute("SHOW lightgbm.last_features_json")
+                        features_row = cur.fetchone()
+                        features_json = features_row[0] if features_row else None
+                        if features_json:
+                            result['routing_details'] = features_json
+                            try:
+                                details_obj = json.loads(features_json)
+                                if isinstance(details_obj, dict):
+                                    if 'plan_cost' in details_obj:
+                                        result['plan_cost'] = details_obj['plan_cost']
+                                    if 'threshold' in details_obj and result.get('threshold_value') is None:
+                                        result['threshold_value'] = details_obj['threshold']
+                            except Exception:
+                                pass
+
+                        if execution_mode.startswith('threshold') and threshold_value is not None:
+                            result['threshold_value'] = threshold_value
+
                         with self._lock:
                             if query_id.endswith(("_1", "_2", "_tp_1", "_ap_1")):
-                                print(f"DEBUG [{query_id}]: lightgbm.enabled={enabled[0] if enabled else 'N/A'}, last_decision='{decision_value}'")
+                                debug_details = features_json if features_json else '{}'
+                                print(f"DEBUG [{query_id}]: mode={execution_mode}, enabled={enabled[0] if enabled else 'N/A'}, last_decision='{decision_value}', details={debug_details}")
 
-                        # Map the decision to a standard value
                         if decision_value and decision_value.lower() in ['postgres', 'postgresql']:
                             result['routed_to'] = 'postgres'
                         elif decision_value and decision_value.lower() in ['duckdb']:
                             result['routed_to'] = 'duckdb'
                         elif decision_value == 'none' or not decision_value:
                             result['routed_to'] = 'unknown'
-                            # The routing might not have been triggered
                         else:
                             result['routed_to'] = 'unknown'
                             print(f"DEBUG: Unexpected routing decision value: '{decision_value}' for query {query_id}")
                     except Exception as e:
                         result['routed_to'] = 'unknown'
+                        result['routing_details'] = f'error: {e}'
                         print(f"ERROR: Could not get routing decision for {query_id}: {e}")
 
         except Exception as e:
@@ -219,12 +249,13 @@ class PerformanceTestRunner:
 
         return result
 
-    def run_concurrent_performance_test(self, queries, lightgbm_model_path=None, query_timeout=30, max_workers=None):
+    def run_concurrent_performance_test(self, queries, lightgbm_model_path=None, thresholds=None, query_timeout=30, max_workers=None):
         """Run concurrent performance comparison test
 
         Args:
             queries: List of query dictionaries
             lightgbm_model_path: Path to LightGBM model file
+            thresholds: Iterable of cost thresholds for threshold-based routing
             query_timeout: Query timeout in seconds
             max_workers: Maximum number of concurrent threads (default: min(32, len(queries)))
 
@@ -233,6 +264,18 @@ class PerformanceTestRunner:
         """
         if max_workers is None:
             max_workers = min(32, len(queries))
+
+        threshold_values = []
+        if thresholds:
+            if isinstance(thresholds, (int, float)):
+                threshold_values = [float(thresholds)]
+            else:
+                for value in thresholds:
+                    try:
+                        threshold_values.append(float(value))
+                    except (TypeError, ValueError):
+                        self.logger.warning(f"Skipping invalid threshold value: {value}")
+        threshold_values = sorted({t for t in threshold_values if t >= 0})
 
         # Set up LightGBM model if provided
         # We need to set up the model in all databases that will be used
@@ -261,19 +304,27 @@ class PerformanceTestRunner:
                 except Exception as e:
                     self.logger.warning(f"Could not connect to database {dataset}: {e}")
 
-        results = {
-            'postgres': [],
-            'duckdb': [],
-            'lightgbm': []
-        }
+        results = {}
+        threshold_mode_map = {}
 
         execution_modes = ['postgres', 'duckdb']
+        for value in threshold_values:
+            if value is None:
+                continue
+            label = f"threshold_{int(value)}" if float(value).is_integer() else f"threshold_{value}"
+            threshold_mode_map[label] = value
+            execution_modes.append(label)
+
         if lightgbm_model_path and os.path.exists(lightgbm_model_path):
             execution_modes.append('lightgbm')
 
         for mode in execution_modes:
+            display_name = mode.upper()
+            if mode in threshold_mode_map:
+                display_name = f"THRESHOLD({threshold_mode_map[mode]:g})"
+
             self.logger.info(f"\n{'='*60}")
-            self.logger.info(f"RUNNING ALL QUERIES CONCURRENTLY WITH {mode.upper()}")
+            self.logger.info(f"RUNNING ALL QUERIES CONCURRENTLY WITH {display_name}")
             self.logger.info(f"{'='*60}")
             self.logger.info(f"Executing {len(queries)} queries with {max_workers} concurrent workers...")
 
@@ -347,6 +398,8 @@ class PerformanceTestRunner:
                 'avg_query_time_ms': avg_query_time,
                 'total_rows': total_rows
             }
+            if mode in threshold_mode_map:
+                results[mode]['threshold'] = threshold_mode_map[mode]
 
         return results
 
@@ -364,7 +417,15 @@ def analyze_concurrent_results(results, output_file=None):
         return
 
     # Extract execution modes that were actually run
-    execution_modes = [mode for mode in ['postgres', 'duckdb', 'lightgbm'] if mode in results and results[mode]]
+    threshold_modes = sorted([mode for mode in results.keys() if isinstance(mode, str) and mode.startswith('threshold')])
+
+    execution_modes = []
+    for base in ['postgres', 'duckdb']:
+        if base in results and results[base]:
+            execution_modes.append(base)
+    execution_modes.extend([mode for mode in threshold_modes if mode in results and results[mode]])
+    if 'lightgbm' in results and results.get('lightgbm'):
+        execution_modes.append('lightgbm')
 
     if not execution_modes:
         logger.error("No valid results to analyze!")
@@ -382,7 +443,12 @@ def analyze_concurrent_results(results, output_file=None):
         batch_time = results[mode]['batch_wall_time_ms']
         successful = results[mode]['successful_count']
         failed = results[mode]['failed_count']
-        logger.info(f"  {mode.upper():<12}: {batch_time:>8.2f}ms ({successful} success, {failed} failed)")
+        label = mode.upper()
+        if mode in threshold_modes:
+            threshold_value = results[mode].get('threshold')
+            if threshold_value is not None:
+                label = f"THRESHOLD({threshold_value:g})"
+        logger.info(f"  {label:<16}: {batch_time:>8.2f}ms ({successful} success, {failed} failed)")
 
     logger.info("")
 
@@ -423,13 +489,32 @@ def analyze_concurrent_results(results, output_file=None):
                     speedup = lightgbm_time / duckdb_time
                     logger.info(f"  DuckDB vs LightGBM: {speedup:.2f}x faster")
 
+        for mode in threshold_modes:
+            mode_data = results.get(mode) or {}
+            threshold_time = mode_data.get('batch_wall_time_ms', 0)
+            if threshold_time <= 0:
+                continue
+            threshold_value = mode_data.get('threshold')
+            label = f"Threshold({threshold_value:g})" if threshold_value is not None else mode
+            if postgres_time > 0:
+                logger.info(f"  {label} vs PostgreSQL: {postgres_time / threshold_time:.2f}x speedup")
+            if duckdb_time > 0:
+                logger.info(f"  {label} vs DuckDB: {duckdb_time / threshold_time:.2f}x speedup")
+            if lightgbm_time > 0:
+                logger.info(f"  {label} vs LightGBM: {lightgbm_time / threshold_time:.2f}x speedup")
+
         logger.info("")
 
     # Show detailed statistics for each mode
     logger.info("DETAILED STATISTICS:")
     for mode in execution_modes:
         mode_data = results[mode]
-        logger.info(f"  {mode.upper()}:")
+        label = mode.upper()
+        if mode in threshold_modes:
+            threshold_value = mode_data.get('threshold')
+            if threshold_value is not None:
+                label = f"THRESHOLD({threshold_value:g})"
+        logger.info(f"  {label}:")
         logger.info(f"    Total execution time: {mode_data['total_query_time_ms']:.2f}ms")
         logger.info(f"    Average query time:   {mode_data['avg_query_time_ms']:.2f}ms")
         logger.info(f"    Total rows returned:  {mode_data['total_rows']}")
@@ -468,6 +553,29 @@ def analyze_concurrent_results(results, output_file=None):
                 logger.info(f"  TP queries -> PostgreSQL: {tp_postgres}/{len(tp_queries)} ({tp_postgres/len(tp_queries)*100:.1f}%)")
                 logger.info(f"  TP queries -> DuckDB:     {tp_duckdb}/{len(tp_queries)} ({tp_duckdb/len(tp_queries)*100:.1f}%)")
 
+    if threshold_modes:
+        logger.info("")
+        logger.info("THRESHOLD ROUTING ANALYSIS:")
+        for mode in threshold_modes:
+            mode_data = results.get(mode)
+            if not mode_data:
+                continue
+            successful_threshold = [q for q in mode_data['queries'] if isinstance(q, dict) and q.get('success')]
+            if not successful_threshold:
+                continue
+            threshold_value = mode_data.get('threshold')
+            label = f"Threshold <= {threshold_value:g}" if threshold_value is not None else mode
+            pg_routes = sum(1 for q in successful_threshold if q.get('routed_to') == 'postgres')
+            duck_routes = sum(1 for q in successful_threshold if q.get('routed_to') == 'duckdb')
+            unknown_routes = len(successful_threshold) - pg_routes - duck_routes
+            logger.info(f"  {label}: {len(successful_threshold)} successful queries")
+            if successful_threshold:
+                logger.info(f"    -> PostgreSQL: {pg_routes} ({(pg_routes/len(successful_threshold))*100:.1f}%)")
+                logger.info(f"    -> DuckDB:     {duck_routes} ({(duck_routes/len(successful_threshold))*100:.1f}%)")
+                logger.info(f"    -> Unknown:    {unknown_routes} ({(unknown_routes/len(successful_threshold))*100:.1f}%)")
+            plan_costs = [q.get('plan_cost') for q in successful_threshold if isinstance(q.get('plan_cost'), (int, float))]
+            if plan_costs:
+                logger.info(f"    Plan cost mean/median: {statistics.mean(plan_costs):.2f} / {statistics.median(plan_costs):.2f}")
     logger.info("="*80)
 
     # Save results to file if requested
@@ -782,6 +890,8 @@ def main():
     parser.add_argument('--lightgbm-model',
                        default='lightgbm_models/lightgbm_model.txt',
                        help='Path to LightGBM model file')
+    parser.add_argument('--thresholds', default='10000,50000',
+                       help='Comma separated list of cost thresholds for threshold-based routing (set to none to skip)')
     parser.add_argument('--db-name', default='tpch_sf1',
                        help='Database name to connect to')
     parser.add_argument('--user', default='wuy',
@@ -840,8 +950,18 @@ def main():
         logger.error("No queries loaded!")
         return 1
     
-    logger.info(f"Total queries to test: {len(all_queries)}")
-    
+    thresholds = []
+    if getattr(args, 'thresholds', None):
+        if isinstance(args.thresholds, str) and args.thresholds.lower() not in ('', 'none'):
+            thresholds = [item.strip() for item in args.thresholds.split(',') if item.strip()]
+        elif isinstance(args.thresholds, (list, tuple)):
+            thresholds = list(args.thresholds)
+
+    if thresholds:
+        logger.info(f"Threshold routing candidates: {thresholds}")
+    else:
+        logger.info("Threshold routing disabled or not requested")
+
     # Run performance test
     runner = PerformanceTestRunner(
         db_name=args.db_name,
@@ -855,9 +975,10 @@ def main():
             logger.info("\\nRunning CONCURRENT performance test...")
             results = runner.run_concurrent_performance_test(
                 all_queries,
-                args.lightgbm_model,
-                args.query_timeout,
-                args.max_workers
+                lightgbm_model_path=args.lightgbm_model,
+                thresholds=thresholds,
+                query_timeout=args.query_timeout,
+                max_workers=args.max_workers
             )
 
             # Analyze and print concurrent results
