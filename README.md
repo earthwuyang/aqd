@@ -124,17 +124,19 @@ The planner hook can now choose between LightGBM predictions and a simple cost t
 
 To sweep multiple thresholds, pass `--thresholds` to `performance_test.py` (for example `--thresholds 10000,50000,150000`). The runner now executes all-postgres, all-duckdb, each requested threshold policy, and LightGBM in one pass and reports comparative statistics.
 
-### Pre-Optimization Features (v1.0.0)
+### Pre-Optimization Features (v2.1.0)
 
-The system extracts 25 lightweight features from Query trees before planning:
+Routing decisions are driven by a 60-element feature vector extracted directly from the PostgreSQL `Query` tree—no planning required. Features fall into the following themes (see `LIGHTGBM_FEATURE_NAMES` in `src/include/utils/preopt_feature_extractor.h` for the exact order):
 
-1. **Query structure**: num_tables, num_joins, query_depth, complexity_score
-2. **Query clauses**: has_aggregates, has_group_by, has_order_by, has_limit, has_distinct
-3. **Advanced features**: has_window_functions, has_outer_joins, has_subqueries
-4. **Complexity indicators**: has_correlated_subqueries, has_complex_expressions
-5. **Function analysis**: has_user_functions, has_text_operations, has_numeric_heavy_ops
-6. **Pattern detection**: analytical_pattern, transactional_pattern, etl_pattern
-7. **Command type**: SELECT=0, INSERT=1, UPDATE=2, DELETE=3, OTHER=4
+1. **Query structure** – table/join counts, heuristic complexity score, query depth, command type.
+2. **Clause presence** – booleans for aggregates, GROUP BY, ORDER BY, LIMIT, DISTINCT, window functions, outer joins, subqueries, correlated subqueries.
+3. **Expression complexity** – whether the statement uses complex expressions, user-defined or text-heavy operators, numeric-heavy expressions, aggregate count, and workload patterns (analytical / transactional / ETL).
+4. **Join analysis** – counts per join type (inner/left/right/full/cross) to hint at star schemas vs OLTP joins.
+5. **Predicate categories** – simple equality, range, LIKE, IN, EXISTS checks, plus flags for parameters, CTE usage, recursive CTEs, lateral joins.
+6. **Selectivity & cardinality heuristics** – rough buckets for expected selectivity/cardinality and whether index usage or partition pruning is likely; also captures parallel-safety, volatile functions, and coarse cost buckets.
+7. **Projection & result metrics** *(new in v2.1.0)* – per-table projected byte totals, average/max projected-row fractions, projected column counts broken down by type (text, numeric, JSON), estimated result row width, and LIMIT/ORDER BY interactions.
+
+These additions provide quantitative signals about projection sparsity and top‑K patterns—key indicators for choosing between row- and column-stores.
 
 ## 📊 Training Pipeline
 

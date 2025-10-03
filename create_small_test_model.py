@@ -6,10 +6,10 @@ import lightgbm as lgb
 import numpy as np
 import json
 
-# Create synthetic training data with 25 features
+# Create synthetic training data with 85 features
 np.random.seed(42)
 n_samples = 1000
-n_features = 25  # Must match PREOPT_NUM_FEATURES
+n_features = 85  # Must match PREOPT_NUM_FEATURES
 
 X = np.random.random((n_samples, n_features))
 # Simple rule: route to DuckDB if first feature > 0.5

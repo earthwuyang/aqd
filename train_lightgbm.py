@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-LightGBM Training Script - Expanded 50 Features
-Trains a regression model on log(pg_time/duck_time) with expanded feature set
-Uses 50 features (25 original + 25 new) for improved routing accuracy
+LightGBM Training Script - 85-Feature Schema (v2.2.0)
+Trains a regression model on log(pg_time/duck_time) with the full pre-optimization
+feature vector emitted by the kernel.
 """
 
 import os
@@ -19,34 +19,40 @@ import logging
 from datetime import datetime
 import argparse
 
-# Expanded feature names - must match kernel exactly (v2.0.0 schema)
+# Feature names must match the kernel (see PreOptFeaturesToArray)
 FEATURE_NAMES = [
-    # Original 25 features
     "num_tables", "num_joins", "query_depth", "complexity_score",
     "has_aggregates", "has_group_by", "has_order_by", "has_limit", "has_distinct",
     "has_window_functions", "has_outer_joins", "estimated_join_complexity",
     "has_subqueries", "has_correlated_subqueries", "has_large_tables", "all_tables_small",
     "has_complex_expressions", "has_user_functions", "has_text_operations", "has_numeric_heavy_ops",
     "num_aggregate_funcs", "analytical_pattern", "transactional_pattern", "etl_pattern", "command_type",
-
-    # Phase 1 expansion - 25 new features
     "join_type_inner", "join_type_left", "join_type_right", "join_type_full", "join_type_cross",
     "predicate_simple_eq", "predicate_range", "predicate_like", "predicate_in", "predicate_exists",
     "has_parameters", "num_cte", "max_subquery_depth", "has_recursive_cte", "has_lateral_join",
     "selectivity_high", "selectivity_medium", "selectivity_low", "cardinality_large", "cardinality_medium",
-    "index_usage_likely", "partition_pruning_likely", "parallel_safe", "has_volatile_funcs", "cost_estimate_high"
+    "index_usage_likely", "partition_pruning_likely", "parallel_safe", "has_volatile_funcs", "cost_estimate_high",
+    "total_projected_bytes", "avg_projected_row_fraction", "max_projected_row_fraction", "projected_column_count",
+    "projected_text_columns", "projected_numeric_columns", "projected_json_columns", "output_row_width",
+    "limit_value", "has_order_by_limit", "avg_scan_fraction", "max_scan_fraction", "total_rowstore_bytes_est",
+    "total_columnar_bytes_est", "has_covering_index", "covering_index_score", "order_by_index_match",
+    "predicate_correlation_max", "predicate_correlation_avg", "group_ndv_est", "groups_per_input_row",
+    "fk_to_pk_joins", "many_to_many_joins", "star_schema_score", "topk_indexed", "topk_log_limit",
+    "text_predicate_indexable", "text_predicate_nonindexable", "duckdb_table_count", "duckdb_parquet_table_count",
+    "duckdb_pushdown_score", "volatile_function_count", "parallel_unsafe_function_count",
+    "estimated_rows_output", "estimated_result_bytes"
 ]
 
-FEATURE_SCHEMA_VERSION = "v2.0.0"
+FEATURE_SCHEMA_VERSION = "v2.2.0"
 
 class LightGBMTrainer:
     def __init__(self, data_dir="lightgbm_training_data", model_dir="lightgbm_models"):
         self.data_dir = data_dir
         self.model_dir = model_dir
         self.model = None
-        self.threshold = 0.0  # Fixed threshold
-        self.num_epochs = 1
-        self.trees_per_epoch = 10
+        self.threshold = 0.0  # Fixed margin threshold (DuckDB if margin > 0)
+        self.num_epochs = 3
+        self.trees_per_epoch = 400
         self.base_learning_rate = 0.045
         self.runtime_alpha = 0.5
 
@@ -267,7 +273,7 @@ class LightGBMTrainer:
 
         # Print results
         self.logger.info(f"\n{'='*60}")
-        self.logger.info(f"ROUTING EVALUATION (50 features, threshold = {threshold})")
+        self.logger.info(f"ROUTING EVALUATION ({len(FEATURE_NAMES)} features, threshold = {threshold})")
         self.logger.info(f"{'='*60}")
 
         self.logger.info(f"\nBinary Classification Metrics:")
@@ -422,7 +428,6 @@ class LightGBMTrainer:
         self.logger.info(f"  MAE: {val_mae:.4f}")
         self.logger.info(f"  R²: {val_r2:.4f}")
 
-        self.threshold = 0.0
         self.logger.info("Using fixed routing threshold: %.4f", self.threshold)
 
         self.evaluate_routing(
@@ -474,7 +479,7 @@ class LightGBMTrainer:
             'target': 'log(pg_time/duck_time)',
             'num_trees': self.model.num_trees(),
             'training_date': timestamp,
-            'expansion_phase': 'Phase 1 - 50 features'
+            'expansion_phase': 'Phase 2 - 85 features'
         }
 
         with open(config_path, 'w') as f:
@@ -486,7 +491,7 @@ class LightGBMTrainer:
 
 def main():
     parser = argparse.ArgumentParser(description='Train LightGBM model with expanded features')
-    parser.add_argument('--data-dir', default='lightgbm_training_data', help='Training data directory')
+    parser.add_argument('--data-dir', default='lightgbm_training_data_new', help='Training data directory')
     parser.add_argument('--model-dir', default='lightgbm_models', help='Model output directory')
     parser.add_argument('--data-file', default='training_data.csv', help='Training data filename')
     parser.add_argument('--suffix', default='', help='Model name suffix')
@@ -506,7 +511,7 @@ def main():
     model_path = trainer.save_model(args.suffix)
 
     print(f"\nTraining complete! Model saved to: {model_path}")
-    print(f"Feature vector size: {len(FEATURE_NAMES)} features (v2.0.0 schema)")
+    print(f"Feature vector size: {len(FEATURE_NAMES)} features (v2.2.0 schema)")
     print(f"To use this model, set in PostgreSQL:")
     print(f"  SET lightgbm.model_path = '{os.path.abspath(model_path)}';")
     print(f"  SET lightgbm.routing_threshold = {trainer.threshold:.6f};")

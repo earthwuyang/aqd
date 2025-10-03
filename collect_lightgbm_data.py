@@ -2,7 +2,7 @@
 """
 LightGBM Data Collection Script - Advanced Benchmark Queries
 Processes datasets from advanced_benchmark_queries directory
-Uses expanded feature set (50 features) for improved routing accuracy
+Captures the full v2.2.0 85-feature schema emitted by the kernel
 """
 
 import os
@@ -19,22 +19,28 @@ import glob
 import random
 from pathlib import Path
 
-# Expanded feature names - must match kernel exactly (v2.0.0 schema)
+# Feature names must match kernel ordering (see PreOptFeaturesToArray)
 FEATURE_NAMES = [
-    # Original 25 features
     "num_tables", "num_joins", "query_depth", "complexity_score",
     "has_aggregates", "has_group_by", "has_order_by", "has_limit", "has_distinct",
     "has_window_functions", "has_outer_joins", "estimated_join_complexity",
     "has_subqueries", "has_correlated_subqueries", "has_large_tables", "all_tables_small",
     "has_complex_expressions", "has_user_functions", "has_text_operations", "has_numeric_heavy_ops",
     "num_aggregate_funcs", "analytical_pattern", "transactional_pattern", "etl_pattern", "command_type",
-
-    # Phase 1 expansion - 25 new features
     "join_type_inner", "join_type_left", "join_type_right", "join_type_full", "join_type_cross",
     "predicate_simple_eq", "predicate_range", "predicate_like", "predicate_in", "predicate_exists",
     "has_parameters", "num_cte", "max_subquery_depth", "has_recursive_cte", "has_lateral_join",
     "selectivity_high", "selectivity_medium", "selectivity_low", "cardinality_large", "cardinality_medium",
-    "index_usage_likely", "partition_pruning_likely", "parallel_safe", "has_volatile_funcs", "cost_estimate_high"
+    "index_usage_likely", "partition_pruning_likely", "parallel_safe", "has_volatile_funcs", "cost_estimate_high",
+    "total_projected_bytes", "avg_projected_row_fraction", "max_projected_row_fraction", "projected_column_count",
+    "projected_text_columns", "projected_numeric_columns", "projected_json_columns", "output_row_width",
+    "limit_value", "has_order_by_limit", "avg_scan_fraction", "max_scan_fraction", "total_rowstore_bytes_est",
+    "total_columnar_bytes_est", "has_covering_index", "covering_index_score", "order_by_index_match",
+    "predicate_correlation_max", "predicate_correlation_avg", "group_ndv_est", "groups_per_input_row",
+    "fk_to_pk_joins", "many_to_many_joins", "star_schema_score", "topk_indexed", "topk_log_limit",
+    "text_predicate_indexable", "text_predicate_nonindexable", "duckdb_table_count", "duckdb_parquet_table_count",
+    "duckdb_pushdown_score", "volatile_function_count", "parallel_unsafe_function_count",
+    "estimated_rows_output", "estimated_result_bytes"
 ]
 
 def setup_logging(level=logging.INFO):
@@ -216,7 +222,18 @@ def process_dataset(dataset_name, db_name, queries, user, host, port, output_dir
         )
         conn.autocommit = False
 
-        # Warm up connection
+        # Ensure LightGBM model is unloaded for this session but feature
+        # extraction stays enabled.
+        with conn.cursor() as cur:
+            try:
+                cur.execute("SET SESSION lightgbm.enabled = true")
+                cur.execute("SET SESSION lightgbm.model_path = ''")
+                cur.execute("RESET lightgbm.last_features_json")
+            except Exception:
+                logger.debug("[%s] LightGBM GUC adjustments failed; continuing", dataset_name)
+        conn.commit()
+
+        # Warm up connection without triggering model loading
         with conn.cursor() as cur:
             for _ in range(3):
                 cur.execute("SELECT 1")
@@ -229,27 +246,50 @@ def process_dataset(dataset_name, db_name, queries, user, host, port, output_dir
                 logger.info(f"[{dataset_name}] Progress: {i}/{len(queries)}")
 
             try:
-                # Extract features using kernel v2.0.0 features
+                # Extract features with the v2.2.0 schema exposed by the kernel
                 features = {}
                 with conn.cursor() as cur:
                     try:
+                        # Enable feature extraction without a loaded model to avoid
+                        # shape mismatches while we regenerate training data.
+                        cur.execute("SET LOCAL lightgbm.enabled = true")
+                        cur.execute("SET LOCAL lightgbm.model_path = ''")
+                        cur.execute("RESET lightgbm.last_features_json")
+
                         cur.execute(f"EXPLAIN {query}")
-                        # Try to get features from GUC if available
                         try:
                             cur.execute("SHOW lightgbm.last_features_json")
                             features_json = cur.fetchone()[0]
                             if features_json and features_json != '{}':
-                                features = json.loads(features_json)
-                                # Validate we have the v2.0.0 feature set
-                                if 'join_type_inner' not in features:
-                                    # Fallback to manual extraction for old schema
+                                try:
+                                    raw_features = json.loads(features_json)
+                                except json.JSONDecodeError:
+                                    logger.warning("[%s] Failed to parse feature JSON; using manual extraction", dataset_name)
+                                    raw_features = None
+
+                                if isinstance(raw_features, dict):
+                                    schema_version = raw_features.get('version')
+                                    if schema_version and schema_version != 'v2.2.0':
+                                        logger.warning(
+                                            "[%s] Feature schema mismatch (kernel=%s, expected=v2.2.0); using manual heuristics",
+                                            dataset_name,
+                                            schema_version
+                                        )
+                                        features = extract_features_manually(query)
+                                    else:
+                                        features = {name: raw_features.get(name, 0) for name in FEATURE_NAMES}
+                                else:
                                     features = extract_features_manually(query)
                             else:
                                 features = extract_features_manually(query)
-                        except:
+                        except Exception:
                             features = extract_features_manually(query)
-                    except:
+                    except Exception:
                         features = extract_features_manually(query)
+
+                for feature_name in FEATURE_NAMES:
+                    features.setdefault(feature_name, 0)
+
                 conn.rollback()
 
                 # Measure PostgreSQL performance
@@ -301,7 +341,7 @@ def process_dataset(dataset_name, db_name, queries, user, host, port, output_dir
                 else:
                     optimal_engine = 'unknown'
 
-                # Create result row with all 50 features
+                # Create result row with the full 85-feature vector
                 row = [query_id, query_type, len(query)]
                 for feature_name in FEATURE_NAMES:
                     row.append(features.get(feature_name, 0))
@@ -344,7 +384,7 @@ def write_results_to_file(output_file, results, mode='w'):
         writer = csv.writer(f)
 
         if mode == 'w':
-            # Write header with all 50 features
+            # Write header with the full feature vector
             header = ['query_id', 'query_type', 'query_length'] + FEATURE_NAMES + \
                     ['pg_time_ms', 'duck_time_ms', 'optimal_engine']
             writer.writerow(header)
@@ -499,7 +539,7 @@ def main():
     parser = argparse.ArgumentParser(description='Collect LightGBM training data from advanced benchmark queries')
     parser.add_argument('--benchmark-dir', default='advanced_benchmark_queries',
                        help='Directory containing advanced benchmark queries')
-    parser.add_argument('--output-dir', default='lightgbm_training_data',
+    parser.add_argument('--output-dir', default='lightgbm_training_data_new',
                        help='Output directory for training data')
     parser.add_argument('--max-ap-queries', type=int, default=10000,
                        help='Maximum AP queries per dataset')

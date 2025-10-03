@@ -208,8 +208,10 @@ class PerformanceTestRunner:
                                         result['plan_cost'] = details_obj['plan_cost']
                                     if 'threshold' in details_obj and result.get('threshold_value') is None:
                                         result['threshold_value'] = details_obj['threshold']
+                                    if 'version' in details_obj:
+                                        result['features_version'] = details_obj['version']
                             except Exception:
-                                pass
+                                result.setdefault('routing_details_error', 'invalid_json')
 
                         if execution_mode.startswith('threshold') and threshold_value is not None:
                             result['threshold_value'] = threshold_value
