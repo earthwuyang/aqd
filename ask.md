@@ -1,39 +1,155 @@
-# Request for GPT-5-Pro: Enriching Pre-Optimization Features for Query Routing
+# LightGBM Concurrent Prediction Segfault in PostgreSQL Multi-Process Environment
 
-## Context
-We perform pre-planner routing between PostgreSQL (row-store) and DuckDB (columnar) using a LightGBM model. The extractor now emits 85 numeric/boolean features directly from the raw `Query` tree plus lightweight catalog lookups, so we avoid running both planners. Models trained on this feature set still show weak recall/precision, suggesting additional information could help.
+## Problem Summary
 
-**Available data at extraction time**
-- Parsed `Query` tree (no `PlannerInfo` or executor statistics).
-- System catalogs (`pg_class`, `pg_stats`, `pg_index`, `pg_constraint`, etc.).
-- DuckDB foreign table metadata (options list, parquet hints).
-- We can afford a few catalog lookups per table per query, but not full sampling.
+I'm integrating LightGBM into PostgreSQL for query routing. The model loads successfully at startup, but **concurrent predictions cause segfaults** when multiple PostgreSQL backend processes call `LGBM_BoosterPredictForMat()` simultaneously on the same booster handle.
 
-## Current Feature Set (85)
-Grouped roughly by theme in the exact order exposed to LightGBM:
+## Architecture
 
-1. **Structural / workload shape**: `num_tables`, `num_joins`, `query_depth`, `complexity_score`, `command_type` and clause booleans (`has_*`).
-2. **Join mix**: counts for each join type (`join_type_inner`, `left`, `right`, `full`, `cross`).
-3. **Predicate categories**: equality/range/like/in/exists flags plus parameter & CTE stats (`has_parameters`, `num_cte`, `max_subquery_depth`, `has_recursive_cte`, `has_lateral_join`).
-4. **Legacy selectivity heuristics**: `selectivity_high/medium/low`, `cardinality_large/medium`, `index_usage_likely`, `partition_pruning_likely`, `parallel_safe`, `has_volatile_funcs`, `cost_estimate_high`.
-5. **Projection metrics**: `total_projected_bytes`, `avg_projected_row_fraction`, `max_projected_row_fraction`, counts of projected columns by type, `output_row_width`, `limit_value`, `has_order_by_limit`.
-6. **Scan & volume estimates**: `avg_scan_fraction`, `max_scan_fraction`, `total_rowstore_bytes_est`, `total_columnar_bytes_est`.
-7. **Index leverage**: `has_covering_index`, `covering_index_score`, `order_by_index_match`, `topk_indexed`, `topk_log_limit`.
-8. **Column correlation signals**: `predicate_correlation_max`, `predicate_correlation_avg`.
-9. **Grouping hardness**: `group_ndv_est`, `groups_per_input_row`.
-10. **Join semantics**: `fk_to_pk_joins`, `many_to_many_joins`, `star_schema_score`.
-11. **Text predicate coverage**: `text_predicate_indexable`, `text_predicate_nonindexable`.
-12. **DuckDB hints**: `duckdb_table_count`, `duckdb_parquet_table_count`, `duckdb_pushdown_score`.
-13. **Function safety**: `volatile_function_count`, `parallel_unsafe_function_count`.
-14. **Output volume**: `estimated_rows_output`, `estimated_result_bytes`.
+- **PostgreSQL 17.6** with custom routing extension (multi-process, not multi-threaded)
+- **LightGBM C API** (lib_lightgbm.so) from latest GitHub
+- **Model loading**: Once at PostgreSQL startup in `TopMemoryContext` (shared memory)
+- **Model usage**: Multiple backend processes call prediction API concurrently
+- **OS**: Linux 6.8.0-59-generic
 
-## Ask
-Despite this richer feature set, training/validation metrics remain sub-par (poor recall on DuckDB decisions, high false positives for Postgres). We want GPT-5-Pro to brainstorm additional cheap signals or transformations that could further differentiate row-store vs columnar routing *before planning*.
+## Current Implementation
 
-**Please provide:**
-1. Additional feature ideas organised by theme (table stats, predicate analysis, projection characteristics, workload history, etc.).
-2. Lightweight formulas using only pre-planner information (catalog stats, constant folding, metadata) – no reliance on `PlannerInfo` or executor stats.
-3. Suggestions for interaction features / ratios (e.g., combining new bytes estimates with concurrency flags) that could help tree models.
-4. Pointers to relevant prior art or heuristics we should study.
+### Model Loading (at startup - works fine)
+```c
+// Global variable in TopMemoryContext, loaded once by postmaster
+LightGBMModel *lightgbm_global_model = NULL;
 
-We especially care about signals that could improve recall on DuckDB-worthy analytical queries without misclassifying OLTP point lookups.
+bool LoadGlobalLightGBMModel(const char *model_path) {
+    // Called once at PostgreSQL startup before forking backends
+    MemoryContext oldcontext = MemoryContextSwitchTo(TopMemoryContext);
+
+    lightgbm_global_model = (LightGBMModel *) palloc0(sizeof(LightGBMModel));
+
+    ret = LGBM_BoosterCreateFromModelfile(
+        model_path,
+        &num_iterations,
+        &lightgbm_global_model->booster
+    );
+
+    // Model loaded successfully: 85 features, 3200 trees (60 iterations)
+    // File: /path/to/lightgbm_model.txt (350KB)
+}
+```
+
+### Prediction (concurrent - causes segfaults)
+```c
+// Called by multiple backend PROCESSES (not threads) concurrently
+// All backends inherit the same lightgbm_global_model pointer after fork()
+static double PredictWithLightGBM(LightGBMModel *model, double *features) {
+    if (!model || !model->loaded || !model->booster)
+        return 0.5;
+
+    // THE PROBLEMATIC CALL - crashes when multiple processes call simultaneously
+    ret = LGBM_BoosterPredictForMat(
+        model->booster,        // SAME booster handle shared by all backends
+        features,              // Per-backend feature array (stack-allocated)
+        1,                     // data_type: double
+        1,                     // nrow: 1 (single prediction)
+        85,                    // ncol: 85 features
+        1,                     // is_row_major
+        0,                     // predict_type: normal (C_API_PREDICT_NORMAL)
+        0,                     // start_iteration
+        -1,                    // num_iteration: use all
+        "num_threads=1",       // Force single-threaded
+        &out_len,
+        &prediction
+    );
+
+    return prediction;
+}
+```
+
+## Test Results
+
+**Scenario**: 9 concurrent queries starting simultaneously
+- **Single query**: ✅ Works perfectly
+- **9 concurrent queries**: ❌ 5/9 crash with segfault
+- **Error**: "LightGBM routing failed with segfault, falling back to PostgreSQL"
+- **Success pattern**: First ~4 queries succeed, remaining 5 crash
+
+## PostgreSQL Multi-Process Architecture (Critical Context)
+
+PostgreSQL uses **processes, not threads**:
+
+1. **Postmaster** (main process) loads model at startup
+2. **fork()** creates child backend processes for each connection
+3. Each backend inherits **copy-on-write memory** including the booster pointer
+4. **No shared memory locking** - processes have separate address spaces
+5. Traditional **spinlocks/mutexes don't work** across processes in PostgreSQL
+
+After fork:
+```
+Postmaster (PID 1000)
+  └─ lightgbm_global_model->booster = 0x7f1234567890
+      ├─ Backend 1 (PID 1001) sees same pointer 0x7f1234567890
+      ├─ Backend 2 (PID 1002) sees same pointer 0x7f1234567890
+      └─ Backend 3 (PID 1003) sees same pointer 0x7f1234567890
+```
+
+## What I've Tried
+
+1. ✅ **Model loaded once at startup** - eliminates concurrent file access
+2. ✅ **`num_threads=1` parameter** - forces single-threaded prediction
+3. ❌ **PostgreSQL spinlock** - doesn't work across processes (only threads)
+4. ❌ **Random delays before prediction** - doesn't help
+5. ❌ **Per-backend model loading** - causes concurrent file access crashes
+6. ❌ **PG_TRY/PG_CATCH** - can't catch SIGSEGV signals
+
+## Root Cause Hypothesis
+
+I suspect the segfault is caused by one of:
+
+1. **LightGBM internal state mutation**: The booster handle contains mutable buffers/caches that get corrupted when multiple processes modify them simultaneously (even for read-only prediction)
+
+2. **Process-local state after fork()**: LightGBM might use thread-local storage, mutexes, or other process-local resources that become invalid after PostgreSQL fork()s the backends
+
+3. **Memory layout assumptions**: LightGBM might assume single-process access and use non-atomic operations on shared internal structures
+
+## Key Questions
+
+1. **Is `LGBM_BoosterPredictForMat()` safe for multi-process concurrent read-only prediction?**
+   - Thread-safe ≠ Process-safe
+   - Does it maintain internal mutable state?
+
+2. **Does LightGBM support shared memory scenarios?**
+   - Can a booster loaded in parent process be used by fork()ed children?
+   - Are there any known limitations or requirements?
+
+3. **What's the recommended architecture for this use case?**
+   - Option A: Each process loads its own model (wastes ~35MB for 100 backends)
+   - Option B: Use shared memory with IPC locking (how?)
+   - Option C: Single prediction server process with IPC (too slow?)
+
+4. **Are there LightGBM build flags or API calls** to make prediction process-safe?
+   - Copy-on-write friendly modes?
+   - Prediction with no internal state mutation?
+
+## Debugging Information
+
+No actual stack traces available (segfault happens in C library, caught by Python test harness), but the pattern is:
+- Crashes happen during `LGBM_BoosterPredictForMat()` call
+- Always affects queries 5-9 (the later ones in concurrent batch)
+- Never crashes with sequential queries
+- Model file is valid (works fine in single-process mode)
+
+## Workarounds Considered
+
+1. **Copy model for each backend** - Works but wastes memory
+2. **Serialize predictions with file locks** - Would kill performance
+3. **Pre-compute predictions** - Not feasible, queries are dynamic
+4. **Use Python LightGBM via separate process** - Too slow, defeats purpose
+
+## What Would Help
+
+- Confirmation if LightGBM C API is designed for multi-process scenarios
+- Recommended synchronization approach (if any)
+- Whether fork() invalidates booster handles
+- Any experience with LightGBM in Apache/nginx (multi-process servers)
+- Alternative APIs or methods that are process-safe
+
+Thank you for any insights!

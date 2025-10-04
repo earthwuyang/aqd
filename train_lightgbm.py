@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-LightGBM Training Script - 85-Feature Schema (v2.2.0)
-Trains a regression model on log(pg_time/duck_time) with the full pre-optimization
-feature vector emitted by the kernel.
+LightGBM Training Script - 85-Feature Schema (v2.2.0).
+Implements self-paced, Taylor-weighted boosting with focal loss to better handle
+class imbalance when routing queries between PostgreSQL and DuckDB.
 """
 
 import os
@@ -13,14 +13,23 @@ import numpy as np
 import pandas as pd
 import lightgbm as lgb
 from sklearn.model_selection import train_test_split, KFold
-from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
-from sklearn.metrics import accuracy_score, precision_score, recall_score, confusion_matrix, classification_report
+from sklearn.metrics import accuracy_score, precision_score, recall_score, confusion_matrix
+from sklearn.metrics import log_loss, balanced_accuracy_score
 import logging
 from datetime import datetime
 import argparse
 
+
+def sigmoid(x):
+    return 1.0 / (1.0 + np.exp(-x))
+
+
+def _clip_probabilities(p, eps=1e-6):
+    return np.clip(p, eps, 1.0 - eps)
+
+
 # Feature names must match the kernel (see PreOptFeaturesToArray)
-FEATURE_NAMES = [
+BASE_FEATURE_NAMES = [
     "num_tables", "num_joins", "query_depth", "complexity_score",
     "has_aggregates", "has_group_by", "has_order_by", "has_limit", "has_distinct",
     "has_window_functions", "has_outer_joins", "estimated_join_complexity",
@@ -43,6 +52,29 @@ FEATURE_NAMES = [
     "estimated_rows_output", "estimated_result_bytes"
 ]
 
+# DERIVED FEATURES DISABLED - C code doesn't compute them, causes segfault
+# Re-enable after implementing derived features in preopt_feature_extractor.c
+DERIVED_FEATURE_SPECS = [
+    # ("idx_cover_gap", -1),
+    # ("topk_idx_gap", -1),
+    # ("covering_idx_effect", -1),
+    # ("col_ratio", 1),
+    # ("duckdb_suitability", 1),
+    # ("pushdown_intensity", 1),
+    # ("pg_parallel_edge", -1),
+    # ("duck_parallel_edge", 1),
+    # ("scan_to_result", 1),
+    # ("project_frac_gap", 1),
+    # ("fanout", 1),
+    # ("star_col_gain", 1),
+    # ("topk_no_idx", 1),
+]
+
+DERIVED_FEATURE_NAMES = [name for name, _ in DERIVED_FEATURE_SPECS]
+
+# Use only base features to match C code (85 features)
+FEATURE_NAMES = BASE_FEATURE_NAMES  # + DERIVED_FEATURE_NAMES
+
 FEATURE_SCHEMA_VERSION = "v2.2.0"
 
 class LightGBMTrainer:
@@ -52,9 +84,51 @@ class LightGBMTrainer:
         self.model = None
         self.threshold = 0.0  # Fixed margin threshold (DuckDB if margin > 0)
         self.num_epochs = 3
-        self.trees_per_epoch = 400
-        self.base_learning_rate = 0.045
-        self.runtime_alpha = 0.5
+        self.trees_per_epoch = 1000
+        self.base_learning_rate = 0.03
+        self.runtime_alpha = 0.6
+        self.focal_alpha = 0.25  # retained for experimentation; not used directly in current weights
+        self.focal_gamma = 2.0   # retained for experimentation; not used directly in current weights
+        self.max_class_weight = 2.5
+        self.min_class_weight = 0.8
+        self.weight_schedule = [
+            {
+                'gamma_pos': 1.5,
+                'gamma_neg': 1.2,
+                'tau': 0.50,
+                'hard_neg_threshold': 0.70,
+                'hard_neg_boost': 1.5,
+                'clip': (0.20, 8.0),
+            },
+            {
+                'gamma_pos': 1.8,
+                'gamma_neg': 1.5,
+                'tau': 0.55,
+                'hard_neg_threshold': 0.70,
+                'hard_neg_boost': 2.0,
+                'clip': (0.15, 6.0),
+            },
+            {
+                'gamma_pos': 2.0,
+                'gamma_neg': 1.8,
+                'tau': 0.60,
+                'hard_neg_threshold': 0.75,
+                'hard_neg_boost': 2.5,
+                'clip': (0.10, 5.0),
+            },
+            {
+                'gamma_pos': 2.2,
+                'gamma_neg': 2.0,
+                'tau': 0.65,
+                'hard_neg_threshold': 0.75,
+                'hard_neg_boost': 2.5,
+                'clip': (0.08, 4.5),
+            },
+        ]
+        self.gap_sharpener_k = 6.0
+        self.gap_sharpener_m = 0.20
+        # No monotone constraints for derived features since they're disabled
+        self.monotone_constraints = [0] * len(FEATURE_NAMES)  # All features unconstrained for now
 
         # Setup logging
         logging.basicConfig(
@@ -112,7 +186,7 @@ class LightGBMTrainer:
                 sys.exit(1)
 
         # Validate feature columns exist
-        missing_features = [f for f in FEATURE_NAMES if f not in df.columns]
+        missing_features = [f for f in BASE_FEATURE_NAMES if f not in df.columns]
         if missing_features:
             self.logger.warning(f"Missing features in data: {missing_features}")
             # Add missing features with default values
@@ -167,31 +241,152 @@ class LightGBMTrainer:
             df['class_label'].mean(),
         )
 
+        # Derived features disabled - C code doesn't compute them
+        # df = self._augment_features(df)
         return df
 
-    def _compute_sample_weights(self, df_subset, predictions, dataset_counts, epoch):
-        """Compute self-paced Taylor-weighted boosting weights."""
+    def _augment_features(self, df):
+        """Compute derived cross-features that help separate PG vs DuckDB."""
+        required = {
+            'has_order_by_limit', 'order_by_index_match', 'topk_indexed', 'limit_value',
+            'covering_index_score', 'predicate_simple_eq', 'predicate_in',
+            'total_columnar_bytes_est', 'total_rowstore_bytes_est',
+            'has_aggregates', 'has_group_by', 'analytical_pattern', 'star_schema_score',
+            'duckdb_pushdown_score', 'selectivity_low', 'predicate_range', 'predicate_like',
+            'projected_column_count', 'output_row_width', 'parallel_safe', 'cardinality_large',
+            'avg_scan_fraction', 'max_scan_fraction', 'parallel_unsafe_function_count',
+            'volatile_function_count', 'total_projected_bytes', 'estimated_result_bytes',
+            'max_projected_row_fraction', 'avg_projected_row_fraction', 'many_to_many_joins',
+            'num_joins', 'index_usage_likely'
+        }
+        missing = required - set(df.columns)
+        if missing:
+            self.logger.warning("Derived feature prerequisites missing: %s", sorted(missing))
+            for col in missing:
+                df[col] = 0.0
+
+        eps = 1e-6
+
+        has_order_by_limit = df['has_order_by_limit'].to_numpy(dtype=float, copy=False)
+        order_by_index_match = df['order_by_index_match'].to_numpy(dtype=float, copy=False)
+        topk_indexed = df['topk_indexed'].to_numpy(dtype=float, copy=False)
+        limit_value = np.maximum(df['limit_value'].to_numpy(dtype=float, copy=False), 0.0)
+
+        idx_cover_gap = has_order_by_limit * (1.0 - order_by_index_match)
+        df['idx_cover_gap'] = idx_cover_gap
+
+        topk_idx_gap = has_order_by_limit * (1.0 - topk_indexed) * np.log1p(limit_value)
+        df['topk_idx_gap'] = np.clip(topk_idx_gap, 0.0, 10.0)
+
+        covering_index_score = df['covering_index_score'].to_numpy(dtype=float, copy=False)
+        predicate_simple_eq = df['predicate_simple_eq'].to_numpy(dtype=float, copy=False)
+        predicate_in = df['predicate_in'].to_numpy(dtype=float, copy=False)
+        has_order = df['has_order_by_limit'].to_numpy(dtype=float, copy=False)
+        df['covering_idx_effect'] = covering_index_score * (
+            predicate_simple_eq + predicate_in + has_order
+        )
+
+        total_columnar = np.maximum(df['total_columnar_bytes_est'].to_numpy(dtype=float, copy=False), 0.0)
+        total_rowstore = np.maximum(df['total_rowstore_bytes_est'].to_numpy(dtype=float, copy=False), 0.0)
+        col_ratio = total_columnar / (total_columnar + total_rowstore + eps)
+        df['col_ratio'] = col_ratio
+
+        has_aggregates = df['has_aggregates'].to_numpy(dtype=float, copy=False)
+        has_group_by = df['has_group_by'].to_numpy(dtype=float, copy=False)
+        analytical_pattern = df['analytical_pattern'].to_numpy(dtype=float, copy=False)
+        star_schema = df['star_schema_score'].to_numpy(dtype=float, copy=False)
+        df['duckdb_suitability'] = col_ratio * (
+            has_aggregates + has_group_by + analytical_pattern + star_schema
+        )
+
+        duckdb_pushdown = df['duckdb_pushdown_score'].to_numpy(dtype=float, copy=False)
+        selectivity_low = df['selectivity_low'].to_numpy(dtype=float, copy=False)
+        predicate_range = df['predicate_range'].to_numpy(dtype=float, copy=False)
+        predicate_like = df['predicate_like'].to_numpy(dtype=float, copy=False)
+        projected_cols = df['projected_column_count'].to_numpy(dtype=float, copy=False)
+        output_row_width = np.maximum(df['output_row_width'].to_numpy(dtype=float, copy=False), 1.0)
+        pushdown_base = selectivity_low + predicate_range + predicate_like + (projected_cols / output_row_width)
+        df['pushdown_intensity'] = np.clip(duckdb_pushdown * pushdown_base, 0.0, 15.0)
+
+        parallel_safe = df['parallel_safe'].to_numpy(dtype=float, copy=False)
+        cardinality_large = df['cardinality_large'].to_numpy(dtype=float, copy=False)
+        avg_scan_fraction = df['avg_scan_fraction'].to_numpy(dtype=float, copy=False)
+        max_scan_fraction = df['max_scan_fraction'].to_numpy(dtype=float, copy=False)
+        df['pg_parallel_edge'] = parallel_safe * (cardinality_large + avg_scan_fraction + max_scan_fraction)
+
+        parallel_unsafe_fn = df['parallel_unsafe_function_count'].to_numpy(dtype=float, copy=False)
+        volatile_fn = df['volatile_function_count'].to_numpy(dtype=float, copy=False)
+        df['duck_parallel_edge'] = parallel_unsafe_fn + volatile_fn - parallel_safe
+
+        total_projected_bytes = np.maximum(df['total_projected_bytes'].to_numpy(dtype=float, copy=False), 0.0)
+        estimated_result_bytes = np.maximum(df['estimated_result_bytes'].to_numpy(dtype=float, copy=False), 0.0)
+        df['scan_to_result'] = np.log1p(total_projected_bytes) - np.log1p(estimated_result_bytes + eps)
+
+        max_proj_frac = df['max_projected_row_fraction'].to_numpy(dtype=float, copy=False)
+        avg_proj_frac = df['avg_projected_row_fraction'].to_numpy(dtype=float, copy=False)
+        df['project_frac_gap'] = max_proj_frac - avg_proj_frac
+
+        many_to_many = df['many_to_many_joins'].to_numpy(dtype=float, copy=False)
+        num_joins = df['num_joins'].to_numpy(dtype=float, copy=False)
+        df['fanout'] = many_to_many * num_joins
+
+        df['star_col_gain'] = star_schema * col_ratio * has_aggregates
+
+        index_usage_likely = df['index_usage_likely'].to_numpy(dtype=float, copy=False)
+        df['topk_no_idx'] = has_order * (1.0 - order_by_index_match) * np.log1p(limit_value) * (1.0 - index_usage_likely)
+
+        return df
+
+    def _compute_sample_weights(self, df_subset, predictions, dataset_counts, epoch, *, is_validation=False):
+        """Compute self-paced weights with asymmetric focusing and hard-negative emphasis."""
         if df_subset.empty:
             return np.array([])
 
         total = len(df_subset)
+        labels = df_subset['class_label'].to_numpy()
+
         class_counts = df_subset['class_label'].value_counts()
-        class_factor = df_subset['class_label'].map(
+        base_class_factor = df_subset['class_label'].map(
             lambda lbl: total / (2.0 * max(class_counts.get(lbl, 1), 1))
         ).to_numpy()
+        class_factor = np.clip(base_class_factor, self.min_class_weight, self.max_class_weight)
 
-        gap_factor = df_subset['relative_gap'].to_numpy() + 1e-3
+        raw_gap = df_subset['relative_gap'].to_numpy()
+        gap_factor = 1.0 + 1.0 / (1.0 + np.exp(-self.gap_sharpener_k * (raw_gap - self.gap_sharpener_m)))
+
         dataset_factor = df_subset['dataset'].map(
             lambda ds: 1.0 / np.sqrt(max(dataset_counts.get(ds, total), 1))
         ).to_numpy()
-        regret_factor = df_subset['regret'].to_numpy() + 1e-3
+
+        regret_base = np.maximum(df_subset['regret'].to_numpy(), 1e-3)
+        regret_factor = np.power(regret_base, 0.25)
+
         runtime_factor = np.power(df_subset['min_runtime'].to_numpy(), self.runtime_alpha)
 
         if predictions is None or len(predictions) == 0:
             prob = np.full(total, 0.5)
         else:
-            prob = 1.0 / (1.0 + np.exp(-predictions))
-        focal_factor = np.square(1.0 - 2.0 * np.abs(prob - 0.5)) + 1e-3
+            prob = _clip_probabilities(sigmoid(predictions))
+
+        schedule = self.weight_schedule[min(epoch, len(self.weight_schedule) - 1)]
+        focus = np.ones_like(prob)
+
+        pos_mask = labels == 1
+        if np.any(pos_mask):
+            focus[pos_mask] *= np.power(
+                np.maximum(1.0 - prob[pos_mask], 1e-3),
+                schedule['gamma_pos'],
+            )
+
+        neg_mask = ~pos_mask
+        if np.any(neg_mask):
+            over_conf = np.maximum(prob[neg_mask] - schedule['tau'], 0.0)
+            neg_focus = np.where(
+                over_conf > 0.0,
+                1.0 + np.power(over_conf, schedule['gamma_neg']),
+                1.0,
+            )
+            focus[neg_mask] *= neg_focus
 
         weights = (
             class_factor
@@ -199,49 +394,39 @@ class LightGBMTrainer:
             * dataset_factor
             * regret_factor
             * runtime_factor
-            * focal_factor
+            * focus
         )
+
+        if not is_validation:
+            hard_neg_threshold = schedule.get('hard_neg_threshold')
+            hard_neg_boost = schedule.get('hard_neg_boost', 1.0)
+            if hard_neg_threshold is not None and hard_neg_boost > 1.0:
+                hard_neg_mask = (labels == 0) & (prob >= hard_neg_threshold)
+                if np.any(hard_neg_mask):
+                    weights[hard_neg_mask] *= hard_neg_boost
 
         # Gradient compression for near-ties (log gap < 5%)
         small_gap = np.log(1.05)
-        near_ties = df_subset['relative_gap'].to_numpy() < small_gap
+        near_ties = raw_gap < small_gap
         weights[near_ties] *= 0.3
 
-        # Soft clipping with gradually widening bounds
-        clip_low = 0.05 / np.sqrt(epoch + 1)
-        clip_high = 50.0 * (1.0 + 0.5 * epoch)
+        clip_low_base, clip_high_base = schedule['clip']
+        clip_low = clip_low_base / np.sqrt(epoch + 1)
+        clip_high = clip_high_base
         weights = np.clip(weights, clip_low, clip_high)
 
-        # Normalize to keep numerical scale stable
         weights /= np.mean(weights)
         return weights
 
-    @staticmethod
-    def _calibrate_threshold(predictions, pg_times, duck_times):
-        """Find routing threshold that minimizes total latency on validation set."""
-        if len(predictions) == 0:
-            return 0.0
-
-        candidate_thresholds = np.linspace(-0.5, 0.5, 101)
-        best_threshold = 0.0
-        best_latency = float('inf')
-
-        for thr in candidate_thresholds:
-            routed_duck = predictions > thr
-            total_latency = np.sum(np.where(routed_duck, duck_times, pg_times))
-            if total_latency < best_latency:
-                best_latency = total_latency
-                best_threshold = thr
-
-        return best_threshold
 
     def evaluate_routing(self, model, X_val, pg_times_val, duck_times_val, threshold=0):
         """Evaluate routing decisions with classification metrics"""
-        # Get predictions
-        predictions = model.predict(X_val, num_iteration=model.best_iteration)
+        # Get raw predictions (log-odds)
+        raw_predictions = model.predict(X_val, num_iteration=model.best_iteration, raw_score=True)
+        probabilities = sigmoid(raw_predictions)
 
-        # Route based on threshold (positive = DuckDB, negative = PostgreSQL)
-        predicted_duckdb = predictions > threshold
+        # Route based on raw score: if raw_score > 0, route to DuckDB
+        predicted_duckdb = raw_predictions > 0
 
         # Ground truth: which engine is actually faster
         actual_duckdb = duck_times_val < pg_times_val
@@ -330,7 +515,7 @@ class LightGBMTrainer:
         return accuracy, precision, recall, conf_matrix
 
     def train(self, prepared_df):
-        """Train LightGBM regression model with self-paced boosting."""
+        """Train LightGBM classifier with self-paced, Taylor-weighted boosting."""
         dataset_counts = prepared_df['dataset'].value_counts()
 
         # Stratified split to maintain class balance
@@ -348,45 +533,83 @@ class LightGBMTrainer:
         val_df = prepared_df.loc[val_idx].reset_index(drop=True)
 
         X_train = train_df[FEATURE_NAMES].values
-        y_train = train_df['target'].values
+        y_train = train_df['class_label'].values.astype(float)
         X_val = val_df[FEATURE_NAMES].values
-        y_val = val_df['target'].values
+        y_val = val_df['class_label'].values.astype(float)
 
         train_preds = np.zeros(len(train_df))
         val_preds = np.zeros(len(val_df))
         booster = None
 
         self.logger.info(
-            "Training with self-paced Taylor-weighted boosting: %d epochs × %d trees",
+            "Training with self-paced Taylor-weighted boosting: %d epochs × %d trees (early_stop=150)",
             self.num_epochs,
             self.trees_per_epoch,
         )
 
         for epoch in range(self.num_epochs):
-            lr = self.base_learning_rate * (0.75 ** epoch)
+            lr = self.base_learning_rate * (0.8 ** epoch)
             params = {
-                'objective': 'regression',
-                'metric': 'rmse',
-                'boosting_type': 'goss',
-                'num_leaves': 256,
-                'max_depth': 18,
+                'objective': 'binary',
+                'metric': ['binary_logloss'],
+                'boosting_type': 'gbdt',
+                'num_leaves': 96,
+                'max_depth': 10,
                 'learning_rate': lr,
-                'feature_fraction': 0.8,
-                'bagging_fraction': 1.0,
-                'bagging_freq': 0,
-                'min_child_samples': 20,
-                'lambda_l2': 1.0,
+                'feature_fraction': 0.75,
+                'bagging_fraction': 0.75,
+                'bagging_freq': 1,
+                'min_child_samples': 400,
+                'lambda_l2': 3.0,
+                'min_gain_to_split': 0.08,
+                'monotone_constraints': self.monotone_constraints,
                 'verbosity': -1,
                 'num_threads': -1,
                 'seed': 42,
             }
 
-            train_weights = self._compute_sample_weights(train_df, train_preds, dataset_counts, epoch)
-            val_weights = self._compute_sample_weights(val_df, val_preds, dataset_counts, epoch)
+            # Stage-1 balanced subset (epoch 0) to learn positive manifold
+            if epoch == 0:
+                pos_idx = np.where(y_train == 1)[0]
+                neg_idx = np.where(y_train == 0)[0]
+                if pos_idx.size > 0 and neg_idx.size > 0:
+                    rng = np.random.default_rng(42)
+                    neg_take = min(neg_idx.size, pos_idx.size * 3)
+                    sel_neg = rng.choice(neg_idx, size=neg_take, replace=False)
+                    sel_idx = np.concatenate([pos_idx, sel_neg])
+                    X_epoch = X_train[sel_idx]
+                    y_epoch = y_train[sel_idx]
+                    df_epoch = train_df.iloc[sel_idx].reset_index(drop=True)
+                    # map predictions for selected subset if available
+                    if len(train_preds) == len(train_df):
+                        pred_epoch = train_preds[sel_idx]
+                    else:
+                        pred_epoch = np.zeros(len(df_epoch))
+                else:
+                    X_epoch, y_epoch, df_epoch = X_train, y_train, train_df
+                    pred_epoch = train_preds
+            else:
+                X_epoch, y_epoch, df_epoch = X_train, y_train, train_df
+                pred_epoch = train_preds
+
+            train_weights = self._compute_sample_weights(
+                df_epoch,
+                pred_epoch,
+                dataset_counts,
+                epoch,
+                is_validation=False,
+            )
+            val_weights = self._compute_sample_weights(
+                val_df,
+                val_preds,
+                dataset_counts,
+                epoch,
+                is_validation=True,
+            )
 
             train_data = lgb.Dataset(
-                X_train,
-                label=y_train,
+                X_epoch,
+                label=y_epoch,
                 weight=train_weights,
                 feature_name=FEATURE_NAMES,
                 free_raw_data=False,
@@ -409,26 +632,36 @@ class LightGBMTrainer:
                 valid_names=['val'],
                 keep_training_booster=True,
                 callbacks=[
-                    lgb.early_stopping(100, first_metric_only=True),
+                    lgb.early_stopping(150, first_metric_only=True),
                     lgb.log_evaluation(100),
                 ],
             )
 
-            train_preds = booster.predict(X_train)
-            val_preds = booster.predict(X_val)
+            train_preds = booster.predict(X_train, raw_score=True)
+            val_preds = booster.predict(X_val, raw_score=True)
 
         self.model = booster
 
-        val_rmse = np.sqrt(mean_squared_error(y_val, val_preds))
-        val_mae = mean_absolute_error(y_val, val_preds)
-        val_r2 = r2_score(y_val, val_preds)
+        # No margin calibration - use raw scores directly
+        prob_val = _clip_probabilities(sigmoid(val_preds))
+        binary_val = val_preds > 0
+
+        try:
+            val_logloss = log_loss(y_val, prob_val, labels=[0, 1])
+        except ValueError:
+            val_logloss = float('nan')
+
+        val_bal_acc = balanced_accuracy_score(y_val, binary_val)
+        val_precision = precision_score(y_val, binary_val, zero_division=0)
+        val_recall = recall_score(y_val, binary_val, zero_division=0)
 
         self.logger.info("Validation metrics after self-paced training:")
-        self.logger.info(f"  RMSE: {val_rmse:.4f}")
-        self.logger.info(f"  MAE: {val_mae:.4f}")
-        self.logger.info(f"  R²: {val_r2:.4f}")
+        self.logger.info(f"  LogLoss: {val_logloss:.4f}")
+        self.logger.info(f"  Balanced Accuracy: {val_bal_acc:.4f}")
+        self.logger.info(f"  Precision (DuckDB): {val_precision:.4f}")
+        self.logger.info(f"  Recall (DuckDB): {val_recall:.4f}")
 
-        self.logger.info("Using fixed routing threshold: %.4f", self.threshold)
+        self.logger.info("Using raw score threshold: 0.0 (no calibration)")
 
         self.evaluate_routing(
             self.model,
@@ -461,7 +694,7 @@ class LightGBMTrainer:
 
         self.logger.info(f"Model saved to: {model_path}")
 
-        # Also save threshold separately for easy access
+        # Save threshold separately for easy access (always 0.0 - no calibration)
         threshold_path = os.path.join(self.model_dir, f"{model_name}_threshold.txt")
         with open(threshold_path, 'w') as f:
             f.write(f"{self.threshold:.6f}\n")
@@ -475,11 +708,14 @@ class LightGBMTrainer:
             'features': FEATURE_NAMES,
             'num_features': len(FEATURE_NAMES),
             'threshold': float(self.threshold),
-            'model_type': 'regression',
-            'target': 'log(pg_time/duck_time)',
+            'model_type': 'binary_classification',
+            'target': 'class_label (DuckDB better if log(pg_time/duck_time) > 0)',
+            'decision_rule': 'route to DuckDB if raw_score > 0',
             'num_trees': self.model.num_trees(),
             'training_date': timestamp,
-            'expansion_phase': 'Phase 2 - 85 features'
+            'expansion_phase': 'Phase 3 - derived cross features',
+            'monotone_constraints': self.monotone_constraints,
+            'derived_features': DERIVED_FEATURE_NAMES,
         }
 
         with open(config_path, 'w') as f:
@@ -516,6 +752,7 @@ def main():
     print(f"  SET lightgbm.model_path = '{os.path.abspath(model_path)}';")
     print(f"  SET lightgbm.routing_threshold = {trainer.threshold:.6f};")
     print(f"  SET lightgbm.enabled = true;")
+    print(f"Decision rule: Route to DuckDB if raw_score > 0 (no calibration)")
 
 if __name__ == "__main__":
     main()

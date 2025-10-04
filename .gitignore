@@ -8,6 +8,7 @@ dual_execution_data
 logfile
 
 lightgbm_training_data
+lightgbm_training_data_new
 lightgbm_models
 plan_logger
 
