@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+    #!/usr/bin/env python3
 """
 LightGBM Training Script - 85-Feature Schema (v2.2.0).
 Implements self-paced, Taylor-weighted boosting with focal loss to better handle
@@ -9,6 +9,7 @@ import os
 import sys
 import json
 import glob
+import inspect
 import numpy as np
 import pandas as pd
 import lightgbm as lgb
@@ -78,57 +79,97 @@ FEATURE_NAMES = BASE_FEATURE_NAMES  # + DERIVED_FEATURE_NAMES
 FEATURE_SCHEMA_VERSION = "v2.2.0"
 
 class LightGBMTrainer:
-    def __init__(self, data_dir="lightgbm_training_data", model_dir="lightgbm_models"):
+    def __init__(
+        self,
+        data_dir="lightgbm_training_data",
+        model_dir="lightgbm_models",
+        *,
+        adaptive_margin=False,
+        use_focal_loss=True,
+        focal_alpha=0.25,
+        focal_gamma=2.0,
+    ):
         self.data_dir = data_dir
         self.model_dir = model_dir
         self.model = None
-        self.threshold = 0.0  # Fixed margin threshold (DuckDB if margin > 0)
+        # Raw-score threshold (log-odds). Keep fixed margin at 0.0.
+        self.threshold = 0.0
+        # Adaptive (floating) margin toggle (per-bucket thresholds on validation)
+        self.adaptive_margin = bool(adaptive_margin)
+        self.adaptive_thresholds = None  # dict[int->float] learned on validation
+        # Features to form buckets for adaptive margins (must exist in FEATURE_NAMES)
+        self.adaptive_features = [
+            'index_usage_likely',
+            'has_covering_index',
+            'order_by_index_match',
+            'selectivity_high',
+        ]
         self.num_epochs = 3
         self.trees_per_epoch = 1000
         self.base_learning_rate = 0.03
         self.runtime_alpha = 0.6
         self.focal_alpha = 0.25  # retained for experimentation; not used directly in current weights
         self.focal_gamma = 2.0   # retained for experimentation; not used directly in current weights
-        self.max_class_weight = 2.5
-        self.min_class_weight = 0.8
+        # Global class weighting to discourage positives (DuckDB=1)
+        # Applied directly instead of inverse-frequency equalization.
+        self.neg_class_weight_global = 1.6  # weight for label 0 (PG better)
+        self.pos_class_weight_global = 0.7  # weight for label 1 (DuckDB better)
         self.weight_schedule = [
             {
-                'gamma_pos': 1.5,
-                'gamma_neg': 1.2,
-                'tau': 0.50,
-                'hard_neg_threshold': 0.70,
-                'hard_neg_boost': 1.5,
-                'clip': (0.20, 8.0),
+                'gamma_pos': 1.0,
+                'gamma_neg': 2.8,
+                'tau': 0.35,
+                'hard_neg_threshold': 0.50,
+                'hard_neg_boost': 3.5,
+                'fp_boost': 1.2,
+                'clip': (0.20, 5.5),
             },
             {
-                'gamma_pos': 1.8,
-                'gamma_neg': 1.5,
-                'tau': 0.55,
-                'hard_neg_threshold': 0.70,
-                'hard_neg_boost': 2.0,
-                'clip': (0.15, 6.0),
+                'gamma_pos': 1.0,
+                'gamma_neg': 3.0,
+                'tau': 0.35,
+                'hard_neg_threshold': 0.52,
+                'hard_neg_boost': 4.0,
+                'fp_boost': 1.3,
+                'clip': (0.15, 5.0),
             },
             {
-                'gamma_pos': 2.0,
-                'gamma_neg': 1.8,
-                'tau': 0.60,
-                'hard_neg_threshold': 0.75,
-                'hard_neg_boost': 2.5,
-                'clip': (0.10, 5.0),
+                'gamma_pos': 1.1,
+                'gamma_neg': 3.2,
+                'tau': 0.35,
+                'hard_neg_threshold': 0.55,
+                'hard_neg_boost': 5.0,
+                'fp_boost': 1.4,
+                'clip': (0.10, 4.8),
             },
             {
-                'gamma_pos': 2.2,
-                'gamma_neg': 2.0,
-                'tau': 0.65,
-                'hard_neg_threshold': 0.75,
-                'hard_neg_boost': 2.5,
+                'gamma_pos': 1.1,
+                'gamma_neg': 3.3,
+                'tau': 0.35,
+                'hard_neg_threshold': 0.58,
+                'hard_neg_boost': 5.0,
+                'fp_boost': 1.5,
                 'clip': (0.08, 4.5),
             },
         ]
         self.gap_sharpener_k = 6.0
         self.gap_sharpener_m = 0.20
-        # No monotone constraints for derived features since they're disabled
-        self.monotone_constraints = [0] * len(FEATURE_NAMES)  # All features unconstrained for now
+        # Monotone constraints to bias decisions conservatively.
+        # Negative means increasing the feature should reduce the raw score (favor PG),
+        # Positive means increasing the feature should increase the raw score (favor DuckDB).
+        constraint_map = {
+            'index_usage_likely': -1,
+            'has_covering_index': -1,
+            'order_by_index_match': -1,
+            'selectivity_high': -1,
+            'selectivity_low': +1,
+            'total_columnar_bytes_est': +1,
+            'duckdb_pushdown_score': +1,
+            'cardinality_large': +1,
+            'avg_scan_fraction': +1,
+            'max_scan_fraction': +1,
+        }
+        self.monotone_constraints = [constraint_map.get(name, 0) for name in FEATURE_NAMES]
 
         # Setup logging
         logging.basicConfig(
@@ -139,6 +180,159 @@ class LightGBMTrainer:
 
         # Create directories if they don't exist
         os.makedirs(self.model_dir, exist_ok=True)
+
+        # Focal loss configuration
+        self.use_focal_loss = bool(use_focal_loss)
+        self.focal_alpha = float(focal_alpha)
+        self.focal_gamma = float(focal_gamma)
+        sig = inspect.signature(lgb.train)
+        self._supports_custom_objective = 'fobj' in sig.parameters
+
+    def _compute_bucket_ids(self, df):
+        """Compute integer bucket ids from selected boolean features for adaptive margin."""
+        bits = np.zeros(len(df), dtype=np.int64)
+        for i, fname in enumerate(self.adaptive_features):
+            if fname in df.columns:
+                col = (df[fname].to_numpy() > 0).astype(np.int64)
+            else:
+                col = np.zeros(len(df), dtype=np.int64)
+            bits |= (col << i)
+        return bits
+
+    @staticmethod
+    def _tune_thresholds_by_bucket(raw_scores, bucket_ids, pg_ms, duck_ms, *, labels=None,
+                                   objective='latency', fbeta=1.0, q=101, min_bucket=50):
+        """Tune per-bucket raw-score thresholds.
+
+        objective:
+          - 'latency': minimize average latency in each bucket
+          - 'precision': maximize precision in each bucket
+          - 'f1': maximize F1 in each bucket
+          - 'fbeta': maximize F-beta (uses provided fbeta)
+        """
+        thresholds = {}
+        uniq = np.unique(bucket_ids)
+        for b in uniq:
+            idx = (bucket_ids == b)
+            if np.count_nonzero(idx) < min_bucket:
+                thresholds[int(b)] = 0.0
+                continue
+            scores_b = raw_scores[idx]
+            pg_b = pg_ms[idx]
+            duck_b = duck_ms[idx]
+            y_b = None if labels is None else labels[idx]
+            # Build quantile grid per-bucket
+            try:
+                qs = np.linspace(0.0, 1.0, q)
+                grid = np.unique(np.quantile(scores_b, qs))
+            except Exception:
+                grid = np.array([0.0])
+            best_t = 0.0
+            # Initialize depending on objective
+            if objective == 'latency':
+                best_score = float('inf')
+            else:
+                best_score = -float('inf')
+
+            for t in grid:
+                pred_duck = scores_b > t
+                if objective == 'latency':
+                    lats = np.where(pred_duck, duck_b, pg_b)
+                    score = -float(np.mean(lats))  # negative for argmax
+                else:
+                    if y_b is None or y_b.size == 0:
+                        continue
+                    # Compute precision/recall
+                    tp = float(np.sum((pred_duck == 1) & (y_b == 1)))
+                    fp = float(np.sum((pred_duck == 1) & (y_b == 0)))
+                    fn = float(np.sum((pred_duck == 0) & (y_b == 1)))
+                    prec = tp / (tp + fp) if (tp + fp) > 0 else 0.0
+                    rec = tp / (tp + fn) if (tp + fn) > 0 else 0.0
+                    if objective == 'precision':
+                        score = prec
+                    elif objective == 'f1' or objective == 'fbeta':
+                        beta2 = fbeta * fbeta
+                        denom = (beta2 * prec + rec)
+                        fscore = (1 + beta2) * prec * rec / denom if denom > 0 else 0.0
+                        score = fscore
+                    else:
+                        score = prec
+
+                if score > best_score:
+                    best_score = score
+                    best_t = float(t)
+
+            thresholds[int(b)] = best_t
+        return thresholds
+
+    @staticmethod
+    def _apply_bucket_thresholds(raw_scores, bucket_ids, thresholds):
+        """Apply per-bucket thresholds to get predicted_duckdb mask."""
+        pred = np.zeros_like(raw_scores, dtype=bool)
+        # Vectorized apply by iterating buckets
+        for b, t in thresholds.items():
+            mask = (bucket_ids == b)
+            if np.any(mask):
+                pred[mask] = raw_scores[mask] > t
+        return pred
+
+    def _focal_loss_objective(self, preds, train_data):
+        """Custom focal loss objective returning gradient and Hessian."""
+        labels = train_data.get_label()
+        grad, hess = self._compute_focal_grad_hess(
+            preds,
+            labels,
+            alpha=self.focal_alpha,
+            gamma=self.focal_gamma,
+        )
+        return grad, hess
+
+    @staticmethod
+    def _compute_focal_grad_hess(preds, labels, *, alpha=0.25, gamma=2.0, eps=1e-9):
+        preds = preds.astype(np.float64)
+        labels = labels.astype(np.float64)
+        p = sigmoid(preds)
+        p = np.clip(p, eps, 1.0 - eps)
+
+        grad = np.zeros_like(p)
+        hess = np.zeros_like(p)
+
+        pos_mask = labels > 0.5
+        neg_mask = ~pos_mask
+
+        if np.any(pos_mask):
+            p_pos = p[pos_mask]
+            one_minus = np.clip(1.0 - p_pos, eps, 1.0)
+            ce = -np.log(p_pos)
+            w = alpha * (one_minus ** gamma)
+            dw_dz = -alpha * gamma * (one_minus ** (gamma - 1)) * p_pos * one_minus
+            d2w_dz2 = (
+                alpha * gamma * (gamma - 1) * (one_minus ** (gamma - 2)) * (p_pos * one_minus) ** 2
+                - alpha * gamma * (one_minus ** (gamma - 1)) * p_pos * one_minus * (1.0 - 2.0 * p_pos)
+            )
+            grad[pos_mask] = w * (p_pos - 1.0) + ce * dw_dz
+            hess[pos_mask] = 2.0 * (p_pos - 1.0) * dw_dz + w * p_pos * one_minus + ce * d2w_dz2
+
+        if np.any(neg_mask):
+            p_neg = p[neg_mask]
+            q = np.clip(p_neg, eps, 1.0 - eps)
+            one_minus_q = np.clip(1.0 - p_neg, eps, 1.0)
+            ce = -np.log(one_minus_q)
+            w = (1.0 - alpha) * (q ** gamma)
+            dw_dz = (1.0 - alpha) * gamma * (q ** (gamma - 1)) * q * one_minus_q
+            d2w_dz2 = (
+                (1.0 - alpha)
+                * gamma
+                * (
+                    (gamma - 1.0) * (q ** (gamma - 2)) * (q * one_minus_q) ** 2
+                    + (q ** (gamma - 1)) * q * one_minus_q * (1.0 - 2.0 * q)
+                )
+            )
+            grad[neg_mask] = w * p_neg + ce * dw_dz
+            hess[neg_mask] = 2.0 * p_neg * dw_dz + w * p_neg * one_minus_q + ce * d2w_dz2
+
+        hess = np.clip(hess, 1e-6, None)
+        return grad.astype(np.float64), hess.astype(np.float64)
 
     def load_data(self, filename="training_data.csv"):
         """Load training data from CSV or multiple CSV files"""
@@ -345,11 +539,8 @@ class LightGBMTrainer:
         total = len(df_subset)
         labels = df_subset['class_label'].to_numpy()
 
-        class_counts = df_subset['class_label'].value_counts()
-        base_class_factor = df_subset['class_label'].map(
-            lambda lbl: total / (2.0 * max(class_counts.get(lbl, 1), 1))
-        ).to_numpy()
-        class_factor = np.clip(base_class_factor, self.min_class_weight, self.max_class_weight)
+        # Fixed class weighting to discourage positive predictions
+        class_factor = np.where(labels == 1, self.pos_class_weight_global, self.neg_class_weight_global)
 
         raw_gap = df_subset['relative_gap'].to_numpy()
         gap_factor = 1.0 + 1.0 / (1.0 + np.exp(-self.gap_sharpener_k * (raw_gap - self.gap_sharpener_m)))
@@ -364,9 +555,11 @@ class LightGBMTrainer:
         runtime_factor = np.power(df_subset['min_runtime'].to_numpy(), self.runtime_alpha)
 
         if predictions is None or len(predictions) == 0:
+            raw_pred = np.zeros(total)
             prob = np.full(total, 0.5)
         else:
-            prob = _clip_probabilities(sigmoid(predictions))
+            raw_pred = np.asarray(predictions)
+            prob = _clip_probabilities(sigmoid(raw_pred))
 
         schedule = self.weight_schedule[min(epoch, len(self.weight_schedule) - 1)]
         focus = np.ones_like(prob)
@@ -405,10 +598,22 @@ class LightGBMTrainer:
                 if np.any(hard_neg_mask):
                     weights[hard_neg_mask] *= hard_neg_boost
 
-        # Gradient compression for near-ties (log gap < 5%)
-        small_gap = np.log(1.05)
-        near_ties = raw_gap < small_gap
-        weights[near_ties] *= 0.3
+            # Mild explicit false-positive emphasis
+            fp_boost = float(schedule.get('fp_boost', 1.0))
+            if fp_boost > 1.0:
+                fp_mask = (labels == 0) & (raw_pred > 0)
+                if np.any(fp_mask):
+                    weights[fp_mask] *= fp_boost
+
+        # Asymmetric small-gap handling: strongly downweight weak positives
+        # and mildly downweight weak negatives.
+        small_gap = np.log(1.08)
+        pos_small = (labels == 1) & (raw_gap < small_gap)
+        neg_small = (labels == 0) & (raw_gap < small_gap)
+        if np.any(pos_small):
+            weights[pos_small] *= 0.1
+        if np.any(neg_small):
+            weights[neg_small] *= 0.5
 
         clip_low_base, clip_high_base = schedule['clip']
         clip_low = clip_low_base / np.sqrt(epoch + 1)
@@ -419,13 +624,13 @@ class LightGBMTrainer:
         return weights
 
 
-    def evaluate_routing(self, model, X_val, pg_times_val, duck_times_val, threshold=0):
+    def evaluate_routing(self, model, X_val, pg_times_val, duck_times_val, threshold=0.0):
         """Evaluate routing decisions with classification metrics"""
         # Get raw predictions (log-odds)
         raw_predictions = model.predict(X_val, num_iteration=model.best_iteration, raw_score=True)
         probabilities = sigmoid(raw_predictions)
 
-        # Route based on raw score: if raw_score > 0, route to DuckDB
+        # Fixed margin decision rule: route to DuckDB if raw_score > 0
         predicted_duckdb = raw_predictions > 0
 
         # Ground truth: which engine is actually faster
@@ -458,7 +663,7 @@ class LightGBMTrainer:
 
         # Print results
         self.logger.info(f"\n{'='*60}")
-        self.logger.info(f"ROUTING EVALUATION ({len(FEATURE_NAMES)} features, threshold = {threshold})")
+        self.logger.info(f"ROUTING EVALUATION ({len(FEATURE_NAMES)} features, threshold = 0.000000)")
         self.logger.info(f"{'='*60}")
 
         self.logger.info(f"\nBinary Classification Metrics:")
@@ -553,44 +758,29 @@ class LightGBMTrainer:
                 'objective': 'binary',
                 'metric': ['binary_logloss'],
                 'boosting_type': 'gbdt',
-                'num_leaves': 96,
-                'max_depth': 10,
+                'num_leaves': 64,
+                'max_depth': 8,
                 'learning_rate': lr,
-                'feature_fraction': 0.75,
-                'bagging_fraction': 0.75,
+                'feature_fraction': 0.60,
+                'bagging_fraction': 0.60,
                 'bagging_freq': 1,
-                'min_child_samples': 400,
-                'lambda_l2': 3.0,
-                'min_gain_to_split': 0.08,
+                'min_child_samples': 800,
+                'lambda_l2': 10.0,
+                'min_gain_to_split': 0.20,
+                'path_smooth': 20.0,
                 'monotone_constraints': self.monotone_constraints,
                 'verbosity': -1,
                 'num_threads': -1,
                 'seed': 42,
             }
 
-            # Stage-1 balanced subset (epoch 0) to learn positive manifold
-            if epoch == 0:
-                pos_idx = np.where(y_train == 1)[0]
-                neg_idx = np.where(y_train == 0)[0]
-                if pos_idx.size > 0 and neg_idx.size > 0:
-                    rng = np.random.default_rng(42)
-                    neg_take = min(neg_idx.size, pos_idx.size * 3)
-                    sel_neg = rng.choice(neg_idx, size=neg_take, replace=False)
-                    sel_idx = np.concatenate([pos_idx, sel_neg])
-                    X_epoch = X_train[sel_idx]
-                    y_epoch = y_train[sel_idx]
-                    df_epoch = train_df.iloc[sel_idx].reset_index(drop=True)
-                    # map predictions for selected subset if available
-                    if len(train_preds) == len(train_df):
-                        pred_epoch = train_preds[sel_idx]
-                    else:
-                        pred_epoch = np.zeros(len(df_epoch))
-                else:
-                    X_epoch, y_epoch, df_epoch = X_train, y_train, train_df
-                    pred_epoch = train_preds
-            else:
-                X_epoch, y_epoch, df_epoch = X_train, y_train, train_df
-                pred_epoch = train_preds
+            use_custom_obj = self.use_focal_loss and self._supports_custom_objective
+            if use_custom_obj:
+                params['objective'] = 'none'
+
+            # Train on the full dataset each epoch (avoid oversampling positives in epoch 0)
+            X_epoch, y_epoch, df_epoch = X_train, y_train, train_df
+            pred_epoch = train_preds
 
             train_weights = self._compute_sample_weights(
                 df_epoch,
@@ -623,26 +813,48 @@ class LightGBMTrainer:
                 free_raw_data=False,
             )
 
-            booster = lgb.train(
-                params,
-                train_data,
-                num_boost_round=self.trees_per_epoch,
-                init_model=booster,
-                valid_sets=[val_data],
-                valid_names=['val'],
-                keep_training_booster=True,
-                callbacks=[
+            train_kwargs = {
+                'params': params,
+                'train_set': train_data,
+                'num_boost_round': self.trees_per_epoch,
+                'init_model': booster,
+                'valid_sets': [val_data],
+                'valid_names': ['val'],
+                'keep_training_booster': True,
+                'callbacks': [
                     lgb.early_stopping(150, first_metric_only=True),
                     lgb.log_evaluation(100),
                 ],
-            )
+            }
+
+            if use_custom_obj:
+                train_kwargs['fobj'] = self._focal_loss_objective
+
+            try:
+                booster = lgb.train(**train_kwargs)
+            except TypeError as exc:
+                if use_custom_obj:
+                    self.logger.warning(
+                        "LightGBM version does not support custom objective (fobj). Falling back to binary objective. Error: %s",
+                        exc,
+                    )
+                    params['objective'] = 'binary'
+                    train_kwargs.pop('fobj', None)
+                    train_kwargs['params'] = params
+                    booster = lgb.train(**train_kwargs)
+                    self.use_focal_loss = False
+                else:
+                    raise
 
             train_preds = booster.predict(X_train, raw_score=True)
             val_preds = booster.predict(X_val, raw_score=True)
 
         self.model = booster
 
-        # No margin calibration - use raw scores directly
+        # No margin calibration; keep fixed margin decision rule at 0
+        # Recompute final predictions for both train and validation
+        train_preds = self.model.predict(X_train, raw_score=True)
+        val_preds = self.model.predict(X_val, raw_score=True)
         prob_val = _clip_probabilities(sigmoid(val_preds))
         binary_val = val_preds > 0
 
@@ -655,21 +867,96 @@ class LightGBMTrainer:
         val_precision = precision_score(y_val, binary_val, zero_division=0)
         val_recall = recall_score(y_val, binary_val, zero_division=0)
 
+        # Classification metrics (margin > 0) for train and validation
+        binary_train = train_preds > 0
+        train_acc = accuracy_score(y_train, binary_train)
+        train_prec = precision_score(y_train, binary_train, zero_division=0)
+        train_rec = recall_score(y_train, binary_train, zero_division=0)
+
+        val_acc = accuracy_score(y_val, binary_val)
+
         self.logger.info("Validation metrics after self-paced training:")
         self.logger.info(f"  LogLoss: {val_logloss:.4f}")
         self.logger.info(f"  Balanced Accuracy: {val_bal_acc:.4f}")
         self.logger.info(f"  Precision (DuckDB): {val_precision:.4f}")
         self.logger.info(f"  Recall (DuckDB): {val_recall:.4f}")
 
-        self.logger.info("Using raw score threshold: 0.0 (no calibration)")
+        self.logger.info("\nClassification metrics (margin > 0):")
+        self.logger.info(f"  Train - Accuracy: {train_acc:.4f}, Precision: {train_prec:.4f}, Recall: {train_rec:.4f}")
+        self.logger.info(f"  Valid - Accuracy: {val_acc:.4f}, Precision: {val_precision:.4f}, Recall: {val_recall:.4f}")
 
+        # Final evaluation with fixed threshold 0
+        self.logger.info("Using raw score threshold: 0.0 (fixed margin)")
         self.evaluate_routing(
             self.model,
             X_val,
             val_df['pg_time_ms'].to_numpy(),
             val_df['duck_time_ms'].to_numpy(),
-            threshold=self.threshold,
+            threshold=0.0,
         )
+
+        # Optional: Adaptive (floating) margin via per-bucket thresholds
+        if self.adaptive_margin:
+            self.logger.info("\n===== ADAPTIVE (FLOATING) MARGIN EVALUATION =====")
+            raw_val = val_preds
+            pg_ms_val = val_df['pg_time_ms'].to_numpy()
+            duck_ms_val = val_df['duck_time_ms'].to_numpy()
+            bucket_ids = self._compute_bucket_ids(val_df)
+            thresholds = self._tune_thresholds_by_bucket(
+                raw_val,
+                bucket_ids,
+                pg_ms_val,
+                duck_ms_val,
+                labels=y_val,
+                objective=getattr(self, 'adaptive_objective', 'latency'),
+                fbeta=getattr(self, 'adaptive_fbeta', 1.0),
+                q=101,
+                min_bucket=50,
+            )
+            pred_duck = self._apply_bucket_thresholds(raw_val, bucket_ids, thresholds)
+
+            # Classification metrics under adaptive thresholds
+            acc_ad = accuracy_score(y_val, pred_duck)
+            prec_ad = precision_score(y_val, pred_duck, zero_division=0)
+            rec_ad = recall_score(y_val, pred_duck, zero_division=0)
+            cm_ad = confusion_matrix(y_val, pred_duck)
+
+            # Latencies
+            lats = np.where(pred_duck, duck_ms_val, pg_ms_val)
+            avg_lat = float(np.mean(lats))
+            total_lat = float(np.sum(lats))
+            avg_pg = float(np.mean(pg_ms_val))
+            avg_duck = float(np.mean(duck_ms_val))
+            avg_oracle = float(np.mean(np.minimum(pg_ms_val, duck_ms_val)))
+
+            self.logger.info("Adaptive Classification Metrics:")
+            self.logger.info(f"  Accuracy:  {acc_ad:.3f}")
+            self.logger.info(f"  Precision: {prec_ad:.3f}")
+            self.logger.info(f"  Recall:    {rec_ad:.3f}")
+            self.logger.info("Confusion Matrix:")
+            if cm_ad.shape == (2, 2):
+                self.logger.info(f"                 Predicted PG  Predicted DuckDB")
+                self.logger.info(f"  Actual PG:     {cm_ad[0,0]:8d}     {cm_ad[0,1]:8d}")
+                self.logger.info(f"  Actual DuckDB: {cm_ad[1,0]:8d}     {cm_ad[1,1]:8d}")
+            else:
+                self.logger.info(f"  Matrix: {cm_ad}")
+
+            self.logger.info("\nAverage Query Latency (ms):")
+            self.logger.info(f"  Always PostgreSQL: {avg_pg:10.2f}")
+            self.logger.info(f"  Always DuckDB:     {avg_duck:10.2f}")
+            self.logger.info(f"  Adaptive Routing:  {avg_lat:10.2f}")
+            self.logger.info(f"  Oracle (Perfect):  {avg_oracle:10.2f}")
+
+            best_single = min(avg_pg, avg_duck)
+            lgbm_vs_best = (best_single - avg_lat) / best_single * 100.0
+            lgbm_vs_oracle = (avg_lat - avg_oracle) / avg_oracle * 100.0
+            self.logger.info("\nPerformance Analysis (Adaptive):")
+            self.logger.info(f"  Adaptive vs Best Single Engine: {lgbm_vs_best:+.1f}%")
+            self.logger.info(f"  Adaptive vs Oracle (gap):       {lgbm_vs_oracle:+.1f}%")
+            self.logger.info(f"  Routing Decisions: {int(np.sum(pred_duck))}/{len(pred_duck)} chose DuckDB")
+
+            # Persist thresholds for later inspection/use
+            self.adaptive_thresholds = thresholds
 
         importance = self.model.feature_importance(importance_type='gain')
         feature_imp = pd.DataFrame({
@@ -694,7 +981,7 @@ class LightGBMTrainer:
 
         self.logger.info(f"Model saved to: {model_path}")
 
-        # Save threshold separately for easy access (always 0.0 - no calibration)
+        # Save threshold separately for easy access (fixed raw-score threshold)
         threshold_path = os.path.join(self.model_dir, f"{model_name}_threshold.txt")
         with open(threshold_path, 'w') as f:
             f.write(f"{self.threshold:.6f}\n")
@@ -707,7 +994,7 @@ class LightGBMTrainer:
             'version': FEATURE_SCHEMA_VERSION,
             'features': FEATURE_NAMES,
             'num_features': len(FEATURE_NAMES),
-            'threshold': float(self.threshold),
+            'threshold': 0.0,
             'model_type': 'binary_classification',
             'target': 'class_label (DuckDB better if log(pg_time/duck_time) > 0)',
             'decision_rule': 'route to DuckDB if raw_score > 0',
@@ -716,12 +1003,24 @@ class LightGBMTrainer:
             'expansion_phase': 'Phase 3 - derived cross features',
             'monotone_constraints': self.monotone_constraints,
             'derived_features': DERIVED_FEATURE_NAMES,
+            'adaptive_margin': bool(self.adaptive_margin),
+            'adaptive_features': list(self.adaptive_features),
+            'use_focal_loss': bool(self.use_focal_loss),
+            'focal_alpha': self.focal_alpha,
+            'focal_gamma': self.focal_gamma,
         }
 
         with open(config_path, 'w') as f:
             json.dump(config, f, indent=2)
 
         self.logger.info(f"Configuration saved to: {config_path}")
+
+        # Save adaptive thresholds if available
+        if self.adaptive_margin and isinstance(self.adaptive_thresholds, dict):
+            thresholds_path = os.path.join(self.model_dir, f"{model_name}_adaptive_thresholds.json")
+            with open(thresholds_path, 'w') as f:
+                json.dump({str(k): float(v) for k, v in self.adaptive_thresholds.items()}, f, indent=2)
+            self.logger.info(f"Adaptive thresholds saved to: {thresholds_path}")
 
         return model_path
 
@@ -731,10 +1030,25 @@ def main():
     parser.add_argument('--model-dir', default='lightgbm_models', help='Model output directory')
     parser.add_argument('--data-file', default='training_data.csv', help='Training data filename')
     parser.add_argument('--suffix', default='', help='Model name suffix')
+    parser.add_argument('--adaptive-margin', action='store_true', help='Enable adaptive (floating) margin using per-bucket thresholds learned on validation')
+    parser.add_argument('--adaptive-objective', choices=['latency','precision','f1','fbeta'], default='latency', help='Objective for tuning per-bucket thresholds')
+    parser.add_argument('--adaptive-fbeta', type=float, default=1.0, help='Beta for F-beta when adaptive-objective=fbeta')
+    parser.add_argument('--no-focal-loss', action='store_true', help='Disable focal loss objective (use standard binary logloss)')
+    parser.add_argument('--focal-alpha', type=float, default=0.25, help='Alpha parameter for focal loss (balance factor)')
+    parser.add_argument('--focal-gamma', type=float, default=2.0, help='Gamma parameter for focal loss (focus factor)')
     args = parser.parse_args()
 
     # Initialize trainer
-    trainer = LightGBMTrainer(data_dir=args.data_dir, model_dir=args.model_dir)
+    trainer = LightGBMTrainer(
+        data_dir=args.data_dir,
+        model_dir=args.model_dir,
+        adaptive_margin=args.adaptive_margin,
+        use_focal_loss=not args.no_focal_loss,
+        focal_alpha=args.focal_alpha,
+        focal_gamma=args.focal_gamma,
+    )
+    trainer.adaptive_objective = args.adaptive_objective
+    trainer.adaptive_fbeta = args.adaptive_fbeta
 
     # Load and prepare data
     df_raw = trainer.load_data(args.data_file)
